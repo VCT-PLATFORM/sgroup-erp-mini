@@ -1,0 +1,26 @@
+{
+  "name": "SGROUP ERP",
+  "short_name": "SGROUP",
+  "description": "Hệ thống quản lý kinh doanh bất động sản SGROUP",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#05070A",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "vi"
+}

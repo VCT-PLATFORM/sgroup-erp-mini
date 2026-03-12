@@ -50,7 +50,26 @@ export function useCustomers(filters?: Record<string, any>) {
       });
       return res.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [CUSTOMERS_KEY] }),
+    onMutate: async (newData) => {
+      await qc.cancelQueries({ queryKey: [CUSTOMERS_KEY] });
+      const previous = qc.getQueryData<Customer[]>([CUSTOMERS_KEY, filters]);
+      const optimistic: Customer = {
+        id: `temp-${Date.now()}`,
+        fullName: newData.fullName || '',
+        status: (newData.status as LeadStatus) || 'NEW',
+        year: newData.year || new Date().getFullYear(),
+        month: newData.month || new Date().getMonth() + 1,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...newData,
+      };
+      qc.setQueryData<Customer[]>([CUSTOMERS_KEY, filters], (old = []) => [optimistic, ...old]);
+      return { previous };
+    },
+    onError: (_err, _data, context) => {
+      if (context?.previous) qc.setQueryData([CUSTOMERS_KEY, filters], context.previous);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: [CUSTOMERS_KEY] }),
   });
 
   const updateMutation = useMutation({
@@ -58,14 +77,36 @@ export function useCustomers(filters?: Record<string, any>) {
       const res = await apiClient.patch(`/customers/${id}`, data);
       return res.data;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [CUSTOMERS_KEY] }),
+    onMutate: async ({ id, data: updateData }) => {
+      await qc.cancelQueries({ queryKey: [CUSTOMERS_KEY] });
+      const previous = qc.getQueryData<Customer[]>([CUSTOMERS_KEY, filters]);
+      qc.setQueryData<Customer[]>([CUSTOMERS_KEY, filters], (old = []) =>
+        old.map(c => c.id === id ? { ...c, ...updateData } : c)
+      );
+      return { previous };
+    },
+    onError: (_err, _data, context) => {
+      if (context?.previous) qc.setQueryData([CUSTOMERS_KEY, filters], context.previous);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: [CUSTOMERS_KEY] }),
   });
 
   const removeMutation = useMutation({
     mutationFn: async (id: string) => {
       await apiClient.delete(`/customers/${id}`);
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: [CUSTOMERS_KEY] }),
+    onMutate: async (id) => {
+      await qc.cancelQueries({ queryKey: [CUSTOMERS_KEY] });
+      const previous = qc.getQueryData<Customer[]>([CUSTOMERS_KEY, filters]);
+      qc.setQueryData<Customer[]>([CUSTOMERS_KEY, filters], (old = []) =>
+        old.filter(c => c.id !== id)
+      );
+      return { previous };
+    },
+    onError: (_err, _data, context) => {
+      if (context?.previous) qc.setQueryData([CUSTOMERS_KEY, filters], context.previous);
+    },
+    onSettled: () => qc.invalidateQueries({ queryKey: [CUSTOMERS_KEY] }),
   });
 
   return {
