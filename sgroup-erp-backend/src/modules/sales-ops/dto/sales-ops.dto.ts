@@ -139,8 +139,8 @@ export class CreateDealDto {
   @IsNumber()
   dealValue: number;
 
-  @IsOptional() @IsNumber()
-  feeRate?: number;
+  @IsNumber()
+  feeRate: number;
 
   @IsOptional() @IsNumber()
   commission?: number;
@@ -168,16 +168,25 @@ export class CreateDealDto {
 // ── Projects ──
 export class CreateProjectDto {
   @IsString()
-  name: string;
+  projectCode: string;
 
-  @IsOptional() @IsString()
-  code?: string;
+  @IsString()
+  name: string;
 
   @IsOptional() @IsString()
   developer?: string;
 
   @IsOptional() @IsString()
   location?: string;
+
+  @IsOptional() @IsString()
+  type?: string;
+
+  @IsOptional() @IsNumber()
+  feeRate?: number;
+
+  @IsOptional() @IsNumber()
+  avgPrice?: number;
 
   @IsOptional() @IsInt()
   totalUnits?: number;
