@@ -1,6 +1,7 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { API_BASE_URL } from './api';
+import { useAuthStore } from '../../features/auth/store/authStore';
 
 
 export const apiClient = axios.create({
@@ -11,7 +12,12 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use(
   async (config) => {
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      // Primary: read token from Zustand store (set on login)
+      let token = useAuthStore.getState().token;
+      // Fallback: read from AsyncStorage (for persistence across reloads)
+      if (!token) {
+        token = await AsyncStorage.getItem('access_token');
+      }
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -29,8 +35,6 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      // Token is invalid or expired
-      // TODO: Centralize auth failure logic (e.g. prompt re-login, use event emitter or store dispatch)
       console.warn('Unauthorized! Token expired or invalid.');
       await AsyncStorage.removeItem('access_token');
     }
