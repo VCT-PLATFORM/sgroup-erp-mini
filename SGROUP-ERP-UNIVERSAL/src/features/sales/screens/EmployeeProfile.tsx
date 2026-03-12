@@ -15,6 +15,15 @@ const ROLE_LABELS: Record<string, string> = {
   sales_admin: 'Admin Kinh doanh',
 };
 
+const DEPT_LABELS: Record<string, string> = {
+  SALES: 'Phòng Kinh Doanh',
+  MANAGEMENT: 'Ban Giám Đốc',
+  HR: 'Phòng Nhân Sự',
+  FINANCE: 'Phòng Tài Chính - Kế Toán',
+  MARKETING: 'Phòng Marketing',
+  LEGAL: 'Phòng Pháp Chế',
+};
+
 export function EmployeeProfile() {
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
@@ -33,6 +42,7 @@ export function EmployeeProfile() {
   const [pwSuccess, setPwSuccess] = useState(false);
 
   const roleLabel = ROLE_LABELS[user?.salesRole || user?.role || 'sales'] || 'Nhân viên';
+  const deptLabel = DEPT_LABELS[user?.department || ''] || user?.department || 'Phòng Kinh Doanh';
 
   const handleChangePassword = async () => {
     setPwError('');
@@ -202,7 +212,7 @@ export function EmployeeProfile() {
               {[
                 { icon: Mail, label: 'Email công ty', value: user?.email || 'N/A' },
                 { icon: ShieldCheck, label: 'Vai trò', value: roleLabel },
-                { icon: Briefcase, label: 'Phòng ban', value: user?.department || 'Phòng Kinh Doanh' },
+                { icon: Briefcase, label: 'Phòng ban', value: deptLabel },
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (
