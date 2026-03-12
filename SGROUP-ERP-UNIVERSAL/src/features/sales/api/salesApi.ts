@@ -2,7 +2,7 @@
  * SGROUP ERP — Sales API Client
  * Centralized API wrapper for all Sales module endpoints
  */
-import { API_BASE_URL } from '../../core/api/api';
+import { API_BASE_URL } from '../../../core/api/api';
 
 const API_BASE = API_BASE_URL;
 
