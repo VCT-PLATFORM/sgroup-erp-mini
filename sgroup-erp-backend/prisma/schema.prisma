@@ -1,0 +1,570 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ══════════════════════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════════════════════
+model User {
+  id          String   @id @default(uuid(7))
+  email       String   @unique
+  name        String
+  password    String
+  role        String   @default("employee") // admin, hr, employee
+  department  String?  // SALES, MARKETING, HR, FINANCE, OPS
+  salesRole   String?  // sales, sales_manager, sales_director, ceo, sales_admin
+  teamId      String?  // FK → SalesTeam.id (for sales/sales_manager)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════════
+// EXEC PLANNING (port from GAS Service_ExecPlanning.js)
+// ══════════════════════════════════════════════════════════════════
+model PlanScenarioLog {
+  id            String   @id @default(uuid(7))
+  planId        String
+  moduleKey     String   @default("EXEC")
+  scenario      String   // base, optimistic, pessimistic
+  year          Int
+  createdAt     DateTime @default(now())
+  createdBy     String
+  schemaVersion String   @default("1")
+  isDeleted     Boolean  @default(false)
+  rawJson       String?
+  note          String?
+}
+
+model PlanBundleLog {
+  id            String   @id @default(uuid(7))
+  planId        String
+  moduleKey     String   @default("EXEC")
+  scenario      String
+  year          Int
+  tabKey        String   // PLAN_TOTAL, PLAN_MARKETING, etc.
+  createdAt     DateTime @default(now())
+  createdBy     String
+  schemaVersion String   @default("1")
+  isDeleted     Boolean  @default(false)
+  rawJson       String?
+  note          String?
+}
+
+model ExecPlanLatest {
+  id              String   @id @default(uuid(7))
+  year            Int
+  scenarioKey     String
+  tabKey          String
+  latestPlanId    String?
+  latestBundleId  String?
+  updatedAt       DateTime @default(now())
+  updatedBy       String?
+  schemaVersion   String   @default("1")
+  rawJson         String?
+  note            String?
+
+  @@unique([year, scenarioKey, tabKey])
+}
+
+model ExecKpiLatest {
+  id            String   @id @default(uuid(7))
+  year          Int
+  scenarioKey   String
+  tabKey        String
+  kpiKey        String
+  value         Float    @default(0)
+  unit          String?
+  sourcePlanId  String?
+  calcVersion   String?
+  updatedAt     DateTime @default(now())
+  updatedBy     String?
+  note          String?
+
+  @@unique([year, scenarioKey, tabKey, kpiKey])
+}
+
+model ExecKpiLog {
+  id            String   @id @default(uuid(7))
+  snapshotId    String
+  year          Int
+  scenarioKey   String
+  tabKey        String
+  kpiKey        String
+  value         Float    @default(0)
+  unit          String?
+  sourcePlanId  String?
+  calcVersion   String?
+  createdAt     DateTime @default(now())
+  createdBy     String?
+  rawJson       String?
+  note          String?
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES PLANNING (port from GAS Service_SalesPlanning.js)
+// ══════════════════════════════════════════════════════════════════
+model SalePlanLatest {
+  id           String   @id @default(uuid(7))
+  year         Int
+  scenarioKey  String
+  planId       String
+  updatedAt    DateTime @default(now())
+  updatedBy    String?
+  version      String?
+  rawJson      String?
+  note         String?
+
+  @@unique([year, scenarioKey])
+}
+
+model SalePlanHeader {
+  id             String   @id @default(uuid(7))
+  planId         String
+  year           Int
+  scenarioKey    String
+  ownerEmail     String?
+  status         String   @default("DRAFT")
+  targetGMV      Float    @default(0)
+  avgDealValue   Float    @default(0)
+  headcount      Int      @default(0)
+  marketingRate  Float    @default(0)
+  rateDeal       Float    @default(0)
+  rateBooking    Float    @default(0)
+  rateMeeting    Float    @default(0)
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model SalePlanMonth {
+  id           String   @id @default(uuid(7))
+  planId       String
+  year         Int
+  scenarioKey  String
+  month        Int
+  weight       Float    @default(0)
+  gmv          Float    @default(0)
+  deals        Int      @default(0)
+  bookings     Int      @default(0)
+  meetings     Int      @default(0)
+  leadsSale    Int      @default(0)
+  note         String?
+  createdAt    DateTime @default(now())
+}
+
+model SalePlanTeam {
+  id           String   @id @default(uuid(7))
+  planId       String
+  year         Int
+  scenarioKey  String
+  teamId       String?
+  name         String
+  leaderId     String?
+  leaderName   String?
+  status       String   @default("active")
+  activeFrom   Int      @default(1)
+  activeTo     Int      @default(12)
+  sortOrder    Int      @default(0)
+  note         String?
+  createdAt    DateTime @default(now())
+}
+
+model SalePlanStaff {
+  id           String   @id @default(uuid(7))
+  planId       String
+  year         Int
+  scenarioKey  String
+  staffId      String?
+  hoTen        String
+  role         String   @default("Sales")
+  team         String?
+  status       String   @default("active")
+  activeFrom   Int      @default(1)
+  activeTo     Int      @default(12)
+  leadsCapacity Float   @default(0)
+  rateMeeting  Float    @default(0)
+  rateBooking  Float    @default(0)
+  rateDeal     Float    @default(0)
+  note         String?
+  createdAt    DateTime @default(now())
+}
+
+// ══════════════════════════════════════════════════════════════════
+// MARKETING PLANNING (port from GAS Service_MarketingPlanning.js)
+// ══════════════════════════════════════════════════════════════════
+model MktPlanHeader {
+  id              String   @id @default(uuid(7))
+  planId          String   @unique
+  year            Int
+  scenarioKey     String
+  ownerEmail      String?
+  status          String   @default("DRAFT")
+  totalBudgetVnd  Float    @default(0)
+  currency        String   @default("VND")
+  note            String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model MktPlanChannelBudget {
+  id              String   @id @default(uuid(7))
+  planId          String
+  year            Int
+  scenarioKey     String
+  channelKey      String
+  channelLabel    String?
+  budgetVnd       Float    @default(0)
+  pct             Float    @default(0)
+  kpiLeadTarget   Float?
+  kpiCplTargetVnd Float?
+  note            String?
+  updatedAt       DateTime @default(now())
+}
+
+model MktPlanKpiTarget {
+  id           String   @id @default(uuid(7))
+  planId       String
+  year         Int
+  scenarioKey  String
+  kpiKey       String
+  kpiLabel     String?
+  targetValue  Float    @default(0)
+  unit         String?
+  note         String?
+  updatedAt    DateTime @default(now())
+}
+
+model MktPlanAssumption {
+  id           String   @id @default(uuid(7))
+  planId       String
+  year         Int
+  scenarioKey  String
+  key          String
+  label        String?
+  value        Float    @default(0)
+  unit         String?
+  note         String?
+  updatedAt    DateTime @default(now())
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SHARED: Audit & Snapshot
+// ══════════════════════════════════════════════════════════════════
+model FactPlanSnapshotLog {
+  id           String   @id @default(uuid(7))
+  snapshotId   String
+  planId       String
+  year         Int
+  scenarioKey  String
+  ownerEmail   String?
+  json         String?
+  createdAt    DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid(7))
+  auditId    String
+  action     String
+  entity     String
+  entityId   String?
+  actorEmail String?
+  meta       String?
+  createdAt  DateTime @default(now())
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Dimension Tables
+// ══════════════════════════════════════════════════════════════════
+
+model DimProject {
+  id            String    @id @default(uuid(7))
+  projectCode   String    @unique
+  name          String
+  developer     String?
+  location      String?
+  type          String?               // "Chung cư", "Biệt thự", "Shophouse"
+  feeRate       Float     @default(0) // Phí MG mặc định (%)
+  avgPrice      Float     @default(0) // Giá bán TB (Tỷ)
+  totalUnits    Int       @default(0)
+  soldUnits     Int       @default(0)
+  status        String    @default("ACTIVE") // ACTIVE, PAUSED, CLOSED
+  startDate     DateTime?
+  endDate       DateTime?
+  note          String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model SalesTeam {
+  id          String   @id @default(uuid(7))
+  code        String   @unique
+  name        String
+  leaderId    String?
+  leaderName  String?
+  region      String?
+  status      String   @default("ACTIVE")
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SalesStaff {
+  id              String    @id @default(uuid(7))
+  userId          String?
+  employeeCode    String?   @unique
+  fullName        String
+  phone           String?
+  email           String?
+  teamId          String?
+  role            String    @default("sales") // sales, senior_sales, team_lead
+  status          String    @default("ACTIVE")
+  joinDate        DateTime?
+  leaveDate       DateTime?
+  leadsCapacity   Float     @default(30)
+  personalTarget  Float     @default(0) // Target GMV tháng (Tỷ)
+  note            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Fact Tables
+// ══════════════════════════════════════════════════════════════════
+
+model FactDeal {
+  id              String    @id @default(uuid(7))
+  dealCode        String?   @unique
+  bizflyCrmId     String?
+  projectId       String?
+  projectName     String?
+  staffId         String?
+  staffName       String?
+  teamId          String?
+  teamName        String?
+  customerName    String?
+  customerPhone   String?
+  productCode     String?
+  productType     String?
+  dealValue       Float     @default(0) // Tỷ
+  feeRate         Float     @default(0) // %
+  commission      Float     @default(0) // Tỷ
+  stage           String    @default("LEAD") // LEAD, MEETING, BOOKING, DEPOSIT, CONTRACT, COMPLETED, CANCELLED
+  dealDate        DateTime?
+  bookingDate     DateTime?
+  contractDate    DateTime?
+  source          String?               // MARKETING, SELF_GEN, REFERRAL
+  note            String?
+  year            Int
+  month           Int
+  status          String    @default("ACTIVE")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model FactSalesDaily {
+  id              String    @id @default(uuid(7))
+  date            DateTime
+  year            Int
+  month           Int
+  week            Int
+  teamId          String?
+  staffId         String?
+  newLeads        Int       @default(0)
+  meetings        Int       @default(0)
+  bookings        Int       @default(0)
+  deposits        Int       @default(0)
+  contracts       Int       @default(0)
+  completedDeals  Int       @default(0)
+  cancelledDeals  Int       @default(0)
+  gmv             Float     @default(0)
+  revenue         Float     @default(0)
+  source          String    @default("MANUAL") // MANUAL, BIZFLY_SYNC
+  syncedAt        DateTime?
+  createdAt       DateTime  @default(now())
+
+  @@unique([date, teamId, staffId])
+}
+
+model FactPipelineSnapshot {
+  id              String   @id @default(uuid(7))
+  snapshotDate    DateTime
+  year            Int
+  month           Int
+  teamId          String?
+  leadCount       Int      @default(0)
+  contactedCount  Int      @default(0)
+  meetingCount    Int      @default(0)
+  bookingCount    Int      @default(0)
+  depositCount    Int      @default(0)
+  contractCount   Int      @default(0)
+  completedCount  Int      @default(0)
+  totalPipelineValue Float @default(0)
+  source          String   @default("MANUAL")
+  createdAt       DateTime @default(now())
+
+  @@unique([snapshotDate, teamId])
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Commission & Target
+// ══════════════════════════════════════════════════════════════════
+
+model CommissionRecord {
+  id               String    @id @default(uuid(7))
+  dealId           String
+  staffId          String
+  staffName        String?
+  teamId           String?
+  role             String               // SALES, MANAGER, DIRECTOR
+  dealValue        Float     @default(0)
+  commissionRate   Float     @default(0)
+  commissionAmount Float     @default(0)
+  status           String    @default("PENDING") // PENDING, APPROVED, PAID
+  period           String?   // "2026-03"
+  approvedBy       String?
+  approvedAt       DateTime?
+  paidAt           DateTime?
+  year             Int
+  month            Int
+  note             String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model SalesTargetMonthly {
+  id             String   @id @default(uuid(7))
+  year           Int
+  month          Int
+  teamId         String?
+  staffId        String?
+  targetGMV      Float    @default(0)
+  targetDeals    Int      @default(0)
+  targetLeads    Int      @default(0)
+  targetMeetings Int      @default(0)
+  targetBookings Int      @default(0)
+  scenarioKey    String   @default("base")
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([year, month, teamId, staffId, scenarioKey])
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Bizfly CRM Sync
+// ══════════════════════════════════════════════════════════════════
+
+model BizflySyncLog {
+  id            String    @id @default(uuid(7))
+  syncType      String               // LEADS, DEALS, PIPELINE
+  syncDirection String    @default("PULL")
+  status        String    @default("PENDING") // PENDING, RUNNING, SUCCESS, FAILED
+  recordsTotal  Int       @default(0)
+  recordsSynced Int       @default(0)
+  recordsFailed Int       @default(0)
+  errorMessage  String?
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+  initiatedBy   String?
+  metadata      String?
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — CRM (Customer / Lead)
+// ══════════════════════════════════════════════════════════════════
+
+model Customer {
+  id              String    @id @default(uuid(7))
+  fullName        String
+  phone           String?
+  email           String?
+  source          String?               // FACEBOOK_ADS, GOOGLE_ADS, HOTLINE, REFERRAL, WALK_IN, WEBSITE
+  projectInterest String?
+  budget          String?
+  status          String    @default("NEW") // NEW, CONTACTED, INTERESTED, MEETING, NEGOTIATION, WON, LOST
+  assignedTo      String?               // staffId
+  assignedName    String?
+  isVip           Boolean   @default(false)
+  lastContactAt   DateTime?
+  note            String?
+  year            Int
+  month           Int
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Daily Activity Log
+// ══════════════════════════════════════════════════════════════════
+
+model SalesActivity {
+  id            String    @id @default(uuid(7))
+  date          DateTime  @default(now())
+  staffId       String
+  staffName     String?
+  postsCount    Int       @default(0)
+  callsCount    Int       @default(0)
+  newLeads      Int       @default(0)
+  meetingsMade  Int       @default(0)
+  note          String?
+  year          Int
+  month         Int
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Appointments / Calendar
+// ══════════════════════════════════════════════════════════════════
+
+model Appointment {
+  id              String    @id @default(uuid(7))
+  staffId         String
+  staffName       String?
+  customerId      String?
+  customerName    String?
+  customerPhone   String?
+  projectId       String?
+  projectName     String?
+  type            String    @default("MEETING") // MEETING, SITE_VISIT, FOLLOW_UP, SIGNING
+  scheduledAt     DateTime
+  duration        Int       @default(60) // minutes
+  location        String?
+  status          String    @default("SCHEDULED") // SCHEDULED, CONFIRMED, COMPLETED, CANCELLED, NO_SHOW
+  outcome         String?
+  note            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ══════════════════════════════════════════════════════════════════
+// SALES MODULE — Property Products (Inventory per-unit)
+// ══════════════════════════════════════════════════════════════════
+
+model PropertyProduct {
+  id              String    @id @default(uuid(7))
+  projectId       String
+  projectName     String?
+  code            String    @unique
+  block           String?
+  floor           Int       @default(0)
+  area            Float     @default(0)
+  price           Float     @default(0)       // Tỷ VND
+  direction       String?
+  bedrooms        Int       @default(0)
+  status          String    @default("AVAILABLE") // AVAILABLE, BOOKED, LOCKED, PENDING_DEPOSIT, DEPOSIT, SOLD, COMPLETED
+  bookedBy        String?
+  lockedUntil     DateTime?
+  customerPhone   String?
+  note            String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}

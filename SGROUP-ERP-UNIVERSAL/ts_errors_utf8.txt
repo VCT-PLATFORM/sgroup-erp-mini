@@ -1,0 +1,3 @@
+src/features/sales/components/forms/SalesQuickForms.tsx(136,20): error TS2322: Type 'LucideIcon' is not assignable to type 'ReactNode'.
+src/features/sales/screens/CommissionCalc.tsx(47,139): error TS2322: Type '{ title: string; icon: any; style: { backgroundColor: string; }; textStyle: { color: string; }; }' is not assignable to type 'IntrinsicAttributes & Props'.
+  Property 'textStyle' does not exist on type 'IntrinsicAttributes & Props'.

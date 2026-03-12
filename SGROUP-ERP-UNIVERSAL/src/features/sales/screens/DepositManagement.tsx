@@ -1,0 +1,780 @@
+/**
+ * SGROUP ERP — Deposit Management (Quản Lý Đặt Cọc)
+ * Data entry + KPI reporting page
+ */
+import React, { useState, useCallback, useMemo } from 'react';
+import { View, Text, ScrollView, Platform, TouchableOpacity, TextInput, useWindowDimensions } from 'react-native';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
+import {
+  Plus, Send, History, Calendar, Landmark, Users, CheckCircle, Clock,
+  BarChart2, ArrowRight, Filter, Pencil, Trash2, X, Check, XCircle,
+  Building2, Phone, User, Hash, AlertTriangle, Search, DollarSign,
+  Grid, Edit2
+} from 'lucide-react-native';
+import { SGButton, SGPlanningSectionTitle, SGPlanningNumberField, SGTable, SGStatCard } from '../../../shared/ui/components';
+import { useSalesStore } from '../store/useSalesStore';
+import { useDepositFilter } from '../hooks/useDepositFilter';
+import { DepositChart } from '../components/charts/DepositChart';
+import { UnitMatrix } from '../components/inventory/UnitMatrix';
+import { UnitDetailsModal } from '../components/modals/UnitDetailsModal';
+import type { SalesRole } from '../SalesSidebar';
+import type { TransactionEntry, PropertyUnit } from '../store/useSalesStore';
+import type { BookingPeriod } from '../hooks/useBookingFilter';
+
+const PERIOD_TABS: { label: string; value: BookingPeriod }[] = [
+  { label: 'Ngày', value: 'DAY' },
+  { label: 'Tuần', value: 'WEEK' },
+  { label: 'Tháng', value: 'MONTH' },
+  { label: 'Quý', value: 'QUARTER' },
+  { label: 'Năm', value: 'YEAR' },
+  { label: 'Tuỳ chọn', value: 'CUSTOM' },
+];
+
+function formatDateInput(d: Date | null): string {
+  if (!d) return '';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function parseDateInput(s: string): Date | null {
+  if (!s) return null;
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+// Status badge component
+function StatusBadge({ status }: { status: string }) {
+  const config: Record<string, { bg: string; text: string; label: string }> = {
+    PENDING_DEPOSIT: { bg: '#fef3c7', text: '#d97706', label: 'CHỜ DUYỆT' },
+    DEPOSIT: { bg: '#dcfce7', text: '#16a34a', label: 'ĐÃ DUYỆT' },
+  };
+  const c = config[status] || config.PENDING_DEPOSIT;
+  return (
+    <View style={{ backgroundColor: c.bg, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, alignSelf: 'center' }}>
+      <Text style={{ fontSize: 11, fontWeight: '800', color: c.text, letterSpacing: 0.3 }}>{c.label}</Text>
+    </View>
+  );
+}
+
+export function DepositManagement({ userRole }: { userRole?: SalesRole }) {
+  const { theme, isDark } = useAppTheme();
+  const { width: windowWidth } = useWindowDimensions();
+  const isWideScreen = Platform.OS === 'web' && windowWidth >= 900;
+  const cText = theme.colors.textPrimary;
+  const cSub = theme.colors.textSecondary;
+
+  const { addTransaction, updateTransaction, deleteTransaction, approveTransaction, rejectTransaction } = useSalesStore();
+  const availableProjects = useSalesStore(s => s.availableProjects);
+  const propertyInventory = useSalesStore(s => s.propertyInventory);
+  
+  const {
+    period, setPeriod,
+    customFrom, setCustomFrom, customTo, setCustomTo,
+    totals, chartData, rawDeposits,
+  } = useDepositFilter();
+
+  // Project search/filter
+  const [projectSearch, setProjectSearch] = useState('');
+  const openProjects = useMemo(() =>
+    availableProjects
+      .filter(p => p.status === 'OPEN')
+      .filter(p => !projectSearch || p.name.toLowerCase().includes(projectSearch.toLowerCase())),
+    [availableProjects, projectSearch]
+  );
+
+  // Layout tabs
+  const [activeTab, setActiveTab] = useState<'input' | 'matrix'>('input');
+  
+  // Matrix states
+  const [matrixProjectSearch, setMatrixProjectSearch] = useState('');
+  const openMatrixProjects = useMemo(() =>
+    availableProjects
+      .filter(p => p.status === 'OPEN')
+      .filter(p => !matrixProjectSearch || p.name.toLowerCase().includes(matrixProjectSearch.toLowerCase())),
+    [availableProjects, matrixProjectSearch]
+  );
+  
+  const [matrixSelectedProject, setMatrixSelectedProject] = useState('');
+  const [selectedUnitDetails, setSelectedUnitDetails] = useState<PropertyUnit | null>(null);
+
+  const unitsForSelectedProject = useMemo(() => {
+    if (!matrixSelectedProject) return [];
+    return propertyInventory.filter(u => u.project === matrixSelectedProject);
+  }, [propertyInventory, matrixSelectedProject]);
+
+  // Form states
+  const [selectedProject, setSelectedProject] = useState('');
+  const [unitCode, setUnitCode] = useState('');
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [transactionValue, setTransactionValue] = useState(0); // Tỷ VNĐ
+  const [notes, setNotes] = useState('');
+
+  // Edit states
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editUnitCode, setEditUnitCode] = useState('');
+  const [editCustomer, setEditCustomer] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editValue, setEditValue] = useState(0);
+
+  // Delete confirmation
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleSubmit = () => {
+    if (!selectedProject) { alert('Vui lòng chọn dự án!'); return; }
+    if (!unitCode.trim()) { alert('Vui lòng nhập mã căn!'); return; }
+    if (!customerName.trim()) { alert('Vui lòng nhập tên khách hàng!'); return; }
+    if (!customerPhone.trim()) { alert('Vui lòng nhập số điện thoại!'); return; }
+    
+    addTransaction({
+      project: selectedProject,
+      unitCode: unitCode.trim(),
+      customerName: customerName.trim(),
+      customerPhone: customerPhone.trim(),
+      transactionValue,
+      status: 'PENDING_DEPOSIT',
+      notes,
+    });
+    
+    setSelectedProject('');
+    setUnitCode('');
+    setCustomerName('');
+    setCustomerPhone('');
+    setTransactionValue(0);
+    setNotes('');
+    alert('✅ Đã gửi yêu cầu đặt cọc! Chờ Admin phê duyệt.');
+  };
+
+  const handleSelectUnitFromMatrix = useCallback((unit: PropertyUnit) => {
+    setSelectedProject(unit.project);
+    setUnitCode(unit.code);
+    setTransactionValue(unit.price);
+    setActiveTab('input');
+  }, []);
+
+  const startEdit = useCallback((t: TransactionEntry) => {
+    setEditingId(t.id);
+    setEditUnitCode(t.unitCode);
+    setEditCustomer(t.customerName);
+    setEditPhone(t.customerPhone);
+    setEditValue(t.transactionValue);
+    setDeletingId(null);
+  }, []);
+
+  const cancelEdit = useCallback(() => { setEditingId(null); }, []);
+
+  const confirmEdit = useCallback(() => {
+    if (editingId) {
+      updateTransaction(editingId, {
+        unitCode: editUnitCode,
+        customerName: editCustomer,
+        customerPhone: editPhone,
+        transactionValue: editValue
+      });
+      setEditingId(null);
+    }
+  }, [editingId, editUnitCode, editCustomer, editPhone, editValue, updateTransaction]);
+
+  const handleDelete = useCallback((id: string) => {
+    setDeletingId(id);
+    setEditingId(null);
+  }, []);
+
+  const confirmDelete = useCallback(() => {
+    if (deletingId) { deleteTransaction(deletingId); setDeletingId(null); }
+  }, [deletingId, deleteTransaction]);
+
+  const cancelDelete = useCallback(() => { setDeletingId(null); }, []);
+
+  const isAdmin = userRole === 'sales_admin' || userRole === 'sales_manager' || userRole === 'sales_director' || userRole === 'ceo';
+
+  // Table columns
+  const DEPOSIT_COLUMNS = [
+    { key: 'date', title: 'THỜI GIAN', width: 140, render: (v: string) => (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+        <Calendar size={14} color="#94a3b8" />
+        <Text style={{ fontSize: 12, fontWeight: '700', color: '#64748b' }}>
+          {new Date(v).toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', year: 'numeric' })}
+        </Text>
+      </View>
+    )},
+    { key: 'unitCode', title: 'MÃ CĂN', width: 120, render: (v: string, row: any) => (
+      editingId === row.id ? (
+        <TextInput
+          value={editUnitCode}
+          onChangeText={setEditUnitCode}
+          style={{
+            fontSize: 13, fontWeight: '800', color: '#ea580c',
+            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+            borderWidth: 2, borderColor: '#ea580c', borderRadius: 8,
+            paddingHorizontal: 8, paddingVertical: 4, minWidth: 90,
+          }}
+        />
+      ) : (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Hash size={14} color="#ea580c" />
+          <Text style={{ fontSize: 13, fontWeight: '800', color: '#ea580c' }} numberOfLines={1}>{v}</Text>
+        </View>
+      )
+    )},
+    { key: 'customerName', title: 'KHÁCH HÀNG', width: 140, render: (v: string, row: any) => (
+      editingId === row.id ? (
+        <TextInput
+          value={editCustomer}
+          onChangeText={setEditCustomer}
+          style={{
+            fontSize: 13, fontWeight: '700', color: cText,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+            borderWidth: 2, borderColor: '#0ea5e9', borderRadius: 8,
+            paddingHorizontal: 8, paddingVertical: 4, minWidth: 120,
+          }}
+        />
+      ) : (
+        <Text style={{ fontSize: 13, fontWeight: '700', color: cText }} numberOfLines={1}>{v}</Text>
+      )
+    )},
+    { key: 'transactionValue', title: 'GIÁ TRỊ (TỶ)', width: 100, align: 'center' as const, render: (v: number, row: any) => (
+      editingId === row.id ? (
+        <EditableCell value={editValue} onChange={setEditValue} color="#10b981" bgColor="#ecfdf5" isFloat />
+      ) : (
+        <Text style={{ fontSize: 14, fontWeight: '900', color: '#10b981' }}>{v}</Text>
+      )
+    )},
+    { key: 'status', title: 'TRẠNG THÁI', width: 120, align: 'center' as const, render: (v: string) => (
+      <StatusBadge status={v} />
+    )},
+    { key: 'id', title: '', width: 150, align: 'center' as const, render: (_v: string, row: any) => (
+      <View style={{ flexDirection: 'row', gap: 4, justifyContent: 'center', flexWrap: 'wrap' }}>
+        {editingId === row.id ? (
+          <>
+            <ActionButton icon={Check} color="#10b981" bg="#ecfdf5" onPress={confirmEdit} />
+            <ActionButton icon={X} color="#94a3b8" bg={isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'} onPress={cancelEdit} />
+          </>
+        ) : deletingId === row.id ? (
+          <>
+            <ActionButton icon={Check} color="#ef4444" bg="#fef2f2" onPress={confirmDelete} />
+            <ActionButton icon={X} color="#94a3b8" bg={isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'} onPress={cancelDelete} />
+          </>
+        ) : (
+          <>
+            {/* Admin approve/reject */}
+            {isAdmin && row.status === 'PENDING_DEPOSIT' && (
+              <>
+                <ActionButton icon={CheckCircle} color="#10b981" bg="#ecfdf5" onPress={() => approveTransaction(row.id)} />
+                <ActionButton icon={XCircle} color="#ef4444" bg="#fef2f2" onPress={() => rejectTransaction(row.id)} />
+              </>
+            )}
+            {/* Edit/Delete for own pending entries */}
+            {row.status === 'PENDING_DEPOSIT' && (
+              <>
+                <ActionButton icon={Pencil} color="#f59e0b" bg={isDark ? 'rgba(245,158,11,0.1)' : '#fffbeb'} onPress={() => startEdit(row)} />
+                <ActionButton icon={Trash2} color="#ef4444" bg={isDark ? 'rgba(239,68,68,0.1)' : '#fef2f2'} onPress={() => handleDelete(row.id)} />
+              </>
+            )}
+          </>
+        )}
+      </View>
+    )},
+  ];
+
+  const cardStyle: any = {
+    backgroundColor: isDark ? 'rgba(20,24,35,0.55)' : '#fff',
+    borderRadius: 20, padding: 28,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    ...(Platform.OS === 'web' ? {
+      backdropFilter: 'blur(24px)',
+      boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 2px 16px rgba(0,0,0,0.04)',
+    } : {}),
+  };
+
+  const inputStyle: any = {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+    borderRadius: 14, padding: 14, fontSize: 15, color: cText, fontWeight: '600',
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+  };
+
+  const dateInputStyle: any = {
+    fontSize: 14, fontWeight: '600', color: cText,
+    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+    backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+    minWidth: 140, textAlign: 'center',
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+  };
+
+  const periodLabel = PERIOD_TABS.find(t => t.value === period)?.label || '';
+
+  return (
+    <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
+      <ScrollView contentContainerStyle={{ padding: 28, paddingBottom: 120, gap: 20 }}>
+
+        {/* ── Header ── */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+            <View style={{
+              width: 52, height: 52, borderRadius: 18,
+              backgroundColor: isDark ? 'rgba(234,88,12,0.12)' : '#fff7ed',
+              alignItems: 'center', justifyContent: 'center',
+            }}>
+              <Landmark size={26} color="#ea580c" />
+            </View>
+            <View>
+              <Text style={{ fontSize: 12, fontWeight: '800', color: '#ea580c', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 2 }}>
+                QUẢN LÝ GIAO DỊCH
+              </Text>
+              <Text style={{ fontSize: 26, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>
+                Đặt Cọc & Phê Duyệt
+              </Text>
+            </View>
+          </View>
+
+          {/* Period Tabs */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <View style={{
+              flexDirection: 'row',
+              backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
+              borderRadius: 14, padding: 3,
+            }}>
+              {PERIOD_TABS.map(tab => {
+                const active = period === tab.value;
+                return (
+                  <TouchableOpacity key={tab.value} onPress={() => setPeriod(tab.value)} activeOpacity={0.7} style={{
+                    paddingHorizontal: 16, paddingVertical: 9, borderRadius: 11,
+                    backgroundColor: active ? (isDark ? '#ea580c' : '#fff') : 'transparent',
+                    ...(Platform.OS === 'web' && active && !isDark ? { boxShadow: '0 2px 8px rgba(0,0,0,0.06)' } : {}),
+                  } as any}>
+                    <Text style={{
+                      fontSize: 13, fontWeight: '700',
+                      color: active ? (isDark ? '#fff' : '#0f172a') : '#94a3b8',
+                    }}>
+                      {tab.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+
+        {/* Custom date range */}
+        {period === 'CUSTOM' && (
+          <View style={[cardStyle, { flexDirection: 'row', alignItems: 'center', gap: 12, padding: 16, flexWrap: 'wrap' }]}>
+            <Filter size={18} color="#ea580c" />
+            <Text style={{ fontSize: 13, fontWeight: '700', color: cSub }}>Từ:</Text>
+            {Platform.OS === 'web' ? (
+              <input
+                type="date"
+                value={formatDateInput(customFrom)}
+                onChange={(e: any) => setCustomFrom(parseDateInput(e.target.value))}
+                style={{
+                  fontSize: 14, fontWeight: 600, color: isDark ? '#e2e8f0' : '#1e293b',
+                  padding: '8px 14px', borderRadius: 12,
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                  outline: 'none', minWidth: 150,
+                }}
+              />
+            ) : (
+              <TextInput placeholder="YYYY-MM-DD" value={formatDateInput(customFrom)} onChangeText={t => setCustomFrom(parseDateInput(t))} style={dateInputStyle} />
+            )}
+            <ArrowRight size={16} color="#94a3b8" />
+            <Text style={{ fontSize: 13, fontWeight: '700', color: cSub }}>Đến:</Text>
+            {Platform.OS === 'web' ? (
+              <input
+                type="date"
+                value={formatDateInput(customTo)}
+                onChange={(e: any) => setCustomTo(parseDateInput(e.target.value))}
+                style={{
+                  fontSize: 14, fontWeight: 600, color: isDark ? '#e2e8f0' : '#1e293b',
+                  padding: '8px 14px', borderRadius: 12,
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'}`,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                  outline: 'none', minWidth: 150,
+                }}
+              />
+            ) : (
+              <TextInput placeholder="YYYY-MM-DD" value={formatDateInput(customTo)} onChangeText={t => setCustomTo(parseDateInput(t))} style={dateInputStyle} />
+            )}
+          </View>
+        )}
+
+        {/* ── View Mode Tabs ── */}
+        <View style={{ flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 20, padding: 6 }}>
+          {[
+            { id: 'input', label: 'NHẬP LIỆU & LỊCH SỬ', icon: Edit2 },
+            { id: 'matrix', label: 'BẢNG HÀNG DỰ ÁN', icon: Grid },
+          ].map(tab => {
+            const Icon = tab.icon;
+            const active = activeTab === tab.id;
+            return (
+              <TouchableOpacity key={tab.id} onPress={() => setActiveTab(tab.id as any)}
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 14, borderRadius: 16, backgroundColor: active ? (isDark ? '#3b82f6' : '#fff') : 'transparent', shadowOpacity: active && !isDark ? 0.05 : 0 }}
+              >
+                <Icon size={18} color={active ? (isDark ? '#fff' : '#0f172a') : '#64748b'} />
+                <Text style={{ fontSize: 13, fontWeight: '800', color: active ? (isDark ? '#fff' : '#0f172a') : '#64748b' }}>{tab.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        {activeTab === 'input' ? (
+          <>
+            {/* ── KPI Summary Cards ── */}
+        <View style={{ flexDirection: 'row', gap: 14, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Tổng Số Cọc', value: totals.totalDeposits, icon: <Landmark size={24} color="#3b82f6" strokeWidth={2} />, color: '#3b82f6' },
+            { label: 'Doanh Thu (Tỷ VNĐ)', value: totals.confirmedValue.toFixed(2), icon: <DollarSign size={24} color="#8b5cf6" strokeWidth={2} />, color: '#8b5cf6' },
+            { label: 'Cọc Chờ Duyệt', value: totals.pendingCount, icon: <Clock size={24} color="#f59e0b" strokeWidth={2} />, color: '#f59e0b' },
+            { label: 'Cọc Đã Nhận', value: totals.confirmedCount, icon: <CheckCircle size={24} color="#10b981" strokeWidth={2} />, color: '#10b981' },
+          ].map((card, i) => (
+            <View key={i} style={{ flex: 1, minWidth: 200 }}>
+              <SGStatCard label={card.label} value={card.value} icon={card.icon} iconColor={card.color} />
+            </View>
+          ))}
+        </View>
+
+        {/* ── Chart ── */}
+        <View style={cardStyle}>
+          <SGPlanningSectionTitle
+            icon={BarChart2 as any}
+            title={`Biểu Đồ Doanh Thu Giữ Chỗ & Đặt Cọc (${periodLabel})`}
+            accent="#ea580c"
+            badgeText="TRENDS"
+          />
+          <DepositChart data={chartData} height={280} />
+        </View>
+
+        {/* ── Form + History Row ── */}
+        <View style={{ flexDirection: isWideScreen ? 'row' : 'column', gap: 20 }}>
+
+          {/* Input Form */}
+          <View style={[cardStyle, { flex: 1 }]}>
+            <SGPlanningSectionTitle
+              icon={Plus as any}
+              title="Tạo Yêu Cầu Đặt Cọc Mới"
+              accent="#ea580c"
+              style={{ marginBottom: 20 }}
+            />
+            <View style={{ gap: 16 }}>
+              {/* Project Selector */}
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  DỰ ÁN
+                </Text>
+                {/* Search filter */}
+                <View style={{
+                  flexDirection: 'row', alignItems: 'center', gap: 8,
+                  backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
+                  borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8,
+                  borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0',
+                  marginBottom: 10,
+                }}>
+                  <Search size={16} color="#94a3b8" />
+                  <TextInput
+                    style={{
+                      flex: 1, fontSize: 13, fontWeight: '600', color: cText,
+                      ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
+                    } as any}
+                    placeholder="Tìm dự án..."
+                    placeholderTextColor="#94a3b8"
+                    value={projectSearch}
+                    onChangeText={setProjectSearch}
+                  />
+                  {projectSearch !== '' && (
+                    <TouchableOpacity onPress={() => setProjectSearch('')}>
+                      <X size={14} color="#94a3b8" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {openProjects.map(p => (
+                    <TouchableOpacity
+                      key={p.name}
+                      onPress={() => setSelectedProject(p.name)}
+                      style={{
+                        paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12,
+                        backgroundColor: selectedProject === p.name ? '#ea580c' : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
+                        borderWidth: 1,
+                        borderColor: selectedProject === p.name ? '#ea580c' : (isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'),
+                        ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 150ms ease' } : {}),
+                      } as any}
+                    >
+                      <Text style={{
+                        fontSize: 13, fontWeight: '700',
+                        color: selectedProject === p.name ? '#fff' : cSub,
+                      }}>{p.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  {openProjects.length === 0 && (
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#94a3b8', fontStyle: 'italic' }}>
+                      Không tìm thấy dự án phù hợp
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              {/* Unit Code */}
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  MÃ CĂN HỘ / SẢN PHẨM
+                </Text>
+                <TouchableOpacity 
+                  onPress={() => setActiveTab('matrix')}
+                  style={[inputStyle, { backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f1f5f9', borderColor: '#cbd5e1' }]}
+                >
+                  <Text style={{ color: unitCode ? cText : '#94a3b8', fontSize: 15, fontWeight: '700' }}>
+                    {unitCode || "Chọn từ Bảng Hàng Dự Án..."}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+
+              {/* Customer Name */}
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  TÊN KHÁCH HÀNG
+                </Text>
+                <TextInput
+                  style={inputStyle}
+                  placeholder="Nhập tên khách hàng..."
+                  placeholderTextColor="#94a3b8"
+                  value={customerName}
+                  onChangeText={setCustomerName}
+                />
+              </View>
+
+              {/* Phone */}
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  SỐ ĐIỆN THOẠI
+                </Text>
+                <TextInput
+                  style={inputStyle}
+                  placeholder="Nhập số điện thoại..."
+                  placeholderTextColor="#94a3b8"
+                  keyboardType="phone-pad"
+                  value={customerPhone}
+                  onChangeText={setCustomerPhone}
+                />
+              </View>
+
+              {/* Transaction Value */}
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                   GIÁ TRỊ CĂN (TỶ VNĐ)
+                </Text>
+                <View style={[inputStyle, { backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f1f5f9', borderColor: '#cbd5e1' }]}>
+                  <Text style={{ color: transactionValue > 0 ? '#10b981' : '#94a3b8', fontSize: 16, fontWeight: '900' }}>
+                    {transactionValue > 0 ? transactionValue : "Tự động điền theo mã căn"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Notes */}
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  GHI CHÚ (NẾU CÓ)
+                </Text>
+                <TextInput
+                  style={[inputStyle, { height: 80, textAlignVertical: 'top' }]}
+                  placeholder="Ví dụ: Đã nhận chuyển khoản cọc 50tr..."
+                  placeholderTextColor="#94a3b8"
+                  multiline
+                  value={notes}
+                  onChangeText={setNotes}
+                />
+              </View>
+            </View>
+
+            <View style={{ marginTop: 24 }}>
+              <SGButton
+                title="GỬI PHÊ DUYỆT"
+                icon={Send as any}
+                onPress={handleSubmit}
+                style={{ backgroundColor: '#ea580c', borderRadius: 16, height: 56 }}
+              />
+            </View>
+          </View>
+
+          {/* History Table */}
+          <View style={[cardStyle, { flex: 1.8 }]}>
+            <SGPlanningSectionTitle
+              icon={History as any}
+              title="Danh Sách Giao Dịch"
+              accent="#ea580c"
+              badgeText={`${rawDeposits.length} MỤC`}
+              style={{ marginBottom: 20 }}
+            />
+
+            {/* Delete confirmation banner */}
+            {deletingId && (
+              <View style={{
+                flexDirection: 'row', alignItems: 'center', gap: 12,
+                backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#fef2f2',
+                borderRadius: 14, padding: 14, marginBottom: 16,
+                borderWidth: 1, borderColor: isDark ? 'rgba(239,68,68,0.2)' : '#fecaca',
+              }}>
+                <Trash2 size={18} color="#ef4444" />
+                <Text style={{ flex: 1, fontSize: 13, fontWeight: '700', color: '#ef4444' }}>
+                  Xác nhận xoá giao dịch này? Nhấn ✓ để xoá hoặc ✗ để huỷ.
+                </Text>
+              </View>
+            )}
+
+            {rawDeposits.length > 0 ? (
+              <SGTable
+                columns={DEPOSIT_COLUMNS}
+                data={rawDeposits}
+                onRowPress={() => {}}
+                style={{ borderWidth: 0, backgroundColor: 'transparent' }}
+              />
+            ) : (
+              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 60 }}>
+                <Landmark size={56} color={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} style={{ marginBottom: 12 }} />
+                <Text style={{ fontSize: 15, fontWeight: '700', color: '#94a3b8' }}>Chưa có giao dịch cọc nào trong kỳ này</Text>
+                <Text style={{ fontSize: 13, color: '#94a3b8', marginTop: 4 }}>Hãy tạo giao dịch mới ở khung bên trái</Text>
+              </View>
+            )}
+          </View>
+        </View>
+          </>
+        ) : (
+          <View style={[cardStyle, { paddingHorizontal: 20 }]}>
+            <SGPlanningSectionTitle
+              icon={Grid as any}
+              title="Bảng Hàng Khả Dụng"
+              accent="#ea580c"
+              style={{ marginBottom: 20 }}
+            />
+            {/* Project Selector for Matrix */}
+            <View style={{ marginBottom: 24, paddingBottom: 24, borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }}>
+               <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>
+                  CHỌN DỰ ÁN ĐỂ XEM BẢNG HÀNG
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', borderRadius: 12, paddingHorizontal: 12, paddingVertical: 8, borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', marginBottom: 10, maxWidth: 400 }}>
+                  <Search size={16} color="#94a3b8" />
+                  <TextInput
+                    style={{ flex: 1, fontSize: 13, fontWeight: '600', color: cText, ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}) } as any}
+                    placeholder="Tìm dự án..."
+                    placeholderTextColor="#94a3b8"
+                    value={matrixProjectSearch}
+                    onChangeText={setMatrixProjectSearch}
+                  />
+                  {matrixProjectSearch !== '' && (
+                    <TouchableOpacity onPress={() => setMatrixProjectSearch('')}>
+                      <X size={14} color="#94a3b8" />
+                    </TouchableOpacity>
+                  )}
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                  {openMatrixProjects.map(p => (
+                    <TouchableOpacity
+                      key={p.name}
+                      onPress={() => setMatrixSelectedProject(p.name)}
+                      style={{
+                        paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12,
+                        backgroundColor: matrixSelectedProject === p.name ? '#ea580c' : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
+                        borderWidth: 1,
+                        borderColor: matrixSelectedProject === p.name ? '#ea580c' : (isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0'),
+                        ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 150ms ease' } : {}),
+                      } as any}
+                    >
+                      <Text style={{
+                        fontSize: 13, fontWeight: '700',
+                        color: matrixSelectedProject === p.name ? '#fff' : cSub,
+                      }}>{p.name}</Text>
+                    </TouchableOpacity>
+                  ))}
+                  {openMatrixProjects.length === 0 && (
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#94a3b8', fontStyle: 'italic' }}>
+                      Không tìm thấy dự án phù hợp
+                    </Text>
+                  )}
+                </View>
+            </View>
+
+            {matrixSelectedProject ? (
+              <UnitMatrix 
+                units={unitsForSelectedProject} 
+                selectedProjectName={matrixSelectedProject} 
+                onSelectUnit={handleSelectUnitFromMatrix}
+                onViewDetails={setSelectedUnitDetails}
+              />
+            ) : (
+              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 60 }}>
+                <Building2 size={56} color={isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'} style={{ marginBottom: 12 }} />
+                <Text style={{ fontSize: 15, fontWeight: '700', color: '#94a3b8' }}>Vui lòng chọn một dự án để xem bảng hàng</Text>
+              </View>
+            )}
+          </View>
+        )}
+
+      </ScrollView>
+
+      <UnitDetailsModal 
+        visible={!!selectedUnitDetails} 
+        onClose={() => setSelectedUnitDetails(null)} 
+        unit={selectedUnitDetails} 
+        onSelectUnit={handleSelectUnitFromMatrix} 
+      />
+    </View>
+  );
+}
+
+// ── Action button helper ──
+function ActionButton({ icon: Icon, color, bg, onPress }: { icon: any; color: string; bg: string; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      style={{
+        width: 30, height: 30, borderRadius: 8,
+        backgroundColor: bg,
+        alignItems: 'center', justifyContent: 'center',
+        ...(Platform.OS === 'web' ? { cursor: 'pointer', transition: 'all 0.15s ease' } : {}),
+      } as any}
+    >
+      <Icon size={14} color={color} />
+    </TouchableOpacity>
+  );
+}
+
+// ── Inline editable cell ──
+function EditableCell({ value, onChange, color, bgColor, isFloat = false }: { value: number; onChange: (v: number) => void; color: string; bgColor: string; isFloat?: boolean }) {
+  return (
+    <View style={{ alignSelf: 'center' }}>
+      {Platform.OS === 'web' ? (
+        <input
+          type="number"
+          min={0}
+          step={isFloat ? "0.1" : "1"}
+          value={value}
+          onChange={(e: any) => onChange(Math.max(0, isFloat ? parseFloat(e.target.value) || 0 : parseInt(e.target.value) || 0))}
+          style={{
+            width: 60, textAlign: 'center',
+            fontSize: 14, fontWeight: 900, color,
+            backgroundColor: bgColor,
+            border: `2px solid ${color}`,
+            borderRadius: 10, padding: '3px 6px',
+            outline: 'none',
+          }}
+        />
+      ) : (
+        <TextInput
+          value={String(value)}
+          onChangeText={t => onChange(Math.max(0, isFloat ? parseFloat(t) || 0 : parseInt(t) || 0))}
+          keyboardType="numeric"
+          style={{
+            width: 60, textAlign: 'center',
+            fontSize: 14, fontWeight: '900', color,
+            backgroundColor: bgColor,
+            borderWidth: 2, borderColor: color,
+            borderRadius: 10, paddingHorizontal: 6, paddingVertical: 3,
+          }}
+        />
+      )}
+    </View>
+  );
+}
