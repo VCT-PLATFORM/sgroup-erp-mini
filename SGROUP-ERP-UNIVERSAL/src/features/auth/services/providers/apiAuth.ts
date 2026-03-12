@@ -17,6 +17,7 @@ export const apiAuthProvider: AuthProvider = {
           salesRole?: string;
           department?: string;
           teamId?: string;
+          teamName?: string;
         };
       };
     }>('/auth/login', {
@@ -37,6 +38,8 @@ export const apiAuthProvider: AuthProvider = {
         : ['biz', 'project'],
       salesRole: u.salesRole,
       department: u.department,
+      teamId: u.teamId,
+      teamName: u.teamName,
     };
 
     return { user, token: res.data.access_token };

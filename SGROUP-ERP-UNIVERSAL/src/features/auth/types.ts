@@ -6,6 +6,8 @@ export interface AuthUser {
   modules: string[];
   salesRole?: string;
   department?: string;
+  teamId?: string;
+  teamName?: string;
 }
 
 export interface LoginRequest {

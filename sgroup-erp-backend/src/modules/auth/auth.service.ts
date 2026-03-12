@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { USER_REPOSITORY } from '../../common/database/repository-tokens';
 import { IUserRepository } from '../../common/database/entity-repositories';
+import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -9,6 +10,7 @@ export class AuthService {
   constructor(
     @Inject(USER_REPOSITORY) private userRepo: IUserRepository,
     private jwtService: JwtService,
+    private prisma: PrismaService,
   ) {}
 
   async login(email: string, pass: string) {
@@ -24,6 +26,15 @@ export class AuthService {
       if (pass !== user.password) {
         throw new UnauthorizedException('Mật khẩu không chính xác');
       }
+    }
+
+    // Look up team name if user has a teamId
+    let teamName: string | null = null;
+    if (user.teamId) {
+      try {
+        const team = await this.prisma.salesTeam.findUnique({ where: { id: user.teamId } });
+        teamName = team?.name || null;
+      } catch { /* team lookup optional */ }
     }
 
     const payload = {
@@ -44,6 +55,7 @@ export class AuthService {
         department: user.department,
         salesRole: user.salesRole,
         teamId: user.teamId,
+        teamName: teamName,
       }
     };
   }

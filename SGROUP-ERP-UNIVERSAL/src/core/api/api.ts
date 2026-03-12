@@ -27,7 +27,16 @@ export async function apiFetch<T>(
 
   if (!res.ok) {
     const errorBody = await res.text();
-    throw new Error(`API Error ${res.status}: ${errorBody}`);
+    let message = `Lỗi ${res.status}`;
+    try {
+      const parsed = JSON.parse(errorBody);
+      if (parsed.message) {
+        message = typeof parsed.message === 'string' ? parsed.message : JSON.stringify(parsed.message);
+      }
+    } catch {
+      if (errorBody) message = errorBody;
+    }
+    throw new Error(message);
   }
   return res.json() as Promise<T>;
 }

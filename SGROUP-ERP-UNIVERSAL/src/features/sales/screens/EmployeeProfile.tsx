@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
-import { UserCircle, Mail, Phone, MapPin, Award, Star, TrendingUp, ShieldCheck, Briefcase, Lock, Eye, EyeOff, CheckCircle } from 'lucide-react-native';
+import { UserCircle, Mail, Phone, MapPin, Award, Star, TrendingUp, ShieldCheck, Briefcase, Lock, Eye, EyeOff, CheckCircle, Users } from 'lucide-react-native';
 import { SGButton, SGPlanningSectionTitle } from '../../../shared/ui/components';
 import { useAuthStore } from '../../auth/store/authStore';
 import { apiFetch } from '../../../core/api/api';
@@ -213,6 +213,7 @@ export function EmployeeProfile() {
                 { icon: Mail, label: 'Email công ty', value: user?.email || 'N/A' },
                 { icon: ShieldCheck, label: 'Vai trò', value: roleLabel },
                 { icon: Briefcase, label: 'Phòng ban', value: deptLabel },
+                ...(user?.teamName ? [{ icon: Users, label: 'Team', value: user.teamName }] : []),
               ].map((item, idx) => {
                 const Icon = item.icon;
                 return (

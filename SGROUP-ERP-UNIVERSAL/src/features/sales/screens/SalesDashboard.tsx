@@ -13,33 +13,9 @@ import { useSalesData } from '../hooks/useSalesData';
 import { SalesQuickForms } from '../components/forms/SalesQuickForms';
 import { useDeals } from '../hooks/useDeals';
 
-// Mock data — will be replaced with hooks when backend is connected
-const MOCK_KPI = [
-  { id: 'gmv', label: 'DOANH SỐ (GMV)', value: '2.500', unit: 'Tỷ', change: 18.5, color: '#8b5cf6', icon: DollarSign },
-  { id: 'rev', label: 'DOANH THU', value: '125', unit: 'Tỷ', change: 12.3, color: '#3b82f6', icon: TrendingUp },
-  { id: 'deals', label: 'GIAO DỊCH', value: '714', unit: 'GD', change: 22.0, color: '#22c55e', icon: ShoppingCart },
-  { id: 'staff', label: 'NHÂN SỰ', value: '156', unit: 'Người', change: 8.0, color: '#f59e0b', icon: Users },
-];
-
-const MOCK_SALES_KPI = [
-  { id: 'target', label: 'MỤC TIÊU THÁNG', value: '3.2', unit: 'Tỷ / 5 Tỷ', change: 64, color: '#8b5cf6', icon: Target },
-  { id: 'comm', label: 'HOA HỒNG DỰ KIẾN', value: '45.5', unit: 'Tr', change: 12.3, color: '#22c55e', icon: DollarSign },
-  { id: 'calls', label: 'CUỘC GỌI HÔM NAY', value: '24', unit: '/ 50', change: 48, color: '#3b82f6', icon: PhoneCall },
-  { id: 'meets', label: 'LỊCH HẸN HÔM NAY', value: '3', unit: 'Lịch', change: 2, color: '#f59e0b', icon: Calendar },
-];
-
-
-const MOCK_FUNNEL = [
-  { stage: 'Lead mới', count: 2840, color: '#94a3b8', pct: 100 },
-  { stage: 'Đã liên hệ', count: 1988, color: '#60a5fa', pct: 70 },
-  { stage: 'Hẹn gặp', count: 1136, color: '#818cf8', pct: 40 },
-  { stage: 'Giữ chỗ', count: 568, color: '#a78bfa', pct: 20 },
-  { stage: 'Đặt cọc', count: 398, color: '#c084fc', pct: 14 },
-  { stage: 'Ký HĐMB', count: 342, color: '#8b5cf6', pct: 12 },
-  { stage: 'Hoàn tất', count: 285, color: '#7c3aed', pct: 10 },
-];
-
-// MOCK_RECENT_DEALS removed, using global store transactions
+// Data arrays — populated from API hooks
+const TEAM_KPI: { id: string; label: string; value: string; unit: string; change: number; color: string; icon: any }[] = [];
+const TEAM_FUNNEL: { stage: string; count: number; color: string; pct: number }[] = [];
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   LEAD: { bg: '#f1f5f9', text: '#64748b', label: 'Lead' },
@@ -51,11 +27,7 @@ const STAGE_COLORS: Record<string, { bg: string; text: string; label: string }> 
   CANCELLED: { bg: '#fef2f2', text: '#dc2626', label: 'Huỷ' },
 };
 
-const MOCK_PERSONAL_PIPELINE = [
-  { id: 'act1', customer: 'Hoàng Kim E', project: 'Grand Marina', phone: '0901xxx234', type: 'urgent', action: 'Nợ cọc 50Tr - Chờ bổ sung', time: 'Hôm nay, 14:00', stage: 'DEPOSIT' },
-  { id: 'act2', customer: 'Vũ Thành F', project: 'The Global City', phone: '0988xxx567', type: 'meeting', action: 'Hẹn khách xem sa bàn lần 2', time: 'Hôm nay, 16:30', stage: 'MEETING' },
-  { id: 'act3', customer: 'Phan Thị G', project: 'Vinhomes Grand Park', phone: '0912xxx890', type: 'call', action: 'Gọi tư vấn chính sách vay', time: 'Sáng mai, 09:00', stage: 'LEAD' },
-];
+const PERSONAL_PIPELINE: { id: string; customer: string; project: string; phone: string; type: string; action: string; time: string; stage: string }[] = [];
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
 
@@ -165,7 +137,7 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
           </View>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24, marginTop: 10 }}>
-            {MOCK_KPI.map((k: any) => (
+            {TEAM_KPI.map((k: any) => (
               <View key={k.id} style={{ 
                 flex: 1, minWidth: 240, backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : '#ffffff', 
                 borderRadius: 24, padding: 24, 
@@ -233,12 +205,12 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
                   badgeText="MY PIPELINE"
                 />
                 <View style={{ backgroundColor: '#ef44441A', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}>
-                   <Text style={{ fontSize: 12, fontWeight: '800', color: '#ef4444' }}>{MOCK_PERSONAL_PIPELINE.length} Nhiệm vụ</Text>
+                   <Text style={{ fontSize: 12, fontWeight: '800', color: '#ef4444' }}>{PERSONAL_PIPELINE.length} Nhiệm vụ</Text>
                 </View>
               </View>
 
               <View style={{ gap: 16 }}>
-                {MOCK_PERSONAL_PIPELINE.map((task) => {
+                {PERSONAL_PIPELINE.map((task) => {
                   const s = STAGE_COLORS[task.stage] || STAGE_COLORS.LEAD;
                   return (
                     <View key={task.id} style={{ 
@@ -283,7 +255,7 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
                 badgeText="PIPELINE"
                 style={{ marginBottom: 28 }}
               />
-              {MOCK_FUNNEL.map((s, i) => (
+              {TEAM_FUNNEL.map((s, i) => (
                 <View key={i} style={{ marginBottom: 18 }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8, alignItems: 'flex-end' }}>
                     <Text style={{ fontSize: 13, fontWeight: '700', color: cText, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.stage}</Text>

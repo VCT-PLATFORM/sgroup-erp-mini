@@ -9,23 +9,7 @@ import { sgds } from '../../../shared/theme/theme';
 import { SGCard, SGGradientStatCard, SGTable } from '../../../shared/ui/components';
 import type { SalesRole } from '../SalesSidebar';
 
-const MOCK_TIMEKEEPING = Array.from({ length: 15 }, (_, i) => {
-  const day = (i + 1).toString().padStart(2, '0');
-  let status = 'ON_TIME';
-  let checkIn = '08:25';
-  let checkOut = '17:35';
-  if (i === 4) { status = 'LATE'; checkIn = '09:15'; }
-  if (i === 10) { status = 'LEAVE'; checkIn = '--:--'; checkOut = '--:--'; }
-  
-  return {
-    id: `day-${i}`,
-    date: `${day}/03/2026`,
-    dayOfWeek: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'][new Date(2026, 2, i + 1).getDay()],
-    checkIn,
-    checkOut,
-    status
-  };
-});
+const timekeepingData: { id: string; date: string; dayOfWeek: string; checkIn: string; checkOut: string; status: string }[] = [];
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
   ON_TIME: { bg: '#dcfce7', text: '#16a34a', label: 'Đúng giờ' },
@@ -82,7 +66,7 @@ export function Timekeeping({ userRole }: { userRole?: SalesRole }) {
         <SGCard variant="glass" noPadding>
           <SGTable 
             columns={TIME_COLUMNS} 
-            data={MOCK_TIMEKEEPING} 
+            data={timekeepingData} 
             style={{ borderWidth: 0, backgroundColor: 'transparent' }}
           />
         </SGCard>

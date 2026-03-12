@@ -9,13 +9,7 @@ import { sgds } from '../../../shared/theme/theme';
 import { SGCard } from '../../../shared/ui/components';
 import type { SalesRole } from '../SalesSidebar';
 
-const MOCK_PROJECTS = [
-  { id: '1', code: 'VH-OP3', name: 'Vinhomes Ocean Park 3', developer: 'Vingroup', location: 'Hưng Yên', type: 'Chung cư', feeRate: 5.0, avgPrice: 3.2, totalUnits: 2400, soldUnits: 1680, status: 'ACTIVE' },
-  { id: '2', code: 'MS-WF', name: 'Masteri Waterfront', developer: 'Masterise', location: 'TP.HCM', type: 'Chung cư', feeRate: 4.5, avgPrice: 5.5, totalUnits: 800, soldUnits: 520, status: 'ACTIVE' },
-  { id: '3', code: 'GM-SG', name: 'Grand Marina Saigon', developer: 'Masterise', location: 'TP.HCM', type: 'Biệt thự', feeRate: 3.5, avgPrice: 15.0, totalUnits: 200, soldUnits: 95, status: 'ACTIVE' },
-  { id: '4', code: 'EP-S2', name: 'Ecopark Season 2', developer: 'Ecopark', location: 'Hưng Yên', type: 'Biệt thự', feeRate: 5.5, avgPrice: 8.0, totalUnits: 350, soldUnits: 210, status: 'ACTIVE' },
-  { id: '5', code: 'TGC', name: 'The Global City', developer: 'Masterise', location: 'TP.HCM', type: 'Shophouse', feeRate: 4.0, avgPrice: 12.0, totalUnits: 500, soldUnits: 180, status: 'ACTIVE' },
-];
+const projects: { id: string; code: string; name: string; developer: string; location: string; type: string; feeRate: number; avgPrice: number; totalUnits: number; soldUnits: number; status: string }[] = [];
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
 
@@ -36,7 +30,7 @@ export function ProjectCatalog({ userRole }: { userRole?: SalesRole }) {
             </View>
             <View>
               <Text style={{ ...sgds.typo.h2, color: cText }}>Dự Án BĐS</Text>
-              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>{MOCK_PROJECTS.length} dự án đang bán</Text>
+              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>{projects.length} dự án đang bán</Text>
             </View>
           </View>
           {canEdit && <Pressable style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#22c55e', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 }}>
@@ -46,7 +40,7 @@ export function ProjectCatalog({ userRole }: { userRole?: SalesRole }) {
         </View>
 
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
-          {MOCK_PROJECTS.map(p => {
+          {projects.map(p => {
             const soldPct = p.totalUnits > 0 ? Math.round((p.soldUnits / p.totalUnits) * 100) : 0;
             const remaining = p.totalUnits - p.soldUnits;
             return (

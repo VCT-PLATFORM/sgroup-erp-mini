@@ -80,7 +80,14 @@ export function LoginScreen() {
     try {
       const r = await apiAuthProvider.login(email, pw);
       login(r.user, r.token);
-    } catch (e: any) { setError(e.message || 'Đăng nhập thất bại'); }
+    } catch (e: any) {
+      const msg = e.message || '';
+      if (msg.includes('Failed to fetch') || msg.includes('Network request failed')) {
+        setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.');
+      } else {
+        setError(msg || 'Đăng nhập thất bại');
+      }
+    }
   };
 
   /* ═════════════════════════════════════════ */

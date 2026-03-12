@@ -54,64 +54,6 @@ export type TransactionEntry = {
   notes?: string;
 };
 
-// --- MOCK INITIAL DATA ---
-const MOCK_INVENTORY: PropertyUnit[] = [];
-const blocks = ['S4.01', 'S4.02'];
-const directions = ['Đông Nam', 'Tây Bắc', 'Đông Bắc', 'Tây Nam'];
-
-blocks.forEach(block => {
-  for (let floor = 2; floor <= 12; floor++) {
-    for (let pos = 1; pos <= 6; pos++) {
-      const isCorner = pos === 1 || pos === 6;
-      let status: UnitStatus = 'AVAILABLE';
-      
-      const rand = Math.random();
-      if (rand > 0.85) status = 'COMPLETED';
-      else if (rand > 0.75) status = 'DEPOSIT';
-      else if (rand > 0.65) status = 'BOOKED';
-      else if (rand > 0.60) status = 'LOCKED';
-
-      MOCK_INVENTORY.push({
-        id: `${block}-${floor}${(pos < 10 ? '0' : '')}${pos}`,
-        code: `${block}-${floor}${(pos < 10 ? '0' : '')}${pos}`,
-        floor,
-        block,
-        project: 'Vinhomes Smart City',
-        area: isCorner ? 85 : Math.floor(Math.random() * 30 + 45),
-        price: Number((Math.random() * 3 + 2).toFixed(2)),
-        status,
-        direction: directions[Math.floor(Math.random() * directions.length)],
-        bedrooms: isCorner ? 3 : (Math.random() > 0.5 ? 2 : 1),
-        ...(status === 'BOOKED' ? { 
-          bookedBy: 'Sale: Trần A', 
-          lockedUntil: new Date(Date.now() + Math.random() * 1800000) 
-        } : {})
-      });
-    }
-  }
-});
-
-const INITIAL_ACTIVITIES: ActivityEntry[] = [
-  { id: 'a1', date: new Date().toISOString(), postsCount: 2, callsCount: 45, newLeads: 12, meetingsMade: 3 },
-];
-
-const INITIAL_BOOKINGS: BookingEntry[] = [
-  { id: 'b1', date: new Date().toISOString(), project: 'Vinhomes Ocean Park', customerName: 'Nguyễn Văn A', customerPhone: '0901234567', bookingAmount: 50000000, bookingCount: 2, status: 'APPROVED' },
-  { id: 'b2', date: new Date(Date.now() - 86400000).toISOString(), project: 'Vinhomes Smart City', customerName: 'Trần Thị B', customerPhone: '0912345678', bookingAmount: 100000000, bookingCount: 5, status: 'APPROVED' },
-  { id: 'b3', date: new Date(Date.now() - 86400000).toISOString(), project: 'Masteri Waterfront', customerName: 'Lê Văn C', customerPhone: '0923456789', bookingAmount: 50000000, bookingCount: 1, status: 'PENDING' },
-  { id: 'b4', date: new Date(Date.now() - 2 * 86400000).toISOString(), project: 'Vinhomes Ocean Park', customerName: 'Phạm Minh D', customerPhone: '0934567890', bookingAmount: 150000000, bookingCount: 3, status: 'APPROVED' },
-  { id: 'b5', date: new Date(Date.now() - 3 * 86400000).toISOString(), project: 'Vinhomes Smart City', customerName: 'Hoàng Thị E', customerPhone: '0945678901', bookingAmount: 100000000, bookingCount: 2, status: 'REJECTED' },
-  { id: 'b6', date: new Date(Date.now() - 4 * 86400000).toISOString(), project: 'Masteri Waterfront', customerName: 'Đỗ Quang F', customerPhone: '0956789012', bookingAmount: 200000000, bookingCount: 4, status: 'APPROVED' },
-  { id: 'b7', date: new Date(Date.now() - 5 * 86400000).toISOString(), project: 'Vinhomes Ocean Park', customerName: 'Vũ Thị G', customerPhone: '0967890123', bookingAmount: 50000000, bookingCount: 1, status: 'APPROVED' },
-];
-
-const INITIAL_TRANSACTIONS: TransactionEntry[] = [
-  { id: 't1', date: new Date().toISOString(), project: 'Masteri Waterfront', unitCode: 'M2-1205', customerName: 'Lê Thị B', customerPhone: '0987654321', transactionValue: 4.5, status: 'WAITING_CONTRACT', notes: 'Chờ ký HĐMB' },
-  { id: 't2', date: new Date().toISOString(), project: 'Vinhomes Smart City', unitCode: 'S4-0812', customerName: 'Trần Văn C', customerPhone: '0912345678', transactionValue: 3.2, status: 'COMPLETED', notes: 'Đã hoàn tất thủ tục' },
-  { id: 't3', date: new Date().toISOString(), project: 'Vinhomes Ocean Park', unitCode: 'O2-0511', customerName: 'Nguyễn Văn D', customerPhone: '0900000000', transactionValue: 2.1, status: 'PENDING_DEPOSIT', notes: 'Mới tạo cọc' },
-  { id: 't4', date: new Date().toISOString(), project: 'Vinhomes Smart City', unitCode: 'S4-1005', customerName: 'Hoàng Thị E', customerPhone: '0911111111', transactionValue: 2.8, status: 'DEPOSIT', notes: 'Đã chuyển khoản thành công' },
-];
-
 // --- ZUSTAND STORE ---
 interface SalesState {
   // Inventory
@@ -153,11 +95,11 @@ interface SalesState {
 }
 
 export const useSalesStore = create<SalesState>((set, get) => ({
-  selectedProject: 'Vinhomes Smart City',
-  units: MOCK_INVENTORY,
-  activities: INITIAL_ACTIVITIES,
-  bookings: INITIAL_BOOKINGS,
-  transactions: INITIAL_TRANSACTIONS,
+  selectedProject: '',
+  units: [],
+  activities: [],
+  bookings: [],
+  transactions: [],
   availableProjects: [
     { name: 'Vinhomes Ocean Park', status: 'OPEN' },
     { name: 'Vinhomes Smart City', status: 'OPEN' },

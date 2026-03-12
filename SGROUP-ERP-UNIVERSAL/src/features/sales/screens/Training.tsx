@@ -31,19 +31,9 @@ const STATUS_CFG: Record<CourseStatus, { label: string; color: string }> = {
   LOCKED:      { label: 'CHƯA MỞ',    color: '#94a3b8' },
 };
 
-const MOCK_COURSES: Course[] = [
-  { id: '1', title: 'Kỹ Năng Bán Hàng BĐS Cơ Bản', category: 'Bắt buộc', duration: '8 giờ', lessons: 12, completed: 12, status: 'COMPLETED', instructor: 'Nguyễn Minh Trí', rating: 4.8 },
-  { id: '2', title: 'Nghệ Thuật Đàm Phán & Closing', category: 'Nâng cao', duration: '6 giờ', lessons: 10, completed: 7, status: 'IN_PROGRESS', instructor: 'Trần Hải Đăng', rating: 4.9 },
-  { id: '3', title: 'Phân Tích Dự Án & Quy Hoạch', category: 'Chuyên sâu', duration: '5 giờ', lessons: 8, completed: 0, status: 'NOT_STARTED', instructor: 'KTS. Lê Quốc Dũng' },
-  { id: '4', title: 'Digital Marketing cho Sales', category: 'Kỹ năng mềm', duration: '4 giờ', lessons: 6, completed: 0, status: 'NOT_STARTED', instructor: 'Phạm Thị Thu' },
-  { id: '5', title: 'Tài Chính BĐS & Pháp Lý HĐMB', category: 'Bắt buộc', duration: '10 giờ', lessons: 15, completed: 15, status: 'COMPLETED', instructor: 'LS. Nguyễn Văn Hà', rating: 4.7 },
-  { id: '6', title: 'Leadership — Quản Lý Team Sales', category: 'Leader Track', duration: '12 giờ', lessons: 18, completed: 0, status: 'LOCKED', instructor: 'CEO Trần Phong' },
-];
+const courses: Course[] = [];
 
-const MOCK_CERTS = [
-  { id: '1', name: 'Chứng chỉ Hành nghề Môi giới BĐS', date: '15/01/2026', expiry: '15/01/2031', status: 'active' },
-  { id: '2', name: 'Chứng nhận NVKD Xuất sắc Q4/2025', date: '01/01/2026', expiry: '', status: 'active' },
-];
+const certs: { id: string; name: string; date: string; expiry: string; status: string }[] = [];
 
 export function Training() {
   const { theme, isDark } = useAppTheme();
@@ -51,9 +41,9 @@ export function Training() {
   const cSub = theme.colors.textSecondary;
   const [tab, setTab] = useState<'courses' | 'certs'>('courses');
 
-  const completedCount = MOCK_COURSES.filter(c => c.status === 'COMPLETED').length;
-  const inProgressCount = MOCK_COURSES.filter(c => c.status === 'IN_PROGRESS').length;
-  const totalHours = MOCK_COURSES.filter(c => c.status === 'COMPLETED').reduce((s, c) => s + parseInt(c.duration), 0);
+  const completedCount = courses.filter(c => c.status === 'COMPLETED').length;
+  const inProgressCount = courses.filter(c => c.status === 'IN_PROGRESS').length;
+  const totalHours = courses.filter(c => c.status === 'COMPLETED').reduce((s, c) => s + parseInt(c.duration), 0);
 
   const cardStyle: any = {
     backgroundColor: isDark ? 'rgba(20,24,35,0.45)' : '#fff', borderRadius: 24,
@@ -72,10 +62,10 @@ export function Training() {
         {/* Stats */}
         <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
           {[
-            { label: 'KHÓA HỌC HOÀN THÀNH', value: completedCount, total: MOCK_COURSES.length, color: '#22c55e', icon: CheckCircle2 },
+            { label: 'KHÓA HỌC HOÀN THÀNH', value: completedCount, total: courses.length, color: '#22c55e', icon: CheckCircle2 },
             { label: 'ĐANG HỌC', value: inProgressCount, total: null, color: '#3b82f6', icon: BookOpen },
             { label: 'GIỜ HỌC TÍCH LŨY', value: totalHours, total: null, color: '#8b5cf6', icon: Clock },
-            { label: 'CHỨNG CHỈ', value: MOCK_CERTS.length, total: null, color: '#f59e0b', icon: Award },
+            { label: 'CHỨNG CHỈ', value: certs.length, total: null, color: '#f59e0b', icon: Award },
           ].map((s, i) => {
             const Icon = s.icon;
             return (
@@ -116,7 +106,7 @@ export function Training() {
         {/* Courses List */}
         {tab === 'courses' && (
           <View style={{ gap: 12 }}>
-            {MOCK_COURSES.map(course => {
+            {courses.map(course => {
               const cfg = STATUS_CFG[course.status];
               const progress = course.lessons > 0 ? Math.round((course.completed / course.lessons) * 100) : 0;
               const isLocked = course.status === 'LOCKED';
@@ -172,7 +162,7 @@ export function Training() {
         {/* Certificates List */}
         {tab === 'certs' && (
           <View style={{ gap: 12 }}>
-            {MOCK_CERTS.map(cert => (
+            {certs.map(cert => (
               <View key={cert.id} style={[cardStyle, { padding: 24, flexDirection: 'row', alignItems: 'center' }]}>
                 <View style={{ width: 56, height: 56, borderRadius: 18, backgroundColor: isDark ? 'rgba(245,158,11,0.15)' : '#fffbeb', alignItems: 'center', justifyContent: 'center', marginRight: 20 }}>
                   <Award size={26} color="#f59e0b" />

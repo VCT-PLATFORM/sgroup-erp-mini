@@ -9,14 +9,7 @@ import { sgds } from '../../../shared/theme/theme';
 import { SGCard, SGTable } from '../../../shared/ui/components';
 import type { SalesRole } from '../SalesSidebar';
 
-const MOCK_STAFF = [
-  { id: '1', code: 'NV001', name: 'Nguyễn Văn A', team: 'Team Alpha', role: 'Senior Sales', deals: 28, gmv: 98, target: 120, status: 'ACTIVE' },
-  { id: '2', code: 'NV002', name: 'Trần Thị B', team: 'Team Beta', role: 'Sales', deals: 24, gmv: 84, target: 100, status: 'ACTIVE' },
-  { id: '3', code: 'NV003', name: 'Lê Minh C', team: 'Team Alpha', role: 'Sales', deals: 22, gmv: 77, target: 100, status: 'ACTIVE' },
-  { id: '4', code: 'NV004', name: 'Phạm Đức D', team: 'Team Gamma', role: 'Team Lead', deals: 20, gmv: 70, target: 80, status: 'ACTIVE' },
-  { id: '5', code: 'NV005', name: 'Hoàng Kim E', team: 'Team Delta', role: 'Sales', deals: 18, gmv: 63, target: 100, status: 'ACTIVE' },
-  { id: '6', code: 'NV006', name: 'Vũ Thành F', team: 'Team Beta', role: 'Junior Sales', deals: 12, gmv: 42, target: 60, status: 'ACTIVE' },
-];
+const staffData: { id: string; code: string; name: string; team: string; role: string; deals: number; gmv: number; target: number; status: string }[] = [];
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
 
@@ -66,7 +59,7 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
             </View>
             <View>
               <Text style={{ ...sgds.typo.h2, color: cText }}>Nhân Sự Sales</Text>
-              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>{MOCK_STAFF.length} nhân viên</Text>
+              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>{staffData.length} nhân viên</Text>
             </View>
           </View>
           {canEdit && <Pressable style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#3b82f6', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 }}>
@@ -78,7 +71,7 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
         <SGCard variant="glass" noPadding>
           <SGTable 
             columns={STAFF_COLUMNS} 
-            data={MOCK_STAFF} 
+            data={staffData} 
             onRowPress={(row) => console.log('Press staff', row)} 
             style={{ borderWidth: 0, backgroundColor: 'transparent' }}
           />
