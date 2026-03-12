@@ -21,7 +21,7 @@ export interface SalesSidebarItem {
   key: string;
   label: string;
   icon: any;
-  section: 'dashboard' | 'sales_crm' | 'sales_ops' | 'finance' | 'resources' | 'admin';
+  section: 'dashboard' | 'sales_crm' | 'team' | 'sales_ops' | 'finance' | 'resources' | 'admin';
   minRole: SalesRole[];
 }
 
@@ -34,6 +34,11 @@ const SIDEBAR_ITEMS: SalesSidebarItem[] = [
   // KHÁCH HÀNG & CRM
   { key: 'SALES_CRM',           label: 'Khách hàng & Leads', icon: Users2,          section: 'sales_crm', minRole: ALL_ROLES },
   { key: 'SALES_INVENTORY',     label: 'Giỏ hàng & Bảng giá',icon: LayoutGrid,      section: 'sales_crm', minRole: ALL_ROLES },
+
+  // QUẢN LÝ TEAM (moved above BÁN HÀNG)
+  { key: 'SALES_TEAMS',         label: 'Quản lý Team',       icon: Users,           section: 'team',      minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
+  { key: 'SALES_STAFF',         label: 'Nhân sự Sales',      icon: UserCog,         section: 'team',      minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
+  { key: 'SALES_TEAM_REPORT',   label: 'Báo cáo Team',       icon: FileText,        section: 'team',      minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
 
   // BÁN HÀNG
   { key: 'SALES_ACTIVITY_LOG',  label: 'Nhật ký hoạt động',  icon: CalendarDays,    section: 'sales_ops', minRole: ALL_ROLES },
@@ -54,13 +59,10 @@ const SIDEBAR_ITEMS: SalesSidebarItem[] = [
   { key: 'SALES_POLICIES',      label: 'Chính sách',         icon: BookOpen,        section: 'resources', minRole: ALL_ROLES },
   { key: 'SALES_TRAINING',      label: 'Đào tạo',            icon: GraduationCap,   section: 'resources', minRole: ALL_ROLES },
   
-  // ADMIN WORKSPACE (Manager+)
-  { key: 'SALES_TEAMS',         label: 'Quản lý Team',       icon: Users,           section: 'admin',     minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
-  { key: 'SALES_STAFF',         label: 'Nhân sự Sales',      icon: UserCog,         section: 'admin',     minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
+  // QUẢN TRỊ KINH DOANH (Director+)
   { key: 'SALES_PROJECTS',      label: 'Dự án BĐS',          icon: Building,        section: 'admin',     minRole: ['sales_director', 'ceo', 'sales_admin'] },
   { key: 'SALES_TARGETS',       label: 'Phân bổ Target',     icon: Target,          section: 'admin',     minRole: ['sales_director', 'ceo', 'sales_admin'] },
   { key: 'SALES_PLAN_ACTUAL',   label: 'Plan vs Actual',     icon: BarChart3,       section: 'admin',     minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
-  { key: 'SALES_TEAM_REPORT',   label: 'Báo cáo Team',       icon: FileText,        section: 'admin',     minRole: ['team_lead', 'sales_manager', 'sales_director', 'ceo', 'sales_admin'] },
   { key: 'SALES_CRM_VIEWER',    label: 'Đối chiếu CRM',      icon: RefreshCw,       section: 'admin',     minRole: ['sales_director', 'sales_admin'] },
 ];
 
@@ -82,6 +84,7 @@ export function SalesSidebar({ activeKey, onSelect, collapsed, onToggleCollapse,
   const sections = [
     { key: 'dashboard',  label: '' },
     { key: 'sales_crm',  label: 'KHÁCH HÀNG & CRM' },
+    { key: 'team',       label: 'QUẢN LÝ TEAM' },
     { key: 'sales_ops',  label: 'BÁN HÀNG' },
     { key: 'finance',    label: 'TÀI CHÍNH' },
     { key: 'resources',  label: 'TÀI NGUYÊN' },
