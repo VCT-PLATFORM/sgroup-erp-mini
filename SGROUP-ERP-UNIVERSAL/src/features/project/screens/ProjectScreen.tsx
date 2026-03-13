@@ -1,6 +1,6 @@
 import React from 'react';
-import { ModuleBusinessScreen } from '../../workspace/moduleHub/ModuleBusinessScreen';
+import { ProjectShell } from '../ProjectShell';
 
 export function ProjectScreen() {
-  return <ModuleBusinessScreen moduleId="project" />;
+  return <ProjectShell />;
 }

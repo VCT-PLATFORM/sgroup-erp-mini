@@ -1,9 +1,9 @@
 /**
- * StaffManagement — Premium Nhân sự Sales page
- * Features: stat cards, search/filter, modern staff cards with team display
+ * SGROUP ERP — Sales Module
+ * Redesigned Staff Management Screen
  */
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, Platform, ActivityIndicator, TextInput } from 'react-native';
+import { View, Text, ScrollView, Pressable, Platform, ActivityIndicator, TextInput, StyleSheet } from 'react-native';
 import {
   UserCog, Plus, User, Users, Target, TrendingUp,
   Search, Filter, Star, Award, ChevronRight, Phone, Mail, Hash,
@@ -11,41 +11,45 @@ import {
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard } from '../../../shared/ui/components';
-import type { SalesRole } from '../SalesSidebar';
-import { useGetStaff, useGetTeams } from '../hooks/useSalesOps';
 import { useAuthStore } from '../../auth/store/authStore';
+import { useGetStaff, useGetTeams } from '../hooks/useSalesOps';
+import { SalesRole } from '../SalesSidebar';
+import { SalesErrorBoundary } from '../components/SalesErrorBoundary';
 
-const fmt = (n: number) => n.toLocaleString('vi-VN');
-
-// Role config for badges
 const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  sales: { label: 'Sales', color: '#3b82f6', bg: '#3b82f610' },
-  senior_sales: { label: 'Senior Sales', color: '#8b5cf6', bg: '#8b5cf610' },
-  team_lead: { label: 'Team Lead', color: '#f59e0b', bg: '#f59e0b10' },
-  sales_manager: { label: 'Manager', color: '#22c55e', bg: '#22c55e10' },
-  sales_director: { label: 'Director', color: '#ef4444', bg: '#ef444410' },
+  sales_director: { label: 'GIÁM ĐỐC', color: '#ef4444', bg: '#fee2e2' },
+  sales_manager: { label: 'TRƯỞNG PHÒNG', color: '#f59e0b', bg: '#fef3c7' },
+  team_lead: { label: 'TRƯỞNG NHÓM', color: '#8b5cf6', bg: '#f3e8ff' },
+  sales_admin: { label: 'ADMIN', color: '#64748b', bg: '#f1f5f9' },
+  sales: { label: 'NHÂN VIÊN', color: '#3b82f6', bg: '#eff6ff' },
 };
 
 const FILTER_TABS = [
   { key: 'all', label: 'Tất cả' },
-  { key: 'sales', label: 'Sales' },
-  { key: 'team_lead', label: 'Team Lead' },
-  { key: 'senior_sales', label: 'Senior' },
+  { key: 'sales_director', label: 'Giám đốc' },
+  { key: 'sales_manager', label: 'Trưởng phòng' },
+  { key: 'team_lead', label: 'Trưởng nhóm' },
+  { key: 'sales', label: 'Nhân viên' },
 ];
 
-// Get initials from a full name
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
+function fmt(num: number) {
+  if (num >= 1000000) return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  return num.toString();
 }
 
-// Generate a consistent avatar color from name
+function getInitials(name: string) {
+  if (!name) return 'U';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 function nameToColor(name: string) {
-  const colors = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4', '#6366f1', '#f43f5e'];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
+  const c = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+  let sum = 0;
+  for (let i = 0; i < name.length; i++) sum += name.charCodeAt(i);
+  return c[sum % c.length];
 }
 
 export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
@@ -67,23 +71,26 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
   const isDirectorPlus = userRole === 'sales_director' || userRole === 'sales_admin' || userRole === 'ceo';
   const canEdit = isDirectorPlus || userRole === 'sales_manager';
 
-  // Normalize data
-  const allStaff = Array.isArray(rawStaff) ? rawStaff : (Array.isArray((rawStaff as any)?.data) ? (rawStaff as any).data : []);
-  const allTeams = Array.isArray(rawTeams) ? rawTeams : (Array.isArray((rawTeams as any)?.data) ? (rawTeams as any).data : []);
+  // Normalize data safely
+  const safeStaffData = Array.isArray(rawStaff) ? rawStaff : Array.isArray((rawStaff as any)?.data) ? (rawStaff as any).data : [];
+  const safeTeamData = Array.isArray(rawTeams) ? rawTeams : Array.isArray((rawTeams as any)?.data) ? (rawTeams as any).data : [];
 
   // Build team lookup map
   const teamMap = useMemo(() => {
     const map: Record<string, string> = {};
-    allTeams.forEach((t: any) => { if (t.id && t.name) map[t.id] = t.name; });
+    safeTeamData.forEach((t: any) => { if (t.id && t.name) map[t.id] = t.name; });
     return map;
-  }, [allTeams]);
+  }, [safeTeamData]);
 
   // Team Lead sees their team only
-  const myStaffRecord = allStaff.find((s: any) => s.email === user?.email || s.fullName === user?.name);
-  const myTeamId = myStaffRecord?.teamId || user?.teamId;
+  let myTeamId = user?.teamId;
+  if (!myTeamId) {
+    const myStaffRecord = safeStaffData.find((s: any) => s.email === user?.email || s.fullName === user?.name);
+    myTeamId = myStaffRecord?.teamId;
+  }
   const visibleStaff = (userRole === 'team_lead' && myTeamId)
-    ? allStaff.filter((s: any) => s.teamId === myTeamId)
-    : allStaff;
+    ? safeStaffData.filter((s: any) => s.teamId === myTeamId)
+    : safeStaffData;
 
   // Search + filter
   const filteredStaff = useMemo(() => {
@@ -120,16 +127,16 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
   }));
 
   // Stats
-  const uniqueTeams = new Set(staffData.filter(s => s.teamId).map(s => s.teamId));
-  const totalTarget = staffData.reduce((s, x) => s + x.target, 0);
-  const totalDeals = staffData.reduce((s, x) => s + x.deals, 0);
+  const uniqueTeams = new Set(staffData.filter((s: any) => s.teamId).map((s: any) => s.teamId));
+  const totalTarget = staffData.reduce((s: number, x: any) => s + x.target, 0);
+  const totalDeals = staffData.reduce((s: number, x: any) => s + x.deals, 0);
   const avgTarget = staffData.length > 0 ? totalTarget / staffData.length : 0;
 
   const statCards = [
-    { label: 'Tổng nhân sự', value: visibleStaff.length, icon: Users, color: '#3b82f6', gradient: ['#3b82f6', '#2563eb'] },
-    { label: 'Số team', value: uniqueTeams.size, icon: Target, color: '#8b5cf6', gradient: ['#8b5cf6', '#7c3aed'] },
-    { label: 'Tổng deals', value: totalDeals, icon: TrendingUp, color: '#22c55e', gradient: ['#22c55e', '#16a34a'] },
-    { label: 'Target TB', value: fmt(Math.round(avgTarget)), icon: Award, color: '#f59e0b', gradient: ['#f59e0b', '#d97706'] },
+    { label: 'Tổng nhân sự', value: visibleStaff.length, icon: Users, color: '#3b82f6' },
+    { label: 'Số team', value: uniqueTeams.size, icon: Target, color: '#8b5cf6' },
+    { label: 'Tổng deals', value: totalDeals, icon: TrendingUp, color: '#22c55e' },
+    { label: 'Target TB', value: fmt(Math.round(avgTarget)), icon: Award, color: '#f59e0b' },
   ];
 
   return (
@@ -157,7 +164,6 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
             <Pressable style={{
               flexDirection: 'row', alignItems: 'center', gap: 8,
               backgroundColor: '#3b82f6', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,
-              ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
             }}>
               <Plus size={16} color="#fff" />
               <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>THÊM NV</Text>
@@ -174,7 +180,6 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
                 flex: 1, minWidth: 200, borderRadius: 18, padding: 20,
                 backgroundColor: cardBg,
                 borderWidth: 1, borderColor,
-                ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease' as any } : {}),
               }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
                   <View style={{
@@ -256,7 +261,7 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
           </SGCard>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-            {staffData.map((staff, idx) => {
+            {staffData.map((staff: any, idx: number) => {
               const roleConf = ROLE_CONFIG[staff.role] || ROLE_CONFIG.sales;
               const avatarColor = nameToColor(staff.name);
               const achievement = staff.target > 0 ? Math.round((staff.gmv / staff.target) * 100) : 0;
@@ -270,10 +275,6 @@ export function StaffManagement({ userRole }: { userRole?: SalesRole }) {
                     borderRadius: 20, padding: 0, overflow: 'hidden',
                     backgroundColor: cardBg,
                     borderWidth: 1, borderColor,
-                    ...(Platform.OS === 'web' ? {
-                      cursor: 'pointer' as any,
-                      transition: 'all 0.25s ease' as any,
-                    } : {}),
                   }}
                 >
                   {/* Top accent bar */}

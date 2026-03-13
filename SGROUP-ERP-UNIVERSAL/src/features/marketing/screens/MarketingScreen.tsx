@@ -1,6 +1,6 @@
 import React from 'react';
-import { ModuleBusinessScreen } from '../../workspace/moduleHub/ModuleBusinessScreen';
+import { MarketingShell } from '../MarketingShell';
 
 export function MarketingScreen() {
-  return <ModuleBusinessScreen moduleId="mkt" />;
+  return <MarketingShell />;
 }

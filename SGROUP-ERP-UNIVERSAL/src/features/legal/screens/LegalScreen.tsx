@@ -1,6 +1,6 @@
 import React from 'react';
-import { ModuleBusinessScreen } from '../../workspace/moduleHub/ModuleBusinessScreen';
+import { LegalShell } from '../LegalShell';
 
 export function LegalScreen() {
-  return <ModuleBusinessScreen moduleId="legal" />;
+  return <LegalShell />;
 }

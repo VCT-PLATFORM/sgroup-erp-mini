@@ -8,7 +8,7 @@ import { WorkspaceScreen } from '../../features/workspace/screens/WorkspaceScree
 import { BDHShell } from '../../features/bdh/BDHShell';
 import { SalesScreen } from '../../features/sales/screens/SalesScreen';
 import { MarketingScreen } from '../../features/marketing/screens/MarketingScreen';
-import { HRScreen } from '../../features/hr/screens/HRScreen';
+import { HRShell } from '../../features/hr/HRShell';
 import { AgencyScreen } from '../../features/agency/screens/AgencyScreen';
 import { SHomesScreen } from '../../features/shomes/screens/SHomesScreen';
 import { ProjectScreen } from '../../features/project/screens/ProjectScreen';
@@ -38,7 +38,7 @@ export function AppNavigator() {
             <Stack.Screen name="BDHModule" component={BDHShell} />
             <Stack.Screen name="SalesModule" component={SalesScreen} />
             <Stack.Screen name="MarketingModule" component={MarketingScreen} />
-            <Stack.Screen name="HRModule" component={HRScreen} />
+            <Stack.Screen name="HRModule" component={HRShell} />
             <Stack.Screen name="AgencyModule" component={AgencyScreen} />
             <Stack.Screen name="SHomesModule" component={SHomesScreen} />
             <Stack.Screen name="ProjectModule" component={ProjectScreen} />
