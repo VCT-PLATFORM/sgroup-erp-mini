@@ -19,11 +19,29 @@ model User {
   name       String
   password   String
   role       String   @default("employee") // admin, hr, employee
-  department String? // SALES, MARKETING, HR, FINANCE, OPS
-  salesRole  String? // sales, sales_manager, sales_director, ceo, sales_admin
-  teamId     String? // FK → SalesTeam.id (for sales/sales_manager)
+  department String?  // SALES, MARKETING, HR, FINANCE, OPS
+  salesRole  String?  // sales, sales_manager, sales_director, ceo, sales_admin
+  teamId     String?  // FK → SalesTeam.id (for sales/sales_manager)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  refreshTokens RefreshToken[]
+}
+
+// Refresh Token — dùng cho logout thực sự và token revocation
+// Short-lived access token (1h) + long-lived refresh token (30d)
+model RefreshToken {
+  id         String    @id @default(uuid(7))
+  token      String    @unique
+  userId     String
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  revokedAt  DateTime? // null = token còn hợp lệ
+  createdAt  DateTime  @default(now())
+  deviceInfo String?   // browser/device info để quản lý sessions
+
+  @@index([userId])
+  @@index([expiresAt])
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -33,13 +51,13 @@ model PlanScenarioLog {
   id            String   @id @default(uuid(7))
   planId        String
   moduleKey     String   @default("EXEC")
-  scenario      String // base, optimistic, pessimistic
+  scenario      String   // base, optimistic, pessimistic
   year          Int
   createdAt     DateTime @default(now())
   createdBy     String
   schemaVersion String   @default("1")
   isDeleted     Boolean  @default(false)
-  rawJson       String?
+  rawJson       Json?    // JSONB — cho phép query bên trong JSON
   note          String?
 }
 
@@ -49,12 +67,12 @@ model PlanBundleLog {
   moduleKey     String   @default("EXEC")
   scenario      String
   year          Int
-  tabKey        String // PLAN_TOTAL, PLAN_MARKETING, etc.
+  tabKey        String   // PLAN_TOTAL, PLAN_MARKETING, etc.
   createdAt     DateTime @default(now())
   createdBy     String
   schemaVersion String   @default("1")
   isDeleted     Boolean  @default(false)
-  rawJson       String?
+  rawJson       Json?    // JSONB — cho phép query bên trong JSON
   note          String?
 }
 
@@ -68,7 +86,7 @@ model ExecPlanLatest {
   updatedAt      DateTime @default(now())
   updatedBy      String?
   schemaVersion  String   @default("1")
-  rawJson        String?
+  rawJson        Json?    // JSONB — cho phép query bên trong JSON
   note           String?
 
   @@unique([year, scenarioKey, tabKey])
@@ -380,15 +398,24 @@ model FactDeal {
   dealDate      DateTime?
   bookingDate   DateTime?
   contractDate  DateTime?
-  source        String? // MARKETING, SELF_GEN, REFERRAL
+  source        String?     // MARKETING, SELF_GEN, REFERRAL
   note          String?
   year          Int
   month         Int
   status        String      @default("ACTIVE")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  deletedAt     DateTime?   // Soft delete
 
   legalDocs LegalTransactionDoc[]
+
+  @@index([year, month])
+  @@index([teamId])
+  @@index([staffId])
+  @@index([stage])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@index([deletedAt])
 }
 
 model FactSalesDaily {
@@ -512,11 +539,11 @@ model Customer {
   fullName        String
   phone           String?
   email           String?
-  source          String? // FACEBOOK_ADS, GOOGLE_ADS, HOTLINE, REFERRAL, WALK_IN, WEBSITE
+  source          String?   // FACEBOOK_ADS, GOOGLE_ADS, HOTLINE, REFERRAL, WALK_IN, WEBSITE
   projectInterest String?
   budget          String?
   status          String    @default("NEW") // NEW, CONTACTED, INTERESTED, MEETING, NEGOTIATION, WON, LOST
-  assignedTo      String? // staffId
+  assignedTo      String?   // staffId
   assignedName    String?
   isVip           Boolean   @default(false)
   lastContactAt   DateTime?
@@ -525,8 +552,16 @@ model Customer {
   month           Int
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime? // Soft delete — null = còn active
 
   legalDocs LegalTransactionDoc[]
+
+  @@index([year, month])
+  @@index([status])
+  @@index([assignedTo])
+  @@index([source])
+  @@index([createdAt(sort: Desc)])
+  @@index([deletedAt])
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -548,6 +583,10 @@ model SalesActivity {
   month        Int
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
+  @@index([year, month])
+  @@index([staffId])
+  @@index([date(sort: Desc)])
 }
 
 // ══════════════════════════════════════════════════════════════════

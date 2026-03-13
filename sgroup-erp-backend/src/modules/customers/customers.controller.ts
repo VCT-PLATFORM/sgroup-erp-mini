@@ -22,13 +22,24 @@ export class CustomersController {
     @Query('year') year?: string,
     @Query('month') month?: string,
     @Query('isVip') isVip?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.service.findAll({
-      status, source, assignedTo, search,
-      year: year ? Number(year) : undefined,
-      month: month ? Number(month) : undefined,
-      isVip: isVip !== undefined ? isVip === 'true' : undefined,
-    });
+    return this.service.findAll(
+      {
+        status,
+        source,
+        assignedTo,
+        search,
+        year: year ? Number(year) : undefined,
+        month: month ? Number(month) : undefined,
+        isVip: isVip !== undefined ? isVip === 'true' : undefined,
+      },
+      {
+        page: page ? Number(page) : 1,
+        limit: limit ? Number(limit) : 20,
+      },
+    );
   }
 
   @Get('stats')

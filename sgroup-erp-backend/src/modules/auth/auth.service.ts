@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { USER_REPOSITORY } from '../../common/database/repository-tokens';
 import { IUserRepository } from '../../common/database/entity-repositories';
 import { PrismaService } from '../../prisma/prisma.service';
+import { RefreshTokenService } from './services/refresh-token.service';
 import * as bcrypt from 'bcrypt';
 
 const BCRYPT_ROUNDS = 12;
@@ -21,9 +22,10 @@ export class AuthService {
     @Inject(USER_REPOSITORY) private userRepo: IUserRepository,
     private jwtService: JwtService,
     private prisma: PrismaService,
+    private refreshTokenService: RefreshTokenService,
   ) {}
 
-  async login(email: string, pass: string) {
+  async login(email: string, pass: string, deviceInfo?: string) {
     // SECURITY: Tránh timing attack — luôn so sánh bcrypt dù user không tồn tại
     const user = await this.userRepo.findByEmail(email);
 
@@ -63,10 +65,18 @@ export class AuthService {
       teamId: user.teamId,
     };
 
+    // Tạo cặp access token (short-lived) + refresh token (long-lived)
+    const access_token = this.jwtService.sign(payload);
+    const refresh_token = await this.refreshTokenService.createRefreshToken(
+      user.id,
+      deviceInfo,
+    );
+
     this.logger.log(`Login success: ${email} (role=${user.role})`);
 
     return {
-      access_token: this.jwtService.sign(payload),
+      access_token,
+      refresh_token,
       user: {
         id: user.id,
         email: user.email,
@@ -78,6 +88,21 @@ export class AuthService {
         teamName,
       },
     };
+  }
+
+  /** Đổi access token bằng refresh token hợp lệ */
+  async refreshTokens(refreshToken: string) {
+    return this.refreshTokenService.refreshAccessToken(refreshToken);
+  }
+
+  /** Logout — revoke refresh token hiện tại */
+  async logout(refreshToken: string): Promise<void> {
+    await this.refreshTokenService.revokeToken(refreshToken);
+  }
+
+  /** Logout khỏi tất cả thiết bị */
+  async logoutAll(userId: string): Promise<void> {
+    await this.refreshTokenService.revokeAllUserTokens(userId);
   }
 
   /**

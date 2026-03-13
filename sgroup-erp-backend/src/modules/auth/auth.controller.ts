@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -19,29 +20,63 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   /**
-   * Đăng nhập — endpoint công khai, không cần JWT
+   * Đăng nhập — trả về access_token (short) + refresh_token (long)
    */
   @Public()
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @ApiOperation({ summary: 'Đăng nhập hệ thống' })
-  login(@Body() body: { email: string; password: string }) {
-    return this.authService.login(body.email, body.password);
+  login(
+    @Body() body: { email: string; password: string },
+    @Headers('user-agent') userAgent?: string,
+  ) {
+    return this.authService.login(body.email, body.password, userAgent);
+  }
+
+  /**
+   * Lấy access token mới bằng refresh token (không cần đăng nhập lại)
+   * Áp dụng Refresh Token Rotation: mỗi lần dùng sẽ tạo refresh token mới
+   */
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  @ApiOperation({ summary: 'Làm mới access token bằng refresh token' })
+  refresh(@Body() body: { refresh_token: string }) {
+    return this.authService.refreshTokens(body.refresh_token);
+  }
+
+  /**
+   * Logout — revoke refresh token hiện tại (access token tự hết hạn)
+   */
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  @ApiOperation({ summary: 'Đăng xuất (revoke refresh token)' })
+  logout(@Body() body: { refresh_token: string }) {
+    return this.authService.logout(body.refresh_token);
+  }
+
+  /**
+   * Logout tất cả thiết bị — revoke toàn bộ refresh tokens của user
+   */
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  @Post('logout-all')
+  @ApiOperation({ summary: 'Đăng xuất khỏi tất cả thiết bị' })
+  logoutAll(@Req() req: any) {
+    return this.authService.logoutAll(req.user.id);
   }
 
   /**
    * Tạo user mới — CHỈ DÀNH CHO ADMIN + CHỈ TRONG DEVELOPMENT
-   *
-   * SECURITY FIX: Đã xóa @Public() — endpoint này yêu cầu JWT + role 'admin'.
-   * Bên cạnh đó, AuthService.registerMockDev() cũng throw ForbiddenException
-   * nếu NODE_ENV=production, tạo thành double-guard.
+   * SECURITY: Đã xóa @Public() + AuthService double-guard trong production
    */
   @ApiBearerAuth()
   @Roles('admin')
   @Post('register')
   @ApiOperation({
     summary: '[Dev only] Tạo user mới',
-    description: 'Chỉ admin có thể gọi. Chỉ hoạt động trong môi trường development.',
+    description: 'Chỉ admin. Chỉ hoạt động trong môi trường development.',
   })
   register(
     @Body()
