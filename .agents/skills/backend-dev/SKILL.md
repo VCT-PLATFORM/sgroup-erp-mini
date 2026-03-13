@@ -21,18 +21,92 @@ src/
 ├── app.module.ts         # Root module
 ├── main.ts               # Bootstrap with global middleware
 ├── common/               # Shared utilities, guards, decorators
-│   ├── guards/           # Auth guards
-│   ├── decorators/       # Custom decorators
-│   ├── filters/          # Exception filters
+│   ├── guards/           # Auth guards (JwtAuthGuard, RolesGuard)
+│   ├── decorators/       # Custom decorators (@CurrentUser, @Roles, @Public)
+│   ├── filters/          # Exception filters (AllExceptionsFilter)
 │   ├── interceptors/     # Response interceptors
 │   └── pipes/            # Validation pipes
 ├── modules/              # Feature modules
-│   ├── auth/             # Authentication module
-│   ├── users/            # User management
-│   ├── sales/            # Sales module
-│   ├── planning/         # Planning module
-│   └── ai/               # AI integration module
+│   ├── auth/             # Authentication (JWT login, register)
+│   ├── customers/        # Customer management
+│   ├── products/         # Product catalog
+│   ├── sales-ops/        # Sales operations (staff, teams, KPIs)
+│   ├── sales-planning/   # Sales planning & targets
+│   ├── sales-report/     # Sales reports & analytics
+│   ├── exec-planning/    # Executive planning
+│   ├── marketing-planning/ # Marketing planning
+│   ├── activities/       # Activity logging
+│   ├── appointments/     # Appointment scheduling
+│   ├── ai/               # AI integration module
+│   └── bizfly-sync/      # BizFly CRM data sync
 └── prisma/               # Prisma service and module
+```
+
+## API Response Convention
+
+### Standard Response Format
+```typescript
+// ✅ Consistent response format
+// Paginated list
+{
+  "data": [...],
+  "meta": { "total": 100, "page": 1, "pageSize": 20 }
+}
+
+// Single item
+{
+  "data": { ... }
+}
+
+// Error
+{
+  "error": {
+    "code": 403,
+    "message": "Access denied"
+  }
+}
+
+// ⚠️ IMPORTANT: Some endpoints still return raw arrays.
+// Frontend MUST handle BOTH formats:
+// - Array directly: [item1, item2]
+// - Wrapped: { data: [item1, item2] }
+```
+
+## Adapter / Repository Pattern (Multi-Datasource)
+
+For modules that need to support both Google Sheets and PostgreSQL:
+
+```typescript
+// Abstract repository interface
+export interface IStaffRepository {
+  findAll(): Promise<Staff[]>;
+  findById(id: string): Promise<Staff | null>;
+  create(data: CreateStaffDto): Promise<Staff>;
+  update(id: string, data: UpdateStaffDto): Promise<Staff>;
+}
+
+// Prisma adapter
+@Injectable()
+export class PrismaStaffRepository implements IStaffRepository {
+  constructor(private prisma: PrismaService) {}
+  async findAll() { return this.prisma.staff.findMany(); }
+  // ...
+}
+
+// Google Sheets adapter
+@Injectable()
+export class SheetsStaffRepository implements IStaffRepository {
+  constructor(private sheets: GoogleSheetsService) {}
+  async findAll() { return this.sheets.getRange('Staff!A:Z'); }
+  // ...
+}
+
+// Service uses abstraction
+@Injectable()
+export class StaffService {
+  constructor(@Inject('STAFF_REPO') private repo: IStaffRepository) {}
+  async findAll() { return this.repo.findAll(); }
+}
 ```
 
 ## Module Pattern

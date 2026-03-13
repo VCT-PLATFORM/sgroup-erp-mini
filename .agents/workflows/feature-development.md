@@ -40,20 +40,30 @@ Use this workflow when implementing a new feature. Follow each step in order.
    - Create reusable components in `src/features/<feature>/components/`
    - Add navigation routes
 
-6. **Testing**
+6. **Error Handling (CRITICAL)**
+   - Wrap feature module in ErrorBoundary
+   - Add `try/catch` to all async store actions
+   - Normalize API responses: `Array.isArray(data) ? data : data?.data ?? []`
+   - Handle 401 (auto-logout) and 403 (access denied) responses
+   - Add loading state (`SGSkeleton`) and empty state (`SGEmptyState`)
+
+7. **Testing**
    // turbo
    - Run backend tests: `cd sgroup-erp-backend && npm test`
    - Test API endpoints manually or with Supertest
-   - Verify frontend renders correctly on web and mobile
+   - Verify frontend renders correctly on web (localhost:8081)
+   - Test edge cases: empty data, API error, slow network
 
-7. **Code Review**
+8. **Code Review**
    - Self-review using the code-review skill checklist
-   - Check for TypeScript errors
+   - ⚠️ Check the **Common Bug Checklist** in code-review skill
+   // turbo
+   - Check TypeScript errors: `cd SGROUP-ERP-UNIVERSAL && npx tsc --noEmit`
    // turbo
    - Run lint: `cd sgroup-erp-backend && npm run lint`
 
-8. **Polish**
-   - Add loading states and error handling
+9. **Polish**
    - Verify responsive design (mobile + web)
    - Add micro-animations per UI/UX design skill
-   - Test edge cases (empty state, error state, large data)
+   - Verify all data displays use `Array.isArray()` guards
+   - Test with browser DevTools open (check for console errors)

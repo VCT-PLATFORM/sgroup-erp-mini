@@ -33,7 +33,18 @@ description: Deploy SGROUP ERP to production or staging
    docker-compose -f docker-compose.yml up --build -d
    ```
 
-6. **Deploy Frontend to Web (EAS)**
+6. **Deploy Frontend to Vercel (Web — Recommended)**
+   - Option A: Auto-deploy via git push (recommended):
+     ```bash
+     git add . && git commit -m "deploy: [description]" && git push origin main
+     ```
+   - Option B: Manual deploy:
+     ```bash
+     cd SGROUP-ERP-UNIVERSAL && vercel --prod
+     ```
+   - Verify: Check https://sgroup-erp.vercel.app
+
+7. **Deploy Frontend Mobile (EAS)**
    ```bash
    cd SGROUP-ERP-UNIVERSAL && eas update --branch production
    ```

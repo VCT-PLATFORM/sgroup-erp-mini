@@ -110,7 +110,6 @@ export function SalesShell() {
 
   return (
     <ToastProvider>
-    <SalesErrorBoundary>
     <View style={[styles.shell, { backgroundColor: isDark ? '#05070A' : '#F8FAFC' }]}>
       {/* Aurora backdrop */}
       {Platform.OS === 'web' && (
@@ -155,6 +154,7 @@ export function SalesShell() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            <SalesErrorBoundary key={activeKey}>
             {ContentComponent ? (
               <ContentComponent userRole={userRole} />
             ) : (
@@ -166,11 +166,11 @@ export function SalesShell() {
                 </Text>
               </View>
             )}
+            </SalesErrorBoundary>
           </ScrollView>
         </View>
       </View>
     </View>
-    </SalesErrorBoundary>
     </ToastProvider>
   );
 }

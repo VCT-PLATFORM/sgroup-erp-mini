@@ -80,11 +80,21 @@ Quy trình sửa lỗi khẩn cấp trên production — fast-track từ triage 
    # Delete hotfix branch
    git branch -d hotfix/fix-critical-bug-description
    ```
-   - Deploy to production → Chạy `/deployment`
+   - **Backend**: Deploy to production → Chạy `/deployment`
+   - **Frontend (Vercel)**: Auto-deploys on push to main. Verify at https://sgroup-erp.vercel.app
+   - **Frontend rollback**: Revert to previous deployment in Vercel Dashboard → Deployments → "..." → Promote
 
 7. **Verify in Production**
    - Confirm fix resolves the issue
-   - Monitor error rates for 30 minutes
+   - **Frontend checks**:
+     - [ ] Page loads without crash
+     - [ ] No errors in browser console
+     - [ ] Data displays correctly
+     - [ ] Login/auth still works
+   - **Backend checks**:
+     - [ ] API endpoints respond correctly
+     - [ ] Error rates normal
+   - Monitor for 30 minutes
    - Confirm no regression in related features
    - Update stakeholders: "Issue resolved"
 

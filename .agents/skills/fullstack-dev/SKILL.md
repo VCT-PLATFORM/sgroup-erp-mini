@@ -254,3 +254,72 @@ const handleApiError = (error: AxiosError) => {
 - [ ] Loading and empty states
 - [ ] TypeScript types match between FE/BE
 - [ ] Works on both web and mobile
+- [ ] ErrorBoundary wraps the feature module
+- [ ] API response normalized with `Array.isArray()` guards
+- [ ] 401/403 errors handled gracefully
+
+## Error Flow Architecture
+
+```
+[User Action]
+     │
+     ▼
+[React Component] ──dispatch──> [Zustand Store]
+                                      │
+                                      ▼
+                                [Axios API Call]
+                                      │
+                          ┌───────────┼───────────────┐
+                          ▼           ▼               ▼
+                       [200 OK]   [401 Unauth]   [403 Forbidden]
+                          │           │               │
+                          ▼           ▼               ▼
+                    [Normalize     [Auto logout    [Show "Access
+                     response]     via Axios       Denied" UI]
+                          │        interceptor]
+                          ▼
+                    [Array.isArray  
+                     guard]         [500 Server]   [Network Error]
+                          │              │               │
+                          ▼              ▼               ▼
+                    [Update Store] [Show error     [Show "Không có
+                          │         toast/banner]   kết nối" + retry]
+                          ▼
+                    [React re-render] ──> [User sees result]
+```
+
+### Defensive Frontend Integration Pattern
+
+```typescript
+// ✅ ALWAYS normalize API response in store
+fetchStaff: async () => {
+  set({ loading: true, error: null });
+  try {
+    const { data: raw } = await api.get('/sales-ops/staff');
+    // CRITICAL: Handle both array and { data: array } formats
+    const staff = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
+    set({ staff, loading: false });
+  } catch (error: any) {
+    const status = error?.response?.status;
+    if (status === 401) return; // Axios interceptor handles logout
+    if (status === 403) {
+      set({ error: 'Bạn không có quyền truy cập', loading: false });
+      return;
+    }
+    set({ error: error?.message ?? 'Đã có lỗi xảy ra', loading: false });
+  }
+},
+```
+
+## Common Integration Bugs
+
+| Bug | FE or BE? | Root Cause | Fix |
+|-----|-----------|-----------|-----|
+| `X.map is not a function` | FE | API format changed, no `Array.isArray` | Normalize response |
+| 403 on valid user | BE | Role guard too strict | Check `@Roles()` decorator |
+| Token expired loop | FE | 401 not clearing token | Add Axios interceptor |
+| Data shows for wrong user | BE | Missing `where: { userId }` filter | Add user scope to query |
+| Empty page, no error | FE | Error swallowed in catch | Show `SGEmptyState` on error |
+| Duplicate entries | BE | No unique constraint | Add `@unique` in Prisma schema |
+| Slow page load | BE | N+1 query | Use `include` in Prisma |
+

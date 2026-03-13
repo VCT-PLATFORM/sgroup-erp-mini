@@ -101,3 +101,36 @@ Use this format for feedback:
 | Fetch in component | Custom hook or React Query |
 | `any` type | Proper interface |
 | Nested ternaries | Early returns or switch |
+
+## Common Bug Checklist (from SGROUP ERP Experience)
+
+**Run through this checklist for EVERY code change:**
+
+### Data Safety
+- [ ] Every `.map()`, `.filter()`, `.find()` is preceded by `Array.isArray()` check
+- [ ] API response is normalized: handles both `data[]` and `{ data: data[] }` formats
+- [ ] All nested property access uses optional chaining (`?.`)
+- [ ] Default values provided via nullish coalescing (`?? defaultValue`)
+
+### Error Handling
+- [ ] ErrorBoundary wraps the feature module
+- [ ] All `async` functions have `try/catch`
+- [ ] 401 errors trigger token cleanup + redirect to login
+- [ ] 403 errors show user-friendly "Access Denied" message (not crash)
+- [ ] Network errors show retry option
+- [ ] Loading state shown during data fetch (`SGSkeleton`)
+- [ ] Empty state shown when data array is empty (`SGEmptyState`)
+- [ ] Error message is human-readable, not raw JSON/object
+
+### Auth & Authorization
+- [ ] Protected endpoints use `@UseGuards(JwtAuthGuard)`
+- [ ] Role-based access uses `@Roles()` decorator
+- [ ] Frontend checks user role before showing restricted UI
+- [ ] Token refresh/expiry handled by Axios interceptor
+
+### Data Display
+- [ ] Numbers formatted with `toLocaleString()` or `Intl.NumberFormat`
+- [ ] Dates formatted consistently (use dayjs or date-fns)
+- [ ] User names use `name` field (not `fullName` which doesn't exist)
+- [ ] Team assignment matches by `email`, not `teamId` (which may not exist on AuthUser)
+

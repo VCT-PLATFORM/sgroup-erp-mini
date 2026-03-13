@@ -124,9 +124,119 @@ const animatedStyle = useAnimatedStyle(() => ({
 }));
 ```
 
+## Defensive Data Handling (from Bug-fixing Experience)
+
+### ⚠️ CRITICAL: Always validate API response data before use
+
+API responses may return `data` directly as an array, or wrapped as `{ data: [...] }`.
+NEVER assume the shape — always normalize:
+
+```tsx
+// ✅ SAFE: Normalize API response (handles both formats)
+const rawData = response.data;
+const items = Array.isArray(rawData)
+  ? rawData
+  : (Array.isArray(rawData?.data) ? rawData.data : []);
+
+// ❌ UNSAFE: Assumes response is always an array
+const items = response.data; // CRASH if response is { data: [...] }
+items.map(i => ...); // TypeError: items.map is not a function
+```
+
+### ⚠️ CRITICAL: Array.isArray() before .map(), .filter(), .find()
+
+```tsx
+// ✅ SAFE
+const allStaff = Array.isArray(rawStaff)
+  ? rawStaff
+  : (Array.isArray((rawStaff as any)?.data) ? (rawStaff as any).data : []);
+
+// ✅ SAFE: Default to empty array
+const deals = Array.isArray(dealsData) ? dealsData : [];
+const safeKpiCards = Array.isArray(kpiCards) ? kpiCards : [];
+```
+
+### Safe Property Access
+
+```tsx
+// ✅ Optional chaining + nullish coalescing
+const teamName = staff?.team?.name ?? 'Chưa phân team';
+const revenue = deal?.amount?.toLocaleString() ?? '0';
+const items = response?.data?.items ?? [];
+
+// ❌ UNSAFE: Will crash on null/undefined
+const teamName = staff.team.name; // TypeError if staff.team is null
+```
+
+## Error Boundary Pattern
+
+Every feature module MUST wrap its content in an ErrorBoundary:
+
+```tsx
+// features/<module>/components/<Module>ErrorBoundary.tsx
+import React, { Component, type ReactNode } from 'react';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { AlertTriangle, RefreshCw } from 'lucide-react-native';
+
+type Props = { children: ReactNode };
+type State = { hasError: boolean; error: Error | null };
+
+export class ModuleErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false, error: null };
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[ModuleErrorBoundary]', error, info.componentStack);
+  }
+
+  handleReset = () => this.setState({ hasError: false, error: null });
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 48 }}>
+          <AlertTriangle size={40} color="#ef4444" />
+          <Text>Đã xảy ra lỗi. Vui lòng thử lại.</Text>
+          <TouchableOpacity onPress={this.handleReset}>
+            <RefreshCw size={18} color="#fff" />
+            <Text>Thử Lại</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Usage in Shell/Navigator:
+<ModuleErrorBoundary>
+  <ModuleScreen />
+</ModuleErrorBoundary>
+```
+
+## Common Bug Patterns & Prevention
+
+| Bug | Root Cause | Prevention |
+|-----|-----------|------------|
+| `_.find is not a function` | API returns object, not array | `Array.isArray()` check |
+| `Cannot read property of undefined` | Missing optional chaining | Use `?.` and `?? default` |
+| Page crash after login | ErrorBoundary not wrapping module | Wrap every module route |
+| 403 Forbidden crash | Frontend not handling auth errors | Check `error.response?.status` |
+| Token expired loop | 401 not triggering logout | Axios interceptor with auto-logout |
+| Empty page (no error) | Data fetch failed silently | Always show `SGEmptyState` on error |
+| Stale data after navigation | Store not clearing on unmount | Reset store in `useEffect` cleanup |
+| Duplicate renders | Missing `React.memo` or `useCallback` | Memoize expensive components |
+
 ## Don'ts
 - ❌ Don't use inline styles — always use `StyleSheet.create()`
 - ❌ Don't import from `node_modules` directly — use package exports
 - ❌ Don't use `any` type — always define proper TypeScript interfaces
 - ❌ Don't hardcode colors — use theme constants from `system/`
 - ❌ Don't use `console.log` in production code
+- ❌ Don't call `.map()` / `.filter()` / `.find()` without `Array.isArray()` guard
+- ❌ Don't assume API response shape — always normalize
+- ❌ Don't skip ErrorBoundary for feature modules
+- ❌ Don't ignore 401/403 errors — handle auth failures gracefully

@@ -55,11 +55,18 @@ export class PrismaStaffRepository implements IStaffRepository {
     if (filters?.status) where.status = filters.status;
     else where.status = 'ACTIVE';
     if (filters?.role) where.role = filters.role;
-    return this.prisma.salesStaff.findMany({ where, orderBy: { fullName: 'asc' } }) as any;
+    return this.prisma.salesStaff.findMany({
+      where,
+      include: { team: true, _count: { select: { deals: true } } },
+      orderBy: { fullName: 'asc' },
+    }) as any;
   }
 
   async findById(id: string): Promise<StaffEntity | null> {
-    return this.prisma.salesStaff.findUnique({ where: { id } }) as any;
+    return this.prisma.salesStaff.findUnique({
+      where: { id },
+      include: { team: true, _count: { select: { deals: true } } },
+    }) as any;
   }
 
   async create(data: Partial<StaffEntity>): Promise<StaffEntity> {

@@ -274,3 +274,55 @@ const styles = StyleSheet.create({
 const canUseBiometrics = Platform.OS !== 'web';
 const canUseCamera = Platform.OS !== 'web';
 ```
+
+### 9. Mobile Error Handling (from Bug-fixing Experience)
+
+#### Crash Prevention
+```tsx
+// ✅ ALWAYS guard data from API before rendering
+const MyScreen = () => {
+  const { data, loading, error } = useMyStore();
+
+  // Guard: normalize data
+  const items = Array.isArray(data) ? data : [];
+
+  if (loading) return <SGSkeleton />;
+  if (error) return <SGEmptyState title="Lỗi" description={error} />;
+  if (!items.length) return <SGEmptyState title="Chưa có dữ liệu" />;
+
+  return (
+    <FlatList
+      data={items}
+      keyExtractor={(item) => item?.id ?? String(Math.random())}
+      renderItem={({ item }) => <ItemCard item={item} />}
+    />
+  );
+};
+```
+
+#### Web ↔ Mobile Compatibility
+```tsx
+// ⚠️ These APIs don't exist on web:
+// - AsyncStorage (works on web via @react-native-async-storage/async-storage)
+// - NetInfo (needs polyfill on web)
+// - Camera, Biometrics, Push Notifications (mobile only)
+
+// ✅ Always check platform before using native APIs
+if (Platform.OS !== 'web') {
+  // Use native features
+  const result = await LocalAuthentication.authenticateAsync();
+}
+
+// ✅ Web-specific error: backdrop-filter not supported in all mobile browsers
+// Use sgds.glass helper which handles this
+```
+
+#### Common Mobile Bugs
+| Bug | Platform | Fix |
+|-----|----------|-----|
+| Keyboard covers input | iOS/Android | Use `KeyboardAvoidingView` |
+| Safe area cut off | iOS | Use `SafeAreaView` from `react-native-safe-area-context` |
+| Touch target too small | All | Min 44x44px, add `hitSlop` |
+| List scroll performance | Android | `removeClippedSubviews={true}`, use `FlashList` |
+| Font not loading | Web | Check `expo-font` loaded before render |
+

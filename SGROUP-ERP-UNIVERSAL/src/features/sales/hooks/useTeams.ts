@@ -40,7 +40,9 @@ export function useTeams() {
     queryKey: [TEAMS_KEY],
     queryFn: async () => {
       const res = await apiClient.get('/sales-ops/teams');
-      return res.data as SalesTeamEntry[];
+      // API returns { success, data, timestamp } — extract the array
+      const raw = res.data?.data ?? res.data;
+      return Array.isArray(raw) ? (raw as SalesTeamEntry[]) : [];
     },
   });
 
@@ -48,7 +50,9 @@ export function useTeams() {
     queryKey: [STAFF_KEY],
     queryFn: async () => {
       const res = await apiClient.get('/sales-ops/staff');
-      return res.data as SalesStaffEntry[];
+      // API returns { success, data, timestamp } — extract the array
+      const raw = res.data?.data ?? res.data;
+      return Array.isArray(raw) ? (raw as SalesStaffEntry[]) : [];
     },
   });
 

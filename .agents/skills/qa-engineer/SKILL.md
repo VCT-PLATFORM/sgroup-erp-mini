@@ -229,3 +229,33 @@ What actually happened.
 | Test Pass Rate | Passed / Total tests | ≥ 95% |
 | Automation Coverage | Automated / Total test cases | ≥ 70% |
 | Mean Time to Detect | Detection time from introduction | < 1 sprint |
+
+## SGROUP ERP — Common Bugs to Regression Test
+
+These bugs have been found in production. Always test for them:
+
+| Bug ID | Area | Description | How to Test |
+|--------|------|-------------|-------------|
+| BUG-001 | Data | `.map()` crash on API response | Mock API returning `{ data: [] }` instead of `[]` |
+| BUG-002 | Auth | 401 causes infinite redirect loop | Expire JWT token → should redirect to login once |
+| BUG-003 | Auth | 403 crashes page instead of showing error | Login as restricted role → access admin endpoint |
+| BUG-004 | UI | Error displays `[object Object]` | Trigger API error → should show readable message |
+| BUG-005 | Data | Team name not showing (wrong field lookup) | Check staff with team → team name visible |
+| BUG-006 | Build | Docker `Cannot find module dist/main` | Run `docker build` → should start successfully |
+| BUG-007 | Deploy | Vercel 404 on page refresh | Refresh any route → should not 404 |
+| BUG-008 | UI | White screen on ErrorBoundary-less module | Navigate to all modules → none should crash |
+
+### Quick Smoke Test Script
+```bash
+# Backend health
+curl -s http://localhost:3000/api/health | jq .
+
+# Auth
+TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@sgroup.vn","password":"password"}' | jq -r .access_token)
+
+# Check key endpoints
+curl -s -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/sales-ops/staff | jq 'length'
+curl -s -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/sales-ops/teams | jq 'length'
+```

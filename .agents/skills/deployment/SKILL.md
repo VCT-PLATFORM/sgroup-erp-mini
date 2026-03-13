@@ -119,6 +119,65 @@ eas build --platform ios
 eas update --branch production --message "Bug fixes"
 ```
 
+## Vercel Deployment (Frontend Web)
+
+### Configuration
+```json
+// SGROUP-ERP-UNIVERSAL/vercel.json
+{
+  "buildCommand": "npx expo export --platform web && node scripts/post-export.js",
+  "outputDirectory": "dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ]
+}
+```
+
+### Deploy Steps
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Link project (first time)
+cd SGROUP-ERP-UNIVERSAL && vercel link
+
+# Deploy to preview
+vercel
+
+# Deploy to production
+vercel --prod
+
+# Or: Auto-deploy via git push (recommended)
+git push origin main  # Triggers Vercel auto-build
+```
+
+### Environment Variables (Vercel Dashboard)
+```
+EXPO_PUBLIC_API_URL=https://your-backend-url.com/api
+```
+
+### Common Vercel Issues
+| Issue | Fix |
+|-------|-----|
+| 404 on page refresh | Check `rewrites` in `vercel.json` |
+| Build fails | Check `buildCommand` matches local build |
+| API calls fail | Set `EXPO_PUBLIC_API_URL` in Vercel env vars |
+| Fonts not loading | Ensure `scripts/post-export.js` runs correctly |
+
+## Neon PostgreSQL (Serverless)
+
+### Connection String
+```env
+# .env
+DATABASE_URL=postgresql://user:pass@ep-xxx.region.aws.neon.tech/sgroup_erp?sslmode=require
+```
+
+### Neon Features
+- **Serverless**: Auto-scales, no server management
+- **Branching**: Create DB branches for staging/testing
+- **Connection Pooling**: Built-in via pooler endpoint
+
 ## Environment Management
 
 ### Environment Files
