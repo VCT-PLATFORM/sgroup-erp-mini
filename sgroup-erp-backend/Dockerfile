@@ -15,8 +15,8 @@ RUN npx prisma generate
 # Copy the rest of the application
 COPY . .
 
-# Build the NestJS application
-RUN npm run build
+# Build the NestJS application (clean build)
+RUN rm -rf dist tsconfig.build.tsbuildinfo && npm run build
 
 # ---
 
