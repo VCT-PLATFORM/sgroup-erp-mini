@@ -21,6 +21,11 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export function AppNavigator() {
   const user = useAuthStore((s) => s.user);
+  const restore = useAuthStore((s) => s.restore);
+
+  React.useEffect(() => {
+    restore();
+  }, []);
 
   return (
     <NavigationContainer>
