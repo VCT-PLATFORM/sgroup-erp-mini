@@ -77,16 +77,25 @@ export function LoginScreen() {
   const doLogin = async () => {
     if (!email || !pw) { setError('Vui lòng nhập email và mật khẩu'); return; }
     setLoading(true);
+    setError(null);
     try {
-      const r = await apiAuthProvider.login(email, pw);
+      // Timeout 30s to handle Render cold-start delay
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('__TIMEOUT__')), 30000)
+      );
+      const r = await Promise.race([apiAuthProvider.login(email, pw), timeout]);
       login(r.user, r.token);
     } catch (e: any) {
       const msg = e.message || '';
-      if (msg.includes('Failed to fetch') || msg.includes('Network request failed')) {
+      if (msg === '__TIMEOUT__') {
+        setError('Máy chủ đang khởi động, vui lòng thử lại sau vài giây.');
+      } else if (msg.includes('Failed to fetch') || msg.includes('Network request failed')) {
         setError('Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng.');
       } else {
         setError(msg || 'Đăng nhập thất bại');
       }
+    } finally {
+      setLoading(false);
     }
   };
 

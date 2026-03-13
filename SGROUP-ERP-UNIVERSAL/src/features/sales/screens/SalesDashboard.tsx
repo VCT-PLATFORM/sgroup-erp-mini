@@ -3,14 +3,14 @@
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, ActivityIndicator } from 'react-native';
-import { DollarSign, TrendingUp, ShoppingCart, Users, Target, ArrowUpRight, Filter, PhoneCall, Calendar, AlertCircle, Clock, CheckCircle2, Plus } from 'lucide-react-native';
+import { DollarSign, TrendingUp, ShoppingCart, Users, Target, ArrowUpRight, Filter, PhoneCall, Calendar, AlertCircle, Clock, CheckCircle2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard, SGGradientStatCard, SGTable, SGPlanningSectionTitle, SGButton } from '../../../shared/ui/components';
 import type { SalesRole } from '../SalesSidebar';
 import { useSalesData } from '../hooks/useSalesData';
-import { SalesQuickForms } from '../components/forms/SalesQuickForms';
+
 import { useDeals } from '../hooks/useDeals';
 import { useGetKpiCards, useGetActualFunnel } from '../hooks/useSalesReport';
 
@@ -67,7 +67,7 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
   const cSub = theme.colors.textSecondary;
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
+
   const salesDataHook = useSalesData();
   const { kpiData } = salesDataHook;
   const dealsHook = useDeals();
@@ -136,14 +136,6 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
              </View>
           </View>
 
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <SGButton 
-              title="Nhập Báo Cáo Nhanh" 
-              icon={Plus as any} 
-              onPress={() => setShowQuickAdd(true)} 
-              size="lg"
-            />
-          </View>
         </View>
 
         {/* -------------- KPI CARDS -------------- */}
@@ -377,14 +369,7 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
         </View>
       </ScrollView>
 
-      {/* Render Quick Form Modal when visible */}
-      {showQuickAdd && (
-        <SalesQuickForms 
-          visible={showQuickAdd} 
-          onClose={() => setShowQuickAdd(false)} 
-          dataHook={salesDataHook} 
-        />
-      )}
+
     </View>
   );
 }

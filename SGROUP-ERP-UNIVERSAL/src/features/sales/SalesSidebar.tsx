@@ -8,7 +8,7 @@ import { useAuthStore } from '../auth/store/authStore';
 import {
   LayoutDashboard, Users, UserCog, Building, Target,
   BarChart3, RefreshCw, FileText, ChevronLeft, ChevronRight, LogOut, LayoutGrid,
-  Users2, Briefcase, CalendarDays, UserCircle, Plus, Wallet, FolderOpen, BookOpen,
+  Users2, Briefcase, CalendarDays, UserCircle, Wallet, FolderOpen, BookOpen,
   HandCoins, Ticket, CalendarCheck, Clock, Calculator, GraduationCap, Landmark, Trophy
 } from 'lucide-react-native';
 import { SGThemeToggle } from '../../shared/ui/components/SGThemeToggle';
@@ -195,15 +195,24 @@ export function SalesSidebar({ activeKey, onSelect, collapsed, onToggleCollapse,
         } as any} />
       )}
 
-      {/* Quick Action Button */}
+      {/* Back to Home Button */}
       <View style={{ paddingHorizontal: 16, paddingVertical: 16 }}>
-        <TouchableOpacity style={{
-          height: 48, borderRadius: 14, backgroundColor: '#3b82f6',
-          flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-          shadowColor: '#3b82f6', shadowOpacity: 0.3, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4
-        }}>
-          <Plus size={20} color="#fff" strokeWidth={3} />
-          {!collapsed && <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>Tạo Mới</Text>}
+        <TouchableOpacity
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              window.location.hash = '';
+              window.location.reload();
+            }
+          }}
+          style={{
+            height: 48, borderRadius: 14,
+            backgroundColor: isDark ? 'rgba(14,165,233,0.15)' : '#f0f9ff',
+            borderWidth: 1, borderColor: isDark ? 'rgba(14,165,233,0.3)' : '#bae6fd',
+            flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+        >
+          <LayoutDashboard size={18} color={isDark ? '#38bdf8' : '#0284c7'} strokeWidth={2.5} />
+          {!collapsed && <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#38bdf8' : '#0284c7' }}>Quay về Trang chủ</Text>}
         </TouchableOpacity>
       </View>
 
