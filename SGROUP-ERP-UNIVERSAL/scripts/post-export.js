@@ -15,12 +15,6 @@ if (!fs.existsSync(indexPath)) {
 
 let html = fs.readFileSync(indexPath, 'utf8');
 
-// 1. Add type="module" to script tags that use import.meta
-html = html.replace(
-  /<script src="(.*?)" defer>/g,
-  '<script src="$1" type="module">'
-);
-
 // 1b. Inject __METRO_GLOBAL_PREFIX__ before app bundle to fix RSC runtime error
 // @expo/metro-runtime@55 unconditionally imports rsc/runtime.js which uses this var.
 // Metro normally injects it, but the production web export doesn't define it.
@@ -86,7 +80,6 @@ if (fs.existsSync(jsDir)) {
 }
 
 console.log('✅ Post-export patches applied:');
-console.log('   • Added type="module" to script tags');
 console.log('   • Injected __METRO_GLOBAL_PREFIX__ global (RSC fix)');
 console.log('   • Added PWA manifest link');
 console.log('   • Added apple-touch-icon');
