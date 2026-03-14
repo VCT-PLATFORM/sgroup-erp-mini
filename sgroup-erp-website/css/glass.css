@@ -1,0 +1,128 @@
+/* ============================================
+   Ultra-Premium Liquid Glass 
+   Clean, flawless transparency with depth
+   ============================================ */
+
+/* Base glass panel */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  /* Top-left specular highlight for premium 3D feel */
+  border-top-color: rgba(255, 255, 255, 0.12);
+  border-left-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Elevated glass card — The core UI element */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(40px) saturate(140%);
+  -webkit-backdrop-filter: blur(40px) saturate(140%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow);
+  
+  /* Specular highlight */
+  border-top-color: rgba(255, 255, 255, 0.12);
+  border-left-color: rgba(255, 255, 255, 0.08);
+  
+  transition: all var(--duration) var(--ease);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle glow layer (replaces the heavy gradient border) */
+.glass-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+  pointer-events: none;
+  transition: opacity var(--duration) var(--ease);
+}
+
+/* Hover State — Lift and ignite */
+.glass-card:hover {
+  transform: translateY(-4px) scale(1.005);
+  background: rgba(18, 18, 20, 0.7);
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.8),
+    0 0 0 1px var(--border-default) inset,
+    0 1px 0 rgba(255,255,255,0.1) inset;
+}
+
+/* When a card has an interactive primary action, subtle red glow on hover */
+.glass-card.interactive:hover {
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.8),
+    0 0 0 1px var(--sgroup-red-glow) inset,
+    0 24px 80px rgba(212, 25, 32, 0.08);
+}
+
+/* Glass Badge */
+.glass-badge {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-full);
+  padding: 6px 16px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+/* Ambient glow — Vastly reduced intensity for premium dark mode */
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow-accent { background: var(--sgroup-red); }
+
+/* Scroll progress — Ultra thin, sharp SGROUP red */
+.scroll-progress {
+  position: fixed;
+  top: 0; /* Moving to absolute top for a cleaner look */
+  left: 0;
+  height: 2px;
+  background: var(--hero-red-gradient);
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+.scroll-indicator {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  animation: scrollFade 3s ease-in-out infinite;
+  z-index: 2;
+}
+
+.scroll-indicator i {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+@keyframes scrollFade {
+  0%, 100% { opacity: 0.3; transform: translateX(-50%) translateY(0); }
+  50% { opacity: 1; transform: translateX(-50%) translateY(6px); }
+}

@@ -1,0 +1,239 @@
+/* ============================================
+   Perfected Page Styles
+   Massive cinematic hero, pure premium layouts
+   ============================================ */
+
+/* ---- HERO SECTION — The Showpiece ---- */
+.hero {
+  padding: 0 var(--space-2xl);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Deep clean background with very subtle radial glow, not aggressive red */
+  background: radial-gradient(circle at 50% -20%, rgba(212, 25, 32, 0.08) 0%, var(--bg-base) 60%);
+}
+
+/* Subtle architectural grid overlay */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 80px 80px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero .glow-1 {
+  width: 800px; height: 800px;
+  top: -400px; right: -200px;
+  background: var(--sgroup-red);
+}
+
+.hero .glow-2 {
+  width: 600px; height: 600px;
+  bottom: -300px; left: -100px;
+  background: #a1a1aa; /* Silver glow instead of purple for a tech feel */
+  opacity: 0.1;
+}
+
+/* Hero Badge */
+.hero-badge {
+  margin-bottom: var(--space-2xl);
+  z-index: 2;
+  border-radius: var(--radius-full);
+  padding: 8px 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(10px);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.hero-badge i { color: var(--sgroup-red); }
+
+/* Absolute Massive Headline */
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-hero);
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  z-index: 2;
+  margin-bottom: var(--space-xl);
+  
+  /* Silver/White gradient for pure premium tech feel */
+  background: var(--hero-accent-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #fff; /* fallback */
+  text-transform: none;
+}
+
+/* Subtitle */
+.hero .subtitle {
+  font-size: var(--text-lg);
+  color: var(--text-secondary);
+  max-width: 720px;
+  margin: 0 auto var(--space-3xl);
+  line-height: 1.7;
+  z-index: 2;
+  font-weight: 400;
+}
+
+/* Stats Row — Clean dividers, no boxes */
+.stats-row {
+  display: flex;
+  justify-content: center;
+  z-index: 2;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  background: rgba(0,0,0,0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-xl);
+  padding: 0 var(--space-md);
+}
+
+.stat-card {
+  text-align: left;
+  padding: var(--space-xl) var(--space-2xl);
+  min-width: 140px;
+  position: relative;
+}
+
+.stat-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 40px;
+  width: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.stat-val {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 600;
+  color: #fff;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: var(--text-tertiary);
+  margin-top: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+/* ---- DATA MODEL CARDS ---- */
+.data-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-xl);
+}
+.data-card h3 {
+  font-size: var(--text-md);
+  color: var(--text-primary);
+  margin-bottom: var(--space-md);
+  font-weight: 500;
+}
+.data-card ul { list-style: none; }
+.data-card li {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+.data-card li strong { color: var(--text-primary); font-weight: 500; }
+.data-card li:last-child { border: 0; }
+
+/* ---- TECH STACK ---- */
+.tech-card {
+  text-align: center;
+  padding: var(--space-2xl);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  transition: transform var(--duration-fast);
+}
+.tech-card:hover { transform: translateY(-4px); border-color: var(--border-strong); }
+.tech-card .tech-icon {
+  font-size: 2.2rem;
+  margin-bottom: var(--space-lg);
+  color: var(--text-primary);
+}
+.tech-card h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.tech-card p {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: 1.6;
+}
+
+/* ---- PREMIUM FOOTER ---- */
+.footer {
+  text-align: center;
+  padding: var(--space-4xl) var(--space-xl) var(--space-3xl);
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  position: relative;
+}
+
+.footer .footer-logo {
+  font-family: var(--font-display);
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: var(--space-xl);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.footer-logo-img {
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+}
+
+.footer p { margin-top: 8px; font-size: 0.8rem; }
+
+/* ---- MOBILE RESPONSIVENESS ---- */
+@media (max-width: 1024px) {
+  .stats-row { flex-wrap: wrap; border-radius: var(--radius-md); padding: var(--space-md); }
+  .stat-card { min-width: 33%; padding: var(--space-lg); text-align: center; }
+  .stat-card:not(:last-child)::after { display: none; }
+}
+
+@media (max-width: 768px) {
+  .hero { min-height: auto; padding: 8rem var(--space-lg) 4rem; }
+  .stat-card { min-width: 50%; }
+}

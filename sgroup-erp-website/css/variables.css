@@ -1,0 +1,125 @@
+/* ============================================
+   SGROUP ERP — Premium Design Tokens
+   Ultra-modern, deep dark aesthetic with Red accent
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Typography — Outfit for display, Inter for UI */
+  --font-display: 'Outfit', -apple-system, sans-serif;
+  --font-sans: 'Inter', -apple-system, system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', monospace;
+
+  /* Font Sizes */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+  --text-3xl: 2.5rem;
+  --text-4xl: clamp(3rem, 5vw, 4.5rem);
+  --text-hero: clamp(4rem, 8vw, 7rem);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2.5rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 8rem;
+
+  /* Radius — Apple style */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+
+  /* Transitions — Buttery smooth */
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --duration-fast: 0.2s;
+  --duration: 0.4s;
+  --duration-slow: 0.8s;
+
+  /* Layout */
+  --topbar-h: 72px;
+  --container-max: 1320px;
+
+  /* SGROUP Core Brand */
+  --sgroup-red: #D41920;
+  --sgroup-red-bright: #FF2A33;
+  --sgroup-red-dark: #8B0C11;
+  --sgroup-red-glow: rgba(212, 25, 32, 0.15);
+}
+
+/* ============================================
+   DARK THEME — Deep Space (Default & Enforced)
+   Premium software always looks best in deep dark
+   ============================================ */
+:root, [data-theme="dark"] {
+  /* Deep, pure dark backgrounds */
+  --bg-base: #030303;
+  --bg-elevated: #0a0a0a;
+  --bg-surface: #111111;
+  --bg-card: #151515;
+
+  /* Extremely subtle borders */
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.15);
+
+  /* High contrast text */
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-tertiary: #71717a;
+
+  /* Ultra-Premium Glass */
+  --glass-bg: rgba(10, 10, 10, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-highlight: rgba(255, 255, 255, 0.04);
+  --glass-shadow: 0 4px 30px rgba(0, 0, 0, 0.5),
+                  0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+
+  /* Primary Accent */
+  --accent: var(--sgroup-red);
+  --accent-hover: var(--sgroup-red-bright);
+  
+  /* Semantic Badges/Colors — Muted for premium feel */
+  --green: #34d399; --green-bg: rgba(52,211,153,0.1);
+  --blue: #60a5fa;  --blue-bg: rgba(96,165,250,0.1);
+  --orange:#fbbf24; --orange-bg: rgba(251,191,36,0.1);
+  --purple:#a78bfa; --purple-bg: rgba(167,139,250,0.1);
+  --cyan:  #22d3ee; --cyan-bg: rgba(34,211,238,0.1);
+  --pink:  #f472b6; --pink-bg: rgba(244,114,182,0.1);
+  --red:   var(--sgroup-red); --red-bg: var(--sgroup-red-glow);
+
+  /* Hero Elements */
+  --hero-accent-gradient: linear-gradient(100deg, #ffffff 30%, #a1a1aa 100%);
+  --hero-red-gradient: linear-gradient(135deg, var(--sgroup-red-bright), var(--sgroup-red-dark));
+}
+
+/* Light theme fallback (if toggled, though dark is strictly better for this style) */
+[data-theme="light"] {
+  --bg-base: #fafafa;
+  --bg-elevated: #f4f4f5;
+  --bg-surface: #ffffff;
+  --bg-card: #ffffff;
+  --border-subtle: rgba(0, 0, 0, 0.04);
+  --border-default: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --text-primary: #09090b;
+  --text-secondary: #52525b;
+  --text-tertiary: #a1a1aa;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-highlight: rgba(255, 255, 255, 0.8);
+  --glass-shadow: 0 8px 30px rgba(0,0,0,0.04);
+  --hero-accent-gradient: linear-gradient(100deg, #09090b 30%, #52525b 100%);
+}

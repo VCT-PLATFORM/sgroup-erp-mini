@@ -1,0 +1,150 @@
+/* ============================================
+   Perfected Layout System
+   Surgical precision alignment, rigorous grids
+   ============================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--topbar-h);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--sgroup-red-glow);
+  color: #fff;
+}
+
+a {
+  color: var(--sgroup-red);
+  text-decoration: none;
+  transition: color var(--duration-fast);
+}
+a:hover { color: var(--sgroup-red-bright); }
+
+img { max-width: 100%; display: block; border-style: none; }
+
+/* Structural Containers */
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+  width: 100%;
+}
+
+.container-narrow {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 var(--space-xl);
+  width: 100%;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-main {
+  flex: 1;
+  width: 100%;
+}
+
+/* Sections */
+.section {
+  padding: var(--space-4xl) 0;
+  position: relative;
+  z-index: 10;
+}
+
+.section-alt {
+  background: var(--bg-elevated);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+/* Ultra-clean Section Headers */
+.section-header {
+  text-align: center;
+  margin-bottom: var(--space-3xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.section-header h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: var(--space-sm);
+}
+
+.section-header h2 i {
+  color: var(--sgroup-red);
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+.section-header p {
+  color: var(--text-secondary);
+  font-size: var(--text-lg);
+  max-width: 600px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* Subtle, sharp dividers */
+.section-divider {
+  border: 0;
+  height: 1px;
+  background: radial-gradient(circle at center, var(--border-strong) 0%, transparent 100%);
+  margin: 0;
+  opacity: 0.5;
+}
+
+/* Precision Grid System */
+.grid {
+  display: grid;
+  gap: var(--space-xl);
+}
+
+/* Exact 3 columns for desktop cards looks infinitely better than auto-fill */
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Responsive Rigor */
+@media (max-width: 1200px) {
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .container { padding: 0 var(--space-lg); }
+  .section { padding: var(--space-2xl) 0; }
+  .section-header h2 { font-size: var(--text-2xl); }
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}

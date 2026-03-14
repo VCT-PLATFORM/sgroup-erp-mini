@@ -21,6 +21,16 @@ html = html.replace(
   '<script src="$1" type="module">'
 );
 
+// 1b. Inject __METRO_GLOBAL_PREFIX__ before app bundle to fix RSC runtime error
+// @expo/metro-runtime@55 unconditionally imports rsc/runtime.js which uses this var.
+// Metro normally injects it, but the production web export doesn't define it.
+if (!html.includes('__METRO_GLOBAL_PREFIX__')) {
+  html = html.replace(
+    '<body>',
+    '<body>\n<script>var __METRO_GLOBAL_PREFIX__ = "";</script>'
+  );
+}
+
 // 2. Add PWA manifest link if not present
 if (!html.includes('manifest.json')) {
   html = html.replace(
@@ -53,6 +63,7 @@ if (fs.existsSync(manifestSrc) && !fs.existsSync(manifestDest)) {
 
 console.log('✅ Post-export patches applied:');
 console.log('   • Added type="module" to script tags');
+console.log('   • Injected __METRO_GLOBAL_PREFIX__ global (RSC fix)');
 console.log('   • Added PWA manifest link');
 console.log('   • Added apple-touch-icon');
 console.log('   • Copied manifest.json');
