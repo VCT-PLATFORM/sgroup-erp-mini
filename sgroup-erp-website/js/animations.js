@@ -91,14 +91,15 @@ document.addEventListener('DOMContentLoaded', () => {
     animationStyles.textContent = `
         .reveal-up {
             opacity: 0;
-            transform: translateY(40px) scale(0.98);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-            will-change: opacity, transform;
+            transform: translateY(30px);
+            filter: blur(10px);
+            transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+            will-change: opacity, transform, filter;
         }
         .reveal-up.revealed {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
+            filter: blur(0);
         }
     `;
     document.head.appendChild(animationStyles);

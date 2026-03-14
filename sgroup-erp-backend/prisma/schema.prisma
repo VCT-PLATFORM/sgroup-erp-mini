@@ -19,9 +19,9 @@ model User {
   name       String
   password   String
   role       String   @default("employee") // admin, hr, employee
-  department String?  // SALES, MARKETING, HR, FINANCE, OPS
-  salesRole  String?  // sales, sales_manager, sales_director, ceo, sales_admin
-  teamId     String?  // FK → SalesTeam.id (for sales/sales_manager)
+  department String? // SALES, MARKETING, HR, FINANCE, OPS
+  salesRole  String? // sales, sales_manager, sales_director, ceo, sales_admin
+  teamId     String? // FK → SalesTeam.id (for sales/sales_manager)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -38,7 +38,7 @@ model RefreshToken {
   expiresAt  DateTime
   revokedAt  DateTime? // null = token còn hợp lệ
   createdAt  DateTime  @default(now())
-  deviceInfo String?   // browser/device info để quản lý sessions
+  deviceInfo String? // browser/device info để quản lý sessions
 
   @@index([userId])
   @@index([expiresAt])
@@ -51,13 +51,13 @@ model PlanScenarioLog {
   id            String   @id @default(uuid(7))
   planId        String
   moduleKey     String   @default("EXEC")
-  scenario      String   // base, optimistic, pessimistic
+  scenario      String // base, optimistic, pessimistic
   year          Int
   createdAt     DateTime @default(now())
   createdBy     String
   schemaVersion String   @default("1")
   isDeleted     Boolean  @default(false)
-  rawJson       Json?    // JSONB — cho phép query bên trong JSON
+  rawJson       Json? // JSONB — cho phép query bên trong JSON
   note          String?
 }
 
@@ -67,12 +67,12 @@ model PlanBundleLog {
   moduleKey     String   @default("EXEC")
   scenario      String
   year          Int
-  tabKey        String   // PLAN_TOTAL, PLAN_MARKETING, etc.
+  tabKey        String // PLAN_TOTAL, PLAN_MARKETING, etc.
   createdAt     DateTime @default(now())
   createdBy     String
   schemaVersion String   @default("1")
   isDeleted     Boolean  @default(false)
-  rawJson       Json?    // JSONB — cho phép query bên trong JSON
+  rawJson       Json? // JSONB — cho phép query bên trong JSON
   note          String?
 }
 
@@ -86,7 +86,7 @@ model ExecPlanLatest {
   updatedAt      DateTime @default(now())
   updatedBy      String?
   schemaVersion  String   @default("1")
-  rawJson        Json?    // JSONB — cho phép query bên trong JSON
+  rawJson        Json? // JSONB — cho phép query bên trong JSON
   note           String?
 
   @@unique([year, scenarioKey, tabKey])
@@ -320,8 +320,10 @@ model DimProject {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  legalDocs LegalProjectDoc[]
-  products  PropertyProduct[]
+  legalDocs           LegalProjectDoc[]
+  products            PropertyProduct[]
+  financeTransactions FinanceTransaction[]
+  debtRecords         DebtRecord[]
 }
 
 model SalesTeam {
@@ -398,14 +400,14 @@ model FactDeal {
   dealDate      DateTime?
   bookingDate   DateTime?
   contractDate  DateTime?
-  source        String?     // MARKETING, SELF_GEN, REFERRAL
+  source        String? // MARKETING, SELF_GEN, REFERRAL
   note          String?
   year          Int
   month         Int
   status        String      @default("ACTIVE")
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?   // Soft delete
+  deletedAt     DateTime? // Soft delete
 
   legalDocs LegalTransactionDoc[]
 
@@ -419,30 +421,30 @@ model FactDeal {
 }
 
 model SalesBooking {
-  id              String   @id @default(uuid(7))
-  projectId       String?
-  projectName     String
-  customerName    String
-  customerPhone   String
-  bookingAmount   Float    @default(0)
-  bookingCount    Int      @default(1)
-  staffId         String?
-  staffName       String?
-  teamId          String?
-  teamName        String?
-  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELED
-  bookingDate     DateTime @default(now())
-  note            String?
-  createdByUserId String?
-  createdByName   String?
+  id               String    @id @default(uuid(7))
+  projectId        String?
+  projectName      String
+  customerName     String
+  customerPhone    String
+  bookingAmount    Float     @default(0)
+  bookingCount     Int       @default(1)
+  staffId          String?
+  staffName        String?
+  teamId           String?
+  teamName         String?
+  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELED
+  bookingDate      DateTime  @default(now())
+  note             String?
+  createdByUserId  String?
+  createdByName    String?
   reviewedByUserId String?
-  reviewedByName  String?
-  reviewedAt      DateTime?
-  year            Int
-  month           Int
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  deletedAt       DateTime?
+  reviewedByName   String?
+  reviewedAt       DateTime?
+  year             Int
+  month            Int
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
 
   @@index([year, month])
   @@index([projectId])
@@ -454,13 +456,13 @@ model SalesBooking {
 }
 
 model SalesDeposit {
-  id               String   @id @default(uuid(7))
+  id               String    @id @default(uuid(7))
   projectId        String?
   projectName      String
   unitCode         String
   customerName     String
   customerPhone    String
-  depositAmount    Float    @default(0)
+  depositAmount    Float     @default(0)
   staffId          String?
   staffName        String?
   teamId           String?
@@ -468,8 +470,8 @@ model SalesDeposit {
   paymentMethod    String?
   receiptNo        String?
   notes            String?
-  status           String   @default("PENDING") // PENDING, CONFIRMED, CANCELLED, REFUNDED
-  depositDate      DateTime @default(now())
+  status           String    @default("PENDING") // PENDING, CONFIRMED, CANCELLED, REFUNDED
+  depositDate      DateTime  @default(now())
   createdByUserId  String?
   createdByName    String?
   reviewedByUserId String?
@@ -477,8 +479,8 @@ model SalesDeposit {
   reviewedAt       DateTime?
   year             Int
   month            Int
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
 
   @@index([year, month])
@@ -611,11 +613,11 @@ model Customer {
   fullName        String
   phone           String?
   email           String?
-  source          String?   // FACEBOOK_ADS, GOOGLE_ADS, HOTLINE, REFERRAL, WALK_IN, WEBSITE
+  source          String? // FACEBOOK_ADS, GOOGLE_ADS, HOTLINE, REFERRAL, WALK_IN, WEBSITE
   projectInterest String?
   budget          String?
   status          String    @default("NEW") // NEW, CONTACTED, INTERESTED, MEETING, NEGOTIATION, WON, LOST
-  assignedTo      String?   // staffId
+  assignedTo      String? // staffId
   assignedName    String?
   isVip           Boolean   @default(false)
   lastContactAt   DateTime?
@@ -690,37 +692,40 @@ model Appointment {
 // ══════════════════════════════════════════════════════════════════
 
 model PropertyProduct {
-  id            String    @id @default(uuid(7))
+  id            String     @id @default(uuid(7))
   projectId     String
   project       DimProject @relation(fields: [projectId], references: [id])
   projectName   String?
-  code          String    @unique
+  code          String     @unique
   block         String?
-  floor         Int       @default(0)
-  area          Float     @default(0)
-  price         Float     @default(0) // Tỷ VND
+  floor         Int        @default(0)
+  area          Float      @default(0)
+  price         Float      @default(0) // Tỷ VND
   direction     String?
-  bedrooms      Int       @default(0)
-  status        String    @default("AVAILABLE") // AVAILABLE, BOOKED, LOCKED, PENDING_DEPOSIT, DEPOSIT, SOLD, COMPLETED
+  bedrooms      Int        @default(0)
+  status        String     @default("AVAILABLE") // AVAILABLE, BOOKED, LOCKED, PENDING_DEPOSIT, DEPOSIT, SOLD, COMPLETED
   bookedBy      String?
   lockedUntil   DateTime?
   customerPhone String?
   note          String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  statusLogs    ProductStatusLog[]
+  statusLogs ProductStatusLog[]
+
+  @@index([projectId])
+  @@index([status])
 }
 
 model ProductStatusLog {
-  id          String   @id @default(uuid(7))
-  productId   String
-  product     PropertyProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
-  oldStatus   String
-  newStatus   String
-  changedBy   String?
-  reason      String?
-  createdAt   DateTime @default(now())
+  id        String          @id @default(uuid(7))
+  productId String
+  product   PropertyProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  oldStatus String
+  newStatus String
+  changedBy String?
+  reason    String?
+  createdAt DateTime        @default(now())
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -941,19 +946,19 @@ model LegalTemplate {
 // ══════════════════════════════════════════════════════════════════
 
 model FinanceAccount {
-  id            String   @id @default(uuid(7))
-  accountCode   String   @unique
-  accountName   String
-  accountType   String   @default("BANK") // CASH, BANK, EPAY
-  bankName      String?
-  bankNumber    String?
-  initialBalance Float   @default(0)
-  currentBalance Float   @default(0)
-  currency      String   @default("VND")
-  status        String   @default("ACTIVE") // ACTIVE, INACTIVE
-  note          String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id             String   @id @default(uuid(7))
+  accountCode    String   @unique
+  accountName    String
+  accountType    String   @default("BANK") // CASH, BANK, EPAY
+  bankName       String?
+  bankNumber     String?
+  initialBalance Float    @default(0)
+  currentBalance Float    @default(0)
+  currency       String   @default("VND")
+  status         String   @default("ACTIVE") // ACTIVE, INACTIVE
+  note           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   transactions FinanceTransaction[]
 }
@@ -972,69 +977,71 @@ model FinanceCategory {
 }
 
 model FinanceTransaction {
-  id               String   @id @default(uuid(7))
-  transactionCode  String   @unique // PT..., PC...
-  type             String // INCOME (Thu), EXPENSE (Chi)
-  amount           Float    @default(0)
-  currency         String   @default("VND")
-  
-  accountId        String
-  account          FinanceAccount @relation(fields: [accountId], references: [id])
-  
-  categoryId       String
-  category         FinanceCategory @relation(fields: [categoryId], references: [id])
-  
-  // Liên kết (Relations) với các module khác
-  dealId           String?
-  projectId        String?
-  customerId       String?
-  staffId          String?
-  
-  // Thông tin đối tượng Thanh toán / Thu tiền
-  payerName        String?
-  receiverName     String?
-  
-  paymentMethod    String   @default("BANK_TRANSFER") // CASH, BANK_TRANSFER
-  paymentDate      DateTime
-  
-  status           String   @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED
-  
-  approvedBy       String?
-  approvedAt       DateTime?
-  
-  documentUrl      String? // Link ảnh uỷ nhiệm chi, phiếu thu...
-  note             String?
-  
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  createdBy        String?
+  id              String @id @default(uuid(7))
+  transactionCode String @unique // PT..., PC...
+  type            String // INCOME (Thu), EXPENSE (Chi)
+  amount          Float  @default(0)
+  currency        String @default("VND")
 
-  debtRecords      DebtRecord[]
+  accountId String
+  account   FinanceAccount @relation(fields: [accountId], references: [id])
+
+  categoryId String
+  category   FinanceCategory @relation(fields: [categoryId], references: [id])
+
+  // Liên kết (Relations) với các module khác
+  dealId     String?
+  projectId  String?
+  project    DimProject? @relation(fields: [projectId], references: [id])
+  customerId String?
+  staffId    String?
+
+  // Thông tin đối tượng Thanh toán / Thu tiền
+  payerName    String?
+  receiverName String?
+
+  paymentMethod String   @default("BANK_TRANSFER") // CASH, BANK_TRANSFER
+  paymentDate   DateTime
+
+  status String @default("DRAFT") // DRAFT, PENDING_APPROVAL, APPROVED, REJECTED, CANCELLED
+
+  approvedBy String?
+  approvedAt DateTime?
+
+  documentUrl String? // Link ảnh uỷ nhiệm chi, phiếu thu...
+  note        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+
+  debtRecords DebtRecord[]
 }
 
 model DebtRecord {
-  id               String   @id @default(uuid(7))
-  debtCode         String   @unique
-  debtType         String // RECEIVABLE_CUSTOMER, RECEIVABLE_DEVELOPER, PAYABLE_STAFF
-  
+  id       String @id @default(uuid(7))
+  debtCode String @unique
+  debtType String // RECEIVABLE_CUSTOMER, RECEIVABLE_DEVELOPER, PAYABLE_STAFF
+
   // Đối tượng Công nợ
-  customerId       String?
-  projectId        String?
-  staffId          String?
-  dealId           String?
-  
-  totalAmount      Float    @default(0)
-  paidAmount       Float    @default(0)
-  remainingAmount  Float    @default(0)
-  
-  dueDate          DateTime?
-  status           String   @default("UNPAID") // UNPAID, PARTIAL, PAID, OVERDUE, CANCELLED
-  
-  note             String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  
+  customerId String?
+  projectId  String?
+  project    DimProject? @relation(fields: [projectId], references: [id])
+  staffId    String?
+  dealId     String?
+
+  totalAmount     Float @default(0)
+  paidAmount      Float @default(0)
+  remainingAmount Float @default(0)
+
+  dueDate DateTime?
+  status  String    @default("UNPAID") // UNPAID, PARTIAL, PAID, OVERDUE, CANCELLED
+
+  note      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Link với các lần thanh toán (Phiếu thu / Phiếu chi)
-  transactionId    String?
-  transaction      FinanceTransaction? @relation(fields: [transactionId], references: [id])
+  transactionId String?
+  transaction   FinanceTransaction? @relation(fields: [transactionId], references: [id])
 }

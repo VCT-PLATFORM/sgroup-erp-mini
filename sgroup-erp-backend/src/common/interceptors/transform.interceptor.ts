@@ -9,6 +9,7 @@ import { Observable, map } from 'rxjs';
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
+  meta?: any;
   timestamp: string;
 }
 
@@ -16,11 +17,22 @@ export interface ApiResponse<T> {
 export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
   intercept(context: ExecutionContext, next: CallHandler): Observable<ApiResponse<T>> {
     return next.handle().pipe(
-      map((data) => ({
-        success: true,
-        data,
-        timestamp: new Date().toISOString(),
-      })),
+      map((res) => {
+        const timestamp = new Date().toISOString();
+        if (res && typeof res === 'object' && 'data' in res) {
+          return {
+            success: true,
+            data: res.data,
+            meta: res.meta,
+            timestamp,
+          };
+        }
+        return {
+          success: true,
+          data: res as unknown as T,
+          timestamp,
+        };
+      }),
     );
   }
 }

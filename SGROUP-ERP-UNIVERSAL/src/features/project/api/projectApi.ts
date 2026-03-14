@@ -1,43 +1,6 @@
 import { apiClient } from '../../../core/api/apiClient';
 
-export interface ProjectData {
-  id: string;
-  projectCode: string;
-  name: string;
-  developer?: string;
-  location?: string;
-  type?: string;
-  feeRate: number;
-  avgPrice: number;
-  totalUnits: number;
-  soldUnits: number;
-  status: string;
-  startDate?: string;
-  endDate?: string;
-  note?: string;
-  _count?: {
-    legalDocs: number;
-    products: number;
-  };
-}
-
-export interface PropertyProductData {
-  id: string;
-  projectId: string;
-  projectName?: string;
-  code: string;
-  block?: string;
-  floor: number;
-  area: number;
-  price: number;
-  direction?: string;
-  bedrooms: number;
-  status: string;
-  bookedBy?: string;
-  lockedUntil?: string;
-  customerPhone?: string;
-  note?: string;
-}
+import { DimProject, PropertyProduct } from '../types';
 
 export interface GenerateInventoryParams {
   blocks: string[];
@@ -58,63 +21,68 @@ export interface GenerateInventoryResult {
 
 export const projectApi = {
   // Projects
-  getProjects: async (): Promise<ProjectData[]> => {
-    return apiClient.get('/projects');
+  getProjects: async (): Promise<DimProject[]> => {
+    return apiClient.get('/projects').then(res => res.data?.data || res.data);
   },
   
-  getProject: async (id: string): Promise<ProjectData> => {
-    return apiClient.get(`/projects/${id}`);
+  getProject: async (id: string): Promise<DimProject> => {
+    return apiClient.get(`/projects/${id}`).then(res => res.data?.data || res.data);
   },
   
-  createProject: async (data: Partial<ProjectData>): Promise<ProjectData> => {
-    return apiClient.post('/projects', data);
+  createProject: async (data: Partial<DimProject>): Promise<DimProject> => {
+    return apiClient.post('/projects', data).then(res => res.data?.data || res.data);
   },
   
-  updateProject: async (id: string, data: Partial<ProjectData>): Promise<ProjectData> => {
-    return apiClient.patch(`/projects/${id}`, data);
+  updateProject: async (id: string, data: Partial<DimProject>): Promise<DimProject> => {
+    return apiClient.patch(`/projects/${id}`, data).then(res => res.data?.data || res.data);
   },
   
   deleteProject: async (id: string): Promise<void> => {
-    return apiClient.delete(`/projects/${id}`);
+    return apiClient.delete(`/projects/${id}`).then(res => res.data?.data || res.data);
   },
 
   // Products (Inventory)
-  getProducts: async (projectId: string): Promise<PropertyProductData[]> => {
-    return apiClient.get(`/projects/${projectId}/products`);
+  getProducts: async (projectId: string, params?: any): Promise<{ data: PropertyProduct[], meta?: any}> => {
+    return apiClient.get(`/projects/${projectId}/products`, { params }).then(res => {
+      // Backend returns { success: true, data: [], meta: {} }
+      const body = res.data;
+      if (body?.data !== undefined) return body;
+      return { data: body }; // fallback
+    });
   },
   
-  getProduct: async (productId: string): Promise<PropertyProductData> => {
-    return apiClient.get(`/projects/products/${productId}`);
+  getProduct: async (projectId: string, productId: string): Promise<PropertyProduct> => {
+    return apiClient.get(`/projects/${projectId}/products/${productId}`).then(res => res.data?.data || res.data);
   },
   
-  createProduct: async (projectId: string, data: Partial<PropertyProductData>): Promise<PropertyProductData> => {
-    return apiClient.post(`/projects/${projectId}/products`, data);
+  createProduct: async (projectId: string, data: Partial<PropertyProduct>): Promise<PropertyProduct> => {
+    return apiClient.post(`/projects/${projectId}/products`, data).then(res => res.data?.data || res.data);
   },
   
-  updateProduct: async (productId: string, data: Partial<PropertyProductData>): Promise<PropertyProductData> => {
-    return apiClient.patch(`/projects/products/${productId}`, data);
+  updateProduct: async (projectId: string, productId: string, data: Partial<PropertyProduct>): Promise<PropertyProduct> => {
+    return apiClient.patch(`/projects/${projectId}/products/${productId}`, data).then(res => res.data?.data || res.data);
   },
   
-  deleteProduct: async (productId: string): Promise<void> => {
-    return apiClient.delete(`/projects/products/${productId}`);
+  deleteProduct: async (projectId: string, productId: string): Promise<void> => {
+    return apiClient.delete(`/projects/${projectId}/products/${productId}`).then(res => res.data?.data || res.data);
   },
 
   // Lock / Unlock
-  lockProduct: async (productId: string, staffName?: string): Promise<PropertyProductData> => {
-    return apiClient.patch(`/projects/products/${productId}/lock`, { staffName });
+  lockProduct: async (projectId: string, productId: string, staffName?: string): Promise<PropertyProduct> => {
+    return apiClient.patch(`/projects/${projectId}/products/${productId}/lock`, { staffName }).then(res => res.data?.data || res.data);
   },
 
-  unlockProduct: async (productId: string): Promise<PropertyProductData> => {
-    return apiClient.patch(`/projects/products/${productId}/unlock`, {});
+  unlockProduct: async (projectId: string, productId: string): Promise<PropertyProduct> => {
+    return apiClient.patch(`/projects/${projectId}/products/${productId}/unlock`, {}).then(res => res.data?.data || res.data);
   },
 
   // Batch import
-  batchCreateProducts: async (projectId: string, items: Partial<PropertyProductData>[]): Promise<any> => {
-    return apiClient.post(`/projects/${projectId}/products/batch`, items);
+  batchCreateProducts: async (projectId: string, items: Partial<PropertyProduct>[]): Promise<any> => {
+    return apiClient.post(`/projects/${projectId}/products/batch`, items).then(res => res.data?.data || res.data);
   },
 
   // Generate inventory (batch create by floor/block pattern)
   generateInventory: async (projectId: string, params: GenerateInventoryParams): Promise<GenerateInventoryResult> => {
-    return apiClient.post(`/projects/${projectId}/products/generate`, params);
+    return apiClient.post(`/projects/${projectId}/products/generate`, params).then(res => res.data?.data || res.data);
   },
 };

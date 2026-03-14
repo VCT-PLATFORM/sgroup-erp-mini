@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { projectApi, ProjectData, PropertyProductData, GenerateInventoryParams } from '../api/projectApi';
+import { projectApi, GenerateInventoryParams } from '../api/projectApi';
+import { DimProject, PropertyProduct } from '../types';
 
 export const projectKeys = {
   all: ['projects'] as const,
@@ -27,7 +28,7 @@ export function useProject(id: string) {
 export function useCreateProject() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: Partial<ProjectData>) => projectApi.createProject(data),
+    mutationFn: (data: Partial<DimProject>) => projectApi.createProject(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
     },
@@ -37,7 +38,7 @@ export function useCreateProject() {
 export function useUpdateProject() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<ProjectData> }) => projectApi.updateProject(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<DimProject> }) => projectApi.updateProject(id, data),
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: projectKeys.lists() });
       queryClient.invalidateQueries({ queryKey: projectKeys.detail(variables.id) });
@@ -66,7 +67,7 @@ export function useProjectProducts(projectId: string) {
 export function useCreateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ projectId, data }: { projectId: string; data: Partial<PropertyProductData> }) =>
+    mutationFn: ({ projectId, data }: { projectId: string; data: Partial<PropertyProduct> }) =>
       projectApi.createProduct(projectId, data),
     onSuccess: (data) => {
       if (data?.projectId) {
@@ -80,7 +81,7 @@ export function useCreateProduct() {
 export function useUpdateProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<PropertyProductData> }) => projectApi.updateProduct(id, data),
+    mutationFn: ({ projectId, id, data }: { projectId: string; id: string; data: Partial<PropertyProduct> }) => projectApi.updateProduct(projectId, id, data),
     onSuccess: (data) => {
       if (data?.projectId) {
         queryClient.invalidateQueries({ queryKey: projectKeys.products(data.projectId) });
@@ -94,7 +95,7 @@ export function useUpdateProduct() {
 export function useDeleteProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => projectApi.deleteProduct(id),
+    mutationFn: ({ projectId, id }: { projectId: string; id: string }) => projectApi.deleteProduct(projectId, id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: projectKeys.all });
     },
@@ -104,8 +105,8 @@ export function useDeleteProduct() {
 export function useLockProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, staffName }: { id: string; staffName?: string }) =>
-      projectApi.lockProduct(id, staffName),
+    mutationFn: ({ projectId, id, staffName }: { projectId: string; id: string; staffName?: string }) =>
+      projectApi.lockProduct(projectId, id, staffName),
     onSuccess: (data) => {
       if (data?.projectId) {
         queryClient.invalidateQueries({ queryKey: projectKeys.products(data.projectId) });
@@ -118,7 +119,7 @@ export function useLockProduct() {
 export function useUnlockProduct() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => projectApi.unlockProduct(id),
+    mutationFn: ({ projectId, id }: { projectId: string; id: string }) => projectApi.unlockProduct(projectId, id),
     onSuccess: (data) => {
       if (data?.projectId) {
         queryClient.invalidateQueries({ queryKey: projectKeys.products(data.projectId) });

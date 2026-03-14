@@ -4,11 +4,11 @@
     "slug": "sgroup-erp-universal",
     "version": "1.0.0",
     "orientation": "default",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/Logo 3_noFont.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/images/Logo 3_noFont.png",
       "resizeMode": "contain",
       "backgroundColor": "#0A0E1A"
     },
@@ -18,14 +18,14 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/icon.png",
+        "foregroundImage": "./assets/images/Logo 3_noFont.png",
         "backgroundColor": "#0A0E1A"
       },
       "package": "com.sgroup.erp"
     },
     "web": {
       "bundler": "metro",
-      "favicon": "./assets/icon.png"
+      "favicon": "./assets/images/Logo 3_noFont.png"
     }
   }
 }

@@ -61,7 +61,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
 
   const handleLock = async (productId: string, code: string) => {
     try {
-      await lockMutation.mutateAsync({ id: productId, staffName: user?.name || 'Unknown' });
+      await lockMutation.mutateAsync({ projectId: selectedProjectId!, id: productId, staffName: user?.name || 'Unknown' });
       showToast(`Đã lock căn ${code}`, 'success');
     } catch (e: any) {
       showToast(e?.response?.data?.message || `Lock ${code} thất bại`, 'error');
@@ -69,7 +69,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
   };
   const handleUnlock = async (productId: string, code: string) => {
     try {
-      await unlockMutation.mutateAsync(productId);
+      await unlockMutation.mutateAsync({ projectId: selectedProjectId!, id: productId });
       showToast(`Đã mở lock căn ${code}`, 'success');
     } catch (e: any) {
       showToast(e?.response?.data?.message || `Unlock ${code} thất bại`, 'error');
@@ -78,7 +78,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
   const handleDelete = async () => {
     if (!deletingProduct) return;
     try {
-      await deleteMutation.mutateAsync(deletingProduct.id);
+      await deleteMutation.mutateAsync({ projectId: selectedProjectId!, id: deletingProduct.id });
       showToast(`Đã xóa ${deletingProduct.code}`, 'success');
       setDeletingProduct(null);
     } catch (e: any) {

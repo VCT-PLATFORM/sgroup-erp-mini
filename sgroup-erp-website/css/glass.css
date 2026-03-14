@@ -46,12 +46,9 @@
 
 /* Hover State — Lift and ignite */
 .glass-card:hover {
-  transform: translateY(-4px) scale(1.005);
-  background: rgba(18, 18, 20, 0.7);
-  box-shadow: 
-    0 12px 40px rgba(0, 0, 0, 0.8),
-    0 0 0 1px var(--border-default) inset,
-    0 1px 0 rgba(255,255,255,0.1) inset;
+  transform: translateY(-4px);
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 /* When a card has an interactive primary action, subtle red glow on hover */

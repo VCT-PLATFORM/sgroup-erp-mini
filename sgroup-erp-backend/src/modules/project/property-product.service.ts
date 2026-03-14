@@ -38,11 +38,21 @@ export class PropertyProductService {
     });
   }
 
-  async findAllByProject(projectId: string) {
-    return this.prisma.propertyProduct.findMany({
-      where: { projectId },
-      orderBy: { code: 'asc' },
-    });
+  async findAllByProject(projectId: string, skip?: number, take?: number, status?: string) {
+    const where: any = { projectId };
+    if (status) where.status = status;
+
+    const [data, total] = await Promise.all([
+      this.prisma.propertyProduct.findMany({
+        where,
+        orderBy: { code: 'asc' },
+        skip: skip !== undefined ? Number(skip) : undefined,
+        take: take !== undefined ? Number(take) : undefined,
+      }),
+      this.prisma.propertyProduct.count({ where })
+    ]);
+
+    return { data, meta: { total, skip, take } };
   }
 
   async findOne(id: string) {
@@ -81,25 +91,33 @@ export class PropertyProductService {
   }
 
   async lockProduct(id: string, staffName?: string) {
-    const product = await this.findOne(id);
-    this.validateTransition(product.status, 'LOCKED');
     const lockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-    const updated = await this.prisma.propertyProduct.update({
-      where: { id },
+    const result = await this.prisma.propertyProduct.updateMany({
+      where: { id, status: 'AVAILABLE' },
       data: { status: 'LOCKED', bookedBy: staffName || null, lockedUntil },
     });
-    await this.logStatusChange(id, product.status, 'LOCKED', staffName || 'system', 'Lock căn');
+    
+    if (result.count === 0) {
+       throw new BadRequestException('Sản phẩm không khả dụng để Lock hoặc đã bị Lock bởi người khác.');
+    }
+    
+    const updated = await this.findOne(id);
+    await this.logStatusChange(id, 'AVAILABLE', 'LOCKED', staffName || 'system', 'Lock căn');
     return updated;
   }
 
   async unlockProduct(id: string) {
-    const product = await this.findOne(id);
-    this.validateTransition(product.status, 'AVAILABLE');
-    const updated = await this.prisma.propertyProduct.update({
-      where: { id },
+    const result = await this.prisma.propertyProduct.updateMany({
+      where: { id, status: 'LOCKED' },
       data: { status: 'AVAILABLE', bookedBy: null, lockedUntil: null },
     });
-    await this.logStatusChange(id, product.status, 'AVAILABLE', undefined, 'Unlock căn');
+
+    if (result.count === 0) {
+      throw new BadRequestException('Sản phẩm không trong trạng thái Lock.');
+    }
+
+    const updated = await this.findOne(id);
+    await this.logStatusChange(id, 'LOCKED', 'AVAILABLE', undefined, 'Unlock căn');
     return updated;
   }
 

@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { USER_REPOSITORY } from '../../common/database/repository-tokens';
 import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { RefreshTokenService } from './services/refresh-token.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
 // ─── Mocks ─────────────────────────────────────────────────────────────────
@@ -52,11 +53,11 @@ describe('AuthService', () => {
         AuthService,
         { provide: JwtService, useValue: mockJwtService },
         { provide: USER_REPOSITORY, useValue: mockUserRepo },
-        { provide: 'PrismaService', useValue: mockPrismaService },
+        { provide: PrismaService, useValue: mockPrismaService },
         { provide: RefreshTokenService, useValue: mockRefreshTokenService },
       ],
     })
-      .overrideProvider('PrismaService')
+      .overrideProvider(PrismaService)
       .useValue(mockPrismaService)
       .compile();
 

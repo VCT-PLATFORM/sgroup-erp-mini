@@ -5,14 +5,14 @@ import { useThemeStore } from '../../../shared/theme/themeStore';
 import { SGButton } from '../../../shared/ui/components';
 import { X, AlertCircle } from 'lucide-react-native';
 import { useCreateProduct, useUpdateProduct } from '../hooks/useProjects';
-import { PropertyProductData } from '../api/projectApi';
+import { PropertyProduct } from '../types';
 import { useToast } from '../../sales/components/ToastProvider';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
   projectId: string;
-  editData?: PropertyProductData | null;
+  editData?: PropertyProduct | null;
 }
 
 const DIRECTIONS = ['Đông', 'Tây', 'Nam', 'Bắc', 'Đông Nam', 'Đông Bắc', 'Tây Nam', 'Tây Bắc'];
@@ -75,7 +75,7 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
     if (!validate()) return;
     setSubmitError(null);
 
-    const payload: Partial<PropertyProductData> = {
+    const payload: Partial<PropertyProduct> = {
       code: form.code.trim(),
       block: form.block.trim() || undefined,
       floor: parseInt(form.floor) || 0,
@@ -89,7 +89,7 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
 
     try {
       if (isEdit && editData) {
-        await updateMutation.mutateAsync({ id: editData.id, data: payload });
+        await updateMutation.mutateAsync({ projectId, id: editData.id, data: payload });
         showToast(`Đã cập nhật sản phẩm "${form.code}"`, 'success');
       } else {
         await createMutation.mutateAsync({ projectId, data: payload });

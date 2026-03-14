@@ -62,35 +62,40 @@ export class ProjectController {
   }
 
   @Get(':projectId/products')
-  findAllProductsByProject(@Param('projectId') projectId: string) {
-    return this.propertyProductService.findAllByProject(projectId);
+  findAllProductsByProject(
+    @Param('projectId') projectId: string,
+    @Query('skip') skip?: string,
+    @Query('take') take?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.propertyProductService.findAllByProject(projectId, skip ? +skip : undefined, take ? +take : undefined, status);
   }
 
-  @Get('products/:productId')
+  @Get(':projectId/products/:productId')
   findOneProduct(@Param('productId') productId: string) {
     return this.propertyProductService.findOne(productId);
   }
 
-  @Patch('products/:productId')
+  @Patch(':projectId/products/:productId')
   updateProduct(@Param('productId') productId: string, @Body() updateDto: UpdatePropertyProductDto) {
     return this.propertyProductService.update(productId, updateDto);
   }
 
-  @Patch('products/:productId/lock')
+  @Patch(':projectId/products/:productId/lock')
   @UseGuards(RolesGuard)
   @Roles('admin', 'sales_admin', 'sales_manager', 'sales_rep', 'sales_director')
   lockProduct(@Param('productId') productId: string, @Body() body: { staffName?: string }) {
     return this.propertyProductService.lockProduct(productId, body.staffName);
   }
 
-  @Patch('products/:productId/unlock')
+  @Patch(':projectId/products/:productId/unlock')
   @UseGuards(RolesGuard)
   @Roles('admin', 'sales_admin', 'sales_manager', 'sales_director')
   unlockProduct(@Param('productId') productId: string) {
     return this.propertyProductService.unlockProduct(productId);
   }
 
-  @Delete('products/:productId')
+  @Delete(':projectId/products/:productId')
   removeProduct(@Param('productId') productId: string) {
     return this.propertyProductService.remove(productId);
   }

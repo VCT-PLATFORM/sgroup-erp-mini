@@ -5,13 +5,13 @@ import { useThemeStore } from '../../../shared/theme/themeStore';
 import { SGButton } from '../../../shared/ui/components';
 import { X, AlertCircle } from 'lucide-react-native';
 import { useCreateProject, useUpdateProject } from '../hooks/useProjects';
-import { ProjectData } from '../api/projectApi';
+import { DimProject } from '../types';
 import { useToast } from '../../sales/components/ToastProvider';
 
 interface Props {
   visible: boolean;
   onClose: () => void;
-  editData?: ProjectData | null;
+  editData?: DimProject | null;
 }
 
 const PROJECT_TYPES = ['Chung cư', 'Biệt thự', 'Shophouse', 'Đất nền', 'Townhouse'];
@@ -89,7 +89,7 @@ export function ProjectFormModal({ visible, onClose, editData }: Props) {
     if (!validate()) return;
     setSubmitError(null);
 
-    const payload: Partial<ProjectData> = {
+    const payload: Partial<DimProject> = {
       projectCode: form.projectCode.trim(),
       name: form.name.trim(),
       developer: form.developer.trim() || undefined,
