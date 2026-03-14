@@ -13,8 +13,15 @@ import { ProjectDashboard } from './screens/ProjectDashboard';
 import { ProjectListScreen } from './screens/ProjectListScreen';
 import { InventoryScreen } from './screens/InventoryScreen';
 
+import { ProjectDocs } from './screens/ProjectDocs';
+import { ProjectPolicies } from './screens/ProjectPolicies';
+import { ProjectAssignment } from './screens/ProjectAssignment';
+
 export function ProjectShell() {
-  const validKeys = useMemo(() => ['PROJECT_DASHBOARD', 'PROJECT_LIST', 'PROJECT_INVENTORY'], []);
+  const validKeys = useMemo(() => [
+    'PROJECT_DASHBOARD', 'PROJECT_LIST', 'PROJECT_DOCS', 
+    'PROJECT_INVENTORY', 'PROJECT_POLICIES', 'PROJECT_ASSIGNMENT'
+  ], []);
   const { activeKey, navigate } = useProjectRoute(validKeys);
   const [activeLabel, setActiveLabel] = useState('Tổng quan Dự án');
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -47,6 +54,7 @@ export function ProjectShell() {
     dashboard: 'TỔNG QUAN',
     master_data: 'DỮ LIỆU DỰ ÁN',
     inventory: 'QUẢN LÝ SẢN PHẨM',
+    settings: 'HỆ THỐNG & CÀI ĐẶT',
   };
 
   const breadcrumb = (
@@ -67,8 +75,14 @@ export function ProjectShell() {
         return <ProjectDashboard />;
       case 'PROJECT_LIST':
         return <ProjectListScreen onNavigateInventory={handleNavigateInventory} />;
+      case 'PROJECT_DOCS':
+        return <ProjectDocs />;
       case 'PROJECT_INVENTORY':
         return <InventoryScreen initialProjectId={inventoryProjectId} />;
+      case 'PROJECT_POLICIES':
+        return <ProjectPolicies />;
+      case 'PROJECT_ASSIGNMENT':
+        return <ProjectAssignment />;
       default:
         return (
           <View style={styles.placeholder}>

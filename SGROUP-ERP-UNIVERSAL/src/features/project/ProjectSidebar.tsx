@@ -6,7 +6,8 @@ import { useTheme, typography } from '../../shared/theme/theme';
 import { useThemeStore } from '../../shared/theme/themeStore';
 import { useAuthStore } from '../auth/store/authStore';
 import {
-  LayoutDashboard, Building2, Grid3x3, ChevronLeft, ChevronRight, LogOut, LayoutList
+  LayoutDashboard, Building2, Grid3x3, ChevronLeft, ChevronRight, LogOut,
+  FolderOpen, FileCheck, Users
 } from 'lucide-react-native';
 import { SGThemeToggle } from '../../shared/ui/components/SGThemeToggle';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +18,7 @@ export interface ProjectSidebarItem {
   key: string;
   label: string;
   icon: any;
-  section: 'dashboard' | 'master_data' | 'inventory';
+  section: 'dashboard' | 'master_data' | 'inventory' | 'settings';
   minRole: ProjectRole[];
 }
 
@@ -25,8 +26,14 @@ const ALL_ROLES: ProjectRole[] = ['project_manager', 'sales_director', 'ceo', 'a
 
 const SIDEBAR_ITEMS: ProjectSidebarItem[] = [
   { key: 'PROJECT_DASHBOARD', label: 'Tổng quan Dự án', icon: LayoutDashboard, section: 'dashboard', minRole: ALL_ROLES },
+  
   { key: 'PROJECT_LIST', label: 'Danh mục Dự án', icon: Building2, section: 'master_data', minRole: ALL_ROLES },
+  { key: 'PROJECT_DOCS', label: 'Tài liệu Dự án', icon: FolderOpen, section: 'master_data', minRole: ALL_ROLES },
+  
   { key: 'PROJECT_INVENTORY', label: 'Quản lý Bảng hàng', icon: Grid3x3, section: 'inventory', minRole: ALL_ROLES },
+  { key: 'PROJECT_POLICIES', label: 'Chính sách Bán hàng', icon: FileCheck, section: 'inventory', minRole: ALL_ROLES },
+  
+  { key: 'PROJECT_ASSIGNMENT', label: 'Phân quyền Dự án', icon: Users, section: 'settings', minRole: ['admin', 'project_manager', 'sales_director', 'ceo'] },
 ];
 
 interface Props {
@@ -47,6 +54,7 @@ export function ProjectSidebar({ activeKey, onSelect, collapsed, onToggleCollaps
     { key: 'dashboard', label: 'DASHBOARD' },
     { key: 'master_data', label: 'DỮ LIỆU DỰ ÁN' },
     { key: 'inventory', label: 'QUẢN LÝ SẢN PHẨM' },
+    { key: 'settings', label: 'HỆ THỐNG & CÀI ĐẶT' },
   ];
 
   const renderItem = (item: ProjectSidebarItem) => {
