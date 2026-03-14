@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { View, ActivityIndicator, Text, Platform, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { RootStackParamList } from './routeTypes';
 import { useAuthStore } from '../../features/auth/store/authStore';
@@ -58,6 +58,29 @@ function ModuleLoadingFallback() {
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+// ── Web Linking Configuration ──
+// This ensures that when a user tries to access a URL like /sales, React Navigation knows which screen to show.
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: ['https://sgroup.vn', 'sgroup-erp://', 'http://localhost:3000'],
+  config: {
+    screens: {
+      Login: 'login',
+      Workspace: 'workspace',
+      BDHModule: 'bdh',
+      SalesModule: 'sales',
+      MarketingModule: 'marketing',
+      HRModule: 'hr',
+      AgencyModule: 'agency',
+      SHomesModule: 'shomes',
+      ProjectModule: 'project',
+      FinanceModule: 'finance',
+      LegalModule: 'legal',
+      EmployeeProfile: 'employee/:id',
+      AccessDenied: 'access-denied',
+    },
+  },
+};
+
 export function AppNavigator() {
   const user = useAuthStore((s) => s.user);
   const restore = useAuthStore((s) => s.restore);
@@ -67,7 +90,7 @@ export function AppNavigator() {
   }, []);
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Suspense fallback={<ModuleLoadingFallback />}>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
           {!user ? (
