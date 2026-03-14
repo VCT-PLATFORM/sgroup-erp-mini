@@ -22,7 +22,7 @@ export interface ProjectSidebarItem {
   minRole: ProjectRole[];
 }
 
-const ALL_ROLES: ProjectRole[] = ['project_manager', 'sales_director', 'ceo', 'admin', 'sales_manager', 'sales'];
+const ALL_ROLES: ProjectRole[] = ['project_manager', 'sales_director', 'ceo', 'admin'];
 
 const SIDEBAR_ITEMS: ProjectSidebarItem[] = [
   { key: 'PROJECT_DASHBOARD', label: 'Tổng quan Dự án', icon: LayoutDashboard, section: 'dashboard', minRole: ALL_ROLES },

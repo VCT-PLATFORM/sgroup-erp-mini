@@ -95,9 +95,15 @@ export function WorkspaceScreen() {
     return () => sub?.remove?.();
   }, []);
 
-  const accessibleModules = ERP_MODULES.filter(
-    (m) => user?.role === 'admin' || user?.modules?.includes(m.id)
-  );
+  const accessibleModules = ERP_MODULES.filter((m) => {
+    // Explicitly hide project module from any user who has a sales role assigned
+    if (m.id === 'project' && !!user?.salesRole) {
+      return false;
+    }
+    
+    // Fallback normal logic
+    return user?.role === 'admin' || user?.modules?.includes(m.id);
+  });
 
   const handleModulePress = (mod: ErpModuleDefinition) => {
     if (mod.routeName) {
