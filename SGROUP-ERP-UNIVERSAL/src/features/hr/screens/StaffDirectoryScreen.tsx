@@ -4,15 +4,15 @@
  * Now connected to real database via HR API
  */
 import React, { useState, useMemo } from 'react';
-import { View, Text, ScrollView, Pressable, Platform, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Pressable, Platform, TextInput, ActivityIndicator, Modal, Alert } from 'react-native';
 import {
-  UserCog, Plus, Users, Target, Search, Filter, Mail, Hash, Phone, Building, Star
+  UserCog, Plus, Users, Target, Search, Filter, Mail, Hash, Phone, Building, Star, X
 } from 'lucide-react-native';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard } from '../../../shared/ui/components';
 import type { HRRole } from '../HRSidebar';
-import { useEmployees, useHRDashboard } from '../hooks/useHR';
+import { useEmployees, useHRDashboard, useCreateEmployee } from '../hooks/useHR';
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
 
@@ -48,6 +48,8 @@ function nameToColor(name: string) {
   return colors[Math.abs(hash) % colors.length];
 }
 
+const EMPTY_FORM = { fullName: '', employeeCode: '', email: '', phone: '', status: 'ACTIVE' };
+
 export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
@@ -58,6 +60,8 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
   const [searchText, setSearchText] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState(EMPTY_FORM);
 
   const canEdit = userRole === 'admin' || userRole === 'hr_manager' || userRole === 'hr_director';
 
@@ -67,20 +71,127 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
     search: searchText || undefined,
     status: activeFilter !== 'all' ? activeFilter : undefined,
   });
+  const createEmployee = useCreateEmployee();
 
-  const employees = employeesData?.data || [];
-  const total = employeesData?.meta?.total || 0;
+  const rawList = employeesData?.data ?? employeesData;
+  const employees = Array.isArray(rawList) ? rawList : [];
+  const total = employeesData?.meta?.total || employees.length;
+
+  // Extract dashboard data safely
+  const db = (dashboardData as any)?.data ?? dashboardData ?? {};
 
   // Stats from dashboard
   const statCards = [
-    { label: 'Tổng nhân sự', value: dashboardData?.totalEmployees ?? 0, icon: Users, color: '#ec4899', gradient: ['#ec4899', '#be185d'] },
-    { label: 'Phòng ban', value: dashboardData?.departmentCount ?? 0, icon: Building, color: '#8b5cf6', gradient: ['#8b5cf6', '#7c3aed'] },
-    { label: 'Thử việc', value: dashboardData?.probationEmployees ?? 0, icon: Star, color: '#f59e0b', gradient: ['#f59e0b', '#d97706'] },
-    { label: 'Nghỉ phép', value: dashboardData?.onLeaveCount ?? 0, icon: Target, color: '#3b82f6', gradient: ['#3b82f6', '#2563eb'] },
+    { label: 'Tổng nhân sự', value: db?.totalEmployees ?? 0, icon: Users, color: '#ec4899', gradient: ['#ec4899', '#be185d'] },
+    { label: 'Phòng ban', value: db?.departmentCount ?? 0, icon: Building, color: '#8b5cf6', gradient: ['#8b5cf6', '#7c3aed'] },
+    { label: 'Thử việc', value: db?.probationEmployees ?? 0, icon: Star, color: '#f59e0b', gradient: ['#f59e0b', '#d97706'] },
+    { label: 'Nghỉ phép', value: db?.onLeaveCount ?? 0, icon: Target, color: '#3b82f6', gradient: ['#3b82f6', '#2563eb'] },
   ];
+
+  const handleSubmit = async () => {
+    if (!form.fullName.trim() || !form.employeeCode.trim()) {
+      if (Platform.OS === 'web') {
+        window.alert('Vui lòng nhập họ tên và mã nhân viên');
+      } else {
+        Alert.alert('Lỗi', 'Vui lòng nhập họ tên và mã nhân viên');
+      }
+      return;
+    }
+    try {
+      await createEmployee.mutateAsync(form);
+      setForm(EMPTY_FORM);
+      setShowForm(false);
+    } catch (e: any) {
+      const msg = e?.response?.data?.message || e?.message || 'Có lỗi xảy ra';
+      if (Platform.OS === 'web') {
+        window.alert(msg);
+      } else {
+        Alert.alert('Lỗi', msg);
+      }
+    }
+  };
+
+  const inputStyle = {
+    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
+    borderWidth: 1,
+    borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: cText,
+    ...(Platform.OS === 'web' ? { outlineStyle: 'none' as any } : {}),
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: cBg }}>
+      {/* ── Add Employee Modal ── */}
+      <Modal visible={showForm} transparent animationType="fade" onRequestClose={() => setShowForm(false)}>
+        <Pressable
+          style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }}
+          onPress={() => setShowForm(false)}
+        >
+          <Pressable
+            style={{
+              width: '90%', maxWidth: 480, backgroundColor: isDark ? '#1e293b' : '#fff',
+              borderRadius: 24, padding: 28,
+              ...(Platform.OS === 'web' ? { boxShadow: '0 25px 50px rgba(0,0,0,0.25)' } : {}),
+            }}
+            onPress={() => {}} // prevent close on inner press
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Thêm hồ sơ nhân viên</Text>
+              <Pressable onPress={() => setShowForm(false)} style={{ padding: 4 }}>
+                <X size={22} color={cSub} />
+              </Pressable>
+            </View>
+
+            <View style={{ gap: 14 }}>
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>Họ và tên *</Text>
+                <TextInput value={form.fullName} onChangeText={v => setForm(f => ({ ...f, fullName: v }))} placeholder="Nguyễn Văn A" placeholderTextColor={cSub} style={inputStyle} />
+              </View>
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mã nhân viên *</Text>
+                <TextInput value={form.employeeCode} onChangeText={v => setForm(f => ({ ...f, employeeCode: v }))} placeholder="EMP-001" placeholderTextColor={cSub} style={inputStyle} />
+              </View>
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>Email</Text>
+                <TextInput value={form.email} onChangeText={v => setForm(f => ({ ...f, email: v }))} placeholder="email@sgroup.vn" placeholderTextColor={cSub} style={inputStyle} keyboardType="email-address" />
+              </View>
+              <View>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase', letterSpacing: 0.5 }}>Số điện thoại</Text>
+                <TextInput value={form.phone} onChangeText={v => setForm(f => ({ ...f, phone: v }))} placeholder="0901234567" placeholderTextColor={cSub} style={inputStyle} keyboardType="phone-pad" />
+              </View>
+
+              <View style={{ flexDirection: 'row', gap: 12, marginTop: 10 }}>
+                <Pressable
+                  onPress={() => setShowForm(false)}
+                  style={{
+                    flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
+                  }}
+                >
+                  <Text style={{ fontSize: 14, fontWeight: '800', color: cSub }}>Hủy</Text>
+                </Pressable>
+                <Pressable
+                  onPress={handleSubmit}
+                  disabled={createEmployee.isPending}
+                  style={{
+                    flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center',
+                    backgroundColor: createEmployee.isPending ? '#94a3b8' : '#ec4899',
+                  }}
+                >
+                  <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>
+                    {createEmployee.isPending ? 'Đang lưu...' : 'Tạo hồ sơ'}
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: 28, gap: 20, paddingBottom: 120 }}>
 
         {/* ── Header ── */}
@@ -101,11 +212,14 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
             </View>
           </View>
           {canEdit && (
-            <Pressable style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8,
-              backgroundColor: '#ec4899', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,
-              ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
-            }}>
+            <Pressable
+              onPress={() => setShowForm(true)}
+              style={{
+                flexDirection: 'row', alignItems: 'center', gap: 8,
+                backgroundColor: '#ec4899', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,
+                ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
+              }}
+            >
               <Plus size={16} color="#fff" />
               <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>THÊM HỒ SƠ</Text>
             </Pressable>
@@ -330,3 +444,4 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
     </View>
   );
 }
+
