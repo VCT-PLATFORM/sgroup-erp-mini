@@ -164,6 +164,7 @@ export class HrService {
         include: {
           department: { select: { id: true, name: true, code: true } },
           position: { select: { id: true, name: true, level: true } },
+          team: { select: { id: true, name: true } },
         },
         skip: (page - 1) * limit,
         take: limit,
