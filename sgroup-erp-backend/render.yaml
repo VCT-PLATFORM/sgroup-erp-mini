@@ -12,7 +12,7 @@ services:
       - key: DIRECT_URL
         sync: false  # Set manually in Render Dashboard
       - key: JWT_SECRET
-        generateValue: true
+        sync: false  # Must be >= 32 chars. Set manually in Render Dashboard
       - key: JWT_EXPIRES_IN
         value: 7d
       - key: NODE_ENV
