@@ -24,12 +24,14 @@ export function HRDashboard() {
   const cSub = theme.colors.textSecondary;
 
   const { data: dashboard, isLoading } = useHRDashboard();
-  const { data: departments } = useDepartments();
-  const { data: events } = useDashboardEvents();
-  const { data: activities } = useDashboardActivities();
+  const { data: rawDepts } = useDepartments();
+  const { data: rawEvents } = useDashboardEvents();
+  const { data: rawActivities } = useDashboardActivities();
 
-  const allEvents = events || [];
-  const allActivities = activities || [];
+  // API returns { success, data: [...] } — extract inner array safely
+  const departments = Array.isArray(rawDepts) ? rawDepts : (rawDepts as any)?.data ?? [];
+  const allEvents = Array.isArray(rawEvents) ? rawEvents : (rawEvents as any)?.data ?? [];
+  const allActivities = Array.isArray(rawActivities) ? rawActivities : (rawActivities as any)?.data ?? [];
 
   const KPI_CARDS = [
     { id: 'k1', label: 'TỔNG NHÂN SỰ', value: String(dashboard?.totalEmployees ?? 0), unit: 'người', color: '#ec4899', icon: Users, trend: 'up' as const, trendVal: 5 },
