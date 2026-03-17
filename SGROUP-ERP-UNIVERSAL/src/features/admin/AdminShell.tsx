@@ -14,27 +14,17 @@ import { useAuthStore } from '../auth/store/authStore';
 import { AdminDashboard } from './screens/AdminDashboard';
 import { OrgConfigScreen } from '../hr/screens/OrgConfigScreen';
 import { UserManagementScreen } from './screens/UserManagementScreen';
-
-// Placeholder for screens under development
-function PlaceholderScreen({ label }: { label: string }) {
-  const colors = useTheme();
-  return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', paddingVertical: 100 }}>
-      <Text style={{ fontSize: 60, marginBottom: 24 }}>🔧</Text>
-      <Text style={[typography.h3, { color: colors.text, marginBottom: 8 }]}>Đang phát triển</Text>
-      <Text style={[typography.body, { color: colors.textSecondary, textAlign: 'center', maxWidth: 400 }]}>
-        Tính năng "{label}" sẽ được triển khai trong bản cập nhật tiếp theo.
-      </Text>
-    </View>
-  );
-}
+import { RolePermissionScreen } from './screens/RolePermissionScreen';
+import { SystemSettingsScreen } from './screens/SystemSettingsScreen';
+import { AuditLogScreen } from './screens/AuditLogScreen';
 
 const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
   ADMIN_DASHBOARD: AdminDashboard,
   ADMIN_ORG_CONFIG: OrgConfigScreen,
   ADMIN_USERS: UserManagementScreen,
-  ADMIN_ROLES: () => <PlaceholderScreen label="Phân quyền" />,
-  ADMIN_SYSTEM: () => <PlaceholderScreen label="Cài đặt hệ thống" />,
+  ADMIN_ROLES: RolePermissionScreen,
+  ADMIN_SYSTEM: SystemSettingsScreen,
+  ADMIN_AUDIT: AuditLogScreen,
 };
 
 export function AdminShell() {
@@ -52,13 +42,14 @@ export function AdminShell() {
     setActiveSection(item.section);
   };
 
-  const ContentComponent = KEY_TO_COMPONENT[activeKey] || (() => <PlaceholderScreen label={activeLabel} />);
+  const ContentComponent = KEY_TO_COMPONENT[activeKey] || AdminDashboard;
 
   const sectionLabels: Record<string, string> = {
     dashboard: 'TỔNG QUAN',
     organization: 'CẤU HÌNH TỔ CHỨC',
     users: 'NGƯỜI DÙNG',
     system: 'HỆ THỐNG',
+    audit: 'NHẬT KÝ',
   };
 
   const breadcrumb = (

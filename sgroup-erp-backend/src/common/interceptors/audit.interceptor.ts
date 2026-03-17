@@ -1,6 +1,6 @@
 /**
  * AuditInterceptor — NestJS interceptor that logs every mutation (POST, PATCH, DELETE)
- * into the audit_log table for compliance tracking.
+ * into the audit_logs table for compliance tracking.
  */
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
@@ -22,21 +22,22 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     const startTime = Date.now();
-    const userId = req.user?.id || req.user?.sub || 'anonymous';
-    const userName = req.user?.name || req.user?.email || 'unknown';
-    const action = `${method} ${req.url}`;
+    const userId = req.user?.id || req.user?.sub || null;
+    const userName = req.user?.name || req.user?.email || null;
+    const resource = req.url.split('?')[0].replace(/^\/api\//, '').replace(/^\//, '');
+    const action = `${method} /${resource}`;
 
     return next.handle().pipe(
       tap({
-        next: (data) => {
+        next: () => {
           const duration = Date.now() - startTime;
-          this.logAudit({
+          this.writeAuditLog({
             userId,
             userName,
             action,
-            resource: req.url.split('?')[0].replace('/api/', ''),
+            resource,
             method,
-            requestBody: method !== 'DELETE' ? JSON.stringify(req.body || {}) : undefined,
+            requestBody: method !== 'DELETE' ? this.safeStringify(req.body) : undefined,
             responseStatus: 'SUCCESS',
             duration,
             ip: req.ip || req.connection?.remoteAddress,
@@ -44,13 +45,13 @@ export class AuditInterceptor implements NestInterceptor {
         },
         error: (err) => {
           const duration = Date.now() - startTime;
-          this.logAudit({
+          this.writeAuditLog({
             userId,
             userName,
             action,
-            resource: req.url.split('?')[0].replace('/api/', ''),
+            resource,
             method,
-            requestBody: method !== 'DELETE' ? JSON.stringify(req.body || {}) : undefined,
+            requestBody: method !== 'DELETE' ? this.safeStringify(req.body) : undefined,
             responseStatus: 'FAILED',
             errorMessage: err.message,
             duration,
@@ -61,9 +62,9 @@ export class AuditInterceptor implements NestInterceptor {
     );
   }
 
-  private async logAudit(entry: {
-    userId: string;
-    userName: string;
+  private async writeAuditLog(entry: {
+    userId?: string | null;
+    userName?: string | null;
     action: string;
     resource: string;
     method: string;
@@ -74,21 +75,38 @@ export class AuditInterceptor implements NestInterceptor {
     ip?: string;
   }) {
     try {
-      // Try to write to database if AuditLog model exists
-      // @ts-ignore — model may not exist yet, fallback to console
-      if (this.prisma.auditLog) {
-        await (this.prisma as any).auditLog.create({ data: entry });
-      } else {
-        // Fallback: structured console log
-        this.logger.log(
-          `[AUDIT] ${entry.userName} (${entry.userId}) ${entry.action} → ${entry.responseStatus} (${entry.duration}ms)`,
-        );
-      }
-    } catch {
-      // Silent fallback to console
+      await this.prisma.auditLog.create({
+        data: {
+          userId: entry.userId || undefined,
+          userName: entry.userName || undefined,
+          action: entry.action,
+          resource: entry.resource,
+          method: entry.method,
+          requestBody: entry.requestBody,
+          responseStatus: entry.responseStatus,
+          errorMessage: entry.errorMessage,
+          duration: entry.duration,
+          ip: entry.ip,
+        },
+      });
+    } catch (e) {
+      // Silent fallback to console — never block the request
       this.logger.warn(
-        `[AUDIT-FALLBACK] ${entry.userName} ${entry.action} → ${entry.responseStatus}`,
+        `[AUDIT-FALLBACK] ${entry.userName || 'unknown'} ${entry.action} → ${entry.responseStatus}`,
       );
+    }
+  }
+
+  private safeStringify(obj: any): string | undefined {
+    try {
+      if (!obj || Object.keys(obj).length === 0) return undefined;
+      // Redact sensitive fields
+      const redacted = { ...obj };
+      if (redacted.password) redacted.password = '***REDACTED***';
+      if (redacted.newPassword) redacted.newPassword = '***REDACTED***';
+      return JSON.stringify(redacted).slice(0, 2000); // Cap at 2KB
+    } catch {
+      return undefined;
     }
   }
 }

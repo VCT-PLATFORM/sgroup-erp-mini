@@ -11,7 +11,7 @@ import { IRepository, IUpsertRepository } from './IRepository';
 
 export interface UserEntity {
   id: string; email: string; name: string; password: string;
-  role: string; department?: string; salesRole?: string; teamId?: string;
+  role: string; department?: string; isActive?: boolean; salesRole?: string; teamId?: string;
   createdAt: Date; updatedAt: Date;
 }
 
@@ -119,11 +119,11 @@ export interface BizflySyncLogEntity {
 }
 
 export interface AuditLogEntity {
-  id: string; auditId: string; action: string;
-  entity: string; entityId?: string;
-  actorEmail?: string; ipAddress?: string;
-  oldValue?: any; newValue?: any;
-  meta?: string; createdAt: Date;
+  id: string; userId?: string; userName?: string;
+  action: string; resource?: string; method?: string;
+  requestBody?: string; responseStatus?: string;
+  errorMessage?: string; duration?: number;
+  ip?: string; createdAt: Date;
 }
 
 export interface SalesDailyEntity {

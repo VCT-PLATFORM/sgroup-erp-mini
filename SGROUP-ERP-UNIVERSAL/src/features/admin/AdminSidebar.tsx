@@ -1,6 +1,6 @@
 /**
  * AdminSidebar — System Administration Sidebar
- * Sections: Dashboard, Org Config, Users, System
+ * Sections: Dashboard, Org Config, Users, System, Audit
  */
 import React from 'react';
 import {
@@ -11,7 +11,7 @@ import { useThemeStore } from '../../shared/theme/themeStore';
 import { useAuthStore } from '../auth/store/authStore';
 import {
   LayoutDashboard, Building, Users, Settings, ChevronLeft, ChevronRight,
-  LogOut, UserCircle, Shield,
+  LogOut, UserCircle, Shield, FileText,
 } from 'lucide-react-native';
 import { SGThemeToggle } from '../../shared/ui/components/SGThemeToggle';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -20,7 +20,7 @@ export interface AdminSidebarItem {
   key: string;
   label: string;
   icon: any;
-  section: 'dashboard' | 'organization' | 'users' | 'system';
+  section: 'dashboard' | 'organization' | 'users' | 'system' | 'audit';
 }
 
 const SIDEBAR_ITEMS: AdminSidebarItem[] = [
@@ -36,6 +36,9 @@ const SIDEBAR_ITEMS: AdminSidebarItem[] = [
   // System
   { key: 'ADMIN_ROLES',       label: 'Phân quyền',             icon: Shield,          section: 'system' },
   { key: 'ADMIN_SYSTEM',      label: 'Cài đặt hệ thống',      icon: Settings,        section: 'system' },
+
+  // Audit
+  { key: 'ADMIN_AUDIT',       label: 'Nhật ký hệ thống',      icon: FileText,        section: 'audit' },
 ];
 
 interface Props {
@@ -55,6 +58,7 @@ export function AdminSidebar({ activeKey, onSelect, collapsed, onToggleCollapse 
     { key: 'organization',  label: 'CẤU HÌNH TỔ CHỨC' },
     { key: 'users',         label: 'NGƯỜI DÙNG' },
     { key: 'system',        label: 'HỆ THỐNG' },
+    { key: 'audit',         label: 'GIÁM SÁT' },
   ];
 
   const renderItem = (item: AdminSidebarItem) => {

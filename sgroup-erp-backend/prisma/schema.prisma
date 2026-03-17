@@ -99,6 +99,7 @@ model User {
   password   String
   role       String     @default("employee") // admin, hr, employee
   department String? // SALES, MARKETING, HR, FINANCE, OPS
+  isActive   Boolean    @default(true) @map("is_active")
   salesRole  String?    @map("sales_role")
   teamId     String?    @map("team_id")
   team       SalesTeam? @relation(fields: [teamId], references: [id], onDelete: SetNull)
@@ -520,21 +521,22 @@ model FactPlanSnapshotLog {
 }
 
 model AuditLog {
-  id         String   @id @default(uuid(7))
-  auditId    String
-  action     String
-  entity     String
-  entityId   String?
-  actorEmail String?
-  ipAddress  String? // Track access source
-  oldValue   Json? // Previous state (JSONB)
-  newValue   Json? // New state (JSONB)
-  meta       String?
-  createdAt  DateTime @default(now())
+  id             String   @id @default(uuid(7))
+  userId         String?  @map("user_id")
+  userName       String?  @map("user_name")
+  action         String   // POST /admin/users, PATCH /hr/employees/:id, etc.
+  resource       String?  // admin/users, hr/employees, auth/login
+  method         String?  // POST, PATCH, PUT, DELETE
+  requestBody    String?  @map("request_body") @db.Text
+  responseStatus String?  @map("response_status") // SUCCESS, FAILED
+  errorMessage   String?  @map("error_message") @db.Text
+  duration       Int?     // milliseconds
+  ip             String?
+  createdAt      DateTime @default(now()) @map("created_at")
 
-  @@index([entity, entityId])
-  @@index([actorEmail])
   @@index([action])
+  @@index([userId])
+  @@index([resource])
   @@index([createdAt(sort: Desc)])
   @@map("audit_logs")
 }
@@ -1696,3 +1698,21 @@ model FileAttachment {
   @@map("file_attachments")
 }
 
+// ══════════════════════════════════════════════════════════════════
+// SYSTEM SETTINGS (Admin Module)
+// ══════════════════════════════════════════════════════════════════
+
+model SystemSetting {
+  id          String   @id @default(uuid(7))
+  key         String   @unique
+  value       String
+  group       String   @default("general") // general, email, security, notification
+  label       String?  // UI display label
+  description String?
+  valueType   String   @default("string") @map("value_type") // string, boolean, number, json
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([group])
+  @@map("system_settings")
+}
