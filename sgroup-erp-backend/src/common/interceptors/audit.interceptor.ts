@@ -1,6 +1,7 @@
 /**
  * AuditInterceptor — NestJS interceptor that logs every mutation (POST, PATCH, DELETE)
  * into the audit_logs table for compliance tracking.
+ * Now includes userAgent tracking.
  */
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler, Logger } from '@nestjs/common';
 import { Observable, tap } from 'rxjs';
@@ -26,6 +27,7 @@ export class AuditInterceptor implements NestInterceptor {
     const userName = req.user?.name || req.user?.email || null;
     const resource = req.url.split('?')[0].replace(/^\/api\//, '').replace(/^\//, '');
     const action = `${method} /${resource}`;
+    const userAgent = req.headers?.['user-agent'] || null;
 
     return next.handle().pipe(
       tap({
@@ -41,6 +43,7 @@ export class AuditInterceptor implements NestInterceptor {
             responseStatus: 'SUCCESS',
             duration,
             ip: req.ip || req.connection?.remoteAddress,
+            userAgent,
           });
         },
         error: (err) => {
@@ -56,6 +59,7 @@ export class AuditInterceptor implements NestInterceptor {
             errorMessage: err.message,
             duration,
             ip: req.ip || req.connection?.remoteAddress,
+            userAgent,
           });
         },
       }),
@@ -73,6 +77,7 @@ export class AuditInterceptor implements NestInterceptor {
     errorMessage?: string;
     duration: number;
     ip?: string;
+    userAgent?: string | null;
   }) {
     try {
       await this.prisma.auditLog.create({
@@ -87,6 +92,7 @@ export class AuditInterceptor implements NestInterceptor {
           errorMessage: entry.errorMessage,
           duration: entry.duration,
           ip: entry.ip,
+          userAgent: entry.userAgent || undefined,
         },
       });
     } catch (e) {
@@ -104,6 +110,7 @@ export class AuditInterceptor implements NestInterceptor {
       const redacted = { ...obj };
       if (redacted.password) redacted.password = '***REDACTED***';
       if (redacted.newPassword) redacted.newPassword = '***REDACTED***';
+      if (redacted.currentPassword) redacted.currentPassword = '***REDACTED***';
       return JSON.stringify(redacted).slice(0, 2000); // Cap at 2KB
     } catch {
       return undefined;

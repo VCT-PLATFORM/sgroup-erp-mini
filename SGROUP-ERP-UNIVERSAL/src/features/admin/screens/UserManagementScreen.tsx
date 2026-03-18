@@ -1,33 +1,44 @@
 /**
- * UserManagementScreen — Manage system users (Phase 2 Upgraded)
- * Full CRUD: Create, Search (debounced), Filter, Edit name/role/dept, Deactivate, Reset Password, Pagination
+ * UserManagementScreen — Premium upgrade
+ * Uses SGPageHeader, SGSearchBar, SGChip, SGPagination, SGAvatar, SGStatusBadge
+ * SGSkeleton loading, SGEmptyState, SGConfirmDialog, SGButton
+ * Modals extracted to separate files
+ * NEW: Bulk actions, unlock user, locked status badge, export CSV, improved filters
  */
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { View, Text, ScrollView, Pressable, TextInput, Platform, ActivityIndicator, Alert, Modal } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import {
-  Users, Search, Shield, X, Pencil, UserCircle, Mail, Calendar, Plus,
-  UserX, UserCheck, ChevronLeft, ChevronRight, Key, Building,
+  Users, Pencil, Key, UserX, UserCheck, Plus, Building, Mail, Inbox,
+  Lock, Unlock, Download, CheckSquare, Square, Upload, Eye,
 } from 'lucide-react-native';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
-import { sgds } from '../../../shared/theme/theme';
-import { useAdminUsers, useUpdateUser, useCreateUser, useDeactivateUser, useResetPassword } from '../hooks/useAdmin';
+import { typography, sgds, radius, spacing } from '../../../shared/theme/theme';
+import { ROLE_OPTIONS, getRoleStyle } from '../constants/adminConstants';
+import { showToast, showAlert, downloadFile } from '../utils/adminUtils';
+import { SGPageHeader } from '../../../shared/ui/components/SGPageHeader';
+import { SGSearchBar } from '../../../shared/ui/components/SGSearchBar';
+import { SGChip } from '../../../shared/ui/components/SGChip';
+import { SGPagination } from '../../../shared/ui/components/SGPagination';
+import { SGAvatar } from '../../../shared/ui/components/SGAvatar';
+import { SGStatusBadge } from '../../../shared/ui/components/SGStatusBadge';
+import { SGSkeleton } from '../../../shared/ui/components/SGSkeleton';
+import { SGEmptyState } from '../../../shared/ui/components/SGEmptyState';
+import { SGButton } from '../../../shared/ui/components/SGButton';
+import { SGConfirmDialog } from '../../../shared/ui/components/SGConfirmDialog';
+import { SGSection } from '../../../shared/ui/components/SGSection';
+import { useAdminUsers, useDeactivateUser, useUnlockUser, useBatchToggleUsers } from '../hooks/useAdmin';
+import { exportUsersCSV } from '../api/adminApi';
+import { CreateUserModal } from './CreateUserModal';
+import { EditUserModal } from './EditUserModal';
+import { ResetPasswordModal } from './ResetPasswordModal';
+import { UserDetailDrawer } from './UserDetailDrawer';
+import { BatchImportModal } from './BatchImportModal';
 
-const ROLE_OPTIONS = [
-  { value: 'admin',    label: 'Admin',      color: '#ef4444' },
-  { value: 'hr',       label: 'HR',         color: '#ec4899' },
-  { value: 'employee', label: 'Nhân viên',  color: '#6366f1' },
-  { value: 'sales',    label: 'Sales',      color: '#3b82f6' },
-  { value: 'ceo',      label: 'CEO',        color: '#f59e0b' },
-];
 
-const DEPT_OPTIONS = ['SALES', 'MARKETING', 'HR', 'FINANCE', 'OPS'];
 
 export function UserManagementScreen() {
-  const { theme, isDark } = useAppTheme();
-  const cText = theme.colors.textPrimary;
-  const cSub = theme.colors.textSecondary;
-  const cardBg = isDark ? 'rgba(255,255,255,0.03)' : '#ffffff';
-  const borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const { colors } = useAppTheme();
 
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -35,30 +46,38 @@ export function UserManagementScreen() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
 
-  // Search debounce
-  const debounceRef = useRef<any>(null);
+  // Debounced search
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleSearch = useCallback((t: string) => {
     setSearch(t);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => { setDebouncedSearch(t); setPage(1); }, 500);
   }, []);
 
-  // Edit modal state
+  useEffect(() => () => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+  }, []);
+
+  // Modal states
+  const [createModal, setCreateModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [editUser, setEditUser] = useState<any>(null);
-  const [editName, setEditName] = useState('');
-  const [editRole, setEditRole] = useState('');
-  const [editDept, setEditDept] = useState('');
-
-  // Create modal state
-  const [createModal, setCreateModal] = useState(false);
-  const [newUser, setNewUser] = useState({ name: '', email: '', password: '', role: 'employee', department: '' });
-
-  // Reset password modal
   const [resetModal, setResetModal] = useState(false);
   const [resetUserId, setResetUserId] = useState('');
   const [resetUserName, setResetUserName] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+
+  // Confirm deactivate dialog
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmUser, setConfirmUser] = useState<any>(null);
+
+  // Bulk selection
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkConfirmVisible, setBulkConfirmVisible] = useState(false);
+  const [bulkAction, setBulkAction] = useState<'activate' | 'deactivate'>('deactivate');
+
+  // Tier 2: Detail drawer + Import modal
+  const [detailUserId, setDetailUserId] = useState<string | null>(null);
+  const [importVisible, setImportVisible] = useState(false);
 
   const { data: rawData, isLoading } = useAdminUsers({
     search: debouncedSearch || undefined,
@@ -67,10 +86,9 @@ export function UserManagementScreen() {
     page,
     limit: 20,
   });
-  const updateUser = useUpdateUser();
-  const createUser = useCreateUser();
   const deactivateUser = useDeactivateUser();
-  const resetPassword = useResetPassword();
+  const unlockUserMut = useUnlockUser();
+  const batchToggle = useBatchToggleUsers();
 
   const users = useMemo(() => {
     if (!rawData) return [];
@@ -79,488 +97,502 @@ export function UserManagementScreen() {
 
   const meta = rawData?.meta ?? { total: users.length, page: 1, totalPages: 1 };
 
-  const inputStyle: any = {
-    backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
-    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10,
-    fontSize: 14, color: cText, flex: 1,
-    ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
-  };
-
-  const showAlert = (msg: string) => {
-    Platform.OS === 'web' ? window.alert(msg) : Alert.alert('Thông báo', msg);
-  };
-
-  // Open edit modal with user data
   const openEdit = (user: any) => {
     setEditUser(user);
-    setEditName(user.name || '');
-    setEditRole(user.role || 'employee');
-    setEditDept(user.department || '');
     setEditModal(true);
   };
 
-  const handleUpdateUser = async () => {
-    if (!editUser) return;
-    const data: any = {};
-    if (editName !== editUser.name) data.name = editName;
-    if (editRole !== editUser.role) data.role = editRole;
-    if (editDept !== (editUser.department || '')) data.department = editDept || null;
+  const openReset = (user: any) => {
+    setResetUserId(user.id);
+    setResetUserName(user.name);
+    setResetModal(true);
+  };
 
-    if (Object.keys(data).length === 0) {
-      setEditModal(false);
-      return;
-    }
+  const confirmDeactivate = (user: any) => {
+    setConfirmUser(user);
+    setConfirmVisible(true);
+  };
 
-    // Warn if changing to admin
-    if (data.role === 'admin' && editUser.role !== 'admin') {
-      if (Platform.OS === 'web') {
-        if (!window.confirm('⚠️ Bạn sắp cấp quyền ADMIN cho user này. Tiếp tục?')) return;
-      }
-    }
-
+  const handleDeactivate = async () => {
+    if (!confirmUser) return;
     try {
-      await updateUser.mutateAsync({ id: editUser.id, data });
-      setEditModal(false);
-      setEditUser(null);
+      await deactivateUser.mutateAsync(confirmUser.id);
+      setConfirmVisible(false);
+      setConfirmUser(null);
+      showToast(
+        confirmUser.isActive ? 'Đã vô hiệu hóa tài khoản' : 'Đã kích hoạt lại tài khoản',
+        'success',
+      );
     } catch (e: any) {
-      showAlert(e?.response?.data?.message || e?.message || 'Lỗi');
+      showToast(e?.response?.data?.message || e?.message || 'Lỗi', 'error');
     }
   };
 
-  const handleCreateUser = async () => {
-    if (!newUser.name || !newUser.email || !newUser.password) {
-      showAlert('Vui lòng nhập đầy đủ thông tin');
-      return;
-    }
+  const handleUnlock = async (user: any) => {
     try {
-      await createUser.mutateAsync(newUser);
-      setCreateModal(false);
-      setNewUser({ name: '', email: '', password: '', role: 'employee', department: '' });
-      showAlert('Tạo user thành công!');
+      await unlockUserMut.mutateAsync(user.id);
+      showToast(`Đã mở khóa tài khoản ${user.name}`, 'success');
     } catch (e: any) {
-      showAlert(e?.response?.data?.message || e?.message || 'Lỗi');
+      showToast(e?.response?.data?.message || e?.message || 'Lỗi', 'error');
     }
   };
 
-  const handleDeactivate = async (user: any) => {
-    const action = user.isActive ? 'vô hiệu hóa' : 'kích hoạt lại';
-    if (Platform.OS === 'web') {
-      if (!window.confirm(`Bạn có chắc muốn ${action} user "${user.name}"?`)) return;
+  // Bulk actions
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const n = new Set(prev);
+      if (n.has(id)) n.delete(id); else n.add(id);
+      return n;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === users.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(users.map((u: any) => u.id)));
     }
+  };
+
+  const handleBulkToggle = async () => {
     try {
-      await deactivateUser.mutateAsync(user.id);
+      await batchToggle.mutateAsync({
+        ids: Array.from(selectedIds),
+        activate: bulkAction === 'activate',
+      });
+      setBulkConfirmVisible(false);
+      setSelectedIds(new Set());
+      showToast(
+        `Đã ${bulkAction === 'activate' ? 'kích hoạt' : 'vô hiệu hóa'} ${selectedIds.size} tài khoản`,
+        'success',
+      );
     } catch (e: any) {
-      showAlert(e?.response?.data?.message || e?.message || 'Lỗi');
+      showToast(e?.response?.data?.message || e?.message || 'Lỗi', 'error');
     }
   };
 
-  const handleResetPassword = async () => {
-    if (!newPassword || newPassword.length < 8) {
-      showAlert('Mật khẩu phải có ít nhất 8 ký tự');
-      return;
-    }
+  const handleExportCSV = async () => {
     try {
-      await resetPassword.mutateAsync({ id: resetUserId, newPassword });
-      setResetModal(false);
-      setNewPassword('');
-      showAlert('Đặt lại mật khẩu thành công!');
+      const csv = await exportUsersCSV({ role: roleFilter || undefined, status: statusFilter || undefined });
+      downloadFile(csv, `users_export_${new Date().toISOString().slice(0, 10)}.csv`);
+      showToast('Đã xuất file CSV', 'success');
     } catch (e: any) {
-      showAlert(e?.response?.data?.message || e?.message || 'Lỗi');
+      showToast('Lỗi khi xuất CSV', 'error');
     }
   };
 
-  const getRoleStyle = (role: string) => {
-    const r = ROLE_OPTIONS.find(o => o.value === role);
-    return r || { label: role, color: '#64748b' };
-  };
+  const isLocked = (user: any) => user.lockedUntil && new Date(user.lockedUntil) > new Date();
 
-  const modalOverlay: any = {
-    position: 'absolute' as const, top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center', zIndex: 9999,
-    ...(Platform.OS === 'web' ? { position: 'fixed' } : {}),
-  };
+  const renderUserItem = (user: any, index: number) => {
+    const roleStyle = getRoleStyle(user.role);
+    const locked = isLocked(user);
+    const isSelected = selectedIds.has(user.id);
+    return (
+      <Animated.View entering={FadeInDown.delay(Math.min(index * 40, 300)).duration(300).springify()}>
+        <View
+          style={[styles.userRow, {
+            borderBottomWidth: index < users.length - 1 ? 1 : 0,
+            borderBottomColor: colors.border,
+            backgroundColor: isSelected ? `${colors.accent}08` : 'transparent',
+          }]}
+        >
+          {/* Checkbox */}
+          <Pressable onPress={() => toggleSelect(user.id)} style={styles.checkbox}>
+            {isSelected
+              ? <CheckSquare size={18} color={colors.accent} />
+              : <Square size={18} color={colors.textDisabled} />
+            }
+          </Pressable>
 
-  const modalBox = {
-    width: Platform.OS === 'web' ? 480 : '90%', borderRadius: 24,
-    backgroundColor: isDark ? '#1e293b' : '#ffffff', padding: 28,
-    ...(Platform.OS === 'web' ? {
-      boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
-    } : { shadowColor: '#000', shadowOpacity: 0.3, shadowRadius: 20, elevation: 20 }),
-  } as any;
+          {/* Avatar */}
+          <SGAvatar
+            name={user.name || '?'}
+            size="md"
+            color={roleStyle.color}
+            status={user.isActive === false ? 'offline' : undefined}
+          />
+
+          {/* Info */}
+          <View style={[styles.userInfo, { opacity: user.isActive === false ? 0.6 : 1 }]}>
+            <View style={styles.userName}>
+              <Text style={[typography.bodyBold, { color: colors.text }]}>{user.name}</Text>
+              {user.isActive === false && (
+                <SGStatusBadge status="danger" text="INACTIVE" size="sm" />
+              )}
+              {locked && (
+                <SGStatusBadge status="warning" text="LOCKED" size="sm" />
+              )}
+            </View>
+            <View style={styles.userEmail}>
+              <Mail size={11} color={colors.textTertiary} />
+              <Text style={[typography.caption, { color: colors.textSecondary }]}>{user.email}</Text>
+            </View>
+            {user.department && (
+              <View style={styles.userDept}>
+                <Building size={10} color={colors.textTertiary} />
+                <Text style={[typography.caption, { color: colors.textTertiary }]}>{user.department}</Text>
+              </View>
+            )}
+            {user.lastLoginAt && (
+              <Text style={[typography.caption, { color: colors.textDisabled, marginTop: 1 }]}>
+                {new Date(user.lastLoginAt).toLocaleDateString('vi')} · {user.loginCount ?? 0} lần
+              </Text>
+            )}
+          </View>
+
+          {/* Role badge */}
+          <SGChip label={roleStyle.label} color={roleStyle.color} selected />
+
+          {/* Actions */}
+          <View style={styles.actions}>
+            <Pressable
+              onPress={() => setDetailUserId(user.id)}
+              accessibilityRole="button"
+              accessibilityLabel={`Chi tiết ${user.name}`}
+              {...(Platform.OS === 'web' ? { title: 'Chi tiết' } as any : {})}
+              style={({ hovered }: any) => [
+                styles.actionBtn,
+                {
+                  backgroundColor: hovered ? `${colors.info}15` : colors.bgCard,
+                },
+                Platform.OS === 'web' && ({ ...sgds.transition.fast, cursor: 'pointer' } as any),
+              ]}
+            >
+              <Eye size={14} color={colors.info} />
+            </Pressable>
+            <Pressable
+              onPress={() => openEdit(user)}
+              accessibilityRole="button"
+              accessibilityLabel={`Chỉnh sửa ${user.name}`}
+              {...(Platform.OS === 'web' ? { title: 'Chỉnh sửa' } as any : {})}
+              style={({ hovered }: any) => [
+                styles.actionBtn,
+                {
+                  backgroundColor: hovered ? `${colors.accent}15` : colors.bgCard,
+                },
+                Platform.OS === 'web' && ({ ...sgds.transition.fast, cursor: 'pointer' } as any),
+              ]}
+            >
+              <Pencil size={14} color={colors.accent} />
+            </Pressable>
+            <Pressable
+              onPress={() => openReset(user)}
+              accessibilityRole="button"
+              accessibilityLabel={`Đặt lại mật khẩu ${user.name}`}
+              {...(Platform.OS === 'web' ? { title: 'Đặt lại mật khẩu' } as any : {})}
+              style={({ hovered }: any) => [
+                styles.actionBtn,
+                {
+                  backgroundColor: hovered ? `${colors.warning}15` : colors.bgCard,
+                },
+                Platform.OS === 'web' && ({ ...sgds.transition.fast, cursor: 'pointer' } as any),
+              ]}
+            >
+              <Key size={14} color={colors.warning} />
+            </Pressable>
+            {locked ? (
+              <Pressable
+                onPress={() => handleUnlock(user)}
+                accessibilityRole="button"
+                accessibilityLabel={`Mở khóa ${user.name}`}
+                {...(Platform.OS === 'web' ? { title: 'Mở khóa' } as any : {})}
+                style={({ hovered }: any) => [
+                  styles.actionBtn,
+                  {
+                    backgroundColor: hovered ? `${colors.info}15` : colors.bgCard,
+                  },
+                  Platform.OS === 'web' && ({ ...sgds.transition.fast, cursor: 'pointer' } as any),
+                ]}
+              >
+                <Unlock size={14} color={colors.info} />
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={() => confirmDeactivate(user)}
+                accessibilityRole="button"
+                accessibilityLabel={user.isActive ? `Vô hiệu hóa ${user.name}` : `Kích hoạt ${user.name}`}
+                {...(Platform.OS === 'web' ? { title: user.isActive ? 'Vô hiệu hóa' : 'Kích hoạt' } as any : {})}
+                style={({ hovered }: any) => [
+                  styles.actionBtn,
+                  {
+                    backgroundColor: hovered
+                      ? (user.isActive ? `${colors.danger}15` : `${colors.success}15`)
+                      : colors.bgCard,
+                  },
+                  Platform.OS === 'web' && ({ ...sgds.transition.fast, cursor: 'pointer' } as any),
+                ]}
+              >
+                {user.isActive ? <UserX size={14} color={colors.danger} /> : <UserCheck size={14} color={colors.success} />}
+              </Pressable>
+            )}
+          </View>
+        </View>
+      </Animated.View>
+    );
+  };
 
   return (
-    <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 28, gap: 20, paddingBottom: 120 }}>
+    <View style={styles.container}>
+      <View style={styles.innerPadding}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: isDark ? 'rgba(99,102,241,0.12)' : '#eef2ff', alignItems: 'center', justifyContent: 'center' }}>
-              <Users size={24} color="#6366f1" />
-            </View>
-            <View>
-              <Text style={{ ...sgds.typo.h2, color: cText }}>Quản lý người dùng</Text>
-              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>{meta.total} tài khoản</Text>
-            </View>
-          </View>
-          <Pressable
-            onPress={() => setCreateModal(true)}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8,
-              paddingHorizontal: 18, paddingVertical: 12, borderRadius: 14, backgroundColor: '#6366f1',
-              ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
-            } as any}
-          >
-            <Plus size={16} color="#fff" />
-            <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff' }}>Tạo User</Text>
-          </Pressable>
-        </View>
+        <Animated.View entering={FadeInDown.duration(400)}>
+          <SGPageHeader
+            icon={<Users size={24} color={colors.accent} />}
+            iconColor={colors.accent}
+            title="Quản lý người dùng"
+            subtitle={`${meta.total} tài khoản`}
+            rightContent={
+              <View style={styles.headerActions}>
+                {Platform.OS === 'web' && (
+                  <SGButton
+                    title="Export CSV"
+                    variant="secondary"
+                    icon={<Download size={16} />}
+                    size="sm"
+                    onPress={handleExportCSV}
+                  />
+                )}
+                <SGButton
+                  title="Import CSV"
+                  variant="secondary"
+                  icon={<Upload size={16} />}
+                  size="sm"
+                  onPress={() => setImportVisible(true)}
+                />
+                <SGButton
+                  title="Tạo User"
+                  onPress={() => setCreateModal(true)}
+                  icon={<Plus size={16} color="#fff" />}
+                  size="md"
+                />
+              </View>
+            }
+          />
+        </Animated.View>
 
         {/* Search + Filters */}
-        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
-          <View style={{
-            flex: 1, minWidth: 220, flexDirection: 'row', alignItems: 'center', gap: 8,
-            backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
-            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-            borderRadius: 14, paddingHorizontal: 14,
-          }}>
-            <Search size={16} color={cSub} />
-            <TextInput
-              value={search}
-              onChangeText={handleSearch}
-              placeholder="Tìm theo tên, email..."
-              placeholderTextColor={cSub}
-              style={[inputStyle, { borderWidth: 0, paddingHorizontal: 0, backgroundColor: 'transparent' }]}
-            />
-          </View>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <SGSearchBar
+            value={search}
+            onChangeText={handleSearch}
+            placeholder="Tìm theo tên, email..."
+          />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={styles.filterRow}>
           {/* Role filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 6, alignItems: 'center' }}>
-            <Pressable
-              onPress={() => { setRoleFilter(''); setPage(1); }}
-              style={{ paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, backgroundColor: !roleFilter ? '#6366f1' : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9') }}
-            >
-              <Text style={{ fontSize: 11, fontWeight: '700', color: !roleFilter ? '#fff' : cSub }}>Tất cả</Text>
-            </Pressable>
-            {ROLE_OPTIONS.map(r => (
-              <Pressable
-                key={r.value}
-                onPress={() => { setRoleFilter(roleFilter === r.value ? '' : r.value); setPage(1); }}
-                style={{
-                  paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10,
-                  backgroundColor: roleFilter === r.value ? `${r.color}20` : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                  borderWidth: roleFilter === r.value ? 1 : 0, borderColor: r.color,
-                }}
-              >
-                <Text style={{ fontSize: 11, fontWeight: '700', color: roleFilter === r.value ? r.color : cSub }}>{r.label}</Text>
-              </Pressable>
-            ))}
-          </ScrollView>
+          <SGChip
+            label="Tất cả"
+            selected={!roleFilter}
+            onPress={() => { setRoleFilter(''); setPage(1); }}
+          />
+          {ROLE_OPTIONS.map(r => (
+            <SGChip
+              key={r.value}
+              label={r.label}
+              color={r.color}
+              selected={roleFilter === r.value}
+              onPress={() => { setRoleFilter(roleFilter === r.value ? '' : r.value); setPage(1); }}
+            />
+          ))}
+
+          <View style={styles.filterSpacer} />
+
           {/* Status filter */}
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {[
-              { value: '', label: 'All', icon: null },
-              { value: 'active', label: 'Active', icon: UserCheck, color: '#10b981' },
-              { value: 'inactive', label: 'Inactive', icon: UserX, color: '#ef4444' },
-            ].map(s => (
-              <Pressable
-                key={s.value}
-                onPress={() => { setStatusFilter(statusFilter === s.value ? '' : s.value); setPage(1); }}
-                style={{
-                  paddingHorizontal: 12, paddingVertical: 8, borderRadius: 10, flexDirection: 'row', alignItems: 'center', gap: 4,
-                  backgroundColor: statusFilter === s.value ? (s.color ? `${s.color}15` : '#6366f1') : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                }}
-              >
-                {s.icon && <s.icon size={12} color={statusFilter === s.value ? s.color : cSub} />}
-                <Text style={{ fontSize: 11, fontWeight: '700', color: statusFilter === s.value ? (s.color || '#fff') : cSub }}>{s.label}</Text>
+          <SGChip
+            label="All"
+            selected={!statusFilter}
+            onPress={() => { setStatusFilter(''); setPage(1); }}
+          />
+          <SGChip
+            label="Active"
+            color={colors.success}
+            selected={statusFilter === 'active'}
+            icon={<UserCheck size={12} color={statusFilter === 'active' ? colors.success : colors.textTertiary} />}
+            onPress={() => { setStatusFilter(statusFilter === 'active' ? '' : 'active'); setPage(1); }}
+          />
+          <SGChip
+            label="Inactive"
+            color={colors.danger}
+            selected={statusFilter === 'inactive'}
+            icon={<UserX size={12} color={statusFilter === 'inactive' ? colors.danger : colors.textTertiary} />}
+            onPress={() => { setStatusFilter(statusFilter === 'inactive' ? '' : 'inactive'); setPage(1); }}
+          />
+          <SGChip
+            label="Locked"
+            color={colors.warning}
+            selected={statusFilter === 'locked'}
+            icon={<Lock size={12} color={statusFilter === 'locked' ? colors.warning : colors.textTertiary} />}
+            onPress={() => { setStatusFilter(statusFilter === 'locked' ? '' : 'locked'); setPage(1); }}
+          />
+        </Animated.View>
+
+        {/* Bulk actions bar */}
+        {selectedIds.size > 0 && (
+          <Animated.View entering={FadeInDown.duration(300)} style={[styles.bulkBar, { backgroundColor: `${colors.accent}10`, borderColor: `${colors.accent}25` }]}>
+            <View style={styles.bulkInfo}>
+              <Text style={[typography.smallBold, { color: colors.accent }]}>
+                {selectedIds.size} user đã chọn
+              </Text>
+            </View>
+            <View style={styles.bulkActions}>
+              <SGButton
+                title="Kích hoạt"
+                size="sm"
+                variant="secondary"
+                icon={<UserCheck size={14} />}
+                onPress={() => { setBulkAction('activate'); setBulkConfirmVisible(true); }}
+              />
+              <SGButton
+                title="Vô hiệu hóa"
+                size="sm"
+                variant="secondary"
+                icon={<UserX size={14} />}
+                onPress={() => { setBulkAction('deactivate'); setBulkConfirmVisible(true); }}
+              />
+              <Pressable onPress={() => setSelectedIds(new Set())} style={styles.bulkCancel}>
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>Bỏ chọn</Text>
               </Pressable>
-            ))}
-          </View>
-        </View>
+            </View>
+          </Animated.View>
+        )}
 
         {/* User List */}
         {isLoading ? (
-          <View style={{ padding: 60, alignItems: 'center' }}><ActivityIndicator size="large" color="#6366f1" /></View>
-        ) : users.length === 0 ? (
-          <View style={{ padding: 60, alignItems: 'center', borderRadius: 20, backgroundColor: cardBg, borderWidth: 1, borderColor }}>
-            <Text style={{ fontSize: 40, marginBottom: 12 }}>👤</Text>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: cSub }}>Không tìm thấy user nào</Text>
-          </View>
-        ) : (
-          <View style={{ borderRadius: 20, backgroundColor: cardBg, borderWidth: 1, borderColor, overflow: 'hidden' }}>
-            {users.map((user: any, i: number) => {
-              const roleStyle = getRoleStyle(user.role);
-              return (
-                <View key={user.id} style={{
-                  flexDirection: 'row', alignItems: 'center', gap: 12,
-                  padding: 16, borderBottomWidth: i < users.length - 1 ? 1 : 0, borderBottomColor: borderColor,
-                }}>
-                  {/* Avatar */}
-                  <View style={{
-                    width: 44, height: 44, borderRadius: 14,
-                    backgroundColor: `${roleStyle.color}12`,
-                    alignItems: 'center', justifyContent: 'center',
-                    opacity: user.isActive === false ? 0.5 : 1,
-                  }}>
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: roleStyle.color }}>
-                      {user.name?.charAt(0)?.toUpperCase() || '?'}
-                    </Text>
-                  </View>
-
-                  {/* Info */}
-                  <View style={{ flex: 1, opacity: user.isActive === false ? 0.6 : 1 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                      <Text style={{ fontSize: 14, fontWeight: '700', color: cText }}>{user.name}</Text>
-                      {user.isActive === false && (
-                        <View style={{ paddingHorizontal: 6, paddingVertical: 1, borderRadius: 4, backgroundColor: 'rgba(239,68,68,0.12)' }}>
-                          <Text style={{ fontSize: 8, fontWeight: '800', color: '#ef4444' }}>INACTIVE</Text>
-                        </View>
-                      )}
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                      <Mail size={11} color={cSub} />
-                      <Text style={{ fontSize: 11, fontWeight: '600', color: cSub }}>{user.email}</Text>
-                    </View>
-                    {user.department && (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 }}>
-                        <Building size={10} color={cSub} />
-                        <Text style={{ fontSize: 10, fontWeight: '600', color: cSub }}>{user.department}</Text>
-                      </View>
-                    )}
-                  </View>
-
-                  {/* Role badge */}
-                  <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, backgroundColor: `${roleStyle.color}12` }}>
-                    <Text style={{ fontSize: 10, fontWeight: '800', color: roleStyle.color }}>{roleStyle.label}</Text>
-                  </View>
-
-                  {/* Actions */}
-                  <View style={{ flexDirection: 'row', gap: 6 }}>
-                    <Pressable
-                      onPress={() => openEdit(user)}
-                      style={{ width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}
-                    >
-                      <Pencil size={14} color="#6366f1" />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => { setResetUserId(user.id); setResetUserName(user.name); setNewPassword(''); setResetModal(true); }}
-                      style={{ width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}
-                    >
-                      <Key size={14} color="#f59e0b" />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleDeactivate(user)}
-                      style={{ width: 34, height: 34, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: user.isActive ? 'rgba(239,68,68,0.08)' : 'rgba(16,185,129,0.08)' }}
-                    >
-                      {user.isActive ? <UserX size={14} color="#ef4444" /> : <UserCheck size={14} color="#10b981" />}
-                    </Pressable>
-                  </View>
+          <View style={styles.skeletonContainer}>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <View key={i} style={styles.skeletonRow}>
+                <SGSkeleton width={40} height={40} variant="circle" />
+                <View style={{ flex: 1, gap: 6 }}>
+                  <SGSkeleton width="60%" height={14} variant="text" />
+                  <SGSkeleton width="40%" height={10} variant="text" />
                 </View>
-              );
-            })}
+                <SGSkeleton width={60} height={28} borderRadius={20} />
+              </View>
+            ))}
           </View>
+        ) : users.length === 0 ? (
+          <SGSection>
+            <SGEmptyState
+              icon={<Inbox size={48} color={colors.textTertiary} strokeWidth={1} />}
+              title="Không tìm thấy user nào"
+              subtitle="Thử thay đổi bộ lọc hoặc tạo user mới"
+              actionLabel="Tạo User"
+              onAction={() => setCreateModal(true)}
+            />
+          </SGSection>
+        ) : (
+          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+            <SGSection noPadding>
+              {/* Select all row */}
+              <Pressable onPress={toggleSelectAll} style={[styles.selectAllRow, { borderBottomColor: colors.border }]}>
+                {selectedIds.size === users.length
+                  ? <CheckSquare size={16} color={colors.accent} />
+                  : <Square size={16} color={colors.textDisabled} />
+                }
+                <Text style={[typography.caption, { color: colors.textSecondary }]}>
+                  Chọn tất cả ({users.length})
+                </Text>
+              </Pressable>
+              {users.map((user: any, index: number) => (
+                <React.Fragment key={user.id}>
+                  {renderUserItem(user, index)}
+                </React.Fragment>
+              ))}
+            </SGSection>
+          </Animated.View>
         )}
 
         {/* Pagination */}
         {meta.totalPages > 1 && (
-          <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 16, marginTop: 8 }}>
-            <Pressable
-              onPress={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page <= 1}
-              style={{
-                width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
-                backgroundColor: page <= 1 ? (isDark ? 'rgba(255,255,255,0.03)' : '#f1f5f9') : '#6366f1',
-              }}
-            >
-              <ChevronLeft size={16} color={page <= 1 ? cSub : '#fff'} />
-            </Pressable>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: cText }}>
-              Trang {meta.page} / {meta.totalPages}
-            </Text>
-            <Pressable
-              onPress={() => setPage(p => Math.min(meta.totalPages, p + 1))}
-              disabled={page >= meta.totalPages}
-              style={{
-                width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
-                backgroundColor: page >= meta.totalPages ? (isDark ? 'rgba(255,255,255,0.03)' : '#f1f5f9') : '#6366f1',
-              }}
-            >
-              <ChevronRight size={16} color={page >= meta.totalPages ? cSub : '#fff'} />
-            </Pressable>
-          </View>
+          <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+            <SGPagination
+              currentPage={page}
+              totalPages={meta.totalPages}
+              onPageChange={setPage}
+            />
+          </Animated.View>
         )}
-      </ScrollView>
+      </View>
 
-      {/* ═══ CREATE USER MODAL ═══ */}
-      {createModal && (
-        <View style={modalOverlay}>
-          <View style={modalBox}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: cText }}>Tạo User mới</Text>
-              <Pressable onPress={() => setCreateModal(false)}><X size={20} color={cSub} /></Pressable>
-            </View>
-            <View style={{ gap: 14 }}>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Họ tên *</Text>
-                <TextInput value={newUser.name} onChangeText={t => setNewUser(p => ({ ...p, name: t }))} placeholder="Nguyễn Văn A" placeholderTextColor={cSub} style={inputStyle} />
-              </View>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Email *</Text>
-                <TextInput value={newUser.email} onChangeText={t => setNewUser(p => ({ ...p, email: t }))} placeholder="user@sgroup.vn" keyboardType="email-address" placeholderTextColor={cSub} style={inputStyle} />
-              </View>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Mật khẩu * (≥ 8 ký tự)</Text>
-                <TextInput value={newUser.password} onChangeText={t => setNewUser(p => ({ ...p, password: t }))} placeholder="••••••••" secureTextEntry placeholderTextColor={cSub} style={inputStyle} />
-              </View>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Vai trò</Text>
-                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                  {ROLE_OPTIONS.map(r => (
-                    <Pressable key={r.value} onPress={() => setNewUser(p => ({ ...p, role: r.value }))} style={{
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-                      backgroundColor: newUser.role === r.value ? `${r.color}20` : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                      borderWidth: newUser.role === r.value ? 1 : 0, borderColor: r.color,
-                    }}>
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: newUser.role === r.value ? r.color : cSub }}>{r.label}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Phòng ban</Text>
-                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                  {DEPT_OPTIONS.map(d => (
-                    <Pressable key={d} onPress={() => setNewUser(p => ({ ...p, department: p.department === d ? '' : d }))} style={{
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-                      backgroundColor: newUser.department === d ? 'rgba(99,102,241,0.15)' : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                      borderWidth: newUser.department === d ? 1 : 0, borderColor: '#6366f1',
-                    }}>
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: newUser.department === d ? '#6366f1' : cSub }}>{d}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            </View>
-            <Pressable onPress={handleCreateUser} disabled={createUser.isPending} style={{
-              marginTop: 24, paddingVertical: 14, borderRadius: 14, backgroundColor: '#6366f1', alignItems: 'center',
-              opacity: createUser.isPending ? 0.6 : 1,
-            }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>
-                {createUser.isPending ? 'Đang tạo...' : 'Tạo User'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
+      {/* Modals */}
+      <CreateUserModal visible={createModal} onClose={() => setCreateModal(false)} />
+      <EditUserModal visible={editModal} onClose={() => { setEditModal(false); setEditUser(null); }} user={editUser} />
+      <ResetPasswordModal
+        visible={resetModal}
+        onClose={() => setResetModal(false)}
+        userId={resetUserId}
+        userName={resetUserName}
+      />
 
-      {/* ═══ EDIT USER MODAL ═══ */}
-      {editModal && editUser && (
-        <View style={modalOverlay}>
-          <View style={modalBox}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: cText }}>Chỉnh sửa User</Text>
-              <Pressable onPress={() => setEditModal(false)}><X size={20} color={cSub} /></Pressable>
-            </View>
-            {/* User info header */}
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20, padding: 14, borderRadius: 14, backgroundColor: isDark ? 'rgba(255,255,255,0.04)' : '#f8fafc' }}>
-              <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: `${getRoleStyle(editUser.role).color}15`, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={{ fontSize: 16, fontWeight: '800', color: getRoleStyle(editUser.role).color }}>{editUser.name?.charAt(0)?.toUpperCase()}</Text>
-              </View>
-              <View>
-                <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>{editUser.email}</Text>
-                <Text style={{ fontSize: 10, fontWeight: '600', color: `${cSub}80` }}>ID: {editUser.id?.slice(0, 8)}...</Text>
-              </View>
-            </View>
-            <View style={{ gap: 14 }}>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Họ tên</Text>
-                <TextInput value={editName} onChangeText={setEditName} placeholderTextColor={cSub} style={inputStyle} />
-              </View>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Vai trò</Text>
-                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                  {ROLE_OPTIONS.map(r => (
-                    <Pressable key={r.value} onPress={() => setEditRole(r.value)} style={{
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-                      backgroundColor: editRole === r.value ? `${r.color}20` : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                      borderWidth: editRole === r.value ? 1 : 0, borderColor: r.color,
-                    }}>
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: editRole === r.value ? r.color : cSub }}>{r.label}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-              <View>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Phòng ban</Text>
-                <View style={{ flexDirection: 'row', gap: 6, flexWrap: 'wrap' }}>
-                  <Pressable onPress={() => setEditDept('')} style={{
-                    paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-                    backgroundColor: !editDept ? 'rgba(99,102,241,0.15)' : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                  }}>
-                    <Text style={{ fontSize: 12, fontWeight: '700', color: !editDept ? '#6366f1' : cSub }}>Không</Text>
-                  </Pressable>
-                  {DEPT_OPTIONS.map(d => (
-                    <Pressable key={d} onPress={() => setEditDept(d)} style={{
-                      paddingHorizontal: 14, paddingVertical: 8, borderRadius: 10,
-                      backgroundColor: editDept === d ? 'rgba(99,102,241,0.15)' : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                      borderWidth: editDept === d ? 1 : 0, borderColor: '#6366f1',
-                    }}>
-                      <Text style={{ fontSize: 12, fontWeight: '700', color: editDept === d ? '#6366f1' : cSub }}>{d}</Text>
-                    </Pressable>
-                  ))}
-                </View>
-              </View>
-            </View>
-            <Pressable onPress={handleUpdateUser} disabled={updateUser.isPending} style={{
-              marginTop: 24, paddingVertical: 14, borderRadius: 14, backgroundColor: '#6366f1', alignItems: 'center',
-              opacity: updateUser.isPending ? 0.6 : 1,
-            }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>
-                {updateUser.isPending ? 'Đang lưu...' : 'Lưu thay đổi'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
+      {/* Confirm Deactivate Dialog */}
+      <SGConfirmDialog
+        visible={confirmVisible}
+        title={confirmUser?.isActive ? 'Vô hiệu hóa User' : 'Kích hoạt lại User'}
+        message={`Bạn có chắc muốn ${confirmUser?.isActive ? 'vô hiệu hóa' : 'kích hoạt lại'} user "${confirmUser?.name}"?`}
+        confirmLabel={confirmUser?.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
+        variant={confirmUser?.isActive ? 'danger' : 'default'}
+        loading={deactivateUser.isPending}
+        onConfirm={handleDeactivate}
+        onCancel={() => { setConfirmVisible(false); setConfirmUser(null); }}
+      />
 
-      {/* ═══ RESET PASSWORD MODAL ═══ */}
-      {resetModal && (
-        <View style={modalOverlay}>
-          <View style={modalBox}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <Text style={{ fontSize: 18, fontWeight: '800', color: cText }}>Đặt lại mật khẩu</Text>
-              <Pressable onPress={() => setResetModal(false)}><X size={20} color={cSub} /></Pressable>
-            </View>
-            <View style={{
-              flexDirection: 'row', alignItems: 'center', gap: 10, padding: 12, borderRadius: 12, marginBottom: 16,
-              backgroundColor: 'rgba(245,158,11,0.08)', borderWidth: 1, borderColor: 'rgba(245,158,11,0.15)',
-            }}>
-              <Key size={16} color="#f59e0b" />
-              <Text style={{ flex: 1, fontSize: 12, fontWeight: '600', color: cSub }}>
-                Đặt lại mật khẩu cho <Text style={{ fontWeight: '800', color: cText }}>{resetUserName}</Text>
-              </Text>
-            </View>
-            <View>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginBottom: 6 }}>Mật khẩu mới (≥ 8 ký tự)</Text>
-              <TextInput
-                value={newPassword}
-                onChangeText={setNewPassword}
-                placeholder="Nhập mật khẩu mới..."
-                secureTextEntry
-                placeholderTextColor={cSub}
-                style={inputStyle}
-              />
-            </View>
-            <Pressable onPress={handleResetPassword} disabled={resetPassword.isPending} style={{
-              marginTop: 20, paddingVertical: 14, borderRadius: 14, backgroundColor: '#f59e0b', alignItems: 'center',
-              opacity: resetPassword.isPending ? 0.6 : 1,
-            }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>
-                {resetPassword.isPending ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
+      {/* Bulk Action Confirm */}
+      <SGConfirmDialog
+        visible={bulkConfirmVisible}
+        title={bulkAction === 'activate' ? 'Kích hoạt hàng loạt' : 'Vô hiệu hóa hàng loạt'}
+        message={`Bạn có chắc muốn ${bulkAction === 'activate' ? 'kích hoạt' : 'vô hiệu hóa'} ${selectedIds.size} tài khoản?`}
+        confirmLabel={bulkAction === 'activate' ? 'Kích hoạt' : 'Vô hiệu hóa'}
+        variant={bulkAction === 'deactivate' ? 'danger' : 'default'}
+        loading={batchToggle.isPending}
+        onConfirm={handleBulkToggle}
+        onCancel={() => setBulkConfirmVisible(false)}
+      />
+
+      {/* Tier 2: User Detail Drawer */}
+      <UserDetailDrawer userId={detailUserId} onClose={() => setDetailUserId(null)} />
+
+      {/* Tier 2: Batch Import Modal */}
+      <BatchImportModal visible={importVisible} onClose={() => setImportVisible(false)} />
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  innerPadding: { padding: spacing['2xl'] - 4, gap: spacing.lg - 4, paddingBottom: 120 },
+  headerActions: { flexDirection: 'row', gap: 8 },
+  filterRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, alignItems: 'center' },
+  filterSpacer: { width: 12 },
+  // Bulk actions bar
+  bulkBar: {
+    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
+    padding: 12, borderRadius: 12, borderWidth: 1,
+  },
+  bulkInfo: { flex: 1 },
+  bulkActions: { flexDirection: 'row', gap: 8, alignItems: 'center' },
+  bulkCancel: { paddingHorizontal: 8, paddingVertical: 4 },
+  // Select all
+  selectAllRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingHorizontal: spacing.base, paddingVertical: 10,
+    borderBottomWidth: 1,
+  },
+  // Checkbox
+  checkbox: { padding: 4 },
+  userRow: {
+    flexDirection: 'row', alignItems: 'center', gap: 12,
+    padding: spacing.base,
+  },
+  userInfo: { flex: 1 },
+  userName: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 2 },
+  userEmail: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  userDept: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2 },
+  actions: { flexDirection: 'row', gap: 6 },
+  actionBtn: {
+    width: 34, height: 34, borderRadius: radius.sm + 2,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  skeletonContainer: { gap: 16 },
+  skeletonRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+});

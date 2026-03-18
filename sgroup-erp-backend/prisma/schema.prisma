@@ -93,18 +93,24 @@ enum AppointmentStatus {
 // AUTH
 // ══════════════════════════════════════════════════════════════════
 model User {
-  id         String     @id @default(uuid(7))
-  email      String     @unique
-  name       String
-  password   String
-  role       String     @default("employee") // admin, hr, employee
-  department String? // SALES, MARKETING, HR, FINANCE, OPS
-  isActive   Boolean    @default(true) @map("is_active")
-  salesRole  String?    @map("sales_role")
-  teamId     String?    @map("team_id")
-  team       SalesTeam? @relation(fields: [teamId], references: [id], onDelete: SetNull)
-  createdAt  DateTime   @default(now()) @map("created_at")
-  updatedAt  DateTime   @updatedAt @map("updated_at")
+  id                  String     @id @default(uuid(7))
+  email               String     @unique
+  name                String
+  password            String
+  role                String     @default("employee") // admin, hr, employee
+  department          String? // SALES, MARKETING, HR, FINANCE, OPS
+  isActive            Boolean    @default(true) @map("is_active")
+  salesRole           String?    @map("sales_role")
+  teamId              String?    @map("team_id")
+  team                SalesTeam? @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  // Login tracking & account lock
+  lastLoginAt         DateTime?  @map("last_login_at")
+  loginCount          Int        @default(0) @map("login_count")
+  failedLoginAttempts Int        @default(0) @map("failed_login_attempts")
+  lockedUntil         DateTime?  @map("locked_until")
+  passwordChangedAt   DateTime?  @map("password_changed_at")
+  createdAt           DateTime   @default(now()) @map("created_at")
+  updatedAt           DateTime   @updatedAt @map("updated_at")
 
   refreshTokens     RefreshToken[]
   notifications     Notification[]
@@ -532,6 +538,7 @@ model AuditLog {
   errorMessage   String?  @map("error_message") @db.Text
   duration       Int?     // milliseconds
   ip             String?
+  userAgent      String?  @map("user_agent") // Browser / Device info
   createdAt      DateTime @default(now()) @map("created_at")
 
   @@index([action])
@@ -550,6 +557,7 @@ model RolePermission {
   role       String   // admin, ceo, hr, sales, employee
   module     String   // admin, hr, sales, finance, project, marketing, planning, reports
   permission String   @default("none") // full, write, read, none
+  updatedBy  String?  @map("updated_by") // who changed this permission
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
@@ -1762,3 +1770,48 @@ model SystemSetting {
   @@index([group])
   @@map("system_settings")
 }
+
+model FeatureFlag {
+  id          String   @id @default(uuid(7))
+  key         String   @unique       // e.g. "module.hr.enabled", "feature.2fa", "feature.dark_mode"
+  enabled     Boolean  @default(false)
+  description String?
+  module      String?                // which module this flag belongs to
+  updatedBy   String?  @map("updated_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([module])
+  @@map("feature_flags")
+}
+
+model AdminNotification {
+  id        String   @id @default(uuid(7))
+  type      String                // LOGIN_FAIL, SETTING_CHANGE, USER_LOCKED, PASSWORD_EXPIRED, USER_CREATED, SYSTEM
+  title     String
+  message   String
+  severity  String   @default("info") // info, warning, danger, success
+  userId    String?  @map("user_id")   // target admin user (null = broadcast to all)
+  isRead    Boolean  @default(false) @map("is_read")
+  metadata  String?                // JSON extra data
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("admin_notifications")
+}
+
+model Changelog {
+  id          String   @id @default(uuid(7))
+  version     String                // e.g. "1.2.0"
+  title       String
+  description String               // markdown content
+  type        String   @default("feature") // feature, bugfix, improvement, security, breaking
+  author      String?
+  publishedAt DateTime @default(now()) @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([publishedAt])
+  @@map("changelogs")
+}
+

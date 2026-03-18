@@ -1,45 +1,55 @@
 /**
- * AdminSidebar — System Administration Sidebar
- * Sections: Dashboard, Org Config, Users, System, Audit
+ * AdminSidebar — Premium System Administration Sidebar
+ * Uses Pressable, token colors, typography presets, Reanimated collapse
  */
-import React from 'react';
-import {
-  View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform,
-} from 'react-native';
-import { useTheme } from '../../shared/theme/theme';
-import { useThemeStore } from '../../shared/theme/themeStore';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Pressable, ScrollView, StyleSheet, Platform } from 'react-native';
+import Animated, {
+  useSharedValue, useAnimatedStyle, withSpring,
+} from 'react-native-reanimated';
+import { useAppTheme } from '../../shared/theme/useAppTheme';
+import { typography, sgds, radius, spacing } from '../../shared/theme/theme';
 import { useAuthStore } from '../auth/store/authStore';
 import {
   LayoutDashboard, Building, Users, Settings, ChevronLeft, ChevronRight,
-  LogOut, UserCircle, Shield, FileText,
+  LogOut, Shield, FileText, Flag, BarChart3, Clock, BookOpen,
 } from 'lucide-react-native';
 import { SGThemeToggle } from '../../shared/ui/components/SGThemeToggle';
+import { SGAvatar } from '../../shared/ui/components/SGAvatar';
+import { SGConfirmDialog } from '../../shared/ui/components/SGConfirmDialog';
 import { LinearGradient } from 'expo-linear-gradient';
 
 export interface AdminSidebarItem {
   key: string;
   label: string;
   icon: any;
-  section: 'dashboard' | 'organization' | 'users' | 'system' | 'audit';
+  section: 'dashboard' | 'organization' | 'users' | 'system' | 'audit' | 'tools';
 }
 
 const SIDEBAR_ITEMS: AdminSidebarItem[] = [
-  // Dashboard
-  { key: 'ADMIN_DASHBOARD',   label: 'Tổng quan',              icon: LayoutDashboard, section: 'dashboard' },
-
-  // Organization
-  { key: 'ADMIN_ORG_CONFIG',  label: 'Phòng ban & Team',       icon: Building,        section: 'organization' },
-
-  // Users
-  { key: 'ADMIN_USERS',       label: 'Quản lý User',           icon: Users,           section: 'users' },
-
-  // System
-  { key: 'ADMIN_ROLES',       label: 'Phân quyền',             icon: Shield,          section: 'system' },
-  { key: 'ADMIN_SYSTEM',      label: 'Cài đặt hệ thống',      icon: Settings,        section: 'system' },
-
-  // Audit
-  { key: 'ADMIN_AUDIT',       label: 'Nhật ký hệ thống',      icon: FileText,        section: 'audit' },
+  { key: 'ADMIN_DASHBOARD', label: 'Tổng quan', icon: LayoutDashboard, section: 'dashboard' },
+  { key: 'ADMIN_ORG_CONFIG', label: 'Phòng ban & Team', icon: Building, section: 'organization' },
+  { key: 'ADMIN_USERS', label: 'Quản lý User', icon: Users, section: 'users' },
+  { key: 'ADMIN_ROLES', label: 'Phân quyền', icon: Shield, section: 'system' },
+  { key: 'ADMIN_SYSTEM', label: 'Cài đặt hệ thống', icon: Settings, section: 'system' },
+  { key: 'ADMIN_FLAGS', label: 'Feature Flags', icon: Flag, section: 'system' },
+  { key: 'ADMIN_AUDIT', label: 'Nhật ký hệ thống', icon: FileText, section: 'audit' },
+  { key: 'ADMIN_ANALYTICS', label: 'Phân tích Audit', icon: BarChart3, section: 'audit' },
+  { key: 'ADMIN_TASKS', label: 'Tác vụ định kỳ', icon: Clock, section: 'tools' },
+  { key: 'ADMIN_CHANGELOG', label: 'Changelog', icon: BookOpen, section: 'tools' },
 ];
+
+const SECTIONS = [
+  { key: 'dashboard', label: '' },
+  { key: 'organization', label: 'CẤU HÌNH TỔ CHỨC' },
+  { key: 'users', label: 'NGƯỜI DÙNG' },
+  { key: 'system', label: 'HỆ THỐNG' },
+  { key: 'audit', label: 'GIÁM SÁT' },
+  { key: 'tools', label: 'CÔNG CỤ' },
+];
+
+const EXPANDED_WIDTH = 260;
+const COLLAPSED_WIDTH = 80;
 
 interface Props {
   activeKey: string;
@@ -49,143 +59,343 @@ interface Props {
 }
 
 export function AdminSidebar({ activeKey, onSelect, collapsed, onToggleCollapse }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, isDark } = useAppTheme();
   const { logout, user } = useAuthStore();
+  const [logoutConfirm, setLogoutConfirm] = useState(false);
 
-  const sections = [
-    { key: 'dashboard',     label: '' },
-    { key: 'organization',  label: 'CẤU HÌNH TỔ CHỨC' },
-    { key: 'users',         label: 'NGƯỜI DÙNG' },
-    { key: 'system',        label: 'HỆ THỐNG' },
-    { key: 'audit',         label: 'GIÁM SÁT' },
-  ];
+  // Animated width for smooth collapse
+  const sidebarWidth = useSharedValue(collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH);
+
+  useEffect(() => {
+    sidebarWidth.value = withSpring(collapsed ? COLLAPSED_WIDTH : EXPANDED_WIDTH, {
+      damping: 20,
+      stiffness: 120,
+    });
+  }, [collapsed]);
+
+  const animatedSidebarStyle = useAnimatedStyle(() => ({
+    width: sidebarWidth.value,
+  }));
 
   const renderItem = (item: AdminSidebarItem) => {
     const isActive = activeKey === item.key;
     const IconComp = item.icon;
     return (
-      <TouchableOpacity
+      <Pressable
         key={item.key}
         onPress={() => onSelect(item)}
-        style={[styles.menuItem, {
-          backgroundColor: isActive ? (isDark ? 'rgba(99,102,241,0.15)' : '#eef2ff') : 'transparent',
-          borderRadius: 16, marginHorizontal: 12, marginBottom: 4, paddingVertical: 12, paddingHorizontal: 12,
-          ...(isActive && !isDark && Platform.OS === 'web' ? { boxShadow: '0 4px 14px rgba(99,102,241,0.12)' } : {}),
-        } as any]}
+        accessibilityRole="button"
+        accessibilityLabel={item.label}
+        accessibilityState={{ selected: isActive }}
+        style={({ hovered, pressed }: any) => [
+          styles.menuItem,
+          {
+            backgroundColor: isActive
+              ? `${colors.accent}15`
+              : hovered
+                ? `${colors.accent}08`
+                : 'transparent',
+            borderRadius: radius.lg,
+            marginHorizontal: spacing.md,
+            marginBottom: spacing.xs,
+            paddingVertical: spacing.md,
+            paddingHorizontal: spacing.md,
+          },
+          pressed && { transform: [{ scale: 0.97 }] },
+          Platform.OS === 'web' && ({
+            ...sgds.transition.fast,
+            cursor: 'pointer',
+          } as any),
+          isActive && Platform.OS === 'web' && ({
+            boxShadow: `0 4px 14px ${colors.accent}18`,
+          } as any),
+        ]}
       >
-        <View style={{ width: 24, alignItems: 'center', justifyContent: 'center' }}>
-          <IconComp size={20} color={isActive ? '#6366f1' : (isDark ? '#94A3B8' : '#64748b')} strokeWidth={isActive ? 2.5 : 2} />
+        <View style={styles.menuItemIcon}>
+          <IconComp
+            size={20}
+            color={isActive ? colors.accent : colors.textSecondary}
+            strokeWidth={isActive ? 2.5 : 2}
+          />
         </View>
         {!collapsed && (
-          <Text style={{
-            fontSize: 14, fontWeight: isActive ? '800' : '600',
-            fontFamily: "'Plus Jakarta Sans', 'Inter', 'Segoe UI', system-ui, sans-serif",
-            color: isActive ? '#6366f1' : (isDark ? '#E2E8F0' : '#475569'),
-            marginLeft: 14, flex: 1, letterSpacing: 0.2
-          }} numberOfLines={1}>
+          <Text
+            style={[
+              isActive ? typography.bodyBold : typography.body,
+              {
+                color: isActive ? colors.accent : colors.text,
+                flex: 1,
+                letterSpacing: 0.2,
+              },
+            ]}
+            numberOfLines={1}
+          >
             {item.label}
           </Text>
         )}
-      </TouchableOpacity>
+      </Pressable>
     );
   };
 
   return (
-    <View style={[styles.sidebar, {
-      width: collapsed ? 80 : 260,
-      backgroundColor: isDark ? 'rgba(15,20,32,0.8)' : 'rgba(255,255,255,0.9)',
-      borderRightColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
-      ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' } : {}),
-    } as any]}>
+    <Animated.View
+      style={[
+        styles.sidebar,
+        animatedSidebarStyle,
+        {
+          backgroundColor: isDark ? colors.glass : `${colors.bgCard}F2`,
+          borderRightColor: colors.border,
+        },
+        Platform.OS === 'web' && ({
+          ...sgds.glass,
+        } as any),
+      ]}
+    >
       {/* Header */}
-      <View style={[styles.header, { borderBottomColor: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.04)' }]}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: collapsed ? 0 : 12, flex: collapsed ? 0 : 1 }}>
+      <View style={[styles.header, { borderBottomColor: colors.border }]}>
+        <View style={[styles.headerContent, { gap: collapsed ? 0 : 12 }]}>
           <LinearGradient
-            colors={isDark ? ['#6366f1', '#8b5cf6'] : ['#6366f1', '#4f46e5']}
-            start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}
-            style={{
-              width: 38, height: 38, borderRadius: 12, justifyContent: 'center', alignItems: 'center',
-              ...(Platform.OS === 'web' ? {
-                boxShadow: isDark
-                  ? '0 4px 16px rgba(99,102,241,0.3), 0 0px 8px rgba(139,92,246,0.2)'
-                  : '0 4px 14px rgba(99,102,241,0.25)',
-              } : { shadowColor: '#6366f1', shadowOpacity: 0.35, shadowRadius: 12, shadowOffset: { width: 0, height: 4 }, elevation: 6 }),
-            } as any}
+            colors={isDark ? [colors.accent, '#8b5cf6'] : [colors.accent, '#4f46e5']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={[
+              styles.logoGradient,
+              Platform.OS === 'web'
+                ? ({
+                    boxShadow: isDark
+                      ? `0 4px 16px ${colors.accent}4D, 0 0 8px #8b5cf633`
+                      : `0 4px 14px ${colors.accent}40`,
+                  } as any)
+                : {
+                    shadowColor: colors.accent,
+                    shadowOpacity: 0.35,
+                    shadowRadius: 12,
+                    shadowOffset: { width: 0, height: 4 },
+                    elevation: 6,
+                  },
+            ]}
           >
             <Settings size={16} color="#fff" strokeWidth={2.5} />
           </LinearGradient>
           {!collapsed && (
-            <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#fff' : '#0f172a', letterSpacing: 0.8, fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" }}>QUẢN TRỊ</Text>
-              <Text style={{ fontSize: 10, fontWeight: '600', color: isDark ? '#818cf8' : '#6366f1', letterSpacing: 2, marginTop: 1, fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" }}>SYSTEM ADMIN</Text>
+            <View style={styles.headerText}>
+              <Text style={[typography.h4, { color: colors.text, letterSpacing: 0.8 }]}>
+                QUẢN TRỊ
+              </Text>
+              <Text
+                style={[
+                  typography.micro,
+                  { color: colors.accent, marginTop: 1 },
+                ]}
+              >
+                SYSTEM ADMIN
+              </Text>
             </View>
           )}
         </View>
-        <TouchableOpacity onPress={onToggleCollapse} style={[styles.collapseBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}>
-          {collapsed ? <ChevronRight size={14} color={isDark ? '#94A3B8' : '#64748b'} strokeWidth={2.5} /> : <ChevronLeft size={14} color={isDark ? '#94A3B8' : '#64748b'} strokeWidth={2.5} />}
-        </TouchableOpacity>
+        <Pressable
+          onPress={onToggleCollapse}
+          accessibilityRole="button"
+          accessibilityLabel={collapsed ? 'Mở rộng sidebar' : 'Thu gọn sidebar'}
+          style={({ hovered }: any) => [
+            styles.collapseBtn,
+            {
+              backgroundColor: hovered ? `${colors.accent}15` : colors.bgCard,
+              borderColor: colors.border,
+            },
+            Platform.OS === 'web' && ({
+              ...sgds.transition.fast,
+              cursor: 'pointer',
+            } as any),
+          ]}
+        >
+          {collapsed
+            ? <ChevronRight size={14} color={colors.textSecondary} strokeWidth={2.5} />
+            : <ChevronLeft size={14} color={colors.textSecondary} strokeWidth={2.5} />}
+        </Pressable>
       </View>
 
       {/* Menu */}
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 16 }}>
-        {sections.map(sec => {
+      <ScrollView
+        style={styles.menuScroll}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.menuContent}
+      >
+        {SECTIONS.map(sec => {
           const sectionItems = SIDEBAR_ITEMS.filter(i => i.section === sec.key);
           if (sectionItems.length === 0) return null;
           return (
             <View key={sec.key}>
               {!collapsed && sec.label !== '' && (
-                <Text style={styles.sectionLabel}>{sec.label}</Text>
+                <Text style={[styles.sectionLabel, { color: colors.textTertiary }]}>
+                  {sec.label}
+                </Text>
               )}
               {sectionItems.map(renderItem)}
-              <View style={[styles.divider, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]} />
+              <View style={[styles.divider, { backgroundColor: colors.border }]} />
             </View>
           );
         })}
       </ScrollView>
 
       {/* User + Footer */}
-      <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', padding: 8 }}>
-          <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
-            <UserCircle size={20} color={isDark ? '#fff' : '#475569'} />
-          </View>
+      <View style={[styles.userSection, { borderTopColor: colors.border }]}>
+        <View style={styles.userRow}>
+          <SGAvatar
+            name={user?.name || 'Admin'}
+            size="sm"
+            color={colors.accent}
+          />
           {!collapsed && (
-            <View style={{ marginLeft: 12, flex: 1 }}>
-              <Text style={{ fontSize: 13, fontWeight: '800', color: isDark ? '#fff' : '#0f172a' }}>{user?.name || 'Admin'}</Text>
-              <Text style={{ fontSize: 11, fontWeight: '600', color: '#64748b' }}>System Admin</Text>
+            <View style={styles.userInfo}>
+              <Text style={[typography.smallBold, { color: colors.text }]}>
+                {user?.name || 'Admin'}
+              </Text>
+              <Text style={[typography.caption, { color: colors.textTertiary }]}>
+                System Admin
+              </Text>
             </View>
           )}
         </View>
       </View>
 
-      <View style={[styles.footer, { borderTopWidth: 0, paddingVertical: 12, flexDirection: collapsed ? 'column' : 'row', justifyContent: collapsed ? 'center' : 'space-between' }]}>
+      <View
+        style={[
+          styles.footer,
+          {
+            flexDirection: collapsed ? 'column' : 'row',
+            justifyContent: collapsed ? 'center' : 'space-between',
+          },
+        ]}
+      >
         <SGThemeToggle size="sm" />
-        <TouchableOpacity onPress={logout} style={[styles.logoutBtn, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : 'rgba(239,68,68,0.05)', marginTop: collapsed ? 12 : 0 }]}>
-          <LogOut size={16} color="#EF4444" />
-        </TouchableOpacity>
+        <Pressable
+          onPress={() => setLogoutConfirm(true)}
+          accessibilityRole="button"
+          accessibilityLabel="Đăng xuất"
+          {...(Platform.OS === 'web' ? { title: 'Đăng xuất' } as any : {})}
+          style={({ hovered }: any) => [
+            styles.logoutBtn,
+            {
+              backgroundColor: hovered
+                ? `${colors.danger}20`
+                : `${colors.danger}10`,
+              marginTop: collapsed ? 12 : 0,
+            },
+            Platform.OS === 'web' && ({
+              ...sgds.transition.fast,
+              cursor: 'pointer',
+            } as any),
+          ]}
+        >
+          <LogOut size={16} color={colors.danger} />
+        </Pressable>
       </View>
-    </View>
+
+      {/* Logout Confirm Dialog */}
+      <SGConfirmDialog
+        visible={logoutConfirm}
+        title="Đăng xuất"
+        message="Bạn có chắc muốn đăng xuất khỏi hệ thống?"
+        confirmLabel="Đăng xuất"
+        variant="danger"
+        onConfirm={() => { setLogoutConfirm(false); logout(); }}
+        onCancel={() => setLogoutConfirm(false)}
+      />
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  sidebar: { borderRightWidth: 1, height: '100%' },
+  sidebar: {
+    borderRightWidth: 1,
+    height: '100%' as any,
+    overflow: 'hidden',
+  },
   header: {
-    height: 80, flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingHorizontal: 16, borderBottomWidth: 1,
+    height: 80,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.base,
+    borderBottomWidth: 1,
   },
-  collapseBtn: { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
-  menuItem: { flexDirection: 'row', alignItems: 'center' },
+  headerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  headerText: {
+    flex: 1,
+  },
+  logoGradient: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  collapseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuScroll: {
+    flex: 1,
+  },
+  menuContent: {
+    paddingVertical: spacing.base,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  menuItemIcon: {
+    width: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 14,
+  },
   sectionLabel: {
-    fontSize: 11, fontWeight: '800', letterSpacing: 1.8, textTransform: 'uppercase',
-    color: '#94A3B8', paddingHorizontal: 24, marginTop: 16, marginBottom: 10,
-    fontFamily: "'Plus Jakarta Sans', 'Inter', 'Segoe UI', system-ui, sans-serif",
+    ...typography.micro,
+    letterSpacing: 1.8,
+    paddingHorizontal: spacing.lg,
+    marginTop: spacing.base,
+    marginBottom: spacing.sm,
   },
-  divider: { height: 1, marginHorizontal: 24, marginVertical: 6 },
+  divider: {
+    height: 1,
+    marginHorizontal: spacing.lg,
+    marginVertical: spacing.xs + 2,
+  },
+  userSection: {
+    padding: spacing.md,
+    borderTopWidth: 1,
+  },
+  userRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.sm,
+    gap: 12,
+  },
+  userInfo: {
+    flex: 1,
+  },
   footer: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center',
-    paddingVertical: 16, paddingHorizontal: 20, borderTopWidth: 1, gap: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg - 4,
+    gap: spacing.sm,
   },
-  logoutBtn: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
+  logoutBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm + 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

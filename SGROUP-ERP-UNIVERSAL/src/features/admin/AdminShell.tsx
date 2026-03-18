@@ -1,13 +1,17 @@
 /**
- * SGROUP ERP — Admin Module Shell
+ * SGROUP ERP — Admin Module Shell (Premium Upgrade)
  * System Administration workspace with Sidebar + TopBar + Content Area
+ * Uses SGAuroraBackground, token colors, Reanimated page transitions
  */
-import React, { useState, useMemo } from 'react';
-import { View, ScrollView, Text, StyleSheet, Platform } from 'react-native';
+import React, { useState, useCallback, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { AdminSidebar, AdminSidebarItem } from './AdminSidebar';
 import { SGTopBar } from '../../shared/ui';
-import { useTheme, typography } from '../../shared/theme/theme';
-import { useThemeStore } from '../../shared/theme/themeStore';
+import { SGAuroraBackground } from '../../shared/ui/components/SGAuroraBackground';
+import { SGBreadcrumb } from '../../shared/ui/components/SGBreadcrumb';
+import { AdminErrorBoundary } from './components/AdminErrorBoundary';
+import { useAppTheme } from '../../shared/theme/useAppTheme';
 import { useAuthStore } from '../auth/store/authStore';
 
 // Import Screens
@@ -17,6 +21,13 @@ import { UserManagementScreen } from './screens/UserManagementScreen';
 import { RolePermissionScreen } from './screens/RolePermissionScreen';
 import { SystemSettingsScreen } from './screens/SystemSettingsScreen';
 import { AuditLogScreen } from './screens/AuditLogScreen';
+import { FeatureFlagsScreen } from './screens/FeatureFlagsScreen';
+import { AuditAnalyticsScreen } from './screens/AuditAnalyticsScreen';
+import { ScheduledTasksScreen } from './screens/ScheduledTasksScreen';
+import { ChangelogScreen } from './screens/ChangelogScreen';
+import { NotificationCenter } from './components/NotificationCenter';
+import { KeyboardShortcutsPanel } from './components/KeyboardShortcutsPanel';
+import { CommandPalette } from './components/CommandPalette';
 
 const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
   ADMIN_DASHBOARD: AdminDashboard,
@@ -24,7 +35,20 @@ const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
   ADMIN_USERS: UserManagementScreen,
   ADMIN_ROLES: RolePermissionScreen,
   ADMIN_SYSTEM: SystemSettingsScreen,
+  ADMIN_FLAGS: FeatureFlagsScreen,
   ADMIN_AUDIT: AuditLogScreen,
+  ADMIN_ANALYTICS: AuditAnalyticsScreen,
+  ADMIN_TASKS: ScheduledTasksScreen,
+  ADMIN_CHANGELOG: ChangelogScreen,
+};
+
+const SECTION_LABELS: Record<string, string> = {
+  dashboard: 'Tổng quan',
+  organization: 'Cấu hình tổ chức',
+  users: 'Người dùng',
+  system: 'Hệ thống',
+  audit: 'Nhật ký',
+  tools: 'Công cụ',
 };
 
 export function AdminShell() {
@@ -32,58 +56,38 @@ export function AdminShell() {
   const [activeLabel, setActiveLabel] = useState('Tổng quan');
   const [activeSection, setActiveSection] = useState('dashboard');
   const [collapsed, setCollapsed] = useState(false);
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors } = useAppTheme();
   const { user } = useAuthStore();
+  const { width: windowWidth } = useWindowDimensions();
 
-  const handleSelect = (item: AdminSidebarItem) => {
+  // Auto-collapse sidebar on narrow viewport
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      setCollapsed(windowWidth < 768);
+    }
+  }, [windowWidth]);
+
+  const handleSelect = useCallback((item: AdminSidebarItem) => {
     setActiveKey(item.key);
     setActiveLabel(item.label);
     setActiveSection(item.section);
-  };
+  }, []);
 
   const ContentComponent = KEY_TO_COMPONENT[activeKey] || AdminDashboard;
 
-  const sectionLabels: Record<string, string> = {
-    dashboard: 'TỔNG QUAN',
-    organization: 'CẤU HÌNH TỔ CHỨC',
-    users: 'NGƯỜI DÙNG',
-    system: 'HỆ THỐNG',
-    audit: 'NHẬT KÝ',
-  };
-
-  const breadcrumb = (
-    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-      <Text style={[typography.micro, { color: colors.textTertiary, opacity: 0.8 }]}>
-        {sectionLabels[activeSection] || 'ADMIN'}
-      </Text>
-      <View style={[styles.breadcrumbDot, { backgroundColor: '#6366f1' }]} />
-      <Text style={[typography.micro, { color: '#6366f1', fontWeight: '800' }]}>
-        {activeLabel.toUpperCase()}
-      </Text>
-    </View>
-  );
+  const breadcrumbItems = [
+    { label: 'Quản trị' },
+    { label: SECTION_LABELS[activeSection] || 'Admin' },
+    { label: activeLabel },
+  ];
 
   return (
-    <View style={[styles.shell, { backgroundColor: isDark ? '#05070A' : '#F8FAFC' }]}>
-      {/* Aurora backdrop */}
-      {Platform.OS === 'web' && (
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <View style={[styles.aurora, {
-            top: '-10%', left: '-5%', width: 1000, height: 1000,
-            backgroundColor: isDark ? 'rgba(99,102,241,0.10)' : 'rgba(99,102,241,0.05)',
-            filter: 'blur(100px)',
-          } as any]} />
-          <View style={[styles.aurora, {
-            bottom: '-15%', right: '-8%', width: 900, height: 900,
-            backgroundColor: isDark ? 'rgba(139,92,246,0.08)' : 'rgba(139,92,246,0.04)',
-            filter: 'blur(120px)',
-          } as any]} />
-        </View>
-      )}
+    <View style={[styles.shell, { backgroundColor: colors.bg }]}>
+      {/* Aurora backdrop — premium animated ambient background */}
+      <SGAuroraBackground />
 
       {/* Sidebar */}
-      <View style={{ zIndex: 1000 }}>
+      <View style={styles.sidebarWrapper}>
         <AdminSidebar
           activeKey={activeKey}
           onSelect={handleSelect}
@@ -94,37 +98,70 @@ export function AdminShell() {
 
       {/* Main Area */}
       <View style={styles.mainArea}>
-        <View style={styles.topBarWrapper}>
+        <View style={[styles.topBarWrapper, Platform.OS === 'web' && ({
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+        } as any)]}>
           <SGTopBar
             title={activeLabel}
-            breadcrumb={breadcrumb}
+            breadcrumb={<SGBreadcrumb items={breadcrumbItems} />}
             userName={user?.name || 'Admin'}
             userRole="SYSTEM ADMIN"
+            rightContent={<NotificationCenter />}
           />
         </View>
         <View style={styles.content}>
           <ScrollView
-            style={{ flex: 1 }}
+            style={styles.scrollView}
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <ContentComponent />
+            <Animated.View
+              key={activeKey}
+              entering={FadeIn.duration(250)}
+            >
+              <AdminErrorBoundary>
+                <ContentComponent />
+              </AdminErrorBoundary>
+            </Animated.View>
           </ScrollView>
         </View>
       </View>
+
+      {/* Keyboard shortcuts overlay (web only, press ? to toggle) */}
+      <KeyboardShortcutsPanel />
+
+      {/* Command Palette (web only, Ctrl+K) */}
+      <CommandPalette />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  shell: { flex: 1, flexDirection: 'row', height: Platform.OS === 'web' ? '100vh' as any : '100%' },
-  mainArea: { flex: 1, position: 'relative', zIndex: 1 },
-  aurora: { position: 'absolute', pointerEvents: 'none', borderRadius: 999 },
+  shell: {
+    flex: 1,
+    flexDirection: 'row',
+    height: Platform.OS === 'web' ? '100vh' as any : '100%',
+  },
+  sidebarWrapper: {
+    zIndex: 1000,
+  },
+  mainArea: {
+    flex: 1,
+    position: 'relative',
+    zIndex: 1,
+  },
   topBarWrapper: {
     zIndex: 100,
-    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' } : {}),
-  } as any,
-  breadcrumbDot: { width: 4, height: 4, borderRadius: 2, marginHorizontal: 8 },
-  content: { flex: 1, zIndex: 1 },
-  scrollContent: { paddingBottom: 40 },
+  },
+  content: {
+    flex: 1,
+    zIndex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40,
+  },
 });
