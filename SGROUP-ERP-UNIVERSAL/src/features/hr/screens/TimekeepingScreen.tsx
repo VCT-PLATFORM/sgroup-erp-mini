@@ -191,9 +191,9 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
             <View style={{ gap: 4 }}>
               {/* Generate 5 rows of 18 cols for ~90 days */}
-              {Array.from({ length: 5 }).map((_, rIdx) => (
+              {new Array(5).fill(0).map((_, rIdx) => (
                 <View key={rIdx} style={{ flexDirection: 'row', gap: 4 }}>
-                  {Array.from({ length: 18 }).map((_, cIdx) => {
+                  {new Array(18).fill(0).map((_, cIdx) => {
                     const rnd = Math.random();
                     const status = rnd > 0.95 ? 'absent' : rnd > 0.85 ? 'late' : 'present';
                     const bg = status === 'present' ? (isDark ? 'rgba(16,185,129,0.8)' : '#22c55e') :
