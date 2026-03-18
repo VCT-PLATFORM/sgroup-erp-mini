@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, Dimensions } from 'react-native';
-import { typography, useTheme } from '../../../shared/theme/theme';
-import { useThemeStore } from '../../../shared/theme/themeStore';
-import { SGCard, SGButton } from '../../../shared/ui/components';
+import Animated, { FadeInDown, FadeInLeft, FadeInRight, FadeInUp } from 'react-native-reanimated';
+import { typography, sgds, radius } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
+import { SGCard, SGButton, SGAuroraBackground } from '../../../shared/ui/components';
 import { useProject, useProjectProducts } from '../hooks/useProjects';
 import { ArrowLeft, Building2, MapPin, Grid3x3, CheckCircle2, Edit2, TrendingUp, DollarSign, Percent, Layers, Package } from 'lucide-react-native';
 import { formatTy } from '../../../shared/utils/formatters';
@@ -18,8 +19,7 @@ interface Props {
 }
 
 export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, theme, isDark } = useAppTheme();
   const [showEditForm, setShowEditForm] = useState(false);
   
   const { data: project, isLoading: isProjectLoading, isError: isProjectError } = useProject(projectId);
@@ -29,13 +29,13 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'AVAILABLE': return '#10b981';
-      case 'LOCKED': return '#f59e0b';
+      case 'AVAILABLE': return colors.success;
+      case 'LOCKED': return colors.warning;
       case 'BOOKED': return '#f97316';
-      case 'PENDING_DEPOSIT': return '#3b82f6';
-      case 'DEPOSIT': return '#8b5cf6';
-      case 'SOLD': return '#ef4444';
-      case 'COMPLETED': return '#64748b';
+      case 'PENDING_DEPOSIT': return colors.brand;
+      case 'DEPOSIT': return colors.purple;
+      case 'SOLD': return colors.danger;
+      case 'COMPLETED': return colors.textTertiary;
       default: return colors.textSecondary;
     }
   };
@@ -80,10 +80,10 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
   }, {} as Record<string, number>);
 
   const kpiCards = [
-    { label: 'Tổng Sản phẩm', value: project.totalUnits || 0, icon: Layers, color: '#3b82f6', bg: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff' },
-    { label: 'Đã Bán', value: project.soldUnits || 0, icon: CheckCircle2, color: '#10b981', bg: isDark ? 'rgba(16,185,129,0.1)' : '#ecfdf5' },
-    { label: 'Giá TB', value: project.avgPrice ? formatTy(project.avgPrice) : 'N/A', icon: DollarSign, color: '#8b5cf6', bg: isDark ? 'rgba(139,92,246,0.1)' : '#f5f3ff' },
-    { label: 'Hoa hồng', value: `${project.feeRate || 0}%`, icon: Percent, color: '#f59e0b', bg: isDark ? 'rgba(245,158,11,0.1)' : '#fffbeb' },
+    { label: 'Tổng Sản phẩm', value: project.totalUnits || 0, icon: Layers, color: colors.brand, bg: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff' },
+    { label: 'Đã Bán', value: project.soldUnits || 0, icon: CheckCircle2, color: colors.success, bg: isDark ? 'rgba(16,185,129,0.1)' : '#ecfdf5' },
+    { label: 'Giá TB', value: project.avgPrice ? formatTy(project.avgPrice) : 'N/A', icon: DollarSign, color: colors.purple, bg: isDark ? 'rgba(139,92,246,0.1)' : '#f5f3ff' },
+    { label: 'Hoa hồng', value: `${project.feeRate || 0}%`, icon: Percent, color: colors.warning, bg: isDark ? 'rgba(245,158,11,0.1)' : '#fffbeb' },
   ];
 
   return (
@@ -93,21 +93,12 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
       {/* Aurora Backdrop */}
       {Platform.OS === 'web' && (
         <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
-          <View style={{
-            position: 'absolute', top: '-10%', right: '-8%', width: 600, height: 600,
-            backgroundColor: isDark ? 'rgba(16, 185, 129, 0.04)' : 'rgba(16, 185, 129, 0.03)',
-            borderRadius: 300,
-          } as any} />
-          <View style={{
-            position: 'absolute', bottom: '10%', left: '-5%', width: 400, height: 400,
-            backgroundColor: isDark ? 'rgba(59, 130, 246, 0.04)' : 'rgba(59, 130, 246, 0.02)',
-            borderRadius: 200,
-          } as any} />
+          <SGAuroraBackground />
         </View>
       )}
 
       {/* Header */}
-      <View style={[styles.header, { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={[styles.header, { zIndex: 1 }]}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <View style={[styles.backIcon, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }]}>
             <ArrowLeft size={18} color={colors.textSecondary} />
@@ -155,33 +146,33 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
             style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' }}
           />
         </View>
-      </View>
+      </Animated.View>
 
       {/* KPI Cards Row */}
-      <View style={[styles.kpiRow, { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.kpiRow, { zIndex: 1 }]}>
         {kpiCards.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
-            <View key={i} style={[
+            <SGCard key={i} style={[
               styles.kpiCard, 
-              isDark ? styles.glassCardDark : styles.glassCardLight,
-              Platform.OS === 'web' && styles.glassEffect as any,
+              sgds.sectionBase(theme) as any,
+              { padding: 20 }
             ]}>
               <View style={[styles.kpiIconBox, { backgroundColor: kpi.bg }]}>
                 <Icon size={20} color={kpi.color} />
               </View>
               <Text style={[typography.micro, { color: colors.textSecondary, fontWeight: '600', marginTop: 12 }]}>{kpi.label}</Text>
               <Text style={[typography.h3, { color: colors.text, fontWeight: '800', marginTop: 4 }]}>{kpi.value}</Text>
-            </View>
+            </SGCard>
           );
         })}
-      </View>
+      </Animated.View>
 
       <View style={[styles.mainContent, { zIndex: 1 }]}>
         {/* Left Column: Info & Stats */}
-        <View style={{ flex: isDesktop ? 1 : undefined, maxWidth: isDesktop ? 400 : undefined }}>
+        <Animated.View entering={FadeInLeft.delay(300).springify().damping(20)} style={{ flex: isDesktop ? 1 : undefined, maxWidth: isDesktop ? 400 : undefined }}>
           {/* General Info Card */}
-          <View style={[styles.sectionCard, isDark ? styles.glassCardDark : styles.glassCardLight, Platform.OS === 'web' && styles.glassEffect as any]}>
+          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme) as any, { padding: 28 }]}>
             <Text style={[typography.h4, { color: colors.text, marginBottom: 24, fontWeight: '800' }]}>Thông tin chung</Text>
             
             {[
@@ -198,10 +189,10 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
                 {idx < arr.length - 1 && <View style={[styles.divider, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }]} />}
               </View>
             ))}
-          </View>
+          </SGCard>
 
           {/* Progress & Performance */}
-          <View style={[styles.sectionCard, isDark ? styles.glassCardDark : styles.glassCardLight, Platform.OS === 'web' && styles.glassEffect as any, { marginTop: 24 }]}>
+          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme) as any, { padding: 28, marginTop: 24 }]}>
             <Text style={[typography.h4, { color: colors.text, marginBottom: 24, fontWeight: '800' }]}>Tiến độ & Hiệu quả</Text>
             
             {/* Liquidity Meter */}
@@ -257,12 +248,12 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
                 </View>
               ))}
             </View>
-          </View>
-        </View>
+          </SGCard>
+        </Animated.View>
 
         {/* Right Column: Inventory */}
-        <View style={{ flex: isDesktop ? 1.6 : undefined, marginTop: isDesktop ? 0 : 24 }}>
-          <View style={[styles.sectionCard, isDark ? styles.glassCardDark : styles.glassCardLight, Platform.OS === 'web' && styles.glassEffect as any, { minHeight: 500 }]}>
+        <Animated.View entering={FadeInRight.delay(400).springify().damping(20)} style={{ flex: isDesktop ? 1.6 : undefined, marginTop: isDesktop ? 0 : 24 }}>
+          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme) as any, { padding: 28, minHeight: 500 }]}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={[styles.kpiIconBox, { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff' }]}>
@@ -356,8 +347,8 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
                 })}
               </ScrollView>
             )}
-          </View>
-        </View>
+          </SGCard>
+        </Animated.View>
       </View>
     </ScrollView>
   );
@@ -407,25 +398,6 @@ const styles = StyleSheet.create({
   kpiIconBox: {
     width: 40, height: 40, borderRadius: 12,
     justifyContent: 'center', alignItems: 'center',
-  },
-  glassEffect: {
-    ...(Platform.OS === 'web' && {
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-    } as any),
-  },
-  glassCardDark: {
-    backgroundColor: 'rgba(30, 41, 59, 0.65)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    borderWidth: 1,
-    ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)' } as any),
-  },
-  glassCardLight: {
-    backgroundColor: 'rgba(255, 255, 255, 0.85)',
-    borderColor: 'rgba(0, 0, 0, 0.04)',
-    borderWidth: 1,
-    ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.04)' } as any),
   },
   mainContent: {
     flexDirection: isDesktop ? 'row' : 'column',

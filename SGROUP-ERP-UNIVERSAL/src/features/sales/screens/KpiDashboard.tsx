@@ -78,12 +78,12 @@ export function KpiDashboard({ userRole }: { userRole?: SalesRole }) {
 
   // Card style
   const card: any = {
-    backgroundColor: isDark ? 'rgba(20,24,35,0.45)' : '#fff',
-    borderRadius: 28, padding: 28,
-    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+    backgroundColor: isDark ? 'rgba(20,24,35,0.55)' : 'rgba(255,255,255,0.85)',
+    borderRadius: 32, padding: 32,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)',
     ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(32px)',
-      boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 4px 24px rgba(0,0,0,0.06)',
+      backdropFilter: 'blur(40px)',
+      boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.5)' : '0 12px 32px rgba(0,0,0,0.06)',
     } : {}),
   };
 
@@ -231,13 +231,13 @@ export function KpiDashboard({ userRole }: { userRole?: SalesRole }) {
                   }),
                 } as any}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                    <View style={{
-                      width: 48, height: 48, borderRadius: 16,
-                      backgroundColor: `${k.color}1A`,
+                    <LinearGradient colors={[`${k.color}DD`, `${k.color}99`]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{
+                      width: 52, height: 52, borderRadius: 16,
                       alignItems: 'center', justifyContent: 'center',
+                      shadowColor: k.color, shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4,
                     }}>
-                      <Icon size={24} color={k.color} />
-                    </View>
+                      <Icon size={26} color="#fff" />
+                    </LinearGradient>
                     {idx === 0 && kpi && (kpi as any).revenuePerStaff > 0 && (
                       <View style={{ backgroundColor: '#22c55e1A', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 }}>
                         <Text style={{ fontSize: 11, fontWeight: '800', color: '#16a34a' }}>
@@ -290,28 +290,35 @@ export function KpiDashboard({ userRole }: { userRole?: SalesRole }) {
                       activeOpacity={0.7}
                       style={{
                         flexDirection: 'row', alignItems: 'center', gap: 16,
-                        padding: 20, borderRadius: 20,
+                        padding: 24, borderRadius: 24,
                         backgroundColor: selectedTeamId === t.team.id
                           ? (isDark ? 'rgba(59,130,246,0.12)' : '#eff6ff')
-                          : (isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc'),
+                          : (isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.8)'),
                         borderWidth: 1,
                         borderColor: selectedTeamId === t.team.id
                           ? '#3b82f6'
-                          : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
+                          : (isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0'),
+                        ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer', ':hover': { transform: 'translateX(4px)', borderColor: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', boxShadow: '0 8px 24px rgba(0,0,0,0.05)' } } as any : {})
                       }}
                     >
                       {/* Rank Badge */}
-                      <View style={{
-                        width: 44, height: 44, borderRadius: 14,
-                        backgroundColor: i < 3 ? `${RANK_COLORS[i]}20` : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
-                        alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        {i < 3 ? (
-                          <Medal size={22} color={RANK_COLORS[i]} />
-                        ) : (
+                      {i < 3 ? (
+                        <LinearGradient colors={[RANK_COLORS[i], `${RANK_COLORS[i]}88`]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{
+                          width: 48, height: 48, borderRadius: 16,
+                          alignItems: 'center', justifyContent: 'center',
+                          shadowColor: RANK_COLORS[i], shadowOpacity: 0.5, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4,
+                        }}>
+                          <Medal size={24} color="#fff" />
+                        </LinearGradient>
+                      ) : (
+                        <View style={{
+                          width: 48, height: 48, borderRadius: 16,
+                          backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
+                          alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0'
+                        }}>
                           <Text style={{ fontSize: 16, fontWeight: '900', color: '#94a3b8' }}>#{i + 1}</Text>
-                        )}
-                      </View>
+                        </View>
+                      )}
 
                       {/* Team Info */}
                       <View style={{ flex: 1 }}>
@@ -397,15 +404,17 @@ export function KpiDashboard({ userRole }: { userRole?: SalesRole }) {
                       {/* Rank */}
                       <View style={{ width: 50 }}>
                         {i < 3 ? (
-                          <View style={{
-                            width: 32, height: 32, borderRadius: 10,
-                            backgroundColor: `${RANK_COLORS[i]}25`,
+                          <LinearGradient colors={[RANK_COLORS[i], `${RANK_COLORS[i]}77`]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{
+                            width: 34, height: 34, borderRadius: 12,
                             alignItems: 'center', justifyContent: 'center',
+                            shadowColor: RANK_COLORS[i], shadowOpacity: 0.4, shadowRadius: 6, shadowOffset: { width: 0, height: 2 }, elevation: 3,
                           }}>
-                            <Text style={{ fontSize: 14, fontWeight: '900', color: RANK_COLORS[i] }}>#{i + 1}</Text>
-                          </View>
+                            <Text style={{ fontSize: 14, fontWeight: '900', color: '#fff' }}>#{i + 1}</Text>
+                          </LinearGradient>
                         ) : (
-                          <Text style={{ fontSize: 14, fontWeight: '700', color: '#94a3b8', paddingLeft: 8 }}>{i + 1}</Text>
+                          <View style={{ width: 34, height: 34, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0' }}>
+                            <Text style={{ fontSize: 14, fontWeight: '700', color: '#94a3b8' }}>{i + 1}</Text>
+                          </View>
                         )}
                       </View>
 
@@ -454,11 +463,12 @@ export function KpiDashboard({ userRole }: { userRole?: SalesRole }) {
                                 color: targetPct >= 100 ? '#16a34a' : targetPct >= 50 ? '#f59e0b' : '#ef4444',
                               }}>{targetPct}%</Text>
                             </View>
-                            <View style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', borderRadius: 3 }}>
-                              <View style={{
-                                width: `${targetPct}%`, height: '100%', borderRadius: 3,
-                                backgroundColor: targetPct >= 100 ? '#22c55e' : targetPct >= 50 ? '#f59e0b' : '#ef4444',
-                              }} />
+                            <View style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', borderRadius: 4, overflow: 'hidden' }}>
+                              <LinearGradient
+                                colors={targetPct >= 100 ? ['#22c55e', '#16a34a'] : targetPct >= 50 ? ['#f59e0b', '#d97706'] : ['#ef4444', '#dc2626']}
+                                start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+                                style={{ width: `${targetPct}%`, height: '100%', borderRadius: 4 } as any}
+                              />
                             </View>
                           </View>
                         ) : (

@@ -253,14 +253,14 @@ export function ActivityLog({ userRole }: { userRole?: SalesRole }) {
   ];
 
   const cardStyle: any = {
-    backgroundColor: isDark ? 'rgba(20,24,35,0.55)' : '#fff',
-    borderRadius: 20,
-    padding: 28,
+    backgroundColor: isDark ? 'rgba(20,24,35,0.6)' : 'rgba(255,255,255,0.85)',
+    borderRadius: 28,
+    padding: 32,
     borderWidth: 1,
-    borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)',
     ...(Platform.OS === 'web' ? {
-      backdropFilter: 'blur(24px)',
-      boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 2px 16px rgba(0,0,0,0.04)',
+      backdropFilter: 'blur(40px)',
+      boxShadow: isDark ? '0 12px 32px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.04)',
     } : {}),
   };
 
@@ -400,7 +400,7 @@ export function ActivityLog({ userRole }: { userRole?: SalesRole }) {
         </View>
 
         {/* ── Chart ── */}
-        <View style={cardStyle}>
+        <View style={[cardStyle, Platform.OS === 'web' ? { transition: 'box-shadow 0.3s ease', ':hover': { boxShadow: isDark ? '0 0 20px rgba(168,85,247,0.3)' : '0 12px 32px rgba(168,85,247,0.15)' } } as any : {}]}>
           <SGPlanningSectionTitle
             icon={BarChart2 as any}
             title={`Biểu Đồ Hoạt Động (${periodLabel})`}
@@ -496,7 +496,11 @@ function EditableCell({ value, onChange, color, bgColor }: { value: number; onCh
             border: `2px solid ${color}`,
             borderRadius: 10, padding: '3px 6px',
             outline: 'none',
+            transition: 'all 0.2s ease',
+            boxShadow: `0 0 0 2px ${color}33`,
           }}
+          onFocus={(e: any) => e.target.style.boxShadow = `0 0 0 4px ${color}66`}
+          onBlur={(e: any) => e.target.style.boxShadow = `0 0 0 2px ${color}33`}
         />
       ) : (
         <TextInput

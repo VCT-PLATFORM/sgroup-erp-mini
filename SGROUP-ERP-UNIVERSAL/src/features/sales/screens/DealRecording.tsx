@@ -2,24 +2,27 @@
  * DealRecording — Ghi nhận giao dịch mới + Danh sách deals
  */
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Pressable, Platform, TextInput, ActivityIndicator } from 'react-native';
-import { ShoppingCart, Plus, Filter, ChevronDown } from 'lucide-react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput } from 'react-native';
+import { Plus, Search, Filter, Download, Star, FilterIcon } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard, SGTable } from '../../../shared/ui/components';
 import type { SalesRole } from '../SalesSidebar';
 import { useGetDeals } from '../hooks/useSalesOps';
 
-const fmt = (n: number) => n.toLocaleString('vi-VN', { minimumFractionDigits: n < 10 ? 1 : 0, maximumFractionDigits: 3 });
-
-const STAGE_COLORS: Record<string, { bg: string; text: string; label: string }> = {
-  LEAD: { bg: '#f1f5f9', text: '#64748b', label: 'Lead' },
-  MEETING: { bg: '#eff6ff', text: '#3b82f6', label: 'Hẹn gặp' },
-  BOOKING: { bg: '#f5f3ff', text: '#8b5cf6', label: 'Giữ chỗ' },
-  DEPOSIT: { bg: '#fef3c7', text: '#d97706', label: 'Đặt cọc' },
-  CONTRACT: { bg: '#ecfdf5', text: '#059669', label: 'Ký HĐ' },
-  COMPLETED: { bg: '#dcfce7', text: '#16a34a', label: '✓ Hoàn tất' },
-  CANCELLED: { bg: '#fef2f2', text: '#dc2626', label: 'Huỷ' },
+type DealEntry = {
+  id: string;
+  customer: string;
+  phone: string;
+  project: string;
+  unitCode: string;
+  isVip: boolean;
+  transactionValue: number;
+  commissionExpected: number;
+  date: string;
+  status: string;
+  staff?: string;
 };
 
 export function DealRecording({ userRole }: { userRole?: SalesRole }) {
@@ -33,64 +36,65 @@ export function DealRecording({ userRole }: { userRole?: SalesRole }) {
   const canCreate = userRole === 'sales' || userRole === 'sales_manager' || userRole === 'sales_admin';
   const now = new Date();
   const { data: rawDeals, isLoading } = useGetDeals({ year: now.getFullYear(), month: now.getMonth() + 1 });
-  const dealsData = (rawDeals || []).map((d: any) => ({
-    id: d.id, dealCode: d.dealCode || '', customer: d.customerName || '', phone: d.customerPhone || '',
-    project: d.projectName || '', product: d.productCode || '', value: d.dealValue ?? 0,
-    feeRate: d.feeRate ?? 0, commission: d.commission ?? 0, stage: d.stage || 'LEAD',
-    staff: d.staffName || '', team: d.teamName || '', source: d.source || 'MARKETING',
-    date: d.dealDate ? new Date(d.dealDate).toLocaleDateString('vi-VN') : '',
+  const dealsData: DealEntry[] = (rawDeals || []).map((d: any) => ({
+    id: d.id,
+    customer: d.customerName || '',
+    phone: d.customerPhone || '',
+    project: d.projectName || '',
+    unitCode: d.productCode || '', // Assuming productCode maps to unitCode
+    isVip: d.isVip || false, // Assuming a new field for VIP status
+    transactionValue: (d.dealValue ?? 0) / 1_000_000_000, // Convert to Tỷ
+    commissionExpected: (d.commission ?? 0) / 1_000_000, // Convert to Tr
+    date: d.dealDate ? new Date(d.dealDate).toISOString() : '',
+    status: d.stage === 'COMPLETED' ? 'thành công' : 'đang xử lý', // Map stage to status
+    staff: d.staffName || '',
   }));
 
-  const sourceLabels: Record<string, { bg: string; text: string; label: string }> = {
-    MARKETING: { bg: '#dbeafe', text: '#2563eb', label: 'MKT' },
-    SELF_GEN: { bg: '#fef3c7', text: '#d97706', label: 'TỰ KIẾM' },
-    REFERRAL: { bg: '#dcfce7', text: '#16a34a', label: 'GIỚI THIỆU' },
-  };
-
-  const DEAL_COLUMNS: any = [
-    { key: 'dealCode', title: 'MÃ GD', width: 100, render: (v: any) => <Text style={{ fontSize: 11, fontWeight: '700', color: '#3b82f6' }}>{v}</Text> },
-    { key: 'customer', title: 'KHÁCH HÀNG', flex: 1.5, render: (v: any, r: any) => (
-      <View>
-        <Text style={{ fontSize: 13, fontWeight: '700', color: cText }}>{v}</Text>
-        <Text style={{ fontSize: 10, color: cSub, marginTop: 2 }}>{r.phone}</Text>
+  const DEAL_COLUMNS = [
+    { key: 'customer', title: 'KHÁCH HÀNG', flex: 1.5, render: (v: string, r: DealEntry) => (
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
+          <Text style={{ fontSize: 16, fontWeight: '900', color: '#64748b' }}>{v.charAt(0)}</Text>
+        </View>
+        <View>
+          <Text style={{ fontSize: 15, fontWeight: '800', color: r.isVip ? '#eab308' : '#1e293b' }}>
+            {v} {r.isVip && <Star size={12} color="#eab308" fill="#eab308" style={{marginLeft: 4}} />}
+          </Text>
+          <Text style={{ fontSize: 13, fontWeight: '600', color: '#94a3b8', marginTop: 2 }}>{r.project} <Text style={{ color: '#cbd5e1' }}>•</Text> {r.unitCode}</Text>
+        </View>
       </View>
-    ) },
-    { key: 'project', title: 'DỰ ÁN', flex: 1.5, render: (v: any, r: any) => (
-      <View>
-        <Text style={{ fontSize: 12, fontWeight: '600', color: cText }}>{v}</Text>
-        <Text style={{ fontSize: 10, color: cSub, marginTop: 2 }}>{r.product}</Text>
-      </View>
-    ) },
-    { key: 'value', title: 'GIÁ TRỊ', width: 90, align: 'center', render: (v: any) => <Text style={{ fontSize: 14, fontWeight: '900', color: cText, textAlign: 'center' }}>{fmt(v)} Tỷ</Text> },
-    { key: 'feeRate', title: 'PHÍ %', width: 60, align: 'center', render: (v: any) => <Text style={{ fontSize: 12, fontWeight: '700', color: '#8b5cf6', textAlign: 'center' }}>{v}%</Text> },
-    { key: 'commission', title: 'HOA HỒNG', width: 90, align: 'center', render: (v: any) => <Text style={{ fontSize: 13, fontWeight: '800', color: '#22c55e', textAlign: 'center' }}>{fmt(v)} Tỷ</Text> },
-    { key: 'stage', title: 'TRẠNG THÁI', width: 90, align: 'center', render: (v: any) => {
-      const s = STAGE_COLORS[v] || STAGE_COLORS.LEAD;
+    )},
+    { key: 'transactionValue', title: 'GIÁ TRỊ', align: 'right' as const, render: (v: number) => (
+      <Text style={{ fontSize: 15, fontWeight: '800', color: '#3b82f6' }}>{v} <Text style={{ fontSize: 12, fontWeight: '700' }}>Tỷ</Text></Text>
+    )},
+    { key: 'commissionExpected', title: 'HOA HỒNG', align: 'right' as const, render: (v: number) => (
+      <Text style={{ fontSize: 15, fontWeight: '800', color: '#10b981' }}>{v} <Text style={{ fontSize: 12, fontWeight: '700' }}>Tr</Text></Text>
+    )},
+    { key: 'date', title: 'NGÀY KÝ', align: 'center' as const, render: (v: string) => (
+      <Text style={{ fontSize: 13, fontWeight: '600', color: '#64748b' }}>{new Date(v).toLocaleDateString('vi-VN')}</Text>
+    )},
+    { key: 'status', title: 'TRẠNG THÁI', align: 'center' as const, render: (v: string) => {
+      const isSuccess = v === 'thành công';
       return (
-        <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, backgroundColor: s.bg, alignSelf: 'center' }}>
-          <Text style={{ fontSize: 9, fontWeight: '800', color: s.text }}>{s.label}</Text>
+        <View style={{ backgroundColor: isSuccess ? '#dcfce7' : '#fef3c7', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: isSuccess ? '#bbf7d0' : '#fde68a' }}>
+          <Text style={{ fontSize: 11, fontWeight: '800', color: isSuccess ? '#16a34a' : '#d97706', letterSpacing: 0.5 }}>{v.toUpperCase()}</Text>
         </View>
       );
-    } },
+    }},
     ...(showStaffColumn ? [{ key: 'staff', title: 'SALES', flex: 1, render: (v: any) => <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>{v}</Text> }] : []),
-    { key: 'source', title: 'NGUỒN', width: 70, align: 'center', render: (v: any) => {
-      const srcInfo = sourceLabels[v] || sourceLabels.MARKETING;
-      return (
-        <View style={{ paddingHorizontal: 6, paddingVertical: 3, borderRadius: 4, backgroundColor: srcInfo.bg, alignSelf: 'center' }}>
-          <Text style={{ fontSize: 8, fontWeight: '800', color: srcInfo.text }}>{srcInfo.label}</Text>
-        </View>
-      );
-    } },
   ];
+
+  const cardStyle: any = {
+    backgroundColor: isDark ? 'rgba(20,24,35,0.6)' : 'rgba(255,255,255,0.85)', borderRadius: 28,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)',
+    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(32px)', boxShadow: isDark ? '0 12px 32px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.04)' } : {}),
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
       <ScrollView contentContainerStyle={{ padding: 32, gap: 24, paddingBottom: 120 }}>
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-            <View style={{ width: 48, height: 48, borderRadius: 16, backgroundColor: '#3b82f620', alignItems: 'center', justifyContent: 'center' }}>
-              <ShoppingCart size={22} color="#3b82f6" />
-            </View>
             <View>
               <Text style={{ fontSize: 12, fontWeight: '800', color: '#3b82f6', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 2 }}>{scopeLabel}</Text>
               <Text style={{ ...sgds.typo.h2, color: cText }}>Giao Dịch</Text>
@@ -98,20 +102,30 @@ export function DealRecording({ userRole }: { userRole?: SalesRole }) {
             </View>
           </View>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            <Pressable style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}>
-              <Filter size={14} color={cSub} />
+            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10 }}>
+              <FilterIcon size={14} color={cSub} />
               <Text style={{ fontSize: 12, fontWeight: '700', color: cSub }}>BỘ LỌC</Text>
-            </Pressable>
-            {canCreate && <Pressable style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: '#3b82f6', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12 }}>
-              <Plus size={16} color="#fff" />
-              <Text style={{ fontSize: 12, fontWeight: '800', color: '#fff' }}>GHI NHẬN GD</Text>
-            </Pressable>}
+            </TouchableOpacity>
+            {canCreate && <TouchableOpacity style={{
+            shadowColor: '#3b82f6', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6,
+            ...(Platform.OS === 'web' ? { transition: 'transform 0.2s', cursor: 'pointer', ':active': { transform: 'scale(0.96)' } } as any : {})
+          }}>
+            <LinearGradient colors={isDark ? ['#3b82f6', '#1d4ed8'] : ['#60a5fa', '#2563eb']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{
+              flexDirection: 'row', alignItems: 'center', paddingHorizontal: 24, paddingVertical: 14, borderRadius: 16, gap: 10,
+            }}>
+              <Plus size={20} color="#fff" strokeWidth={3} />
+              <Text style={{ fontSize: 15, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>Ghi Nhận Giao Dịch</Text>
+            </LinearGradient>
+          </TouchableOpacity>}
           </View>
         </View>
 
-        <SGCard variant="glass" noPadding>
+        <SGCard style={cardStyle} noPadding>
           {isLoading ? (
-            <View style={{ padding: 40, alignItems: 'center' }}><ActivityIndicator size="large" color="#3b82f6" /><Text style={{ color: cSub, marginTop: 12, fontWeight: '600' }}>Đang tải giao dịch...</Text></View>
+            <View style={{ padding: 40, alignItems: 'center' }}>
+              <Text style={{ fontSize: 40, marginBottom: 12 }}>⏳</Text>
+              <Text style={{ color: cSub, fontWeight: '700', fontSize: 15 }}>Đang tải giao dịch...</Text>
+            </View>
           ) : dealsData.length === 0 ? (
             <View style={{ padding: 40, alignItems: 'center' }}><Text style={{ fontSize: 40, marginBottom: 12 }}>📝</Text><Text style={{ color: cSub, fontWeight: '700', fontSize: 15 }}>Chưa có giao dịch nào</Text></View>
           ) : (

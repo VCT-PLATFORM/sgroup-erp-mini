@@ -1,10 +1,11 @@
 /**
- * PayrollScreen — HR Payroll and Compensation Management
- * Features: View payslips, salary, allowances, deductions
+ * PayrollScreen — Premium HR Payroll and Compensation Management
+ * Features: View payslips, Privacy Mode (Fintech style), detailed compensations
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Wallet, DollarSign, ArrowUpRight, ArrowDownRight, Search, FileText, CheckCircle, Clock } from 'lucide-react-native';
+import { Wallet, DollarSign, ArrowUpRight, ArrowDownRight, Search, FileText, CheckCircle, Clock, Eye, EyeOff, LayoutGrid, List } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard, SGTable } from '../../../shared/ui/components';
@@ -15,14 +16,15 @@ const fmt = (n: number) => n.toLocaleString('vi-VN');
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
 
-// Data comes from API now
-
 export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
   const cSub = theme.colors.textSecondary;
   const cardBg = isDark ? 'rgba(255,255,255,0.03)' : '#ffffff';
   const borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+  const [isPrivate, setIsPrivate] = useState(true);
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
   // Fetch real payroll from API
   const { data: rawPayroll, isLoading } = usePayroll({ year: String(currentYear), month: String(currentMonth) });
@@ -48,6 +50,8 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
   const totalDeduction = payrollData.reduce((s: number, r: any) => s + r.deduction, 0);
   const paidPct = payrollData.length > 0 ? Math.round(payrollData.filter((r: any) => r.status === 'PAID').length / payrollData.length * 100) : 0;
 
+  const mask = (val: number) => isPrivate ? '***,***' : fmt(val);
+
   const COLUMNS: any = [
     { key: 'name', title: 'NHÂN VIÊN', flex: 1.5, render: (v: any, row: any) => (
       <View>
@@ -55,18 +59,18 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
         <Text style={{ fontSize: 11, color: cSub, marginTop: 2 }}>{row.code} • {row.dept}</Text>
       </View>
     ) },
-    { key: 'basic', title: 'LƯƠNG CƠ BẢN', flex: 1, render: (v: any) => <Text style={{ fontSize: 12, fontWeight: '600', color: cText }}>{fmt(v)} ₫</Text> },
+    { key: 'basic', title: 'LƯƠNG CƠ BẢN', flex: 1, render: (v: any) => <Text style={{ fontSize: 13, fontWeight: '600', color: cText, fontVariant: ['tabular-nums'] }}>{mask(v)} ₫</Text> },
     { key: 'allowance', title: 'PHỤ CẤP / THƯỞNG', flex: 1, render: (v: any, row: any) => (
       <View>
-        <Text style={{ fontSize: 12, fontWeight: '600', color: '#10b981' }}>+ {fmt(v + row.commission)} ₫</Text>
+        <Text style={{ fontSize: 13, fontWeight: '600', color: '#10b981', fontVariant: ['tabular-nums'] }}>+ {mask(v + row.commission)} ₫</Text>
       </View>
     ) },
-    { key: 'deduction', title: 'BHXH & KHẤU TRỪ', flex: 1, render: (v: any) => <Text style={{ fontSize: 12, fontWeight: '600', color: '#ef4444' }}>- {fmt(v)} ₫</Text> },
-    { key: 'total', title: 'THỰC LÃNH', flex: 1, render: (v: any) => <Text style={{ fontSize: 14, fontWeight: '800', color: '#3b82f6' }}>{fmt(v)} ₫</Text> },
+    { key: 'deduction', title: 'KHẤU TRỪ', flex: 1, render: (v: any) => <Text style={{ fontSize: 13, fontWeight: '600', color: '#ef4444', fontVariant: ['tabular-nums'] }}>- {mask(v)} ₫</Text> },
+    { key: 'total', title: 'THỰC LÃNH', flex: 1, render: (v: any) => <Text style={{ fontSize: 14, fontWeight: '800', color: '#3b82f6', fontVariant: ['tabular-nums'] }}>{mask(v)} ₫</Text> },
     { key: 'status', title: 'TRẠNG THÁI', flex: 0.8, align: 'center', render: (v: any) => {
       const isPaid = v === 'PAID';
       return (
-        <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: isPaid ? '#dcfce7' : '#fef3c7', alignSelf: 'center' }}>
+        <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: isPaid ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)', alignSelf: 'center' }}>
           <Text style={{ fontSize: 10, fontWeight: '800', color: isPaid ? '#16a34a' : '#d97706' }}>
             {isPaid ? 'ĐÃ CHI' : 'CHỜ DUYỆT'}
           </Text>
@@ -74,7 +78,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
       );
     } },
     { key: 'actions', title: '', flex: 0.5, align: 'right', render: () => (
-      <TouchableOpacity style={{ padding: 6 }}>
+      <TouchableOpacity style={{ padding: 6, backgroundColor: 'rgba(59,130,246,0.1)', borderRadius: 8 }}>
         <FileText size={16} color="#3b82f6" />
       </TouchableOpacity>
     ) }
@@ -82,94 +86,201 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
-      <ScrollView contentContainerStyle={{ padding: 28, gap: 24, paddingBottom: 120 }}>
-        {/* Header */}
+      <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+        
+        {/* Fintech Premium Header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: '#8b5cf620', alignItems: 'center', justifyContent: 'center' }}>
-              <Wallet size={24} color="#8b5cf6" />
-            </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+            <LinearGradient 
+              colors={['#8b5cf6', '#6366f1']} start={{x:0,y:0}} end={{x:1,y:1}}
+              style={{ width: 60, height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', 
+                     shadowColor: '#8b5cf6', shadowOpacity: 0.5, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+            >
+              <Wallet size={28} color="#fff" />
+            </LinearGradient>
             <View>
-              <Text style={{ ...sgds.typo.h2, color: cText }}>Bảng Lương</Text>
-              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>Kỳ lương: Tháng {currentMonth}/{currentYear}</Text>
+              <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -1 }}>Quản trị Quỹ lương</Text>
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>Dữ liệu tài chính: Tháng {currentMonth}/{currentYear}</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
-            <TouchableOpacity style={{
-              backgroundColor: cardBg, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14,
-              borderWidth: 1, borderColor,
+          <View style={{ flexDirection: 'row', gap: 12 }}>
+            <TouchableOpacity 
+              onPress={() => setIsPrivate(!isPrivate)}
+              style={{
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              backgroundColor: isPrivate ? 'rgba(34,197,94,0.1)' : 'rgba(244,63,94,0.1)', 
+              paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16,
+              borderWidth: 1, borderColor: isPrivate ? 'rgba(34,197,94,0.2)' : 'rgba(244,63,94,0.2)',
               ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
             }}>
-              <Text style={{ fontSize: 13, fontWeight: '700', color: cText }}>CHỐT BẢNG LƯƠNG</Text>
+              {isPrivate ? <EyeOff size={18} color="#22c55e" /> : <Eye size={18} color="#f43f5e" />}
+              <Text style={{ fontSize: 13, fontWeight: '800', color: isPrivate ? '#22c55e' : '#f43f5e' }}>
+                {isPrivate ? 'CHẾ ĐỘ MẬT' : 'HIỂN THỊ'}
+              </Text>
             </TouchableOpacity>
+
             <TouchableOpacity style={{
-              backgroundColor: '#8b5cf6', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,
+              backgroundColor: '#8b5cf6', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 16,
+              shadowColor: '#8b5cf6', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 4,
+              justifyContent: 'center',
               ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
             }}>
-              <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff' }}>GỬI PAYSLIP</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>CHỐT BẢNG LƯƠNG</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Stats Summary */}
-        <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+        {/* Financial KPI Cards */}
+        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
-            { label: 'TỔNG QUỸ LƯƠNG', val: fmt(totalFund), unit: '₫', icon: DollarSign, color: '#8b5cf6' },
-            { label: 'THƯỢNG & PHỤ CẤP', val: fmt(totalAllowance), unit: '₫', icon: ArrowUpRight, color: '#10b981' },
-            { label: 'BHXH & KHẤU TRỪ', val: fmt(totalDeduction), unit: '₫', icon: ArrowDownRight, color: '#ef4444' },
-            { label: 'ĐÃ THANH TOÁN', val: `${paidPct}%`, unit: '', icon: CheckCircle, color: '#3b82f6' },
+            { label: 'TỔNG QUỸ LƯƠNG', val: mask(totalFund), unit: '₫', icon: DollarSign, color: '#8b5cf6', shadow: '#8b5cf6', gradient: ['#8b5cf6', '#6366f1'] },
+            { label: 'TỔNG THƯỞNG / PHỤ CẤP', val: mask(totalAllowance), unit: '₫', icon: ArrowUpRight, color: '#10b981', shadow: '#10b981', gradient: ['#10b981', '#059669'] },
+            { label: 'BHXH & KHẤU TRỪ', val: mask(totalDeduction), unit: '₫', icon: ArrowDownRight, color: '#f43f5e', shadow: '#f43f5e', gradient: ['#f43f5e', '#e11d48'] },
+            { label: 'ĐÃ THANH TOÁN', val: isPrivate ? '***' : `${paidPct}%`, unit: '', icon: CheckCircle, color: '#3b82f6', shadow: '#3b82f6', gradient: ['#3b82f6', '#2563eb'] },
           ].map((s, i) => (
-            <View key={i} style={{
-              flex: 1, minWidth: 200, padding: 22, borderRadius: 20,
-              backgroundColor: cardBg, borderWidth: 1, borderColor,
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: `${s.color}15`, alignItems: 'center', justifyContent: 'center' }}>
-                  <s.icon size={20} color={s.color} />
-                </View>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: cSub, flex: 1 }}>{s.label}</Text>
+            <LinearGradient
+              key={i}
+              colors={isDark ? ['rgba(30,41,59,0.7)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
+              style={{
+                flex: 1, minWidth: 220, padding: 24, borderRadius: 28,
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                shadowColor: isDark ? '#000' : s.shadow, shadowOpacity: isDark ? 0.5 : 0.08, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 6,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                <LinearGradient
+                  colors={s.gradient as [string, string]} start={{x:0, y:0}} end={{x:1, y:1}}
+                  style={{ width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', shadowColor: s.shadow, shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: {width:0, height:4} }}
+                >
+                  <s.icon size={22} color="#fff" />
+                </LinearGradient>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, flex: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.label}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-                <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>{s.val}</Text>
-                {s.unit ? <Text style={{ fontSize: 14, fontWeight: '700', color: cSub }}>{s.unit}</Text> : null}
+                <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1, fontVariant: ['tabular-nums'] }}>{s.val}</Text>
+                {s.unit ? <Text style={{ fontSize: 16, fontWeight: '700', color: cSub }}>{s.unit}</Text> : null}
               </View>
-            </View>
+            </LinearGradient>
           ))}
         </View>
 
         {/* Filters */}
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
+        <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 12 }}>
           <View style={{
-            flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
-            backgroundColor: cardBg, borderWidth: 1, borderColor,
-            borderRadius: 14, paddingHorizontal: 16, paddingVertical: 12,
+            flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
+            borderRadius: 16, padding: 4,
           }}>
-            <Search size={18} color={cSub} />
-            <Text style={{ color: cSub, fontSize: 14 }}>Tìm nhân viên, mã NV...</Text>
+            <TouchableOpacity onPress={() => setViewMode('table')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: viewMode === 'table' ? (isDark ? '#3b82f6' : '#fff') : 'transparent', shadowColor: '#000', shadowOpacity: viewMode === 'table' ? 0.05 : 0, shadowRadius: 4, elevation: viewMode === 'table' ? 2 : 0 }}>
+              <List size={18} color={viewMode === 'table' ? (isDark ? '#fff' : cText) : cSub} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewMode('grid')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: viewMode === 'grid' ? (isDark ? '#3b82f6' : '#fff') : 'transparent', shadowColor: '#000', shadowOpacity: viewMode === 'grid' ? 0.05 : 0, shadowRadius: 4, elevation: viewMode === 'grid' ? 2 : 0 }}>
+              <LayoutGrid size={18} color={viewMode === 'grid' ? (isDark ? '#fff' : cText) : cSub} />
+            </TouchableOpacity>
+          </View>
+          <View style={{
+            flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#ffffff', 
+            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
+            borderRadius: 16, paddingHorizontal: 20, paddingVertical: 14,
+            shadowColor: '#000', shadowOpacity: 0.02, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 2,
+          }}>
+            <Search size={20} color={cSub} />
+            <Text style={{ color: cSub, fontSize: 15, fontWeight: '600' }}>Tìm kiếm CBNV theo tên hoặc mã số...</Text>
           </View>
           <TouchableOpacity style={{
-            paddingHorizontal: 20, paddingVertical: 12, borderRadius: 14,
-            backgroundColor: cardBg, borderWidth: 1, borderColor,
+            paddingHorizontal: 24, paddingVertical: 14, borderRadius: 16,
+            backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#ffffff', 
+            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
+            shadowColor: '#000', shadowOpacity: 0.02, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 2,
           }}>
-            <Text style={{ fontSize: 13, fontWeight: '700', color: cText }}>Trạng thái: Tất cả</Text>
+            <Text style={{ fontSize: 14, fontWeight: '700', color: cText }}>Bộ lọc Trạng thái: Tất cả</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Table */}
-        <SGCard variant="glass" noPadding>
-          {isLoading ? (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#8b5cf6" />
-              <Text style={{ color: cSub, marginTop: 12, fontSize: 13 }}>Đang tải bảng lương...</Text>
-            </View>
-          ) : (
+        {/* Content View */}
+        {isLoading ? (
+          <View style={{ padding: 60, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#8b5cf6" />
+            <Text style={{ color: cSub, marginTop: 16, fontSize: 14, fontWeight: '600' }}>Đang tính toán dữ liệu lương...</Text>
+          </View>
+        ) : viewMode === 'table' ? (
+          <View style={{
+            backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
+            borderRadius: 28, overflow: 'hidden',
+            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+            ...(Platform.OS === 'web' ? { 
+              backdropFilter: 'blur(32px)', 
+              WebkitBackdropFilter: 'blur(32px)',
+              boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.2)' : '0 12px 32px rgba(0,0,0,0.04)' 
+            } : {}),
+          }}>
             <SGTable 
               columns={COLUMNS} 
               data={payrollData} 
               style={{ borderWidth: 0, backgroundColor: 'transparent' }}
             />
-          )}
-        </SGCard>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
+            {payrollData.length === 0 ? (
+              <Text style={{ color: cSub, fontSize: 15, padding: 32, textAlign: 'center', width: '100%' }}>Không có dữ liệu bảng lương tháng này.</Text>
+            ) : null}
+            {payrollData.map((item: any, idx: number) => {
+              const isPaid = item.status === 'PAID';
+              return (
+                <LinearGradient
+                  key={item.id || idx}
+                  colors={isDark ? ['rgba(30,41,59,0.5)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
+                  style={{
+                    flex: 1, minWidth: 320, maxWidth: Platform.OS === 'web' ? '48%' : '100%', borderRadius: 24, padding: 24,
+                    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                    shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 4,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                    <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center' }}>
+                      <LinearGradient
+                        colors={isDark ? ['rgba(59,130,246,0.2)', 'rgba(59,130,246,0.05)'] : ['#eff6ff', '#dbeafe']}
+                        style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(59,130,246,0.1)' }}
+                      >
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: '#3b82f6' }}>{item.name.charAt(0)}</Text>
+                      </LinearGradient>
+                      <View>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: cText }}>{item.name}</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: cSub, marginTop: 2 }}>{item.code} • {item.dept}</Text>
+                      </View>
+                    </View>
+                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, backgroundColor: isPaid ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)' }}>
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: isPaid ? '#16a34a' : '#d97706', letterSpacing: 0.5 }}>
+                        {isPaid ? 'ĐÃ CHI' : 'CHỜ DUYỆT'}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <View style={{ gap: 12, marginBottom: 24, paddingHorizontal: 4 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Lương cơ bản</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: cText, fontVariant: ['tabular-nums'] }}>{mask(item.basic)} ₫</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Phụ cấp / Thưởng</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: '#10b981', fontVariant: ['tabular-nums'] }}>+ {mask(item.allowance + item.commission)} ₫</Text>
+                    </View>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Khấu trừ</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '700', color: '#ef4444', fontVariant: ['tabular-nums'] }}>- {mask(item.deduction)} ₫</Text>
+                    </View>
+                  </View>
+
+                  <View style={{ borderTopWidth: 1, borderTopColor: borderColor, paddingTop: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 0.5 }}>Thực lãnh</Text>
+                    <Text style={{ fontSize: 24, fontWeight: '900', color: '#3b82f6', fontVariant: ['tabular-nums'], letterSpacing: -0.5 }}>{mask(item.total)} ₫</Text>
+                  </View>
+                </LinearGradient>
+              );
+            })}
+          </View>
+        )}
 
       </ScrollView>
     </View>

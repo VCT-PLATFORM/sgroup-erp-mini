@@ -1,0 +1,65 @@
+src/features/finance/screens/FinanceScreen.tsx(18,10): error TS2305: Module '"../components/CashflowTab"' has no exported member 'CashflowSection'.
+src/features/finance/screens/FinanceScreen.tsx(19,10): error TS2305: Module '"../components/DebtTab"' has no exported member 'DebtSection'.
+src/features/marketing/screens/MarketingDashboard.tsx(91,17): error TS2322: Type '{ key: any; title: any; subtitle: string; rightElement: Element; hideBorder: boolean; }' is not assignable to type 'IntrinsicAttributes & Props'.
+  Property 'rightElement' does not exist on type 'IntrinsicAttributes & Props'.
+src/features/marketing/screens/MarketingDashboard.tsx(114,17): error TS2322: Type '{ key: any; title: any; subtitle: string; rightElement: Element; hideBorder: boolean; }' is not assignable to type 'IntrinsicAttributes & Props'.
+  Property 'rightElement' does not exist on type 'IntrinsicAttributes & Props'.
+src/features/marketing/screens/MarketingPlanning.tsx(8,10): error TS2305: Module '"../api/marketingApi"' has no exported member 'marketingPlanningApi'.
+src/features/project/components/BatchInventoryModal.tsx(92,31): error TS18046: 'result' is of type 'unknown'.
+src/features/project/components/BatchInventoryModal.tsx(92,71): error TS18046: 'result' is of type 'unknown'.
+src/features/project/components/BatchInventoryModal.tsx(92,105): error TS18046: 'result' is of type 'unknown'.
+src/features/project/components/BatchInventoryModal.tsx(92,161): error TS18046: 'result' is of type 'unknown'.
+src/features/project/hooks/useProjects.ts(2,22): error TS2305: Module '"../api/projectApi"' has no exported member 'GenerateInventoryParams'.
+src/features/project/hooks/useProjects.ts(16,31): error TS2339: Property 'getProjects' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(23,31): error TS2339: Property 'getProject' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(31,59): error TS2339: Property 'createProject' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(41,89): error TS2339: Property 'updateProject' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(52,44): error TS2339: Property 'deleteProject' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(62,31): error TS2339: Property 'getProducts' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(71,18): error TS2339: Property 'createProduct' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(73,17): error TS2339: Property 'projectId' does not exist on type '{}'.
+src/features/project/hooks/useProjects.ts(74,77): error TS2339: Property 'projectId' does not exist on type '{}'.
+src/features/project/hooks/useProjects.ts(84,124): error TS2339: Property 'updateProduct' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(86,17): error TS2339: Property 'projectId' does not exist on type '{}'.
+src/features/project/hooks/useProjects.ts(87,77): error TS2339: Property 'projectId' does not exist on type '{}'.
+src/features/project/hooks/useProjects.ts(98,86): error TS2339: Property 'deleteProduct' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(109,18): error TS2339: Property 'lockProduct' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(141,86): error TS2339: Property 'unlockProduct' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/hooks/useProjects.ts(174,18): error TS2339: Property 'generateInventory' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.
+src/features/project/screens/ProjectAssignment.tsx(139,36): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/features/project/screens/ProjectDashboard.tsx(97,21): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDashboard.tsx(117,21): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDashboard.tsx(134,21): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDashboard.tsx(152,21): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDashboard.tsx(173,19): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDashboard.tsx(235,19): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDashboard.tsx(318,19): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDetailView.tsx(156,29): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDetailView.tsx(175,19): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDetailView.tsx(195,19): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectDetailView.tsx(256,19): error TS2322: Type 'any[]' is not assignable to type 'ViewStyle'.
+  Types of property 'filter' are incompatible.
+    Type '{ <S extends any>(predicate: (value: any, index: number, array: any[]) => value is S, thisArg?: any): S[]; (predicate: (value: any, index: number, array: any[]) => unknown, thisArg?: any): any[]; }' is not assignable to type 'string | readonly FilterFunction[] | undefined'.
+src/features/project/screens/ProjectPolicies.tsx(105,40): error TS7006: Parameter 'r' implicitly has an 'any' type.
+src/features/project/screens/ProjectPolicies.tsx(105,43): error TS7006: Parameter 'i' implicitly has an 'any' type.
+src/features/sales/screens/DepositManagement.tsx(157,31): error TS2339: Property 'getProducts' does not exist on type '{ getPolicies: (status?: string | undefined) => Promise<any>; createPolicy: (data: any) => Promise<any>; updatePolicy: (id: string, data: any) => Promise<any>; ... 5 more ...; batchCreateProducts: (projectId: string, products: any[]) => Promise<...>; }'.

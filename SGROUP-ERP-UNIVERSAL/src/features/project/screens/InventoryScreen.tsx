@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Platform, TextInput, Dimensions } from 'react-native';
-import { typography, useTheme } from '../../../shared/theme/theme';
-import { useThemeStore } from '../../../shared/theme/themeStore';
-import { SGCard, SGButton } from '../../../shared/ui/components';
+import Animated, { FadeInDown, FadeInUp, SlideInUp, SlideOutUp, Layout } from 'react-native-reanimated';
+import { typography, sgds, radius } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
+import { SGCard, SGButton, SGAuroraBackground } from '../../../shared/ui/components';
 import { useProjects, useProjectProducts, useLockProduct, useUnlockProduct, useDeleteProduct } from '../hooks/useProjects';
 import { Grid3x3, Lock, Unlock, Plus, Edit2, Trash2, Search, Download, Upload, X, Package, ArrowUpDown, Layers } from 'lucide-react-native';
 import { ProductFormModal } from '../components/ProductFormModal';
@@ -20,8 +21,7 @@ interface Props {
 }
 
 export function InventoryScreen({ initialProjectId }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, theme, isDark } = useAppTheme();
   const { user } = useAuthStore();
   const { showToast } = useToast();
   const { data: projects, isLoading: projectsLoading } = useProjects();
@@ -51,8 +51,8 @@ export function InventoryScreen({ initialProjectId }: Props) {
 
   const getStatusColor = (status: string) => {
     const map: Record<string, string> = {
-      AVAILABLE: '#10b981', LOCKED: '#f59e0b', BOOKED: '#f97316',
-      PENDING_DEPOSIT: '#3b82f6', DEPOSIT: '#8b5cf6', SOLD: '#ef4444', COMPLETED: '#64748b',
+      AVAILABLE: colors.success, LOCKED: colors.warning, BOOKED: '#f97316',
+      PENDING_DEPOSIT: colors.brand, DEPOSIT: colors.purple, SOLD: colors.danger, COMPLETED: colors.textTertiary,
     };
     return map[status] || colors.textSecondary;
   };
@@ -188,14 +188,18 @@ export function InventoryScreen({ initialProjectId }: Props) {
 
   const selectedProject = (Array.isArray(projects) ? projects : []).find((p: any) => p.id === selectedProjectId);
 
-  const renderProductItem = ({ item }: { item: any }) => {
+  const renderProductItem = ({ item, index }: { item: any, index: number }) => {
     const sc = getStatusColor(item.status);
     return (
-      <View style={[
-        styles.productCard, 
-        isDark ? styles.glassCardDark : styles.glassCardLight,
-        Platform.OS === 'web' && styles.glassEffect as any,
-      ]}>
+      <Animated.View 
+        entering={FadeInUp.delay(index * 50).springify().damping(20)} 
+        layout={Layout.springify()} 
+        style={[
+          styles.productCard, 
+          sgds.sectionBase(theme),
+          { padding: 0 }
+        ]}
+      >
         {/* Status color strip */}
         <View style={{ height: 4, width: '100%', backgroundColor: sc, borderTopLeftRadius: 16, borderTopRightRadius: 16 }} />
         
@@ -260,7 +264,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
             )}
           </View>
         </View>
-      </View>
+      </Animated.View>
     );
   };
 
@@ -275,21 +279,12 @@ export function InventoryScreen({ initialProjectId }: Props) {
       {/* Aurora Backdrop */}
       {Platform.OS === 'web' && (
         <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
-          <View style={{
-            position: 'absolute', top: '5%', right: '-8%', width: 500, height: 500,
-            backgroundColor: isDark ? 'rgba(16, 185, 129, 0.03)' : 'rgba(16, 185, 129, 0.02)',
-            borderRadius: 250,
-          } as any} />
-          <View style={{
-            position: 'absolute', bottom: '15%', left: '-5%', width: 400, height: 400,
-            backgroundColor: isDark ? 'rgba(59, 130, 246, 0.03)' : 'rgba(59, 130, 246, 0.02)',
-            borderRadius: 200,
-          } as any} />
+          <SGAuroraBackground />
         </View>
       )}
 
       {/* Header */}
-      <View style={[styles.header, { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={[styles.header, { zIndex: 1 }]}>
         <View style={{ flex: 1 }}>
           <Text style={[typography.h1, { color: colors.text, marginBottom: 8, fontWeight: '800', letterSpacing: -0.5 }]}>Quản lý Bảng hàng</Text>
           <Text style={[typography.body, { color: colors.textSecondary, fontSize: 15 }]}>
@@ -307,11 +302,11 @@ export function InventoryScreen({ initialProjectId }: Props) {
             onPress={() => { setEditingProduct(null); setShowProductForm(true); }} disabled={!selectedProjectId}
             style={{ backgroundColor: '#10b981' }} />
         </View>
-      </View>
+      </Animated.View>
 
       {/* Batch Import Panel */}
       {showBatchInput && (
-        <View style={[styles.batchPanel, isDark ? styles.glassCardDark : styles.glassCardLight, Platform.OS === 'web' && styles.glassEffect as any, { zIndex: 1 }]}>
+        <Animated.View entering={SlideInUp.springify().damping(20)} exiting={SlideOutUp.springify()} style={[styles.batchPanel, sgds.sectionBase(theme), { zIndex: 1 }]}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <Text style={[typography.h4, { color: colors.text, fontWeight: '800' }]}>Import hàng loạt (CSV)</Text>
             <TouchableOpacity onPress={() => setShowBatchInput(false)} style={[styles.miniBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }]}>
@@ -337,9 +332,9 @@ export function InventoryScreen({ initialProjectId }: Props) {
             <SGButton title="Hủy" variant="outline" onPress={() => { setShowBatchInput(false); setBatchCSV(''); }}
               style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' }} />
             <SGButton title={`Import ${batchCSV.trim().split('\n').filter(Boolean).length} dòng`} onPress={handleBatchImport}
-              disabled={!batchCSV.trim()} style={{ backgroundColor: '#10b981' }} />
+              disabled={!batchCSV.trim()} style={{ backgroundColor: colors.success }} />
           </View>
-        </View>
+        </Animated.View>
       )}
 
       {/* Project Selector */}
@@ -408,7 +403,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
       </View>
 
       {/* Grid Section */}
-      <View style={[styles.gridSection, isDark ? styles.glassCardDark : styles.glassCardLight, Platform.OS === 'web' && styles.glassEffect as any, { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.gridSection, sgds.sectionBase(theme), { zIndex: 1 }]}>
         <View style={styles.toolbar}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <View style={[styles.toolbarIcon, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ecfdf5' }]}>
@@ -443,7 +438,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
             columnWrapperStyle={{ gap: 20 }} contentContainerStyle={{ gap: 20, paddingBottom: 40 }}
             showsVerticalScrollIndicator={false} />
         )}
-      </View>
+      </Animated.View>
     </View>
   );
 }
@@ -486,23 +481,5 @@ const styles = StyleSheet.create({
     fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" 
   },
   
-  gridSection: { flex: 1, padding: 28, borderRadius: 20 },
-  
-  glassEffect: {
-    ...(Platform.OS === 'web' && {
-      backdropFilter: 'blur(16px)',
-      WebkitBackdropFilter: 'blur(16px)',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-    } as any),
-  },
-  glassCardDark: { 
-    backgroundColor: 'rgba(30, 41, 59, 0.65)', 
-    borderColor: 'rgba(255, 255, 255, 0.08)', borderWidth: 1,
-    ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)' } as any),
-  },
-  glassCardLight: { 
-    backgroundColor: 'rgba(255, 255, 255, 0.85)', 
-    borderColor: 'rgba(0, 0, 0, 0.04)', borderWidth: 1,
-    ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.04)' } as any),
-  },
+  gridSection: { flex: 1, padding: 28, borderRadius: 28 },
 });

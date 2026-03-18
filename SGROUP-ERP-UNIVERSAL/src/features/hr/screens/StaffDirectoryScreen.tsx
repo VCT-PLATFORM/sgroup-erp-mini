@@ -11,6 +11,7 @@ import {
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard } from '../../../shared/ui/components';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { HRRole } from '../HRSidebar';
 import { useEmployees, useHRDashboard, useCreateEmployee, useUpdateEmployee, useDepartments, usePositions, useTeams, useTransferHistory } from '../hooks/useHR';
 
@@ -433,32 +434,36 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
         </View>
 
         {/* ── Stat Cards ── */}
-        <View style={{ flexDirection: 'row', gap: 14, flexWrap: 'wrap' }}>
+        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {statCards.map((sc, i) => {
             const Icon = sc.icon;
             return (
-              <View key={i} style={{
-                flex: 1, minWidth: 200, borderRadius: 18, padding: 20,
-                backgroundColor: cardBg,
-                borderWidth: 1, borderColor,
-                ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease' as any } : {}),
-              }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <LinearGradient
+                key={i}
+                colors={isDark ? ['rgba(30,41,59,0.7)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
+                style={{
+                  flex: 1, minWidth: 200, borderRadius: 24, padding: 24,
+                  borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                  shadowColor: isDark ? '#000' : sc.color, shadowOpacity: isDark ? 0.3 : 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 6,
+                  ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease' as any } : {}),
+                }}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
                   <View style={{
-                    width: 42, height: 42, borderRadius: 14,
+                    width: 44, height: 44, borderRadius: 14,
                     backgroundColor: sc.color + '15',
                     alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <Icon size={20} color={sc.color} />
+                    <Icon size={22} color={sc.color} />
                   </View>
                 </View>
-                <Text style={{ fontSize: 28, fontWeight: '900', color: cText, letterSpacing: -1 }}>
+                <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1 }}>
                   {typeof sc.value === 'number' ? fmt(sc.value) : sc.value}
                 </Text>
-                <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, marginTop: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginTop: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>
                   {sc.label}
                 </Text>
-              </View>
+              </LinearGradient>
             );
           })}
         </View>
@@ -551,9 +556,10 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                   onPress={() => canEdit && openEdit(staff)}
                   style={{
                     flex: 1, minWidth: 340, maxWidth: 440,
-                    borderRadius: 20, padding: 0, overflow: 'hidden',
-                    backgroundColor: cardBg,
-                    borderWidth: 1, borderColor,
+                    borderRadius: 24, padding: 0, overflow: 'hidden',
+                    backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : '#ffffff',
+                    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                    shadowColor: '#000', shadowOpacity: isDark ? 0.2 : 0.04, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 4,
                     ...(Platform.OS === 'web' ? {
                       cursor: canEdit ? 'pointer' : 'default' as any,
                       transition: 'all 0.25s ease' as any,
@@ -561,38 +567,40 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                   }}
                 >
                   {/* Top accent bar */}
-                  <View style={{ height: 3, backgroundColor: avatarColor, opacity: 0.6 }} />
+                  <LinearGradient colors={[avatarColor, avatarColor + '80']} start={{x:0,y:0}} end={{x:1,y:0}} style={{ height: 4 }} />
 
-                  <View style={{ padding: 22 }}>
+                  <View style={{ padding: 24 }}>
                     {/* Avatar + Name + Code */}
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-                      <View style={{
-                        width: 50, height: 50, borderRadius: 16,
-                        backgroundColor: avatarColor + '18',
-                        alignItems: 'center', justifyContent: 'center',
-                        borderWidth: 2, borderColor: avatarColor + '30',
-                      }}>
-                        <Text style={{ fontSize: 17, fontWeight: '900', color: avatarColor }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+                      <LinearGradient
+                        colors={[avatarColor + '20', avatarColor + '05']}
+                        style={{
+                          width: 56, height: 56, borderRadius: 18,
+                          alignItems: 'center', justifyContent: 'center',
+                          borderWidth: 1, borderColor: avatarColor + '30',
+                        }}
+                      >
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: avatarColor }}>
                           {getInitials(staff.fullName || '')}
                         </Text>
-                      </View>
+                      </LinearGradient>
                       <View style={{ flex: 1 }}>
-                        <Text style={{ fontSize: 16, fontWeight: '800', color: cText, letterSpacing: -0.3 }}>{staff.fullName}</Text>
+                        <Text style={{ fontSize: 17, fontWeight: '800', color: cText, letterSpacing: -0.3 }}>{staff.fullName}</Text>
                         {staff.englishName ? (
-                          <Text style={{ fontSize: 12, fontWeight: '600', color: cSub, marginTop: 1, fontStyle: 'italic' }}>{staff.englishName}</Text>
+                          <Text style={{ fontSize: 13, fontWeight: '600', color: cSub, marginTop: 2, fontStyle: 'italic' }}>{staff.englishName}</Text>
                         ) : null}
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
-                          <Hash size={11} color={cSub} />
-                          <Text style={{ fontSize: 11, fontWeight: '700', color: cSub }}>{staff.employeeCode}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                          <Hash size={12} color={cSub} />
+                          <Text style={{ fontSize: 12, fontWeight: '700', color: cSub }}>{staff.employeeCode}</Text>
                         </View>
                       </View>
                       {/* Role badge */}
                       <View style={{
-                        paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10,
+                        paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12,
                         backgroundColor: roleConf.bg,
                         borderWidth: 1, borderColor: roleConf.color + '20',
                       }}>
-                        <Text style={{ fontSize: 10, fontWeight: '900', color: roleConf.color, letterSpacing: 0.3 }}>
+                        <Text style={{ fontSize: 11, fontWeight: '900', color: roleConf.color, letterSpacing: 0.5, textTransform: 'uppercase' }}>
                           {staff.position?.name || roleConf.label}
                         </Text>
                       </View>
@@ -600,38 +608,38 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
                     {/* Department badge */}
                     <View style={{
-                      flexDirection: 'row', alignItems: 'center', gap: 8,
+                      flexDirection: 'row', alignItems: 'center', gap: 10,
                       paddingBottom: 16, marginBottom: 16,
-                      borderBottomWidth: 1, borderBottomColor: borderColor,
+                      borderBottomWidth: 1, borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
                     }}>
                       <View style={{
-                        width: 26, height: 26, borderRadius: 8,
+                        width: 28, height: 28, borderRadius: 8,
                         backgroundColor: '#8b5cf615',
                         alignItems: 'center', justifyContent: 'center',
                       }}>
-                        <Building size={12} color="#8b5cf6" />
+                        <Building size={14} color="#8b5cf6" />
                       </View>
-                      <Text style={{ fontSize: 13, fontWeight: '700', color: deptName !== '—' ? cText : cSub }}>
+                      <Text style={{ fontSize: 14, fontWeight: '800', color: deptName !== '—' ? cText : cSub }}>
                         {deptName}
                       </Text>
-                      <Text style={{ fontSize: 10, color: cSub }}>•</Text>
+                      <Text style={{ fontSize: 12, color: cSub, marginHorizontal: 4 }}>•</Text>
                       <View style={{
-                        flexDirection: 'row', alignItems: 'center', gap: 4,
-                        paddingHorizontal: 8, paddingVertical: 3, borderRadius: 6,
+                        flexDirection: 'row', alignItems: 'center', gap: 6,
+                        paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8,
                         backgroundColor: staff.team?.name
-                          ? (isDark ? 'rgba(99,102,241,0.1)' : '#eef2ff')
-                          : (isDark ? 'rgba(148,163,184,0.08)' : '#f8fafc'),
+                          ? (isDark ? 'rgba(99,102,241,0.15)' : '#eef2ff')
+                          : (isDark ? 'rgba(148,163,184,0.1)' : '#f8fafc'),
                       }}>
-                        <UsersRound size={10} color={staff.team?.name ? '#6366f1' : '#94a3b8'} />
-                        <Text style={{ fontSize: 10, fontWeight: '700', color: staff.team?.name ? '#6366f1' : '#94a3b8' }}>
+                        <UsersRound size={12} color={staff.team?.name ? '#6366f1' : '#94a3b8'} />
+                        <Text style={{ fontSize: 11, fontWeight: '800', color: staff.team?.name ? '#6366f1' : '#94a3b8' }}>
                           {staff.team?.name || 'Chưa gán team'}
                         </Text>
                       </View>
                       <View style={{
-                        paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, marginLeft: 'auto',
-                        backgroundColor: staff.status === 'ACTIVE' ? '#dcfce7' : staff.status === 'PROBATION' ? '#dbeafe' : '#fef3c7',
+                        paddingHorizontal: 10, paddingVertical: 6, borderRadius: 10, marginLeft: 'auto',
+                        backgroundColor: staff.status === 'ACTIVE' ? 'rgba(34,197,94,0.15)' : staff.status === 'PROBATION' ? 'rgba(59,130,246,0.15)' : 'rgba(245,158,11,0.15)',
                       }}>
-                        <Text style={{ fontSize: 10, fontWeight: '800', color: staff.status === 'ACTIVE' ? '#16a34a' : staff.status === 'PROBATION' ? '#2563eb' : '#d97706' }}>
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: staff.status === 'ACTIVE' ? '#16a34a' : staff.status === 'PROBATION' ? '#2563eb' : '#d97706', letterSpacing: 0.5 }}>
                           {staff.status === 'ACTIVE' ? 'ĐANG LÀM' : staff.status === 'PROBATION' ? 'THỬ VIỆC' : staff.status === 'ON_LEAVE' ? 'ĐANG NGHỈ' : staff.status}
                         </Text>
                       </View>
@@ -639,21 +647,21 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
                     {/* Contact info row */}
                     <View style={{ flexDirection: 'row', gap: 12 }}>
-                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, padding: 10, borderRadius: 12, backgroundColor: isDark ? 'rgba(59,130,246,0.06)' : '#eff6ff' }}>
-                        <Mail size={14} color="#3b82f6" />
-                        <Text style={{ fontSize: 12, fontWeight: '600', color: cText }} numberOfLines={1}>{staff.email || '—'}</Text>
+                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 14, backgroundColor: isDark ? 'rgba(59,130,246,0.06)' : '#eff6ff', borderWidth: 1, borderColor: isDark ? 'transparent' : '#dbeafe' }}>
+                        <Mail size={16} color="#3b82f6" />
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: cText }} numberOfLines={1}>{staff.email || '—'}</Text>
                       </View>
-                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, padding: 10, borderRadius: 12, backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : '#f5f3ff' }}>
-                        <Phone size={14} color="#8b5cf6" />
-                        <Text style={{ fontSize: 12, fontWeight: '600', color: cText }}>{staff.phone || '—'}</Text>
+                      <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, padding: 12, borderRadius: 14, backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : '#f5f3ff', borderWidth: 1, borderColor: isDark ? 'transparent' : '#ede9fe' }}>
+                        <Phone size={16} color="#8b5cf6" />
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: cText }}>{staff.phone || '—'}</Text>
                       </View>
                     </View>
 
                     {/* Edit hint for admins */}
                     {canEdit && (
-                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 10, opacity: 0.5 }}>
-                        <Pencil size={10} color={cSub} />
-                        <Text style={{ fontSize: 10, fontWeight: '600', color: cSub }}>Nhấn để chỉnh sửa</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 4, marginTop: 14, opacity: 0.6 }}>
+                        <Pencil size={12} color={cSub} />
+                        <Text style={{ fontSize: 11, fontWeight: '700', color: cSub, textTransform: 'uppercase', letterSpacing: 0.5 }}>Nhấn để chỉnh sửa</Text>
                       </View>
                     )}
                   </View>

@@ -7,6 +7,7 @@ import { View, Text, ScrollView, TouchableOpacity, Platform, Modal, TextInput } 
 import {
   Calendar, Clock, MapPin, Phone, CheckCircle2, XCircle, AlertCircle, Plus, X
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { SGPlanningSectionTitle } from '../../../shared/ui/components';
 import { useAppointments, AppointmentEntry, AppointmentStatus, AppointmentType } from '../hooks/useAppointments';
@@ -85,9 +86,9 @@ export function Appointments({ userRole }: { userRole?: SalesRole }) {
   };
 
   const cardStyle: any = {
-    backgroundColor: isDark ? 'rgba(20,24,35,0.45)' : '#fff', borderRadius: 24,
-    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)' } : {}),
+    backgroundColor: isDark ? 'rgba(20,24,35,0.6)' : 'rgba(255,255,255,0.85)', borderRadius: 28,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)',
+    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(32px)', boxShadow: isDark ? '0 12px 32px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.04)' } : {}),
   };
 
   return (
@@ -119,17 +120,21 @@ export function Appointments({ userRole }: { userRole?: SalesRole }) {
             return (
               <TouchableOpacity key={i} onPress={() => setSelectedDay(date.getDate())}
                 style={{
-                  flex: 1, alignItems: 'center', paddingVertical: 12, borderRadius: 14,
-                  backgroundColor: isSelected ? '#8b5cf6' : 'transparent',
+                  flex: 1, alignItems: 'center', paddingVertical: 14, borderRadius: 16, overflow: 'hidden',
                 }}>
-                <Text style={{ fontSize: 11, fontWeight: '700', color: isSelected ? '#c4b5fd' : '#94a3b8', marginBottom: 4 }}>
+                {isSelected && (
+                   <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                     <LinearGradient colors={['#a78bfa', '#8b5cf6']} style={{ flex: 1 }} />
+                   </View>
+                )}
+                <Text style={{ fontSize: 12, fontWeight: '800', color: isSelected ? '#ede9fe' : '#94a3b8', marginBottom: 6, zIndex: 1 }}>
                   {DAYS[(i + 1) % 7]}
                 </Text>
-                <Text style={{ fontSize: 20, fontWeight: '900', color: isSelected ? '#fff' : (isToday ? '#8b5cf6' : cText) }}>
+                <Text style={{ fontSize: 22, fontWeight: '900', color: isSelected ? '#fff' : (isToday ? '#8b5cf6' : cText), zIndex: 1 }}>
                   {date.getDate()}
                 </Text>
                 {isToday && !isSelected && (
-                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#8b5cf6', marginTop: 4 }} />
+                  <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: '#8b5cf6', marginTop: 6 }} />
                 )}
               </TouchableOpacity>
             );
@@ -176,22 +181,23 @@ export function Appointments({ userRole }: { userRole?: SalesRole }) {
                     <Text style={{ fontSize: 11, fontWeight: '600', color: cSub }}>{apt.duration} phút</Text>
                   </View>
 
-                  <View style={{ alignItems: 'center', width: 24 }}>
+                  <View style={{ alignItems: 'center', width: 28, position: 'relative' }}>
                     <View style={{
-                      width: 14, height: 14, borderRadius: 7,
-                      backgroundColor: cfg.color, borderWidth: 3, borderColor: isDark ? '#0f172a' : '#fff',
-                      ...(Platform.OS === 'web' ? { boxShadow: `0 0 0 3px ${cfg.color}30` } : {}),
+                      width: 18, height: 18, borderRadius: 9, top: 4,
+                      backgroundColor: cfg.color, borderWidth: 4, borderColor: isDark ? '#1e293b' : '#fff',
+                      ...(Platform.OS === 'web' ? { boxShadow: `0 0 12px ${cfg.color}80, 0 0 0 4px ${cfg.color}20` } : {}),
                     } as any} />
                     {!isLast && (
-                      <View style={{ flex: 1, width: 2, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', minHeight: 60 }} />
+                      <LinearGradient colors={[`${cfg.color}80`, 'transparent', isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1']} style={{ flex: 1, width: 2, minHeight: 60, marginVertical: 6 }} />
                     )}
                   </View>
 
                   <View style={{
-                    flex: 1, marginBottom: 16, padding: 18, borderRadius: 18,
-                    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc',
-                    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
-                    borderLeftWidth: 4, borderLeftColor: typeCfg.color,
+                    flex: 1, marginBottom: 20, padding: 22, borderRadius: 20,
+                    backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.6)',
+                    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0',
+                    borderLeftWidth: 6, borderLeftColor: typeCfg.color,
+                    ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer', ':hover': { transform: 'translateX(4px)', boxShadow: '0 8px 24px rgba(0,0,0,0.04)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' } } as any : {})
                   }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                       <View style={{ flex: 1 }}>

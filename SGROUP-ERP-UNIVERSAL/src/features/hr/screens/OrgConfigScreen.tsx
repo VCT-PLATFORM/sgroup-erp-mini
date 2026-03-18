@@ -1,5 +1,5 @@
 /**
- * OrgConfigScreen — Department-Centric Org Configuration
+ * OrgConfigScreen — Premium Department-Centric Org Configuration
  * Hierarchy: Department → Teams → Positions
  * Full CRUD for departments, teams, and positions
  */
@@ -7,8 +7,9 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Platform, TextInput, Modal, Alert, ActivityIndicator } from 'react-native';
 import {
   Building, Briefcase, Plus, Pencil, Trash2, X, Users, Hash,
-  ChevronDown, ChevronRight, UsersRound,
+  ChevronDown, ChevronRight, UsersRound, Settings
 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard } from '../../../shared/ui/components';
@@ -30,7 +31,6 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
   const cSub = theme.colors.textSecondary;
-  const cBg = isDark ? theme.colors.background : theme.colors.backgroundAlt;
   const cardBg = isDark ? 'rgba(255,255,255,0.03)' : '#ffffff';
   const borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
@@ -60,8 +60,8 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
   const inputStyle: any = {
     backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f8fafc',
     borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0',
-    borderRadius: 12, paddingHorizontal: 16, paddingVertical: 12,
-    fontSize: 14, color: cText,
+    borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14,
+    fontSize: 15, color: cText, fontWeight: '600',
     ...(Platform.OS === 'web' ? { outlineStyle: 'none' } : {}),
   };
 
@@ -137,91 +137,91 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
   const isEdit = modalMode?.startsWith('edit');
 
   return (
-    <View style={{ flex: 1, backgroundColor: cBg }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
       {/* ── Modal ── */}
       <Modal visible={!!modalMode} transparent animationType="fade" onRequestClose={() => setModalMode(null)}>
-        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' }} onPress={() => setModalMode(null)}>
-          <Pressable style={{ width: '90%', maxWidth: 480, backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 24, padding: 28, ...(Platform.OS === 'web' ? { boxShadow: '0 25px 50px rgba(0,0,0,0.25)' } : {}) }} onPress={() => {}}>
+        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' }} onPress={() => setModalMode(null)}>
+          <Pressable style={{ width: '90%', maxWidth: 480, backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 28, padding: 32, ...(Platform.OS === 'web' ? { boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' } : {}) }} onPress={() => {}}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-              <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>{getModalTitle()}</Text>
-              <Pressable onPress={() => setModalMode(null)} style={{ padding: 4 }}><X size={22} color={cSub} /></Pressable>
+              <Text style={{ fontSize: 24, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>{getModalTitle()}</Text>
+              <Pressable onPress={() => setModalMode(null)} style={{ padding: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 12 }}><X size={20} color={cSub} /></Pressable>
             </View>
 
             {/* Department form */}
             {modalMode?.includes('dept') && (
-              <View style={{ gap: 14 }}>
+              <View style={{ gap: 16 }}>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Tên phòng ban *</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Tên phòng ban *</Text>
                   <TextInput value={deptForm.name} onChangeText={v => setDeptForm(f => ({ ...f, name: v }))} placeholder="Phòng Kinh doanh" placeholderTextColor={cSub} style={inputStyle} />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Mã phòng ban *</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mã phòng ban *</Text>
                   <TextInput value={deptForm.code} onChangeText={v => setDeptForm(f => ({ ...f, code: v.toUpperCase() }))} placeholder="SALES" placeholderTextColor={cSub} style={inputStyle} autoCapitalize="characters" />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Mô tả</Text>
-                  <TextInput value={deptForm.description} onChangeText={v => setDeptForm(f => ({ ...f, description: v }))} placeholder="Mô tả phòng ban" placeholderTextColor={cSub} style={[inputStyle, { minHeight: 60 }]} multiline />
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mô tả</Text>
+                  <TextInput value={deptForm.description} onChangeText={v => setDeptForm(f => ({ ...f, description: v }))} placeholder="Mô tả phòng ban" placeholderTextColor={cSub} style={[inputStyle, { minHeight: 80 }]} multiline />
                 </View>
               </View>
             )}
 
             {/* Team form */}
             {modalMode?.includes('team') && (
-              <View style={{ gap: 14 }}>
+              <View style={{ gap: 16 }}>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Tên team *</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Tên team *</Text>
                   <TextInput value={teamForm.name} onChangeText={v => setTeamForm(f => ({ ...f, name: v }))} placeholder="Team KD Online" placeholderTextColor={cSub} style={inputStyle} />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Mã team *</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mã team *</Text>
                   <TextInput value={teamForm.code} onChangeText={v => setTeamForm(f => ({ ...f, code: v.toUpperCase() }))} placeholder="KD-ONLINE" placeholderTextColor={cSub} style={inputStyle} autoCapitalize="characters" />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Mô tả</Text>
-                  <TextInput value={teamForm.description} onChangeText={v => setTeamForm(f => ({ ...f, description: v }))} placeholder="Mô tả team" placeholderTextColor={cSub} style={[inputStyle, { minHeight: 60 }]} multiline />
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mô tả</Text>
+                  <TextInput value={teamForm.description} onChangeText={v => setTeamForm(f => ({ ...f, description: v }))} placeholder="Mô tả team" placeholderTextColor={cSub} style={[inputStyle, { minHeight: 80 }]} multiline />
                 </View>
               </View>
             )}
 
             {/* Position form */}
             {modalMode?.includes('pos') && (
-              <View style={{ gap: 14 }}>
+              <View style={{ gap: 16 }}>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Tên chức vụ *</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Tên chức vụ *</Text>
                   <TextInput value={posForm.name} onChangeText={v => setPosForm(f => ({ ...f, name: v }))} placeholder="Trưởng phòng" placeholderTextColor={cSub} style={inputStyle} />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Mã chức vụ *</Text>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mã chức vụ *</Text>
                   <TextInput value={posForm.code} onChangeText={v => setPosForm(f => ({ ...f, code: v.toUpperCase() }))} placeholder="MGR" placeholderTextColor={cSub} style={inputStyle} autoCapitalize="characters" />
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Cấp bậc</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Cấp bậc</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
                     {LEVEL_OPTIONS.map(l => (
                       <Pressable key={l} onPress={() => setPosForm(f => ({ ...f, level: f.level === l ? '' : l }))} style={{
-                        paddingHorizontal: 14, paddingVertical: 10, borderRadius: 10,
+                        paddingHorizontal: 16, paddingVertical: 12, borderRadius: 12,
                         backgroundColor: posForm.level === l ? '#8b5cf6' : (isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9'),
                         borderWidth: 1, borderColor: posForm.level === l ? '#8b5cf6' : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
                       }}>
-                        <Text style={{ fontSize: 12, fontWeight: '700', color: posForm.level === l ? '#fff' : cText }}>{l}</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '700', color: posForm.level === l ? '#fff' : cText }}>{l}</Text>
                       </Pressable>
                     ))}
                   </ScrollView>
                 </View>
                 <View>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, marginBottom: 6, textTransform: 'uppercase' }}>Mô tả</Text>
-                  <TextInput value={posForm.description} onChangeText={v => setPosForm(f => ({ ...f, description: v }))} placeholder="Mô tả chức vụ" placeholderTextColor={cSub} style={[inputStyle, { minHeight: 60 }]} multiline />
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: cSub, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.5 }}>Mô tả</Text>
+                  <TextInput value={posForm.description} onChangeText={v => setPosForm(f => ({ ...f, description: v }))} placeholder="Mô tả chức vụ" placeholderTextColor={cSub} style={[inputStyle, { minHeight: 80 }]} multiline />
                 </View>
               </View>
             )}
 
             {/* Actions */}
-            <View style={{ flexDirection: 'row', gap: 12, marginTop: 20 }}>
-              <Pressable onPress={() => setModalMode(null)} style={{ flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: cSub }}>Hủy</Text>
+            <View style={{ flexDirection: 'row', gap: 16, marginTop: 32 }}>
+              <Pressable onPress={() => setModalMode(null)} style={{ flex: 1, paddingVertical: 16, borderRadius: 16, alignItems: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: cSub }}>Hủy Bỏ</Text>
               </Pressable>
-              <Pressable onPress={handleSubmit} disabled={isPending} style={{ flex: 1, paddingVertical: 14, borderRadius: 14, alignItems: 'center', backgroundColor: isPending ? '#94a3b8' : getModalColor() }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>{isPending ? 'Đang lưu...' : (isEdit ? 'Cập nhật' : 'Tạo mới')}</Text>
+              <Pressable onPress={handleSubmit} disabled={isPending} style={{ flex: 1, paddingVertical: 16, borderRadius: 16, alignItems: 'center', backgroundColor: isPending ? '#94a3b8' : getModalColor(), shadowColor: getModalColor(), shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }}>
+                <Text style={{ fontSize: 15, fontWeight: '800', color: '#fff' }}>{isPending ? 'Đang lưu...' : (isEdit ? 'Cập Nhật' : 'Tạo Mới')}</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -229,54 +229,70 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
       </Modal>
 
       {/* ── Main Content ── */}
-      <ScrollView contentContainerStyle={{ padding: 28, gap: 24, paddingBottom: 120 }}>
-        {/* Header */}
+      <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+        {/* Premium Header */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: isDark ? 'rgba(139,92,246,0.12)' : '#f5f3ff', alignItems: 'center', justifyContent: 'center' }}>
-              <Building size={24} color="#8b5cf6" />
-            </View>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+            <LinearGradient 
+              colors={['#ec4899', '#f43f5e']} start={{x:0,y:0}} end={{x:1,y:1}}
+              style={{ width: 60, height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', 
+                     shadowColor: '#ec4899', shadowOpacity: 0.5, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+            >
+              <Settings size={28} color="#fff" />
+            </LinearGradient>
             <View>
-              <Text style={{ ...sgds.typo.h2, color: cText }}>Cấu hình Tổ chức</Text>
-              <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>Phòng ban → Teams → Chức vụ</Text>
+              <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -1 }}>Cấu hình Tổ chức</Text>
+              <Text style={{ fontSize: 15, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>Phòng ban → Teams → Chức vụ</Text>
             </View>
           </View>
-          <View style={{ flexDirection: 'row', gap: 10 }}>
+          <View style={{ flexDirection: 'row', gap: 12 }}>
             <Pressable onPress={() => { setPosForm(EMPTY_POS); setModalMode('create_pos'); }} style={{
-              flexDirection: 'row', alignItems: 'center', gap: 6,
-              backgroundColor: '#8b5cf6', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12,
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              backgroundColor: '#8b5cf6', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16,
+              shadowColor: '#8b5cf6', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 4,
               ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
             }}>
-              <Plus size={14} color="#fff" />
-              <Text style={{ fontSize: 12, fontWeight: '800', color: '#fff' }}>CHỨC VỤ</Text>
+              <Plus size={16} color="#fff" />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>CHỨC VỤ</Text>
             </Pressable>
             <Pressable onPress={() => { setDeptForm(EMPTY_DEPT); setModalMode('create_dept'); }} style={{
-              flexDirection: 'row', alignItems: 'center', gap: 6,
-              backgroundColor: '#ec4899', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12,
+              flexDirection: 'row', alignItems: 'center', gap: 8,
+              backgroundColor: '#ec4899', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 16,
+              shadowColor: '#ec4899', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 4,
               ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
             }}>
-              <Plus size={14} color="#fff" />
-              <Text style={{ fontSize: 12, fontWeight: '800', color: '#fff' }}>PHÒNG BAN</Text>
+              <Plus size={16} color="#fff" />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>PHÒNG BAN</Text>
             </Pressable>
           </View>
         </View>
 
         {/* ═══ Stats Overview ═══ */}
-        <View style={{ flexDirection: 'row', gap: 14, flexWrap: 'wrap' }}>
+        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
-            { label: 'PHÒNG BAN', val: departments.length, icon: Building, color: '#ec4899' },
-            { label: 'TEAMS', val: departments.reduce((s: number, d: any) => s + (d.teams?.length || 0), 0), icon: UsersRound, color: '#3b82f6' },
-            { label: 'CHỨC VỤ', val: positions.length, icon: Briefcase, color: '#8b5cf6' },
+            { label: 'PHÒNG BAN', val: departments.length, icon: Building, color: '#ec4899', shadow: '#ec4899' },
+            { label: 'TEAMS', val: departments.reduce((s: number, d: any) => s + (d.teams?.length || 0), 0), icon: UsersRound, color: '#3b82f6', shadow: '#3b82f6' },
+            { label: 'CHỨC VỤ', val: positions.length, icon: Briefcase, color: '#8b5cf6', shadow: '#8b5cf6' },
           ].map((s, i) => (
-            <View key={i} style={{ flex: 1, minWidth: 180, padding: 20, borderRadius: 20, backgroundColor: cardBg, borderWidth: 1, borderColor }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: `${s.color}15`, alignItems: 'center', justifyContent: 'center' }}>
-                  <s.icon size={18} color={s.color} />
+            <LinearGradient
+              key={i}
+              colors={isDark ? ['rgba(30,41,59,0.7)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
+              style={{
+                flex: 1, minWidth: 200, padding: 24, borderRadius: 24,
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                shadowColor: isDark ? '#000' : s.shadow, shadowOpacity: isDark ? 0.3 : 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 6,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${s.color}15`, alignItems: 'center', justifyContent: 'center' }}>
+                  <s.icon size={22} color={s.color} />
                 </View>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: cSub }}>{s.label}</Text>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, flex: 1, textTransform: 'uppercase', letterSpacing: 0.5 }}>{s.label}</Text>
               </View>
-              <Text style={{ fontSize: 32, fontWeight: '900', color: cText }}>{s.val}</Text>
-            </View>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
+                <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1 }}>{s.val}</Text>
+              </View>
+            </LinearGradient>
           ))}
         </View>
 
@@ -284,102 +300,131 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
         {loadingDepts ? (
           <View style={{ padding: 40, alignItems: 'center' }}><ActivityIndicator size="large" color="#ec4899" /></View>
         ) : departments.length === 0 ? (
-          <SGCard variant="glass" style={{ padding: 40, alignItems: 'center' }}>
-            <Text style={{ fontSize: 40, marginBottom: 12 }}>🏢</Text>
-            <Text style={{ fontSize: 14, fontWeight: '700', color: cSub }}>Chưa có phòng ban nào. Bấm "+ PHÒNG BAN" để bắt đầu.</Text>
+          <SGCard variant="glass" style={{ padding: 40, alignItems: 'center', borderRadius: 24 }}>
+            <Text style={{ fontSize: 48, marginBottom: 16 }}>🏢</Text>
+            <Text style={{ fontSize: 16, fontWeight: '700', color: cSub }}>Chưa có phòng ban nào. Bấm "+ PHÒNG BAN" để khởi tạo.</Text>
           </SGCard>
         ) : (
-          <View style={{ gap: 14 }}>
+          <View style={{ gap: 20 }}>
             {departments.map((dept: any) => {
               const isExpanded = expandedDept === dept.id;
               const deptTeams = dept.teams || [];
               return (
-                <View key={dept.id} style={{ borderRadius: 20, backgroundColor: cardBg, borderWidth: 1, borderColor, overflow: 'hidden' }}>
+                <View key={dept.id} style={{ 
+                  borderRadius: 24, overflow: 'hidden',
+                  backgroundColor: isDark ? 'rgba(30,41,59,0.4)' : '#ffffff', 
+                  borderWidth: 1, borderColor: isExpanded ? (isDark ? 'rgba(236,72,153,0.3)' : 'rgba(236,72,153,0.3)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
+                  shadowColor: '#ec4899', shadowOpacity: isExpanded ? 0.05 : 0, shadowRadius: 20,
+                  ...(Platform.OS === 'web' && isExpanded ? { backdropFilter: 'blur(32px)', WebkitBackdropFilter: 'blur(32px)' } : {}),
+                }}>
                   {/* Department Header — clickable to expand */}
-                  <Pressable onPress={() => setExpandedDept(isExpanded ? null : dept.id)} style={{ padding: 20, flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-                    <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: '#ec489915', alignItems: 'center', justifyContent: 'center' }}>
-                      <Building size={20} color="#ec4899" />
-                    </View>
+                  <Pressable onPress={() => setExpandedDept(isExpanded ? null : dept.id)} style={{ padding: 24, flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+                    <LinearGradient 
+                      colors={isExpanded ? ['#ec4899', '#f43f5e'] : (isDark ? ['rgba(255,255,255,0.05)', 'rgba(255,255,255,0.05)'] : ['#fce7f3', '#fbcfe8'])} 
+                      style={{ width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' }}
+                    >
+                      <Building size={24} color={isExpanded ? "#fff" : "#ec4899"} />
+                    </LinearGradient>
                     <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <Text style={{ fontSize: 17, fontWeight: '800', color: cText }}>{dept.name}</Text>
-                        <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}>
-                          <Text style={{ fontSize: 10, fontWeight: '700', color: cSub }}>{dept.code}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Text style={{ fontSize: 18, fontWeight: '900', color: cText }}>{dept.name}</Text>
+                        <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#f1f5f9' }}>
+                          <Text style={{ fontSize: 11, fontWeight: '800', color: cSub, letterSpacing: 0.5 }}>{dept.code}</Text>
                         </View>
                       </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 4 }}>
-                        <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>{dept._count?.employees ?? 0} nhân viên</Text>
-                        <Text style={{ fontSize: 12, fontWeight: '600', color: '#3b82f6' }}>{deptTeams.length} teams</Text>
-                        {dept.manager?.fullName && <Text style={{ fontSize: 12, fontWeight: '600', color: '#f59e0b' }}>TP: {dept.manager.fullName}</Text>}
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 8 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <Users size={14} color={cSub} />
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: cSub }}>{dept._count?.employees ?? 0} nhân sự</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <UsersRound size={14} color="#3b82f6" />
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: '#3b82f6' }}>{deptTeams.length} teams</Text>
+                        </View>
+                        {dept.manager?.fullName && (
+                          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <Briefcase size={14} color="#f59e0b" />
+                            <Text style={{ fontSize: 13, fontWeight: '700', color: '#f59e0b' }}>TP: {dept.manager.fullName}</Text>
+                          </View>
+                        )}
                       </View>
                     </View>
                     {/* Action buttons */}
-                    <View style={{ flexDirection: 'row', gap: 6 }}>
+                    <View style={{ flexDirection: 'row', gap: 8 }}>
                       <Pressable onPress={() => { setEditId(dept.id); setDeptForm({ name: dept.name, code: dept.code, description: dept.description || '' }); setModalMode('edit_dept'); }}
-                        style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
-                        <Pencil size={13} color={cSub} />
+                        style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
+                        <Pencil size={16} color={cSub} />
                       </Pressable>
                       <Pressable onPress={() => handleDeleteDept(dept.id, dept.name)}
-                        style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: '#ef444410', alignItems: 'center', justifyContent: 'center' }}>
-                        <Trash2 size={13} color="#ef4444" />
+                        style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: 'rgba(244,63,94,0.1)', alignItems: 'center', justifyContent: 'center' }}>
+                        <Trash2 size={16} color="#f43f5e" />
                       </Pressable>
                     </View>
-                    {isExpanded ? <ChevronDown size={18} color={cSub} /> : <ChevronRight size={18} color={cSub} />}
+                    <View style={{ marginLeft: 8, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: isExpanded ? 'rgba(236,72,153,0.1)' : 'transparent', borderRadius: 16 }}>
+                      {isExpanded ? <ChevronDown size={20} color="#ec4899" /> : <ChevronRight size={20} color={cSub} />}
+                    </View>
                   </Pressable>
 
                   {/* Expanded content — Teams + Positions */}
                   {isExpanded && (
-                    <View style={{ borderTopWidth: 1, borderTopColor: borderColor }}>
+                    <View style={{ borderTopWidth: 1, borderTopColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', backgroundColor: isDark ? 'rgba(0,0,0,0.1)' : '#f8fafc' }}>
                       {/* Teams Section */}
-                      <View style={{ padding: 20, paddingTop: 16 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <View style={{ padding: 24 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                            <UsersRound size={15} color="#3b82f6" />
-                            <Text style={{ fontSize: 13, fontWeight: '800', color: cText }}>Teams</Text>
-                            <View style={{ paddingHorizontal: 7, paddingVertical: 2, borderRadius: 8, backgroundColor: '#3b82f615' }}>
-                              <Text style={{ fontSize: 10, fontWeight: '800', color: '#3b82f6' }}>{deptTeams.length}</Text>
+                            <UsersRound size={18} color="#3b82f6" />
+                            <Text style={{ fontSize: 16, fontWeight: '900', color: cText }}>Các Team Trực Thuộc</Text>
+                            <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 10, backgroundColor: 'rgba(59,130,246,0.15)' }}>
+                              <Text style={{ fontSize: 11, fontWeight: '900', color: '#3b82f6' }}>{deptTeams.length}</Text>
                             </View>
                           </View>
                           <Pressable onPress={() => { setTeamForm({ ...EMPTY_TEAM, departmentId: dept.id }); setModalMode('create_team'); }} style={{
-                            flexDirection: 'row', alignItems: 'center', gap: 4,
-                            paddingHorizontal: 12, paddingVertical: 6, borderRadius: 10,
+                            flexDirection: 'row', alignItems: 'center', gap: 6,
+                            paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12,
                             backgroundColor: '#3b82f6', ...(Platform.OS === 'web' ? { cursor: 'pointer' as any } : {}),
                           }}>
-                            <Plus size={12} color="#fff" />
-                            <Text style={{ fontSize: 11, fontWeight: '800', color: '#fff' }}>THÊM TEAM</Text>
+                            <Plus size={14} color="#fff" />
+                            <Text style={{ fontSize: 12, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>THÊM TEAM</Text>
                           </Pressable>
                         </View>
 
                         {deptTeams.length === 0 ? (
-                          <View style={{ padding: 16, borderRadius: 14, backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#fafbfd', alignItems: 'center' }}>
-                            <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>Chưa có team nào trong phòng ban này</Text>
+                          <View style={{ padding: 24, borderRadius: 16, backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#ffffff', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.04)' : '#e2e8f0', alignItems: 'center', borderStyle: 'dashed' }}>
+                            <Text style={{ fontSize: 14, fontWeight: '600', color: cSub }}>Chưa có team nào trong phòng ban này</Text>
                           </View>
                         ) : (
-                          <View style={{ gap: 8 }}>
+                          <View style={{ gap: 12 }}>
                             {deptTeams.map((t: any) => (
                               <View key={t.id} style={{
-                                flexDirection: 'row', alignItems: 'center', gap: 12,
-                                padding: 14, borderRadius: 14, backgroundColor: isDark ? 'rgba(59,130,246,0.06)' : '#eff6ff',
-                                borderWidth: 1, borderColor: isDark ? 'rgba(59,130,246,0.12)' : '#dbeafe',
+                                flexDirection: 'row', alignItems: 'center', gap: 16,
+                                padding: 16, borderRadius: 16, backgroundColor: isDark ? 'rgba(59,130,246,0.04)' : '#ffffff',
+                                borderWidth: 1, borderColor: isDark ? 'rgba(59,130,246,0.12)' : '#e0e7ff',
+                                shadowColor: '#000', shadowOpacity: isDark ? 0 : 0.02, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 2,
                               }}>
-                                <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: '#3b82f615', alignItems: 'center', justifyContent: 'center' }}>
-                                  <UsersRound size={14} color="#3b82f6" />
+                                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(59,130,246,0.15)', alignItems: 'center', justifyContent: 'center' }}>
+                                  <UsersRound size={18} color="#3b82f6" />
                                 </View>
                                 <View style={{ flex: 1 }}>
-                                  <Text style={{ fontSize: 14, fontWeight: '700', color: cText }}>{t.name}</Text>
-                                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 2 }}>
-                                    <Text style={{ fontSize: 11, fontWeight: '600', color: cSub }}>#{t.code}</Text>
-                                    <Text style={{ fontSize: 11, fontWeight: '600', color: '#3b82f6' }}>{t._count?.employees ?? 0} thành viên</Text>
+                                  <Text style={{ fontSize: 16, fontWeight: '800', color: cText }}>{t.name}</Text>
+                                  <View style={{ flexDirection: 'row', gap: 12, marginTop: 4 }}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                      <Hash size={12} color={cSub} />
+                                      <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, letterSpacing: 0.5 }}>{t.code}</Text>
+                                    </View>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                                      <Users size={12} color="#3b82f6" />
+                                      <Text style={{ fontSize: 12, fontWeight: '700', color: '#3b82f6' }}>{t._count?.employees ?? 0} thành viên</Text>
+                                    </View>
                                   </View>
                                 </View>
-                                <View style={{ flexDirection: 'row', gap: 6 }}>
+                                <View style={{ flexDirection: 'row', gap: 8 }}>
                                   <Pressable onPress={() => { setEditId(t.id); setTeamForm({ name: t.name, code: t.code, departmentId: dept.id, description: t.description || '' }); setModalMode('edit_team'); }}
-                                    style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#fff', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Pencil size={12} color={cSub} />
+                                    style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Pencil size={14} color={cSub} />
                                   </Pressable>
                                   <Pressable onPress={() => handleDeleteTeam(t.id, t.name)}
-                                    style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: '#ef444410', alignItems: 'center', justifyContent: 'center' }}>
-                                    <Trash2 size={12} color="#ef4444" />
+                                    style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: 'rgba(244,63,94,0.1)', alignItems: 'center', justifyContent: 'center' }}>
+                                    <Trash2 size={14} color="#f43f5e" />
                                   </Pressable>
                                 </View>
                               </View>
@@ -389,30 +434,31 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
                       </View>
 
                       {/* Positions quick view */}
-                      <View style={{ padding: 20, paddingTop: 0 }}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                          <Briefcase size={15} color="#8b5cf6" />
-                          <Text style={{ fontSize: 13, fontWeight: '800', color: cText }}>Chức vụ áp dụng</Text>
+                      <View style={{ padding: 24, paddingTop: 8, paddingBottom: 24 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+                          <Briefcase size={16} color="#8b5cf6" />
+                          <Text style={{ fontSize: 14, fontWeight: '900', color: cText }}>Hệ thống Chức vụ</Text>
                         </View>
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
                           {positions.map((p: any) => {
                             const levelColors: Record<string, string> = { Staff: '#22c55e', Senior: '#3b82f6', Leader: '#8b5cf6', Manager: '#f59e0b', Director: '#ef4444' };
                             const lc = levelColors[p.level] || '#64748b';
                             return (
                               <View key={p.id} style={{
-                                paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12,
-                                backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : '#f5f3ff',
+                                paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12,
+                                backgroundColor: isDark ? 'rgba(139,92,246,0.06)' : '#ffffff',
                                 borderWidth: 1, borderColor: isDark ? 'rgba(139,92,246,0.12)' : '#ede9fe',
-                                flexDirection: 'row', alignItems: 'center', gap: 6,
+                                flexDirection: 'row', alignItems: 'center', gap: 10,
+                                shadowColor: '#000', shadowOpacity: isDark ? 0 : 0.02, shadowRadius: 4, elevation: 1,
                               }}>
-                                <Text style={{ fontSize: 12, fontWeight: '700', color: cText }}>{p.name}</Text>
-                                {p.level && <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: `${lc}15` }}>
-                                  <Text style={{ fontSize: 9, fontWeight: '800', color: lc }}>{p.level}</Text>
+                                <Text style={{ fontSize: 13, fontWeight: '800', color: cText }}>{p.name}</Text>
+                                {p.level && <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: `${lc}15` }}>
+                                  <Text style={{ fontSize: 10, fontWeight: '900', color: lc, letterSpacing: 0.5 }}>{p.level.toUpperCase()}</Text>
                                 </View>}
                               </View>
                             );
                           })}
-                          {positions.length === 0 && <Text style={{ color: cSub, fontSize: 12 }}>Chưa có chức vụ nào</Text>}
+                          {positions.length === 0 && <Text style={{ color: cSub, fontSize: 14, fontWeight: '600' }}>Chưa có chức vụ nào</Text>}
                         </ScrollView>
                       </View>
                     </View>
@@ -424,15 +470,15 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
         )}
 
         {/* ═══ Positions Master List ═══ */}
-        <View>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <View style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: '#8b5cf615', alignItems: 'center', justifyContent: 'center' }}>
-                <Briefcase size={16} color="#8b5cf6" />
+        <View style={{ marginTop: 16 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(139,92,246,0.15)', alignItems: 'center', justifyContent: 'center' }}>
+                <Briefcase size={22} color="#8b5cf6" />
               </View>
-              <Text style={{ fontSize: 16, fontWeight: '900', color: cText }}>Danh sách Chức vụ</Text>
-              <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, backgroundColor: '#8b5cf615' }}>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: '#8b5cf6' }}>{positions.length}</Text>
+              <View>
+                <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Danh sách Chức vụ</Text>
+                <Text style={{ fontSize: 13, fontWeight: '600', color: cSub, marginTop: 2 }}>Toàn bộ các cấp bậc trong công ty</Text>
               </View>
             </View>
           </View>
@@ -440,35 +486,44 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
           {loadingPos ? (
             <ActivityIndicator size="large" color="#8b5cf6" />
           ) : positions.length === 0 ? (
-            <SGCard variant="glass" style={{ padding: 30, alignItems: 'center' }}>
-              <Text style={{ fontSize: 14, fontWeight: '700', color: cSub }}>Chưa có chức vụ nào. Bấm "+ CHỨC VỤ" ở trên.</Text>
+            <SGCard variant="glass" style={{ padding: 40, alignItems: 'center', borderRadius: 24 }}>
+              <Briefcase size={40} color={cSub} style={{ marginBottom: 16, opacity: 0.5 }} />
+              <Text style={{ fontSize: 15, fontWeight: '700', color: cSub }}>Chưa có chức vụ nào. Bấm "+ CHỨC VỤ" ở trên.</Text>
             </SGCard>
           ) : (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
               {positions.map((p: any) => {
                 const levelColors: Record<string, string> = { Staff: '#22c55e', Senior: '#3b82f6', Leader: '#8b5cf6', Manager: '#f59e0b', Director: '#ef4444' };
                 const lc = levelColors[p.level] || '#64748b';
                 return (
                   <View key={p.id} style={{
-                    flexDirection: 'row', alignItems: 'center', gap: 10,
-                    padding: 14, borderRadius: 14, backgroundColor: cardBg, borderWidth: 1, borderColor,
-                    minWidth: 200,
+                    flexDirection: 'row', alignItems: 'center', gap: 16,
+                    padding: 20, borderRadius: 20, backgroundColor: cardBg, 
+                    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)',
+                    flex: 1, minWidth: 280,
+                    shadowColor: '#000', shadowOpacity: 0.02, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2,
                   }}>
                     <View style={{ flex: 1 }}>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                        <Text style={{ fontSize: 14, fontWeight: '700', color: cText }}>{p.name}</Text>
-                        {p.level && <View style={{ paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, backgroundColor: `${lc}15` }}>
-                          <Text style={{ fontSize: 9, fontWeight: '800', color: lc }}>{p.level}</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: cText }}>{p.name}</Text>
+                        {p.level && <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: `${lc}15` }}>
+                          <Text style={{ fontSize: 10, fontWeight: '900', color: lc, letterSpacing: 0.5 }}>{p.level.toUpperCase()}</Text>
                         </View>}
                       </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 3 }}>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: cSub }}>#{p.code}</Text>
-                        <Text style={{ fontSize: 11, fontWeight: '600', color: '#8b5cf6' }}>{p._count?.employees ?? 0} NV</Text>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 6 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Hash size={14} color={cSub} />
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: cSub, letterSpacing: 0.5 }}>{p.code}</Text>
+                        </View>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                          <Users size={14} color="#8b5cf6" />
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: '#8b5cf6' }}>{p._count?.employees ?? 0} NV</Text>
+                        </View>
                       </View>
                     </View>
                     <Pressable onPress={() => { setEditId(p.id); setPosForm({ name: p.name, code: p.code, level: p.level || '', description: p.description || '' }); setModalMode('edit_pos'); }}
-                      style={{ width: 30, height: 30, borderRadius: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
-                      <Pencil size={13} color={cSub} />
+                      style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
+                      <Pencil size={15} color={cSub} />
                     </Pressable>
                   </View>
                 );

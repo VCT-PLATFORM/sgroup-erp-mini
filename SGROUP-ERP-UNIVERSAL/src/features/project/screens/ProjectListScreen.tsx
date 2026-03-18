@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, Dimensions } from 'react-native';
-import { typography, useTheme } from '../../../shared/theme/theme';
-import { useThemeStore } from '../../../shared/theme/themeStore';
-import { SGCard, SGButton } from '../../../shared/ui/components';
+import Animated, { FadeInUp } from 'react-native-reanimated';
+import { typography, sgds, radius } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
+import { SGCard, SGButton, SGAuroraBackground } from '../../../shared/ui/components';
 import { useProjects, useDeleteProject } from '../hooks/useProjects';
 import { Building2, Plus, MapPin, Search, Trash2, TrendingUp, Layers, CheckCircle2 } from 'lucide-react-native';
 import { formatTy } from '../../../shared/utils/formatters';
@@ -20,8 +21,7 @@ interface Props {
 }
 
 export function ProjectListScreen({ onNavigateInventory }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, theme, isDark } = useAppTheme();
   const { showToast } = useToast();
   const { data: projects, isLoading, isError, refetch, isRefetching } = useProjects();
   const deleteMutation = useDeleteProject();
@@ -60,43 +60,44 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
     }
   };
 
-  const renderProjectItem = ({ item }: { item: any }) => {
+  const renderProjectItem = ({ item, index }: { item: any, index: number }) => {
     const isEditing = editProject?.id === item.id;
     const liquidity = item.totalUnits ? Math.round((item.soldUnits / item.totalUnits) * 100) : 0;
     
     return (
-      <SGCard style={[styles.card, styles.glassCard, isDark ? styles.glassCardDark : styles.glassCardLight]}>
-        {/* Top Gradient Banner matching status */}
-        <View style={{
-          height: 6, width: '100%',
-          backgroundColor: item.status === 'ACTIVE' ? '#10b981' : item.status === 'PAUSED' ? '#f59e0b' : '#64748b'
-        }} />
-
-        <View style={styles.cardHeader}>
-          <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
-            <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', elevation: 2, ...(Platform.OS==='web'&&{boxShadow:'0 4px 12px rgba(0,0,0,0.05)'} as any) }]}>
-              <Building2 size={24} color={isDark ? '#e2e8f0' : '#475569'} strokeWidth={2} />
-            </View>
-            <View style={{ marginLeft: 16, flex: 1 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
-                <Text style={[typography.h3, { color: colors.text, fontWeight: '800' }]} numberOfLines={1}>{item.name}</Text>
-                <View style={[
-                  styles.statusBadge, 
-                  { backgroundColor: item.status === 'ACTIVE' ? (isDark ? 'rgba(16,185,129,0.15)' : '#ecfdf5') 
-                    : item.status === 'PAUSED' ? (isDark ? 'rgba(245,158,11,0.15)' : '#fffbeb')
-                    : (isDark ? 'rgba(100,116,139,0.15)' : '#f8fafc'),
-                    borderWidth: 1,
-                    borderColor: item.status === 'ACTIVE' ? (isDark ? 'rgba(16,185,129,0.3)' : '#a7f3d0') 
-                    : item.status === 'PAUSED' ? (isDark ? 'rgba(245,158,11,0.3)' : '#fde68a')
-                    : (isDark ? 'rgba(100,116,139,0.3)' : '#e2e8f0') 
-                  }
-                ]}>
-                  <Text style={[
-                    typography.micro, 
-                    { color: item.status === 'ACTIVE' ? '#10b981' : item.status === 'PAUSED' ? '#f59e0b' : colors.textSecondary, fontWeight: '800', fontSize: 10 }
+      <Animated.View entering={FadeInUp.delay(index * 100).springify().damping(20)} style={{ flex: 1 }}>
+        <SGCard style={[styles.card, sgds.sectionBase(theme), { padding: 0 }] as any}>
+          {/* Top Gradient Banner matching status */}
+          <View style={{
+            height: 6, width: '100%',
+            backgroundColor: item.status === 'ACTIVE' ? colors.success : item.status === 'PAUSED' ? colors.warning : colors.textTertiary
+          }} />
+  
+          <View style={[styles.cardHeader, { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
+              <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', elevation: 2, ...(Platform.OS==='web'&&{boxShadow:'0 4px 12px rgba(0,0,0,0.05)'} as any) }]}>
+                <Building2 size={24} color={isDark ? '#e2e8f0' : '#475569'} strokeWidth={2} />
+              </View>
+              <View style={{ marginLeft: 16, flex: 1 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6, flexWrap: 'wrap', gap: 8 }}>
+                  <Text style={[typography.h3, { color: colors.text, fontWeight: '800' }]} numberOfLines={1}>{item.name}</Text>
+                  <View style={[
+                    styles.statusBadge, 
+                    { backgroundColor: item.status === 'ACTIVE' ? (isDark ? 'rgba(16,185,129,0.15)' : '#ecfdf5') 
+                      : item.status === 'PAUSED' ? (isDark ? 'rgba(245,158,11,0.15)' : '#fffbeb')
+                      : (isDark ? 'rgba(100,116,139,0.15)' : '#f8fafc'),
+                      borderWidth: 1,
+                      borderColor: item.status === 'ACTIVE' ? (isDark ? 'rgba(16,185,129,0.3)' : '#a7f3d0') 
+                      : item.status === 'PAUSED' ? (isDark ? 'rgba(245,158,11,0.3)' : '#fde68a')
+                      : (isDark ? 'rgba(100,116,139,0.3)' : '#e2e8f0') 
+                    }
                   ]}>
-                    {item.status === 'ACTIVE' ? 'ĐANG BÁN' : item.status === 'PAUSED' ? 'TẠM DỪNG' : 'ĐÃ ĐÓNG'}
-                  </Text>
+                    <Text style={[
+                      typography.micro, 
+                      { color: item.status === 'ACTIVE' ? colors.success : item.status === 'PAUSED' ? colors.warning : colors.textSecondary, fontWeight: '800', fontSize: 10 }
+                    ]}>
+                      {item.status === 'ACTIVE' ? 'ĐANG BÁN' : item.status === 'PAUSED' ? 'TẠM DỪNG' : 'ĐÃ ĐÓNG'}
+                    </Text>
                 </View>
               </View>
               <Text style={[typography.body, { color: colors.textSecondary, fontWeight: '600' }]}>{item.projectCode} • {item.developer || 'Đang cập nhật'}</Text>
@@ -126,21 +127,21 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
               </View>
               <Text style={[typography.h3, { color: colors.text, fontWeight: '800' }]}>{item.totalUnits || 0}</Text>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
             <View style={styles.statBox}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <CheckCircle2 size={14} color="#10b981" style={{ marginRight: 4 }} />
+                <CheckCircle2 size={14} color={colors.success} style={{ marginRight: 4 }} />
                 <Text style={[typography.micro, { color: colors.textSecondary, fontWeight: '600' }]}>Đã Bán</Text>
               </View>
-              <Text style={[typography.h3, { color: '#10b981', fontWeight: '800' }]}>{item.soldUnits || 0}</Text>
+              <Text style={[typography.h3, { color: colors.success, fontWeight: '800' }]}>{item.soldUnits || 0}</Text>
             </View>
-            <View style={styles.statDivider} />
+            <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
             <View style={styles.statBox}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                <TrendingUp size={14} color="#3b82f6" style={{ marginRight: 4 }} />
+                <TrendingUp size={14} color={colors.brand} style={{ marginRight: 4 }} />
                 <Text style={[typography.micro, { color: colors.textSecondary, fontWeight: '600' }]}>Giá TB (Tỷ)</Text>
               </View>
-              <Text style={[typography.h3, { color: '#3b82f6', fontWeight: '800' }]}>{item.avgPrice || 'N/A'}</Text>
+              <Text style={[typography.h3, { color: colors.brand, fontWeight: '800' }]}>{item.avgPrice || 'N/A'}</Text>
             </View>
           </View>
           
@@ -153,8 +154,9 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
             <View style={{ height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0', borderRadius: 3, overflow: 'hidden' }}>
               <View style={{ 
                 width: `${Math.min(liquidity, 100)}%`, height: '100%', 
-                backgroundColor: liquidity >= 70 ? '#10b981' : liquidity >= 40 ? '#f59e0b' : '#ef4444', 
-                borderRadius: 3 
+                backgroundColor: liquidity >= 70 ? colors.success : liquidity >= 40 ? colors.warning : colors.danger, 
+                borderRadius: 3,
+                ...(Platform.OS === 'web' && { transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)' } as any),
               } as any} />
             </View>
           </View>
@@ -163,16 +165,17 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
         <View style={styles.cardFooter}>
           <SGButton 
             title="Xem Bảng Hàng" variant="outline" size="md" 
-            style={{ flex: 1, marginRight: 12, borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' }} 
+            style={{ flex: 1, marginRight: 12, borderColor: colors.border }} 
             onPress={() => onNavigateInventory?.(item.id)}
           />
           <SGButton 
             title="Chi Tiết" variant="primary" size="md" 
-            style={{ flex: 1, backgroundColor: '#10b981' }} 
+            style={{ flex: 1, backgroundColor: colors.success }} 
             onPress={() => setSelectedProjectId(item.id)} 
           />
         </View>
-      </SGCard>
+        </SGCard>
+      </Animated.View>
     );
   };
 
@@ -200,11 +203,7 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
       {/* Aurora backdrop for premium feel */}
       {Platform.OS === 'web' && (
         <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
-          <View style={{
-            position: 'absolute', top: '10%', right: '-5%', width: 500, height: 500,
-            backgroundColor: isDark ? 'rgba(56, 189, 248, 0.05)' : 'rgba(56, 189, 248, 0.03)',
-            borderRadius: 250, filter: 'blur(100px)',
-          } as any} />
+          <SGAuroraBackground />
         </View>
       )}
 
@@ -256,11 +255,11 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
                   <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#10b981" />
                 }
                 ListEmptyComponent={
-                  <View style={styles.centerContainer}>
-                    <Building2 size={64} color={colors.textTertiary} opacity={0.3} style={{ marginBottom: 20 }} />
+                  <Animated.View entering={FadeInUp.delay(300).springify().damping(20)} style={styles.centerContainer}>
+                    <Building2 size={64} color={colors.borderStrong || colors.border} style={{ marginBottom: 20 }} />
                     <Text style={[typography.h3, { color: colors.textSecondary, fontWeight: '800' }]}>Chưa có dự án nào</Text>
                     <Text style={[typography.body, { color: colors.textTertiary, marginTop: 8 }]}>Bấm "Thêm Dự án" để khởi tạo dữ liệu.</Text>
-                  </View>
+                  </Animated.View>
                 }
               />
             </View>
@@ -274,12 +273,7 @@ const styles = StyleSheet.create({
   container: { padding: isDesktop ? 40 : 20, flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 400 },
-  card: { flex: 1, padding: 0, overflow: 'hidden', borderRadius: 20 },
-  glassCard: {
-    ...(Platform.OS === 'web' && { backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', transition: 'transform 0.2s, box-shadow 0.2s' } as any),
-  },
-  glassCardDark: { backgroundColor: 'rgba(30, 41, 59, 0.65)', borderColor: 'rgba(255, 255, 255, 0.08)', borderWidth: 1, ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)' } as any) },
-  glassCardLight: { backgroundColor: 'rgba(255, 255, 255, 0.85)', borderColor: 'rgba(0, 0, 0, 0.04)', borderWidth: 1, ...(Platform.OS === 'web' && { boxShadow: '0 8px 32px rgba(0, 0, 0, 0.04)' } as any) },
+  card: { flex: 1, overflow: 'hidden', borderRadius: 28 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: 24, paddingBottom: 16 },
   iconBox: { width: 48, height: 48, borderRadius: 14, justifyContent: 'center', alignItems: 'center' },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 },

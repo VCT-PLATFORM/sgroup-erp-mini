@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
 
 type Props = {
   children: ReactNode;
@@ -14,6 +15,7 @@ export const FinanceLayout: React.FC<Props> = ({
   noScroll = false,
 }) => {
   const insets = useSafeAreaInsets();
+  const { theme, isDark } = useAppTheme();
 
   const content = (
     <View style={styles.contentContainer}>
@@ -22,7 +24,10 @@ export const FinanceLayout: React.FC<Props> = ({
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={[styles.container, {
+      paddingTop: insets.top,
+      backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt,
+    }]}>
       {header && <View style={styles.headerContainer}>{header}</View>}
       
       {noScroll ? (
@@ -43,7 +48,6 @@ export const FinanceLayout: React.FC<Props> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC', // light theme background
   },
   headerContainer: {
     zIndex: 10,

@@ -35,29 +35,32 @@ const fmt = (n: number) => n.toLocaleString('vi-VN');
 
 const DEAL_COLUMNS = [
   { key: 'customer', title: 'KHÁCH HÀNG', flex: 1.5, render: (v: any, r: any) => (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 4 }}>
-      <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
-        <Text style={{ fontSize: 16, fontWeight: '900', color: '#64748b' }}>{v?.charAt(0) || 'K'}</Text>
-      </View>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, paddingVertical: 6 }}>
+      <LinearGradient colors={['#f8fafc', '#f1f5f9']} style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: '#e2e8f0' }}>
+        <Text style={{ fontSize: 18, fontWeight: '900', color: '#64748b' }}>{v?.charAt(0) || 'K'}</Text>
+      </LinearGradient>
       <View>
-        <Text style={{ fontSize: 15, fontWeight: '800', color: '#1e293b' }}>{v}</Text>
-        <Text style={{ fontSize: 13, fontWeight: '600', color: '#94a3b8', marginTop: 3 }}>
-          {r.project} <Text style={{ color: '#cbd5e1' }}>•</Text> <Text style={{ color: '#3b82f6' }}>{r.unitCode}</Text>
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#1e293b', letterSpacing: -0.2 }}>{v}</Text>
+        <Text style={{ fontSize: 13, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>
+          {r.project} <Text style={{ color: '#cbd5e1' }}>•</Text> <Text style={{ color: '#3b82f6', fontWeight: '800' }}>{r.unitCode}</Text>
         </Text>
       </View>
     </View>
   )},
   { key: 'value', title: 'GIÁ TRỊ', flex: 1, align: 'right' as const, render: (v: any, r: any) => (
     <View style={{ alignItems: 'flex-end', justifyContent: 'center', marginRight: 12 }}>
-      <Text style={{ fontSize: 16, fontWeight: '900', color: '#3b82f6' }}>{r.transactionValue} <Text style={{ fontSize: 12, fontWeight: '700' }}>Tỷ</Text></Text>
-      <Text style={{ fontSize: 12, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>{new Date(r.date).toLocaleDateString('vi-VN')}</Text>
+      <Text style={{ fontSize: 18, fontWeight: '900', color: '#3b82f6', letterSpacing: -0.5 }}>{r.transactionValue} <Text style={{ fontSize: 13, fontWeight: '700' }}>Tỷ</Text></Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 4 }}>
+        <Clock size={12} color="#94a3b8" />
+        <Text style={{ fontSize: 12, fontWeight: '600', color: '#94a3b8' }}>{new Date(r.date).toLocaleDateString('vi-VN')}</Text>
+      </View>
     </View>
   )},
-  { key: 'status', title: 'TRẠNG THÁI', width: 110, align: 'center' as const, render: (v: any) => {
+  { key: 'status', title: 'TRẠNG THÁI', width: 120, align: 'center' as const, render: (v: any) => {
     const s = STAGE_COLORS[v] || STAGE_COLORS.LEAD;
     return (
       <View style={{ paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20, backgroundColor: s.bg, alignSelf: 'center', borderWidth: 1, borderColor: `${s.text}20` }}>
-        <Text style={{ fontSize: 11, fontWeight: '800', color: s.text, letterSpacing: 0.3 }}>{s.label.toUpperCase()}</Text>
+        <Text style={{ fontSize: 11, fontWeight: '800', color: s.text, letterSpacing: 0.5 }}>{s.label.toUpperCase()}</Text>
       </View>
     );
   }}
@@ -111,9 +114,9 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
   }));
 
   const card: any = {
-    backgroundColor: isDark ? 'rgba(20,24,35,0.45)' : '#fff', borderRadius: 28, padding: 32,
-    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(32px)', boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 4px 24px rgba(0,0,0,0.06)' } : {}),
+    backgroundColor: isDark ? 'rgba(20,24,35,0.55)' : 'rgba(255,255,255,0.85)', borderRadius: 32, padding: 32,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)',
+    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(40px)', boxShadow: isDark ? '0 16px 40px rgba(0,0,0,0.5)' : '0 12px 32px rgba(0,0,0,0.06)' } : {}),
   };
 
   const showTeam = userRole !== 'sales';
@@ -124,15 +127,15 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }}>
         {/* -------------- HEADER -------------- */}
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-             <LinearGradient colors={['#3b82f6', '#2563eb']} style={{ width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#3b82f6', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 }}>
-               <ShoppingCart size={28} color="#fff" />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
+             <LinearGradient colors={isDark ? ['#3b82f6', '#1d4ed8'] : ['#60a5fa', '#2563eb']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: 64, height: 64, borderRadius: 22, alignItems: 'center', justifyContent: 'center', shadowColor: '#3b82f6', shadowOpacity: 0.5, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}>
+               <ShoppingCart size={32} color="#fff" strokeWidth={2.5} />
              </LinearGradient>
              <View>
-               <Text style={{ fontSize: 28, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>
-                 {userRole === 'sales' ? 'HIỆU SUẤT CÁ NHÂN' : showTotal ? 'TỔNG QUAN KINH DOANH' : 'Hiệu SUẤT TEAM'}
+               <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -0.8 }}>
+                 {userRole === 'sales' ? 'HIỆU SUẤT CÁ NHÂN' : showTotal ? 'TỔNG QUAN KINH DOANH' : 'HIỆU SUẤT TEAM'}
                </Text>
-               <Text style={{ fontSize: 14, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>Dữ liệu tổng hợp từ Báo cáo ngày — Năm 2026</Text>
+               <Text style={{ fontSize: 15, fontWeight: '600', color: '#94a3b8', marginTop: 6 }}>Dữ liệu tổng hợp từ Báo cáo ngày — Năm 2026</Text>
              </View>
           </View>
 
@@ -143,26 +146,26 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24, marginTop: 10 }}>
             {/* Dynamic KPIs for Sales */}
             {[
-              { id: 'k1', label: 'TỔNG SỐ LƯỢNG GIAO DỊCH', value: kpiData.totalTransactions, unit: 'Căn', color: '#22c55e', icon: Target },
-              { id: 'k2', label: 'TỔNG HOA HỒNG DỰ KIẾN (Tỷ Lệ Demo)', value: (kpiData.totalRevenue * 1000 * 0.02).toFixed(1), unit: 'Tr', color: '#8b5cf6', icon: DollarSign }, // ~2% as dummy commission
-              { id: 'k3', label: 'TỔNG KHÁCH HÀNG MỚI (Leads)', value: kpiData.totalLeads, unit: 'KH', color: '#3b82f6', icon: Users },
-              { id: 'k4', label: 'TỔNG SỐ LỊCH HẸN', value: kpiData.totalMeetings, unit: 'Lịch', color: '#f59e0b', icon: Calendar },
+              { id: 'k1', label: 'TỔNG SỐ LƯỢNG GIAO DỊCH', value: kpiData.totalTransactions, unit: 'Căn', color: '#10b981', gradient: ['#34d399', '#059669'], icon: Target },
+              { id: 'k2', label: 'TỔNG HOA HỒNG DỰ KIẾN', value: (kpiData.totalRevenue * 1000 * 0.02).toFixed(1), unit: 'Tr', color: '#8b5cf6', gradient: ['#a78bfa', '#7c3aed'], icon: DollarSign }, 
+              { id: 'k3', label: 'TỔNG KHÁCH HÀNG MỚI (Leads)', value: kpiData.totalLeads, unit: 'KH', color: '#3b82f6', gradient: ['#60a5fa', '#2563eb'], icon: Users },
+              { id: 'k4', label: 'TỔNG SỐ LỊCH HẸN', value: kpiData.totalMeetings, unit: 'Lịch', color: '#f59e0b', gradient: ['#fbbf24', '#d97706'], icon: Calendar },
             ].map(k => (
               <View key={k.id} style={{ 
-                flex: 1, minWidth: 240, backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : '#ffffff', 
-                borderRadius: 24, padding: 24, 
-                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
-                shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 4 
+                flex: 1, minWidth: 240, backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : 'rgba(255,255,255,0.9)', 
+                borderRadius: 28, padding: 28, 
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.8)',
+                ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)', boxShadow: isDark ? '0 12px 32px rgba(0,0,0,0.3)' : '0 8px 24px rgba(0,0,0,0.06)' } : { shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 4 }),
               }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${k.color}1A`, alignItems: 'center', justifyContent: 'center' }}>
-                    {(() => { const Icon = k.icon; return <Icon size={22} color={k.color} />; })()}
-                  </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                   <LinearGradient colors={k.gradient as any} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', shadowColor: k.color, shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 }}>
+                    {(() => { const Icon = k.icon; return <Icon size={26} color="#fff" />; })()}
+                   </LinearGradient>
                 </View>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                  <Text style={{ fontSize: 38, fontWeight: '900', color: cText, letterSpacing: -1 }}>{k.value}</Text>
-                  {k.unit && <Text style={{ fontSize: 16, fontWeight: '700', color: '#94a3b8' }}>{k.unit}</Text>}
+                <Text style={{ fontSize: 13, fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
+                  <Text style={{ fontSize: 44, fontWeight: '900', color: cText, letterSpacing: -1.5 }}>{k.value}</Text>
+                  {k.unit && <Text style={{ fontSize: 18, fontWeight: '800', color: '#94a3b8' }}>{k.unit}</Text>}
                 </View>
               </View>
             ))}
@@ -175,28 +178,28 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24, marginTop: 10 }}>
             {teamKpi.map((k: any) => (
               <View key={k.id} style={{ 
-                flex: 1, minWidth: 240, backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : '#ffffff', 
-                borderRadius: 24, padding: 24, 
-                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
-                shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 4 
+                flex: 1, minWidth: 240, backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : 'rgba(255,255,255,0.9)', 
+                borderRadius: 28, padding: 28, 
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.8)',
+                ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)', boxShadow: isDark ? '0 12px 32px rgba(0,0,0,0.3)' : '0 8px 24px rgba(0,0,0,0.06)' } : { shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 4 }),
               }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${k.color}1A`, alignItems: 'center', justifyContent: 'center' }}>
-                    {(() => { const Icon = k.icon; return <Icon size={22} color={k.color} />; })()}
-                  </View>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                  <LinearGradient colors={[`${k.color}`, `${k.color}CC`]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center', shadowColor: k.color, shadowOpacity: 0.4, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 4 }}>
+                    {(() => { const Icon = k.icon; return <Icon size={26} color="#fff" />; })()}
+                  </LinearGradient>
                   {k.change !== undefined && (
-                    <View style={{ backgroundColor: `${k.change > 0 ? '#22c55e' : '#ef4444'}1A`, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 20 }}>
-                       <Text style={{ fontSize: 13, fontWeight: '800', color: k.change > 0 ? '#16a34a' : '#ef4444' }}>
-                         {k.change > 0 ? '+' : ''}{k.change}%
+                    <View style={{ backgroundColor: `${k.change > 0 ? '#22c55e' : '#ef4444'}15`, paddingHorizontal: 12, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: `${k.change > 0 ? '#22c55e' : '#ef4444'}30` }}>
+                       <Text style={{ fontSize: 13, fontWeight: '800', color: k.change > 0 ? '#10b981' : '#ef4444' }}>
+                         {k.change > 0 ? '↑ ' : '↓ '}{Math.abs(k.change)}%
                        </Text>
                     </View>
                   )}
                 </View>
                 
-                <Text style={{ fontSize: 12, fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                  <Text style={{ fontSize: 38, fontWeight: '900', color: cText, letterSpacing: -1 }}>{k.value}</Text>
-                  {k.unit && <Text style={{ fontSize: 16, fontWeight: '700', color: '#94a3b8' }}>{k.unit}</Text>}
+                <Text style={{ fontSize: 13, fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 8 }}>
+                  <Text style={{ fontSize: 44, fontWeight: '900', color: cText, letterSpacing: -1.5 }}>{k.value}</Text>
+                  {k.unit && <Text style={{ fontSize: 18, fontWeight: '800', color: '#94a3b8' }}>{k.unit}</Text>}
                 </View>
               </View>
             ))}
@@ -255,26 +258,29 @@ export function SalesDashboard({ userRole }: { userRole?: SalesRole }) {
                     <View key={task.id} style={{ 
                       flexDirection: 'row', 
                       backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc',
-                      borderRadius: 16, padding: 16, borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'
+                      borderRadius: 20, padding: 20, borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0',
+                      ...(Platform.OS === 'web' ? { transition: 'all 0.2s ease', cursor: 'pointer', ':hover': { transform: 'translateY(-2px)', boxShadow: '0 8px 24px rgba(0,0,0,0.06)', borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' } } as any : {})
                     }}>
-                      <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: task.type === 'urgent' ? '#fef2f2' : task.type === 'meeting' ? '#eff6ff' : '#f0fdf4', alignItems: 'center', justifyContent: 'center', marginRight: 16 }}>
-                         {task.type === 'urgent' ? <AlertCircle size={24} color="#ef4444" /> : task.type === 'meeting' ? <Users size={24} color="#3b82f6" /> : <PhoneCall size={24} color="#22c55e" />}
-                      </View>
-                      <View style={{ flex: 1 }}>
+                      <LinearGradient colors={task.type === 'urgent' ? ['#fecaca', '#fca5a5'] : task.type === 'meeting' ? ['#bfdbfe', '#93c5fd'] : ['#bbf7d0', '#86efac']} style={{ width: 56, height: 56, borderRadius: 18, alignItems: 'center', justifyContent: 'center', marginRight: 20 }}>
+                         {task.type === 'urgent' ? <AlertCircle size={28} color="#dc2626" /> : task.type === 'meeting' ? <Users size={28} color="#2563eb" /> : <PhoneCall size={28} color="#16a34a" />}
+                      </LinearGradient>
+                      <View style={{ flex: 1, justifyContent: 'center' }}>
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                           <View>
-                            <Text style={{ fontSize: 16, fontWeight: '800', color: cText }}>{task.action}</Text>
-                            <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b', marginTop: 4 }}>
-                               {task.customer} <Text style={{ color: '#cbd5e1' }}>•</Text> {task.phone}
-                            </Text>
+                            <Text style={{ fontSize: 17, fontWeight: '800', color: cText, letterSpacing: -0.2 }}>{task.action}</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 }}>
+                               <Text style={{ fontSize: 14, fontWeight: '700', color: '#64748b' }}>{task.customer}</Text>
+                               <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#cbd5e1' }} />
+                               <Text style={{ fontSize: 14, fontWeight: '600', color: '#94a3b8' }}>{task.phone}</Text>
+                            </View>
                           </View>
-                          <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12, backgroundColor: s.bg, borderWidth: 1, borderColor: `${s.text}20` }}>
-                             <Text style={{ fontSize: 10, fontWeight: '800', color: s.text, letterSpacing: 0.3 }}>{s.label.toUpperCase()}</Text>
+                          <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, backgroundColor: s.bg, borderWidth: 1, borderColor: `${s.text}20` }}>
+                             <Text style={{ fontSize: 10, fontWeight: '900', color: s.text, letterSpacing: 0.5 }}>{s.label.toUpperCase()}</Text>
                           </View>
                         </View>
-                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 12 }}>
-                          <Clock size={14} color="#94a3b8" />
-                          <Text style={{ fontSize: 13, fontWeight: '700', color: task.type === 'urgent' ? '#ef4444' : '#64748b' }}>{task.time}</Text>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 14 }}>
+                          <Clock size={16} color={task.type === 'urgent' ? '#ef4444' : '#94a3b8'} />
+                          <Text style={{ fontSize: 14, fontWeight: '700', color: task.type === 'urgent' ? '#ef4444' : '#64748b' }}>Hạn chót: {task.time}</Text>
                         </View>
                       </View>
                     </View>

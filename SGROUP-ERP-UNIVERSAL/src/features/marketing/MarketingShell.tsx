@@ -123,7 +123,7 @@ export function MarketingShell() {
           >
             <MarketingErrorBoundary key={activeKey}>
             {ContentComponent ? (
-              <ContentComponent userRole={userRole} />
+              <ContentComponent />
             ) : (
               <View style={styles.placeholder}>
                 <Text style={{ fontSize: 60, marginBottom: 24 }}>📣</Text>

@@ -4,7 +4,8 @@
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { TrendingUp, Target, Award, Star, Search, CheckCircle, Clock } from 'lucide-react-native';
+import { TrendingUp, Target, Award, Star, Search, CheckCircle, Clock, LayoutGrid, List } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard, SGTable } from '../../../shared/ui/components';
@@ -32,6 +33,7 @@ const RATING_COLORS: Record<string, string> = {
 };
 
 export function PerformanceScreen({ userRole }: { userRole?: HRRole }) {
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
   const cSub = theme.colors.textSecondary;
@@ -127,31 +129,50 @@ export function PerformanceScreen({ userRole }: { userRole?: HRRole }) {
         {/* Stats Summary */}
         <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
           {[
-            { label: 'TỔNG NHÂN VIÊN Đ.GIÁ', val: String(perfData.length), unit: 'người', icon: Target, color: '#3b82f6' },
-            { label: 'TỈ LỆ HOÀN TẤT', val: String(completePct), unit: '%', icon: CheckCircle, color: '#10b981' },
-            { label: 'XẾP LOẠI A & A-', val: String(highPerformers), unit: 'người', icon: Star, color: '#8b5cf6' },
-            { label: 'ĐANG ĐÁNH GIÁ', val: String(inProgressCount), unit: '', icon: Clock, color: '#f59e0b' },
+            { label: 'TỔNG NHẬN ĐÁNH GIÁ', val: String(perfData.length), unit: 'người', icon: Target, color: '#3b82f6', gradient: ['#3b82f6', '#2563eb'], shadow: '#3b82f6' },
+            { label: 'TỈ LỆ HOÀN TẤT', val: String(completePct), unit: '%', icon: CheckCircle, color: '#10b981', gradient: ['#10b981', '#059669'], shadow: '#10b981' },
+            { label: 'XẾP LOẠI A & A-', val: String(highPerformers), unit: 'người', icon: Star, color: '#8b5cf6', gradient: ['#8b5cf6', '#6366f1'], shadow: '#8b5cf6' },
+            { label: 'ĐANG ĐÁNH GIÁ', val: String(inProgressCount), unit: '', icon: Clock, color: '#f59e0b', gradient: ['#f59e0b', '#d97706'], shadow: '#f59e0b' },
           ].map((s, i) => (
-            <View key={i} style={{
-              flex: 1, minWidth: 200, padding: 22, borderRadius: 20,
-              backgroundColor: cardBg, borderWidth: 1, borderColor,
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                <View style={{ width: 40, height: 40, borderRadius: 12, backgroundColor: `${s.color}15`, alignItems: 'center', justifyContent: 'center' }}>
-                  <s.icon size={20} color={s.color} />
-                </View>
-                <Text style={{ fontSize: 11, fontWeight: '800', color: cSub, flex: 1 }}>{s.label}</Text>
+            <LinearGradient
+              key={i}
+              colors={isDark ? ['rgba(30,41,59,0.7)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#f8fafc']}
+              style={{
+                flex: 1, minWidth: 200, padding: 24, borderRadius: 24,
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                shadowColor: isDark ? '#000' : s.shadow, shadowOpacity: isDark ? 0.3 : 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 5,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14, marginBottom: 20 }}>
+                <LinearGradient
+                  colors={s.gradient as [string, string]} start={{x:0, y:0}} end={{x:1, y:1}}
+                  style={{ width: 44, height: 44, borderRadius: 14, alignItems: 'center', justifyContent: 'center', shadowColor: s.shadow, shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: {width:0, height:4} }}
+                >
+                  <s.icon size={22} color="#fff" />
+                </LinearGradient>
+                <Text style={{ fontSize: 12, fontWeight: '800', color: cSub, flex: 1, letterSpacing: 0.5 }}>{s.label}</Text>
               </View>
               <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-                <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>{s.val}</Text>
-                {s.unit ? <Text style={{ fontSize: 14, fontWeight: '700', color: cSub }}>{s.unit}</Text> : null}
+                <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1 }}>{s.val}</Text>
+                {s.unit ? <Text style={{ fontSize: 16, fontWeight: '700', color: cSub }}>{s.unit}</Text> : null}
               </View>
-            </View>
+            </LinearGradient>
           ))}
         </View>
 
         {/* Filters */}
         <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
+          <View style={{
+            flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
+            borderRadius: 16, padding: 4,
+          }}>
+            <TouchableOpacity onPress={() => setViewMode('table')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: viewMode === 'table' ? (isDark ? '#3b82f6' : '#fff') : 'transparent', shadowColor: '#000', shadowOpacity: viewMode === 'table' ? 0.05 : 0, shadowRadius: 4, elevation: viewMode === 'table' ? 2 : 0 }}>
+              <List size={18} color={viewMode === 'table' ? (isDark ? '#fff' : cText) : cSub} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setViewMode('grid')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: viewMode === 'grid' ? (isDark ? '#3b82f6' : '#fff') : 'transparent', shadowColor: '#000', shadowOpacity: viewMode === 'grid' ? 0.05 : 0, shadowRadius: 4, elevation: viewMode === 'grid' ? 2 : 0 }}>
+              <LayoutGrid size={18} color={viewMode === 'grid' ? (isDark ? '#fff' : cText) : cSub} />
+            </TouchableOpacity>
+          </View>
           <View style={{
             flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10,
             backgroundColor: cardBg, borderWidth: 1, borderColor,
@@ -168,21 +189,99 @@ export function PerformanceScreen({ userRole }: { userRole?: HRRole }) {
           </TouchableOpacity>
         </View>
 
-        {/* Table */}
-        <SGCard variant="glass" noPadding>
-          {isLoading ? (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <ActivityIndicator size="large" color="#10b981" />
-              <Text style={{ color: cSub, marginTop: 12, fontSize: 13 }}>Đang tải dữ liệu...</Text>
-            </View>
-          ) : (
+        {/* Content View */}
+        {isLoading ? (
+          <View style={{ padding: 60, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#10b981" />
+            <Text style={{ color: cSub, marginTop: 16, fontSize: 14, fontWeight: '600' }}>Đang tải dữ liệu...</Text>
+          </View>
+        ) : viewMode === 'table' ? (
+          <View style={{
+            backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
+            borderRadius: 28, overflow: 'hidden',
+            borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+            ...(Platform.OS === 'web' ? { 
+              backdropFilter: 'blur(32px)', 
+              WebkitBackdropFilter: 'blur(32px)',
+              boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.2)' : '0 12px 32px rgba(0,0,0,0.04)' 
+            } : {}),
+          }}>
             <SGTable 
               columns={COLUMNS} 
               data={perfData} 
               style={{ borderWidth: 0, backgroundColor: 'transparent' }}
             />
-          )}
-        </SGCard>
+          </View>
+        ) : (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
+            {perfData.length === 0 ? (
+              <Text style={{ color: cSub, fontSize: 15, padding: 32, textAlign: 'center', width: '100%' }}>Không có dữ liệu đánh giá nào trong kỳ này.</Text>
+            ) : null}
+            {perfData.map((item: any, idx: number) => {
+              let bg = '#f1f5f9', text = '#64748b', label = 'CHƯA BẮT ĐẦU';
+              if (item.status === 'COMPLETED') { bg = '#dcfce7'; text = '#16a34a'; label = 'ĐÃ HOÀN TẤT'; }
+              if (item.status === 'IN_PROGRESS') { bg = '#fef3c7'; text = '#d97706'; label = 'ĐANG ĐÁNH GIÁ'; }
+              
+              const isHigh = ['A', 'A-'].includes(item.rating);
+
+              return (
+                <LinearGradient
+                  key={item.id || idx}
+                  colors={isDark ? ['rgba(30,41,59,0.5)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
+                  style={{
+                    flex: 1, minWidth: 320, maxWidth: Platform.OS === 'web' ? '48%' : '100%', borderRadius: 24, padding: 24,
+                    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)',
+                    shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 4,
+                  }}
+                >
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+                    <View style={{ flexDirection: 'row', gap: 14, alignItems: 'center', flex: 1 }}>
+                      <LinearGradient
+                        colors={isDark ? ['rgba(16,185,129,0.2)', 'rgba(16,185,129,0.05)'] : ['#d1fae5', '#a7f3d0']}
+                        style={{ width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(16,185,129,0.1)' }}
+                      >
+                        <Target size={20} color="#10b981" />
+                      </LinearGradient>
+                      <View style={{ flex: 1, paddingRight: 8 }}>
+                        <Text style={{ fontSize: 16, fontWeight: '800', color: cText }} numberOfLines={1}>{item.name}</Text>
+                        <Text style={{ fontSize: 13, fontWeight: '600', color: cSub, marginTop: 2 }}>{item.code} • {item.dept || 'Nhân sự'}</Text>
+                      </View>
+                    </View>
+                    <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, backgroundColor: bg }}>
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: text, letterSpacing: 0.5 }}>
+                        {label}
+                      </Text>
+                    </View>
+                  </View>
+                  
+                  <View style={{ paddingHorizontal: 4, marginBottom: 24 }}>
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Tiến độ KPIs</Text>
+                      <Text style={{ fontSize: 20, fontWeight: '900', color: item.actual >= 100 ? '#10b981' : item.actual >= 80 ? '#f59e0b' : '#ef4444' }}>{item.actual}%</Text>
+                    </View>
+                    <View style={{ width: '100%', height: 6, backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
+                      <LinearGradient 
+                         colors={item.actual >= 100 ? ['#10b981', '#34d399'] : item.actual >= 80 ? ['#f59e0b', '#fbbf24'] : ['#ef4444', '#f87171']}
+                         start={{x:0, y:0}} end={{x:1, y:0}}
+                         style={{ width: `${Math.min(item.actual, 100)}%`, height: '100%', borderRadius: 3 }} 
+                      />
+                    </View>
+                  </View>
+
+                  <View style={{ borderTopWidth: 1, borderTopColor: borderColor, paddingTop: 18, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View>
+                       <Text style={{ fontSize: 12, fontWeight: '700', color: cSub, textTransform: 'uppercase' }}>Xếp loại</Text>
+                       <Text style={{ fontSize: 24, fontWeight: '900', color: RATING_COLORS[item.rating] || cText }}>{item.rating}</Text>
+                    </View>
+                    <TouchableOpacity style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff', borderRadius: 12 }}>
+                      <Text style={{ fontSize: 13, fontWeight: '800', color: '#3b82f6' }}>CHI TIẾT KẾT QUẢ</Text>
+                    </TouchableOpacity>
+                  </View>
+                </LinearGradient>
+              );
+            })}
+          </View>
+        )}
 
       </ScrollView>
     </View>

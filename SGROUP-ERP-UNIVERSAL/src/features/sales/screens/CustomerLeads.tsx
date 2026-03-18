@@ -4,7 +4,7 @@
  * Connected to API via useCustomers hook
  */
 import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Platform, TextInput, Modal, Pressable } from 'react-native';
 import {
   Users2, Phone, MessageCircle, Calendar, Search, Plus,
   Star, Clock, X, Check, ChevronDown
@@ -51,9 +51,9 @@ export function CustomerLeads({ userRole }: { userRole?: SalesRole }) {
   }));
 
   const cardStyle: any = {
-    backgroundColor: isDark ? 'rgba(20,24,35,0.45)' : '#fff', borderRadius: 24,
-    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(20px)' } : {}),
+    backgroundColor: isDark ? 'rgba(20,24,35,0.55)' : 'rgba(255,255,255,0.85)', borderRadius: 28,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.6)',
+    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(32px)', boxShadow: isDark ? '0 12px 32px rgba(0,0,0,0.4)' : '0 8px 24px rgba(0,0,0,0.04)' } : {}),
   };
 
   const handleAddLead = async () => {
@@ -151,73 +151,73 @@ export function CustomerLeads({ userRole }: { userRole?: SalesRole }) {
             const cfg = STATUS_CFG[lead.status];
             const nextStatus = nextStatusMap[lead.status];
             return (
-              <View key={lead.id} style={[cardStyle, { padding: 20, flexDirection: 'row', alignItems: 'center' }]}>
+              <Pressable key={lead.id} style={({ pressed }) => ([cardStyle, { padding: 20, flexDirection: 'row', alignItems: 'center', ...(Platform.OS === 'web' ? { transition: 'all 0.15s ease' } : {}), transform: [{ scale: pressed ? 0.98 : 1 }] }])}>
                 {/* Avatar */}
                 <View style={{
-                  width: 52, height: 52, borderRadius: 16, marginRight: 16,
-                  backgroundColor: isDark ? `${cfg.color}20` : cfg.bg,
+                  width: 56, height: 56, borderRadius: 20, marginRight: 20,
+                  backgroundColor: isDark ? `${cfg.color}20` : cfg.bg, borderWidth: 1, borderColor: isDark ? `${cfg.color}30` : `${cfg.color}15`,
                   alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <Text style={{ fontSize: 20, fontWeight: '900', color: cfg.color }}>
+                  <Text style={{ fontSize: 24, fontWeight: '900', color: cfg.color }}>
                     {lead.fullName.charAt(0)}
                   </Text>
                 </View>
 
                 {/* Info */}
                 <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: cText }}>{lead.fullName}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                    <Text style={{ fontSize: 18, fontWeight: '800', color: cText, letterSpacing: -0.2 }}>{lead.fullName}</Text>
                     {lead.isVip && (
-                      <View style={{ backgroundColor: '#fef3c7', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, flexDirection: 'row', alignItems: 'center', gap: 3 }}>
-                        <Star size={10} color="#f59e0b" />
-                        <Text style={{ fontSize: 9, fontWeight: '800', color: '#f59e0b' }}>VIP</Text>
+                      <View style={{ backgroundColor: '#fef3c7', paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8, flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                        <Star size={12} color="#f59e0b" />
+                        <Text style={{ fontSize: 10, fontWeight: '900', color: '#f59e0b', letterSpacing: 0.5 }}>VIP</Text>
                       </View>
                     )}
                   </View>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-                    <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>{lead.phone}</Text>
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: '#94a3b8' }}>•</Text>
-                    <Text style={{ fontSize: 13, fontWeight: '600', color: '#3b82f6' }}>{lead.projectInterest}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '600', color: cSub }}>{lead.phone}</Text>
+                    <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#cbd5e1' }} />
+                    <Text style={{ fontSize: 14, fontWeight: '700', color: '#3b82f6' }}>{lead.projectInterest}</Text>
                     {lead.budget && <>
-                      <Text style={{ fontSize: 12, fontWeight: '600', color: '#94a3b8' }}>•</Text>
-                      <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>{lead.budget}</Text>
+                      <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#cbd5e1' }} />
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: cSub }}>{lead.budget}</Text>
                     </>}
                   </View>
                   {lead.note && (
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: isDark ? '#fbbf24' : '#d97706', marginTop: 6, fontStyle: 'italic' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: isDark ? '#fbbf24' : '#d97706', marginTop: 8, fontStyle: 'italic' }}>
                       📝 {lead.note}
                     </Text>
                   )}
                 </View>
 
                 {/* Status + Actions */}
-                <View style={{ alignItems: 'flex-end', gap: 10 }}>
-                  <View style={{ paddingHorizontal: 12, paddingVertical: 5, borderRadius: 10, backgroundColor: isDark ? `${cfg.color}20` : cfg.bg, borderWidth: 1, borderColor: `${cfg.color}30` }}>
-                    <Text style={{ fontSize: 11, fontWeight: '800', color: cfg.color }}>{cfg.label}</Text>
+                <View style={{ alignItems: 'flex-end', gap: 12 }}>
+                  <View style={{ paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12, backgroundColor: isDark ? `${cfg.color}20` : cfg.bg, borderWidth: 1, borderColor: `${cfg.color}30` }}>
+                    <Text style={{ fontSize: 11, fontWeight: '900', color: cfg.color, letterSpacing: 0.5 }}>{cfg.label.toUpperCase()}</Text>
                   </View>
-                  <View style={{ flexDirection: 'row', gap: 6 }}>
-                    <TouchableOpacity style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isDark ? 'rgba(34,197,94,0.1)' : '#f0fdf4', alignItems: 'center', justifyContent: 'center' }}>
-                      <Phone size={14} color="#22c55e" />
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
+                    <TouchableOpacity style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: isDark ? 'rgba(34,197,94,0.1)' : '#f0fdf4', alignItems: 'center', justifyContent: 'center' }}>
+                      <Phone size={16} color="#22c55e" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff', alignItems: 'center', justifyContent: 'center' }}>
-                      <MessageCircle size={14} color="#3b82f6" />
+                    <TouchableOpacity style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff', alignItems: 'center', justifyContent: 'center' }}>
+                      <MessageCircle size={16} color="#3b82f6" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={{ width: 32, height: 32, borderRadius: 10, backgroundColor: isDark ? 'rgba(139,92,246,0.1)' : '#f5f3ff', alignItems: 'center', justifyContent: 'center' }}>
-                      <Calendar size={14} color="#8b5cf6" />
+                    <TouchableOpacity style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: isDark ? 'rgba(139,92,246,0.1)' : '#f5f3ff', alignItems: 'center', justifyContent: 'center' }}>
+                      <Calendar size={16} color="#8b5cf6" />
                     </TouchableOpacity>
                   </View>
                   {nextStatus && (
                     <TouchableOpacity onPress={() => handleStatusChange(lead, nextStatus)} style={{
-                      flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, paddingVertical: 5,
-                      borderRadius: 8, backgroundColor: isDark ? 'rgba(34,197,94,0.1)' : '#f0fdf4',
+                      flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 8,
+                      borderRadius: 12, backgroundColor: isDark ? 'rgba(34,197,94,0.1)' : '#f0fdf4',
                       borderWidth: 1, borderColor: 'rgba(34,197,94,0.2)',
                     }}>
-                      <Check size={12} color="#22c55e" />
-                      <Text style={{ fontSize: 10, fontWeight: '800', color: '#22c55e' }}>→ {STATUS_CFG[nextStatus].label}</Text>
+                      <Check size={14} color="#22c55e" />
+                      <Text style={{ fontSize: 11, fontWeight: '800', color: '#22c55e' }}>→ {STATUS_CFG[nextStatus].label}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
-              </View>
+              </Pressable>
             );
           })}
         </View>
@@ -234,12 +234,12 @@ export function CustomerLeads({ userRole }: { userRole?: SalesRole }) {
       {showAddModal && (
         <Modal transparent animationType="fade" visible={showAddModal} onRequestClose={() => setShowAddModal(false)}>
           <View style={{
-            flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center',
-            ...(Platform.OS === 'web' ? { backdropFilter: 'blur(8px)' } : {}),
+            flex: 1, backgroundColor: 'rgba(0,0,0,0.55)', justifyContent: 'center', alignItems: 'center',
+            ...(Platform.OS === 'web' ? { backdropFilter: 'blur(16px)' } : {}),
           } as any}>
-            <View style={[cardStyle, { width: '90%', maxWidth: 520, padding: 32, borderRadius: 28 }]}>
+            <View style={[cardStyle, { width: '90%', maxWidth: 520, padding: 36, borderRadius: 32 }]}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28 }}>
-                <Text style={{ fontSize: 22, fontWeight: '900', color: cText }}>Thêm Lead Mới</Text>
+                <Text style={{ fontSize: 24, fontWeight: '900', color: cText }}>Thêm Lead Mới</Text>
                 <TouchableOpacity onPress={() => setShowAddModal(false)} style={{ width: 36, height: 36, borderRadius: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9', alignItems: 'center', justifyContent: 'center' }}>
                   <X size={18} color={cSub} />
                 </TouchableOpacity>
@@ -262,10 +262,10 @@ export function CustomerLeads({ userRole }: { userRole?: SalesRole }) {
                     placeholderTextColor="#94a3b8"
                     style={{
                       backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
-                      borderRadius: 14, paddingHorizontal: 16, paddingVertical: 14,
-                      fontSize: 14, fontWeight: '600', color: cText,
+                      borderRadius: 16, paddingHorizontal: 16, paddingVertical: 14,
+                      fontSize: 15, fontWeight: '600', color: cText,
                       borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0',
-                      outlineStyle: 'none',
+                      ...(Platform.OS === 'web' ? { outline: 'none', transition: 'all 0.2s', ':focus': { borderColor: '#3b82f6', boxShadow: '0 0 0 3px rgba(59,130,246,0.2)' } } as any : {}),
                     } as any}
                   />
                 </View>

@@ -38,4 +38,10 @@ export const projectApi = {
     const res = await apiClient.patch(`/projects/assignments/${id}`, data);
     return res.data;
   },
+  
+  // Products
+  batchCreateProducts: async (projectId: string, products: any[]) => {
+    const res = await apiClient.post(`/projects/${projectId}/products/batch`, { products });
+    return res.data;
+  },
 };

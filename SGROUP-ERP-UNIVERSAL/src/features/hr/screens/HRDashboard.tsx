@@ -3,18 +3,13 @@
  */
 import React from 'react';
 import { View, Text, ScrollView, Platform, ActivityIndicator } from 'react-native';
-import { Users, UserMinus, Briefcase, Clock, TrendingUp, Building, Cake, Zap, Radio } from 'lucide-react-native';
+import { Users, UserMinus, Briefcase, Clock, TrendingUp, Building, Cake, Zap, Radio, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { useHRDashboard, useDepartments, useDashboardEvents, useDashboardActivities } from '../hooks/useHR';
 
 const ACCENT = '#ec4899'; // Pink-500
-
-// KPI cards are now driven by API data
-
 const DEPT_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4', '#6366f1', '#f43f5e'];
-
-// Events & Activities from API
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
 
@@ -34,149 +29,206 @@ export function HRDashboard() {
   const allActivities = Array.isArray(rawActivities) ? rawActivities : (rawActivities as any)?.data ?? [];
 
   const KPI_CARDS = [
-    { id: 'k1', label: 'TỔNG NHÂN SỰ', value: String(dashboard?.totalEmployees ?? 0), unit: 'người', color: '#ec4899', icon: Users, trend: 'up' as const, trendVal: 5 },
-    { id: 'k2', label: 'ĐANG LÀM VIỆC', value: String(dashboard?.activeEmployees ?? 0), unit: '', color: '#22c55e', icon: Users, trend: 'up' as const, trendVal: 3 },
-    { id: 'k3', label: 'THỬ VIỆC', value: String(dashboard?.probationEmployees ?? 0), unit: '', color: '#3b82f6', icon: Briefcase, trend: 'up' as const, trendVal: 12 },
-    { id: 'k4', label: 'ĐƠN CHỜ DUYỆT', value: String(dashboard?.pendingLeaves ?? 0), unit: '', color: '#8b5cf6', icon: Clock, trend: 'down' as const, trendVal: 8 },
+    { id: 'k1', label: 'TỔNG NHÂN SỰ', value: String(dashboard?.totalEmployees ?? 0), unit: 'người', 
+      gradient: ['#ec4899', '#f43f5e'], shadow: '#ec4899', icon: Users, trend: 'up' as const, trendVal: 5 },
+    { id: 'k2', label: 'ĐANG LÀM VIỆC', value: String(dashboard?.activeEmployees ?? 0), unit: '', 
+      gradient: ['#10b981', '#059669'], shadow: '#10b981', icon: Briefcase, trend: 'up' as const, trendVal: 3 },
+    { id: 'k3', label: 'THỬ VIỆC', value: String(dashboard?.probationEmployees ?? 0), unit: '', 
+      gradient: ['#3b82f6', '#2563eb'], shadow: '#3b82f6', icon: Users, trend: 'up' as const, trendVal: 12 },
+    { id: 'k4', label: 'ĐƠN CHỜ DUYỆT', value: String(dashboard?.pendingLeaves ?? 0), unit: '', 
+      gradient: ['#8b5cf6', '#6366f1'], shadow: '#8b5cf6', icon: Clock, trend: 'down' as const, trendVal: 8 },
   ];
 
   const deptList = (departments || []).map((d: any, i: number) => {
     const totalEmp = dashboard?.totalEmployees || 1;
     const count = d._count?.employees ?? 0;
-    return { ...d, count, pct: Math.round((count / totalEmp) * 100), color: DEPT_COLORS[i % DEPT_COLORS.length] };
+    return { ...d, count, pct: Math.max(1, Math.round((count / totalEmp) * 100)), color: DEPT_COLORS[i % DEPT_COLORS.length] };
   });
 
-  const card: any = {
-    backgroundColor: isDark ? 'rgba(20,24,35,0.45)' : '#fff', borderRadius: 28, padding: 28,
-    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
-    ...(Platform.OS === 'web' ? { backdropFilter: 'blur(32px)', boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.4)' : '0 4px 24px rgba(0,0,0,0.06)' } : {}),
+  const sectionCardStyle: any = {
+    backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
+    borderRadius: 28, padding: 28,
+    borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
+    ...(Platform.OS === 'web' ? { 
+      backdropFilter: 'blur(32px)', 
+      WebkitBackdropFilter: 'blur(32px)',
+      boxShadow: isDark ? '0 8px 32px rgba(0,0,0,0.2)' : '0 12px 32px rgba(0,0,0,0.04)' 
+    } : {}),
   };
+
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color={ACCENT} />
+        <Text style={{ marginTop: 16, fontSize: 14, color: cSub, fontWeight: '600' }}>Đang tải dữ liệu tổng quan...</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
-      <ScrollView contentContainerStyle={{ padding: 32, gap: 28, paddingBottom: 120 }}>
+      <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
+        
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-          <LinearGradient colors={['#f43f5e', '#ec4899']} style={{ width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center', shadowColor: '#ec4899', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6 }}>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
+          <LinearGradient 
+            colors={['#ec4899', '#8b5cf6']} start={{x:0,y:0}} end={{x:1,y:1}}
+            style={{ width: 60, height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', 
+                   shadowColor: '#ec4899', shadowOpacity: 0.5, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 8 }}
+          >
             <Briefcase size={28} color="#fff" />
           </LinearGradient>
           <View>
-            <Text style={{ fontSize: 28, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>TỔNG QUAN NHÂN SỰ</Text>
-            <Text style={{ fontSize: 14, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>Dữ liệu thời gian thực — Tháng 03/2026</Text>
+            <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -1 }}>TỔNG QUAN HR</Text>
+            <Text style={{ fontSize: 15, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>Dữ liệu thời gian thực — Hệ thống Nhân sự SGroup</Text>
           </View>
         </View>
 
-        {/* KPI Cards */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
+        {/* Premium KPI Cards */}
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24 }}>
           {KPI_CARDS.map(k => (
-            <View key={k.id} style={{
-              flex: 1, minWidth: 220, backgroundColor: isDark ? 'rgba(30,41,59,0.5)' : '#ffffff',
-              borderRadius: 24, padding: 24,
-              borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
-              shadowColor: '#000', shadowOpacity: isDark ? 0.3 : 0.04, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 4,
-            }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${k.color}1A`, alignItems: 'center', justifyContent: 'center' }}>
-                  {(() => { const Icon = k.icon; return <Icon size={22} color={k.color} />; })()}
-                </View>
-                <View style={{ backgroundColor: k.trend === 'up' ? '#22c55e1A' : '#f43f5e1A', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 }}>
-                  <Text style={{ fontSize: 12, fontWeight: '800', color: k.trend === 'up' ? '#16a34a' : '#e11d48' }}>
-                    {k.trend === 'up' ? '+' : '-'}{k.trendVal}%
+            <LinearGradient
+              key={k.id}
+              colors={isDark ? ['rgba(30,41,59,0.7)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#f8fafc']}
+              style={{
+                flex: 1, minWidth: 220, borderRadius: 28, padding: 24,
+                borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)',
+                shadowColor: isDark ? '#000' : k.shadow, shadowOpacity: isDark ? 0.5 : 0.12, shadowRadius: 24, shadowOffset: { width: 0, height: 12 }, elevation: 6,
+              }}
+            >
+              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                <LinearGradient
+                  colors={k.gradient as [string, string]} start={{x:0, y:0}} end={{x:1, y:1}}
+                  style={{ width: 48, height: 48, borderRadius: 16, alignItems: 'center', justifyContent: 'center', shadowColor: k.shadow, shadowOpacity: 0.4, shadowRadius: 8, shadowOffset: {width:0, height:4} }}
+                >
+                  {(() => { const Icon = k.icon; return <Icon size={24} color="#fff" />; })()}
+                </LinearGradient>
+                <View style={{ backgroundColor: k.trend === 'up' ? 'rgba(34,197,94,0.15)' : 'rgba(244,63,94,0.15)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20 }}>
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: k.trend === 'up' ? '#22c55e' : '#f43f5e' }}>
+                    {k.trend === 'up' ? '↑' : '↓'} {k.trendVal}%
                   </Text>
                 </View>
               </View>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Text>
-              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6, marginTop: 4 }}>
-                <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1 }}>{k.value}</Text>
-                {k.unit ? <Text style={{ fontSize: 14, fontWeight: '700', color: '#94a3b8' }}>{k.unit}</Text> : null}
+              <Text style={{ fontSize: 12, fontWeight: '800', color: isDark ? '#94a3b8' : '#64748b', textTransform: 'uppercase', letterSpacing: 0.5 }}>{k.label}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8, marginTop: 6 }}>
+                <Text style={{ fontSize: 42, fontWeight: '900', color: cText, letterSpacing: -1 }}>{k.value}</Text>
+                {k.unit ? <Text style={{ fontSize: 15, fontWeight: '700', color: '#94a3b8' }}>{k.unit}</Text> : null}
               </View>
-            </View>
+            </LinearGradient>
           ))}
         </View>
 
-        <View style={{ flexDirection: 'row', gap: 24, flexWrap: 'wrap' }}>
-          {/* Department Breakdown */}
-          <View style={[card, { flex: 1.4, minWidth: 500 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: `${ACCENT}1A`, alignItems: 'center', justifyContent: 'center' }}>
-                <Building size={18} color={ACCENT} />
-              </View>
-              <Text style={{ fontSize: 18, fontWeight: '900', color: cText, flex: 1 }}>Cán bộ theo Phòng ban</Text>
+        <View style={{ flexDirection: 'row', gap: 28, flexWrap: 'wrap' }}>
+          {/* Department Breakdown with Progress Bars */}
+          <View style={[sectionCardStyle, { flex: 1.5, minWidth: 480 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+              <LinearGradient colors={['rgba(236,72,153,0.2)', 'rgba(236,72,153,0.05)']} style={{ width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(236,72,153,0.2)' }}>
+                <Building size={20} color={ACCENT} />
+              </LinearGradient>
+              <Text style={{ fontSize: 20, fontWeight: '900', color: cText, flex: 1 }}>Cơ cấu Nhân sự theo Phòng ban</Text>
+              <Text style={{ fontSize: 14, fontWeight: '700', color: '#ec4899' }}>Xem tất cả</Text>
             </View>
+            
             {deptList.length === 0 && !isLoading && (
-              <Text style={{ color: cSub, fontSize: 13, textAlign: 'center', padding: 20 }}>Chưa có phòng ban nào</Text>
+              <Text style={{ color: cSub, fontSize: 14, textAlign: 'center', padding: 30 }}>Chưa có phòng ban nào được thiết lập.</Text>
             )}
-            {deptList.map((d: any, i: number) => (
-              <View key={d.id} style={{
-                flexDirection: 'row', alignItems: 'center', paddingVertical: 14,
-                borderBottomWidth: i < deptList.length - 1 ? 1 : 0,
-                borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
-              }}>
-                <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: `${d.color}15`, alignItems: 'center', justifyContent: 'center', marginRight: 14 }}>
-                  <Text style={{ fontSize: 14, fontWeight: '900', color: d.color }}>{d.pct}%</Text>
+            
+            <View style={{ gap: 22 }}>
+              {deptList.map((d: any) => (
+                <View key={d.id}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+                    <View>
+                      <Text style={{ fontSize: 15, fontWeight: '800', color: cText, marginBottom: 2 }}>{d.name}</Text>
+                      <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>
+                        {d.manager?.fullName ? `Trưởng phòng: ${d.manager.fullName}` : `Mã: ${d.code}`}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                      <Text style={{ fontSize: 16, fontWeight: '900', color: d.color }}>{d.count} CBNV</Text>
+                      <Text style={{ fontSize: 12, fontWeight: '700', color: cSub }}>{d.pct}%</Text>
+                    </View>
+                  </View>
+                  {/* Progress Bar Background */}
+                  <View style={{ height: 8, borderRadius: 4, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', overflow: 'hidden' }}>
+                    {/* Progress Bar Fill */}
+                    <LinearGradient 
+                      colors={[d.color, d.color + '99']} 
+                      start={{x:0,y:0}} end={{x:1,y:0}} 
+                      style={{ width: `${d.pct}%`, height: '100%', borderRadius: 4 }} 
+                    />
+                  </View>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 15, fontWeight: '800', color: cText }}>{d.name}</Text>
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: '#94a3b8', marginTop: 3 }}>
-                    {d.manager?.fullName ? `Trưởng phòng: ${d.manager.fullName}` : `Mã: ${d.code}`}
-                  </Text>
-                </View>
-                <View style={{ alignItems: 'flex-end', gap: 4 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '900', color: cText }}>{d.count} CBNV</Text>
-                </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
 
           {/* Upcoming Events */}
-          <View style={[card, { flex: 1, minWidth: 340 }]}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#f59e0b1A', alignItems: 'center', justifyContent: 'center' }}>
-                <Cake size={18} color="#f59e0b" />
-              </View>
-              <Text style={{ fontSize: 18, fontWeight: '900', color: cText }}>Sự kiện sắp tới</Text>
+          <View style={[sectionCardStyle, { flex: 1, minWidth: 340 }]}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+              <LinearGradient colors={['rgba(245,158,11,0.2)', 'rgba(245,158,11,0.05)']} style={{ width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(245,158,11,0.2)' }}>
+                <Cake size={20} color="#f59e0b" />
+              </LinearGradient>
+              <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Sự kiện sắp tới</Text>
             </View>
-            {allEvents.map((e: any, i: number) => (
-              <View key={i} style={{ marginBottom: 18 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 }}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 14, fontWeight: '800', color: cText }}>{e.name}</Text>
-                    <Text style={{ fontSize: 12, fontWeight: '600', color: '#94a3b8' }}>{e.role}</Text>
+            
+            <View style={{ gap: 20 }}>
+              {allEvents.map((e: any, i: number) => (
+                <View key={i} style={{ flexDirection: 'row', gap: 16 }}>
+                  <View style={{ width: 48, height: 56, borderRadius: 14, backgroundColor: e.type === 'birthday' ? 'rgba(236,72,153,0.1)' : 'rgba(59,130,246,0.1)', alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 12, fontWeight: '800', color: e.type === 'birthday' ? '#ec4899' : '#3b82f6', textTransform: 'uppercase' }}>{e.date.split(' ')[1]}</Text>
+                    <Text style={{ fontSize: 20, fontWeight: '900', color: e.type === 'birthday' ? '#ec4899' : '#3b82f6' }}>{e.date.split(' ')[0]}</Text>
                   </View>
-                  <View style={{ alignItems: 'flex-end' }}>
-                    <Text style={{ fontSize: 14, fontWeight: '900', color: e.type === 'birthday' ? '#ec4899' : '#3b82f6' }}>{e.date}</Text>
-                    <Text style={{ fontSize: 11, fontWeight: '700', color: '#64748b' }}>{e.desc}</Text>
+                  <View style={{ flex: 1, justifyContent: 'center' }}>
+                    <Text style={{ fontSize: 15, fontWeight: '800', color: cText, marginBottom: 2 }}>{e.name}</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>{e.desc} • {e.role}</Text>
                   </View>
                 </View>
-              </View>
-            ))}
+              ))}
+              {allEvents.length === 0 && (
+                 <Text style={{ color: cSub, fontSize: 14 }}>Không có sự kiện nào sắp tới.</Text>
+              )}
+            </View>
           </View>
         </View>
 
-        {/* Activity Stream */}
-        <View style={[card, {}]}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 24 }}>
-            <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#8b5cf61A', alignItems: 'center', justifyContent: 'center' }}>
-              <Zap size={18} color="#8b5cf6" />
-            </View>
-            <Text style={{ fontSize: 18, fontWeight: '900', color: cText }}>Biến động & Hoạt động</Text>
+        {/* Activity Stream - Timeline Style */}
+        <View style={sectionCardStyle}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>
+            <LinearGradient colors={['rgba(139,92,246,0.2)', 'rgba(139,92,246,0.05)']} style={{ width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)' }}>
+              <Zap size={20} color="#8b5cf6" />
+            </LinearGradient>
+            <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Biến động & Hoạt động Nhân sự</Text>
           </View>
-          {allActivities.map((a: any, i: number) => (
-            <View key={a.id || i} style={{
-              flexDirection: 'row', alignItems: 'flex-start', gap: 14, paddingVertical: 14,
-              borderBottomWidth: i < allActivities.length - 1 ? 1 : 0,
-              borderBottomColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
-            }}>
-              <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: a.tone, marginTop: 6 }} />
-              <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 14, fontWeight: '800', color: cText }}>{a.title}</Text>
-                <Text style={{ fontSize: 13, fontWeight: '600', color: '#94a3b8', marginTop: 3 }}>{a.detail}</Text>
+          
+          <View style={{ paddingLeft: 8 }}>
+            {allActivities.map((a: any, i: number) => (
+              <View key={a.id || i} style={{ flexDirection: 'row', gap: 20, marginBottom: i === allActivities.length - 1 ? 0 : 24 }}>
+                {/* Timeline Line & Dot */}
+                <View style={{ alignItems: 'center', width: 14 }}>
+                  <View style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: a.tone, borderWidth: 3, borderColor: isDark ? '#0f172a' : '#fff', zIndex: 2 }} />
+                  {i < allActivities.length - 1 && (
+                    <View style={{ width: 2, flex: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0', marginTop: 4, marginBottom: -20 }} />
+                  )}
+                </View>
+                
+                {/* Content */}
+                <View style={{ flex: 1, marginTop: -2, backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', padding: 16, borderRadius: 16, borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.03)' : '#f1f5f9' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                    <Text style={{ fontSize: 15, fontWeight: '800', color: cText }}>{a.title}</Text>
+                    <Text style={{ fontSize: 12, fontWeight: '700', color: cSub }}>{a.time}</Text>
+                  </View>
+                  <Text style={{ fontSize: 14, fontWeight: '600', color: cSub, lineHeight: 20 }}>{a.detail}</Text>
+                </View>
               </View>
-              <Text style={{ fontSize: 12, fontWeight: '700', color: '#64748b' }}>{a.time}</Text>
-            </View>
-          ))}
+            ))}
+            {allActivities.length === 0 && (
+              <Text style={{ color: cSub, fontSize: 14, marginLeft: 24 }}>Chưa có hoạt động nào được ghi nhận.</Text>
+            )}
+          </View>
         </View>
+        
       </ScrollView>
     </View>
   );
 }
+
