@@ -78,7 +78,7 @@ export function LoginCalendar() {
             <View>
               <Text style={[typography.bodyBold, { color: colors.text }]}>Login Activity</Text>
               <Text style={[typography.micro, { color: colors.textTertiary }]}>
-                {data.totalLogins.toLocaleString()} logins trong 365 ngày
+                {(data.totalLogins ?? 0).toLocaleString()} logins trong 365 ngày
               </Text>
             </View>
           </View>
@@ -106,7 +106,7 @@ export function LoginCalendar() {
                           {
                             backgroundColor: day.count < 0
                               ? 'transparent'
-                              : INTENSITY_COLORS[getIntensity(day.count, data.maxCount)],
+                              : INTENSITY_COLORS[getIntensity(day.count, data.maxCount ?? 0)],
                             borderRadius: 2,
                           },
                         ]}
