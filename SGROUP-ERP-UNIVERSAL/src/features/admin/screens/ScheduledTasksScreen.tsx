@@ -32,8 +32,9 @@ const TASK_ICONS: Record<string, any> = {
 
 export function ScheduledTasksScreen() {
   const { colors } = useAppTheme();
-  const { data: tasks, isLoading } = useScheduledTasks();
+  const { data: tasksRaw, isLoading } = useScheduledTasks();
   const triggerMut = useTriggerTask();
+  const tasks: any[] = Array.isArray(tasksRaw) ? tasksRaw : Array.isArray((tasksRaw as any)?.data) ? (tasksRaw as any).data : [];
 
   const handleTrigger = async (name: string) => {
     try {
@@ -61,7 +62,7 @@ export function ScheduledTasksScreen() {
           <View style={styles.statsRow}>
             <View style={[styles.statCard, { backgroundColor: `${colors.success}08`, borderColor: `${colors.success}20` }]}>
               <CheckCircle size={18} color={colors.success} />
-              <Text style={[typography.h3, { color: colors.success }]}>{(tasks || []).length}</Text>
+              <Text style={[typography.h3, { color: colors.success }]}>{tasks.length}</Text>
               <Text style={[typography.caption, { color: colors.success }]}>Active Tasks</Text>
             </View>
             <View style={[styles.statCard, { backgroundColor: `${colors.accent}08`, borderColor: `${colors.accent}20` }]}>
@@ -80,7 +81,7 @@ export function ScheduledTasksScreen() {
             ))}
           </View>
         ) : (
-          (tasks || []).map((task: any, i: number) => {
+          tasks.map((task: any, i: number) => {
             const taskColor = TASK_COLORS[task.name] || colors.accent;
             const TaskIcon = TASK_ICONS[task.name] || Clock;
 

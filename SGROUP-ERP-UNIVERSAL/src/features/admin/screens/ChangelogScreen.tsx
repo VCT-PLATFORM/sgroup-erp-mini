@@ -34,9 +34,11 @@ export function ChangelogScreen() {
   const [deleteTarget, setDeleteTarget] = useState<any>(null);
   const [form, setForm] = useState({ version: '', title: '', description: '', type: 'feature', author: '' });
 
-  const { data: changelogs, isLoading } = useChangelogs();
+  const { data: changelogsRaw, isLoading } = useChangelogs();
   const createMut = useCreateChangelog();
   const deleteMut = useDeleteChangelog();
+
+  const changelogs: any[] = Array.isArray(changelogsRaw) ? changelogsRaw : Array.isArray((changelogsRaw as any)?.data) ? (changelogsRaw as any).data : [];
 
   const handleCreate = async () => {
     if (!form.version || !form.title || !form.description) {
@@ -87,7 +89,7 @@ export function ChangelogScreen() {
               <SGSkeleton key={i} width="100%" height={120} borderRadius={16} />
             ))}
           </View>
-        ) : (changelogs || []).length === 0 ? (
+        ) : changelogs.length === 0 ? (
           <SGSection>
             <SGEmptyState
               icon={<BookOpen size={48} color={colors.textTertiary} strokeWidth={1} />}
@@ -100,7 +102,7 @@ export function ChangelogScreen() {
         ) : (
           /* Timeline */
           <View style={styles.timeline}>
-            {(changelogs || []).map((entry: any, i: number) => {
+            {changelogs.map((entry: any, i: number) => {
               const typeConf = TYPE_CONFIG[entry.type] || TYPE_CONFIG.feature;
               const TypeIcon = typeConf.icon;
               return (
@@ -110,7 +112,7 @@ export function ChangelogScreen() {
                 >
                   <View style={styles.timelineItem}>
                     {/* Timeline line */}
-                    {i < (changelogs || []).length - 1 && (
+                    {i < changelogs.length - 1 && (
                       <View style={[styles.timelineLine, { backgroundColor: colors.border }]} />
                     )}
 
