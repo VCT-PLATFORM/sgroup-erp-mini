@@ -2,8 +2,8 @@
  * LeavesScreen — HR Leave Requests Management
  */
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Calendar, Search, CheckCircle, Clock, XCircle, FileText, LayoutGrid, List } from 'lucide-react-native';
+import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator, Modal, Pressable } from 'react-native';
+import { Calendar, Search, CheckCircle, Clock, XCircle, FileText, LayoutGrid, List, X, Check } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
@@ -29,6 +29,7 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export function LeavesScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
+  const [selectedLeave, setSelectedLeave] = useState<any>(null);
   const { theme, isDark } = useAppTheme();
   const cText = theme.colors.textPrimary;
   const cSub = theme.colors.textSecondary;
@@ -80,15 +81,106 @@ export function LeavesScreen() {
         </View>
       );
     } },
-    { key: 'actions', title: '', flex: 0.5, align: 'right', render: () => (
-      <TouchableOpacity style={{ padding: 6 }}>
+    { key: 'actions', title: '', flex: 0.5, align: 'right', render: (_: any, row: any) => (
+      <TouchableOpacity onPress={() => setSelectedLeave(row)} style={{ padding: 6 }}>
         <Text style={{ fontSize: 12, fontWeight: '700', color: '#3b82f6' }}>Duyệt</Text>
       </TouchableOpacity>
     ) }
   ];
 
+  const workflowSteps = [
+    { id: 1, label: 'Trưởng Nhóm', status: 'approved', role: 'Leader' },
+    { id: 2, label: 'Trưởng Phòng', status: 'pending', role: 'Manager' },
+    { id: 3, label: 'Giám Đốc HR', status: 'waiting', role: 'HR Director' },
+  ];
+
   return (
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
+      {/* ── Approval Workflow Modal ── */}
+      <Modal visible={!!selectedLeave} transparent animationType="slide" onRequestClose={() => setSelectedLeave(null)}>
+        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }} onPress={() => setSelectedLeave(null)}>
+          <Pressable style={{ width: '100%', maxWidth: 540, backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 32, padding: 32, ...(Platform.OS === 'web' ? { boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' } : {}) }} onPress={() => {}}>
+            {selectedLeave && (
+              <View>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                  <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+                    <LinearGradient colors={['#3b82f6', '#2563eb']} style={{ width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
+                      <FileText size={28} color="#fff" />
+                    </LinearGradient>
+                    <View>
+                      <Text style={{ fontSize: 24, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>Duyệt Đơn Nghỉ</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: cSub, marginTop: 4 }}>{selectedLeave.name} • {selectedLeave.code}</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={() => setSelectedLeave(null)} style={{ padding: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 12 }}>
+                    <X size={20} color={cSub} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Info Card */}
+                <View style={{ padding: 20, borderRadius: 20, backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0', marginBottom: 24 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Loại đơn</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cText }}>{selectedLeave.type}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Thời gian</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cText }}>{selectedLeave.from} - {selectedLeave.to}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={{ fontSize: 13, fontWeight: '600', color: cSub }}>Tổng cộng</Text>
+                    <Text style={{ fontSize: 14, fontWeight: '900', color: '#f59e0b' }}>{selectedLeave.days} ngày</Text>
+                  </View>
+                </View>
+
+                {/* Workflow Stepper */}
+                <Text style={{ fontSize: 16, fontWeight: '900', color: cText, marginBottom: 16 }}>Tiến trình Phê duyệt</Text>
+                <View style={{ gap: 0, paddingLeft: 8, marginBottom: 32 }}>
+                  {workflowSteps.map((step, idx) => {
+                    const isLast = idx === workflowSteps.length - 1;
+                    const isApproved = step.status === 'approved';
+                    const isPending = step.status === 'pending';
+                    const iconColor = isApproved ? '#10b981' : isPending ? '#f59e0b' : '#94a3b8';
+                    const bgCircle = isApproved ? 'rgba(16,185,129,0.15)' : isPending ? 'rgba(245,158,11,0.15)' : 'rgba(148,163,184,0.1)';
+                    
+                    return (
+                      <View key={step.id} style={{ flexDirection: 'row', gap: 16 }}>
+                        {/* Timeline Graphic */}
+                        <View style={{ alignItems: 'center', width: 24 }}>
+                          <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: bgCircle, alignItems: 'center', justifyContent: 'center' }}>
+                            {isApproved ? <Check size={14} color={iconColor} /> : <Clock size={14} color={iconColor} />}
+                          </View>
+                          {!isLast && <View style={{ width: 2, height: 32, backgroundColor: isApproved ? '#10b981' : isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0', marginVertical: 4 }} />}
+                        </View>
+                        {/* Step Info */}
+                        <View style={{ flex: 1, paddingBottom: isLast ? 0 : 20, paddingTop: 2 }}>
+                          <Text style={{ fontSize: 15, fontWeight: '800', color: isApproved ? cText : isPending ? cText : cSub }}>{step.label}</Text>
+                          <Text style={{ fontSize: 12, fontWeight: '600', color: cSub, marginTop: 4 }}>{step.role} • {isApproved ? 'Đã duyệt' : isPending ? 'Đang chờ duyệt' : 'Chưa đến lượt'}</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Actions */}
+                <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <TouchableOpacity onPress={() => setSelectedLeave(null)} style={{ flex: 1, paddingVertical: 14, borderRadius: 16, alignItems: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cSub }}>Tính Hợp Lệ</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setSelectedLeave(null)} style={{ flex: 1, paddingVertical: 14, borderRadius: 16, alignItems: 'center', backgroundColor: 'rgba(239,68,68,0.1)' }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: '#ef4444' }}>Từ Chối</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setSelectedLeave(null)} style={{ flex: 1, paddingVertical: 14, borderRadius: 16, alignItems: 'center', backgroundColor: '#10b981', shadowColor: '#10b981', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>Phê Duyệt</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: 28, gap: 24, paddingBottom: 120 }}>
         {/* Header */}
         <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -233,7 +325,7 @@ export function LeavesScreen() {
                   </View>
 
                   <View style={{ borderTopWidth: 1, borderTopColor: borderColor, paddingTop: 18, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
-                    <TouchableOpacity style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff', borderRadius: 12 }}>
+                    <TouchableOpacity onPress={() => setSelectedLeave(item)} style={{ paddingHorizontal: 20, paddingVertical: 10, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff', borderRadius: 12 }}>
                       <Text style={{ fontSize: 13, fontWeight: '800', color: '#3b82f6' }}>XEM & DUYỆT</Text>
                     </TouchableOpacity>
                   </View>

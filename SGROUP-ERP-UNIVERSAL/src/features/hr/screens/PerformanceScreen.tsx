@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { TrendingUp, Target, Award, Star, Search, CheckCircle, Clock, LayoutGrid, List } from 'lucide-react-native';
+import { TrendingUp, Target, Award, Star, Search, CheckCircle, Clock, LayoutGrid, List, Medal, Crown } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
@@ -163,6 +163,51 @@ export function PerformanceScreen({ userRole }: { userRole?: HRRole }) {
           ))}
         </Animated.View>
 
+        {/* ═══ Gamification Leaderboard ═══ */}
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap', marginTop: 8 }}>
+          <LinearGradient
+            colors={isDark ? ['rgba(245,158,11,0.15)', 'rgba(30,41,59,0.5)'] : ['#fffbeb', '#ffffff']}
+            style={{
+              flex: 1, minWidth: 320, padding: 24, borderRadius: 28,
+              borderWidth: 1, borderColor: isDark ? 'rgba(245,158,11,0.2)' : '#fde68a',
+              shadowColor: '#f59e0b', shadowOpacity: isDark ? 0.3 : 0.08, shadowRadius: 20, shadowOffset: { width: 0, height: 10 }, elevation: 5,
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                 <View style={{ padding: 8, borderRadius: 12, backgroundColor: '#fef3c7' }}>
+                   <Crown size={20} color="#f59e0b" />
+                 </View>
+                 <View>
+                   <Text style={{ fontSize: 18, fontWeight: '900', color: cText }}>Bảng Vàng Thành Tích</Text>
+                   <Text style={{ fontSize: 13, fontWeight: '600', color: cSub, marginTop: 2 }}>Top 3 cá nhân xuất sắc nhất Quý</Text>
+                 </View>
+              </View>
+            </View>
+            <View style={{ gap: 12 }}>
+              {[
+                { name: 'Nguyễn Văn A', role: 'Trưởng nhóm KD', score: 98, rank: 1, color: '#f59e0b', badge: 'Vua Doanh Số' },
+                { name: 'Trần Thị B', role: 'Chuyên viên Marketing', score: 95, rank: 2, color: '#94a3b8', badge: 'Sáng tạo' },
+                { name: 'Lê Văn C', role: 'Dev Lead', score: 92, rank: 3, color: '#b45309', badge: 'Bug Hunter' },
+              ].map((lb, idx) => (
+                <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', padding: 12, borderRadius: 16, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }}>
+                   <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: `${lb.color}20`, alignItems: 'center', justifyContent: 'center', marginRight: 12 }}>
+                     {lb.rank === 1 ? <Crown size={16} color={lb.color} /> : <Medal size={16} color={lb.color} />}
+                   </View>
+                   <View style={{ flex: 1 }}>
+                     <Text style={{ fontSize: 14, fontWeight: '800', color: cText }}>{lb.name}</Text>
+                     <Text style={{ fontSize: 12, fontWeight: '600', color: cSub, marginTop: 2 }}>{lb.role}</Text>
+                   </View>
+                   <View style={{ paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(59,130,246,0.1)', marginRight: 12 }}>
+                     <Text style={{ fontSize: 11, fontWeight: '800', color: '#3b82f6' }}>{lb.badge}</Text>
+                   </View>
+                   <Text style={{ fontSize: 16, fontWeight: '900', color: lb.color }}>{lb.score}%</Text>
+                </View>
+              ))}
+            </View>
+          </LinearGradient>
+        </Animated.View>
+
         {/* Filters */}
         <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
           <View style={{
@@ -257,6 +302,21 @@ export function PerformanceScreen({ userRole }: { userRole?: HRRole }) {
                       </Text>
                     </View>
                   </View>
+                  
+                  {isHigh && (
+                    <View style={{ flexDirection: 'row', gap: 8, paddingHorizontal: 4, marginBottom: 16 }}>
+                       <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(245,158,11,0.15)', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                         <Award size={12} color="#d97706" />
+                         <Text style={{ fontSize: 11, fontWeight: '800', color: '#d97706' }}>Xuất Sắc</Text>
+                       </View>
+                       {item.actual >= 95 && (
+                         <View style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(139,92,246,0.15)', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                           <Star size={12} color="#8b5cf6" />
+                           <Text style={{ fontSize: 11, fontWeight: '800', color: '#8b5cf6' }}>Ngôi Sao</Text>
+                         </View>
+                       )}
+                    </View>
+                  )}
                   
                   <View style={{ paddingHorizontal: 4, marginBottom: 24 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>

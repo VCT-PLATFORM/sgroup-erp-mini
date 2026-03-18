@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Clock, CheckCircle, AlertCircle, Calendar, Users, XCircle, Search, LayoutGrid, List } from 'lucide-react-native';
+import { Clock, CheckCircle, AlertCircle, Calendar, Users, XCircle, Search, LayoutGrid, List, CalendarDays, ArrowRight } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
@@ -135,6 +135,76 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1 }}>{s.val}</Text>
             </LinearGradient>
           ))}
+        </Animated.View>
+
+        {/* ═══ Attendance Heatmap (Contribution Graph) ═══ */}
+        <Animated.View entering={FadeInDown.delay(150).duration(400)} style={{ 
+          padding: 24, borderRadius: 28, backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
+          borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.03)',
+          shadowColor: '#000', shadowOpacity: isDark ? 0.2 : 0.05, shadowRadius: 16, shadowOffset: { width: 0, height: 8 }, elevation: 4,
+          marginTop: 8
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+              <View style={{ padding: 8, borderRadius: 10, backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#dcfce7' }}>
+                <CalendarDays size={18} color="#10b981" />
+              </View>
+              <View>
+                <Text style={{ fontSize: 18, fontWeight: '900', color: cText }}>Biểu đồ Chuyên cần (90 ngày)</Text>
+                <Text style={{ fontSize: 13, fontWeight: '600', color: cSub, marginTop: 2 }}>Tỷ lệ đi làm đúng giờ toàn công ty</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              <Text style={{ fontSize: 13, fontWeight: '800', color: '#3b82f6' }}>Phân tích chi tiết</Text>
+              <ArrowRight size={14} color="#3b82f6" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 12 }}>
+            <View style={{ gap: 4 }}>
+              {/* Generate 5 rows of 18 cols for ~90 days */}
+              {Array.from({ length: 5 }).map((_, rIdx) => (
+                <View key={rIdx} style={{ flexDirection: 'row', gap: 4 }}>
+                  {Array.from({ length: 18 }).map((_, cIdx) => {
+                    const rnd = Math.random();
+                    const status = rnd > 0.95 ? 'absent' : rnd > 0.85 ? 'late' : 'present';
+                    const bg = status === 'present' ? (isDark ? 'rgba(16,185,129,0.8)' : '#22c55e') :
+                               status === 'late' ? (isDark ? 'rgba(245,158,11,0.8)' : '#f59e0b') :
+                               (isDark ? 'rgba(239,68,68,0.8)' : '#ef4444');
+                    return (
+                      <Animated.View 
+                        entering={FadeInDown.delay(300 + cIdx * 10 + rIdx * 20).duration(300)}
+                        key={cIdx} 
+                        style={{ 
+                          width: 16, height: 16, borderRadius: 4, backgroundColor: bg,
+                          opacity: status === 'present' ? (0.4 + Math.random() * 0.6) : 1 // vary green intensity
+                        }} 
+                      />
+                    );
+                  })}
+                </View>
+              ))}
+            </View>
+          </ScrollView>
+
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', gap: 12, marginTop: 12 }}>
+            <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>Thấp</Text>
+            <View style={{ flexDirection: 'row', gap: 4 }}>
+               {['rgba(16,185,129,0.2)', 'rgba(16,185,129,0.4)', 'rgba(16,185,129,0.6)', 'rgba(16,185,129,0.8)', '#10b981'].map((c, i) => (
+                 <View key={i} style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: c }} />
+               ))}
+            </View>
+            <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>Cao</Text>
+            <View style={{ width: 1, height: 12, backgroundColor: borderColor, marginHorizontal: 4 }} />
+            <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+               <View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#f59e0b' }} />
+               <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>Trễ</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 4, alignItems: 'center' }}>
+               <View style={{ width: 12, height: 12, borderRadius: 3, backgroundColor: '#ef4444' }} />
+               <Text style={{ fontSize: 12, fontWeight: '600', color: cSub }}>Vắng</Text>
+            </View>
+          </View>
         </Animated.View>
 
         {/* Table actions */}

@@ -3,8 +3,8 @@
  * Features: Job postings, Premium Kanban pipeline, interview scheduling
  */
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { UserPlus, Briefcase, Clock, CheckCircle, Search, Filter, MoreHorizontal, UserCog, Users, MapPin, Star } from 'lucide-react-native';
+import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator, Modal, Pressable } from 'react-native';
+import { UserPlus, Briefcase, Clock, CheckCircle, Search, Filter, MoreHorizontal, UserCog, Users, MapPin, Star, Sparkles, Bot, X } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
@@ -39,6 +39,8 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
   const safeJobs = Array.isArray(rawJobs) ? rawJobs : (rawJobs as any)?.data ?? [];
   const safeCandidates = Array.isArray(rawCandidates) ? rawCandidates : (rawCandidates as any)?.data ?? [];
 
+  const [aiModalCandidate, setAiModalCandidate] = useState<any>(null);
+
   const allJobs = safeJobs.map((j: any) => ({
     id: j.id,
     title: j.title,
@@ -57,10 +59,89 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
     date: new Date(c.createdAt).toLocaleDateString('vi-VN'),
     stage: c.stage,
     rating: c.rating || '-',
+    fitScore: Math.floor(Math.random() * 20) + 75, // Mock AI Fit Score 75-95%
   }));
 
   return (
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
+      {/* ── AI Screening Modal ── */}
+      <Modal visible={!!aiModalCandidate} transparent animationType="slide" onRequestClose={() => setAiModalCandidate(null)}>
+        <Pressable style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center', padding: 20 }} onPress={() => setAiModalCandidate(null)}>
+          <Pressable style={{ width: '100%', maxWidth: 500, backgroundColor: isDark ? '#1e293b' : '#fff', borderRadius: 32, padding: 32, ...(Platform.OS === 'web' ? { boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)' } : {}) }} onPress={() => {}}>
+            {aiModalCandidate && (
+              <View>
+                {/* Header */}
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 }}>
+                  <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+                    <LinearGradient colors={['#8b5cf6', '#6366f1']} style={{ width: 56, height: 56, borderRadius: 20, alignItems: 'center', justifyContent: 'center' }}>
+                      <Bot size={28} color="#fff" />
+                    </LinearGradient>
+                    <View>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                        <Sparkles size={16} color="#8b5cf6" />
+                        <Text style={{ fontSize: 13, fontWeight: '800', color: '#8b5cf6', textTransform: 'uppercase', letterSpacing: 0.5 }}>AI Resume Parsing</Text>
+                      </View>
+                      <Text style={{ fontSize: 24, fontWeight: '900', color: cText, marginTop: 4 }}>{aiModalCandidate.name}</Text>
+                      <Text style={{ fontSize: 14, fontWeight: '600', color: cSub, marginTop: 2 }}>Ứng tuyển: {aiModalCandidate.job}</Text>
+                    </View>
+                  </View>
+                  <TouchableOpacity onPress={() => setAiModalCandidate(null)} style={{ padding: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 12 }}>
+                    <X size={20} color={cSub} />
+                  </TouchableOpacity>
+                </View>
+
+                {/* Score Circular Display Mock */}
+                <View style={{ padding: 24, borderRadius: 24, backgroundColor: isDark ? 'rgba(139,92,246,0.1)' : '#f3f0ff', borderWidth: 1, borderColor: isDark ? 'rgba(139,92,246,0.2)' : '#ede9fe', flexDirection: 'row', alignItems: 'center', gap: 24, marginBottom: 24 }}>
+                  <View style={{ width: 80, height: 80, borderRadius: 40, borderWidth: 6, borderColor: '#8b5cf6', alignItems: 'center', justifyContent: 'center', backgroundColor: isDark ? '#1e293b' : '#fff' }}>
+                    <Text style={{ fontSize: 20, fontWeight: '900', color: '#8b5cf6' }}>{aiModalCandidate.fitScore}%</Text>
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 18, fontWeight: '800', color: cText, marginBottom: 4 }}>Mức độ Phù hợp: RẤT CAO</Text>
+                    <Text style={{ fontSize: 13, fontWeight: '500', color: cSub, lineHeight: 20 }}>
+                      Kinh nghiệm của ứng viên rất khớp với yêu cầu của vị trí {aiModalCandidate.job}. Kỹ năng chuyên môn đạt yêu cầu 90%.
+                    </Text>
+                  </View>
+                </View>
+
+                {/* Key Insights */}
+                <View style={{ gap: 16 }}>
+                  <View style={{ gap: 8 }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cText, textTransform: 'uppercase' }}>Điểm mạnh nổi bật</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                      {['3 năm kinh nghiệm', 'Kỹ năng giao tiếp tốt', 'Phù hợp văn hóa'].map(t => (
+                        <View key={t} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: isDark ? 'rgba(34,197,94,0.15)' : '#dcfce7', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                          <CheckCircle size={14} color="#16a34a" />
+                          <Text style={{ fontSize: 13, fontWeight: '700', color: '#16a34a' }}>{t}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </View>
+                  <View style={{ gap: 8, marginTop: 8 }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cText, textTransform: 'uppercase' }}>Cần lưu ý</Text>
+                    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+                      <View style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: 8, backgroundColor: isDark ? 'rgba(245,158,11,0.15)' : '#fef3c7', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                         <Text style={{ fontSize: 13, fontWeight: '700', color: '#d97706' }}>Thiếu kinh nghiệm quản lý nhóm lớn</Text>
+                      </View>
+                    </View>
+                  </View>
+                </View>
+
+                {/* Actions */}
+                <View style={{ flexDirection: 'row', gap: 12, marginTop: 32 }}>
+                  <TouchableOpacity onPress={() => setAiModalCandidate(null)} style={{ flex: 1, paddingVertical: 14, borderRadius: 16, alignItems: 'center', backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }}>
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: cSub }}>Đóng</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setAiModalCandidate(null)} style={{ flex: 1, paddingVertical: 14, borderRadius: 16, alignItems: 'center', backgroundColor: '#8b5cf6', flexDirection: 'row', justifyContent: 'center', gap: 8, shadowColor: '#8b5cf6', shadowOpacity: 0.3, shadowRadius: 8, shadowOffset: { width: 0, height: 4 } }}>
+                    <CheckCircle size={16} color="#fff" />
+                    <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>Duyệt CV Này</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         
         {/* Premium Header */}
@@ -224,8 +305,9 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
                             <Text style={{ fontSize: 15, fontWeight: '800', color: cText, marginBottom: 2 }}>{c.name}</Text>
                             <Text style={{ fontSize: 12, fontWeight: '600', color: '#3b82f6' }}>{c.job}</Text>
                           </View>
-                          <TouchableOpacity>
-                            <MoreHorizontal size={18} color={cSub} />
+                          <TouchableOpacity onPress={() => setAiModalCandidate(c)} style={{ paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, backgroundColor: 'rgba(139,92,246,0.15)', flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                            <Sparkles size={12} color="#8b5cf6" />
+                            <Text style={{ fontSize: 11, fontWeight: '800', color: '#8b5cf6' }}>{c.fitScore}% FIT</Text>
                           </TouchableOpacity>
                         </View>
                         

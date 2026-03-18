@@ -1,7 +1,7 @@
 import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowLeft, User, Mail, Phone, MapPin, Briefcase, Calendar, ShieldCheck, Award } from 'lucide-react-native';
+import { ArrowLeft, User, Mail, Phone, MapPin, Briefcase, Calendar, ShieldCheck, Award, FileLock2, PenTool, Download, Lock } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds, typography } from '../../../shared/theme/theme';
@@ -107,6 +107,56 @@ export function EmployeeProfileScreen() {
                     <SGStatCard label="Giờ đào tạo" value="48" unit="giờ" gradient icon={<User size={16} color={primaryColor} />} iconColor={primaryColor} />
                   </SGDataGrid>
                 </SGSection>
+                
+                {/* ═══ Self-Service (ESS) Widgets ═══ */}
+                <Animated.View entering={FadeInDown.delay(400).duration(400)} style={{ marginTop: 16 }}>
+                  <SGSection title="Tài liệu & Chứng từ (ESS)" titleIcon={<FileLock2 size={18} color="#ec4899" />} titleColor="#ec4899">
+                    <View style={{ gap: 16 }}>
+                      
+                      {/* Secure Payslip */}
+                      <TouchableOpacity style={{ 
+                        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', 
+                        padding: 16, borderRadius: 16, backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc', 
+                        borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' 
+                      }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: 'rgba(16,185,129,0.15)', alignItems: 'center', justifyContent: 'center' }}>
+                            <FileLock2 size={20} color="#10b981" />
+                          </View>
+                          <View>
+                            <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text }}>Phiếu lương Tháng 02/2026</Text>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                              <Lock size={12} color={colors.textSecondary} />
+                              <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textSecondary }}>Yêu cầu mật khẩu để mở</Text>
+                            </View>
+                          </View>
+                        </View>
+                        <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#e2e8f0', alignItems: 'center', justifyContent: 'center' }}>
+                          <Download size={16} color={colors.textSecondary} />
+                        </View>
+                      </TouchableOpacity>
+
+                      {/* E-Signature Pending */}
+                      <TouchableOpacity style={{ 
+                        flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', 
+                        padding: 16, borderRadius: 16, backgroundColor: 'rgba(59,130,246,0.05)', 
+                        borderWidth: 1, borderColor: 'rgba(59,130,246,0.2)' 
+                      }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                          <View style={{ width: 44, height: 44, borderRadius: 12, backgroundColor: '#3b82f6', alignItems: 'center', justifyContent: 'center', shadowColor: '#3b82f6', shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 }}>
+                            <PenTool size={20} color="#fff" />
+                          </View>
+                          <View>
+                            <Text style={{ fontSize: 14, fontWeight: '800', color: '#3b82f6' }}>Phụ lục HĐLĐ 2026</Text>
+                            <Text style={{ fontSize: 12, fontWeight: '600', color: colors.textSecondary, marginTop: 4 }}>Cần chữ ký số (e-Signature) của bạn</Text>
+                          </View>
+                        </View>
+                        <Text style={{ fontSize: 13, fontWeight: '800', color: '#3b82f6' }}>KÝ NGAY</Text>
+                      </TouchableOpacity>
+
+                    </View>
+                  </SGSection>
+                </Animated.View>
               </Animated.View>
             </View>
           </View>

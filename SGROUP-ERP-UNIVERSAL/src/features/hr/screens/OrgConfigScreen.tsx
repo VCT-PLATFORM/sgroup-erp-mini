@@ -1,4 +1,4 @@
-/**
+ /**
  * OrgConfigScreen — Premium Department-Centric Org Configuration
  * Hierarchy: Department → Teams → Positions
  * Full CRUD for departments, teams, and positions
@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Pressable, Platform, TextInput, Modal, Alert, ActivityIndicator } from 'react-native';
 import {
   Building, Briefcase, Plus, Pencil, Trash2, X, Users, Hash,
-  ChevronDown, ChevronRight, UsersRound, Settings
+  ChevronDown, ChevronRight, UsersRound, Settings, Network, List
 } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -36,6 +36,7 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
   const borderColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
 
   const [modalMode, setModalMode] = useState<ModalMode>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'tree'>('tree'); // Default to Tree View for premium feel
   const [editId, setEditId] = useState('');
   const [expandedDept, setExpandedDept] = useState<string | null>(null);
   const [deptForm, setDeptForm] = useState(EMPTY_DEPT);
@@ -268,6 +269,20 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
           </View>
         </Animated.View>
 
+        {/* View Mode Toggle */}
+        <Animated.View entering={FadeInDown.delay(50).duration(400)} style={{ flexDirection: 'row', justifyContent: 'flex-end', marginTop: -16 }}>
+          <View style={{ flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 16, padding: 4 }}>
+            <Pressable onPress={() => setViewMode('tree')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: viewMode === 'tree' ? (isDark ? '#ec4899' : '#fff') : 'transparent', shadowColor: '#000', shadowOpacity: viewMode === 'tree' ? 0.05 : 0, shadowRadius: 4, elevation: viewMode === 'tree' ? 2 : 0, flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+              <Network size={16} color={viewMode === 'tree' ? (isDark ? '#fff' : '#ec4899') : cSub} />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: viewMode === 'tree' ? (isDark ? '#fff' : '#ec4899') : cSub }}>SƠ ĐỒ CÂY</Text>
+            </Pressable>
+            <Pressable onPress={() => setViewMode('list')} style={{ paddingHorizontal: 16, paddingVertical: 10, borderRadius: 12, backgroundColor: viewMode === 'list' ? (isDark ? '#ec4899' : '#fff') : 'transparent', shadowColor: '#000', shadowOpacity: viewMode === 'list' ? 0.05 : 0, shadowRadius: 4, elevation: viewMode === 'list' ? 2 : 0, flexDirection: 'row', gap: 6, alignItems: 'center' }}>
+              <List size={16} color={viewMode === 'list' ? (isDark ? '#fff' : '#ec4899') : cSub} />
+              <Text style={{ fontSize: 13, fontWeight: '800', color: viewMode === 'list' ? (isDark ? '#fff' : '#ec4899') : cSub }}>DANH SÁCH</Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+
         {/* ═══ Stats Overview ═══ */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
@@ -307,7 +322,76 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 16, fontWeight: '700', color: cSub }}>Chưa có phòng ban nào. Bấm "+ PHÒNG BAN" để khởi tạo.</Text>
             </SGCard>
           </Animated.View>
+        ) : viewMode === 'tree' ? (
+          /* ═══ TREE VIEW ═══ */
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingVertical: 20 }}>
+            <View style={{ alignItems: 'center', minWidth: '100%' }}>
+              {/* Root Node (Company/CEO) Mock */}
+              <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ alignItems: 'center', marginBottom: 32 }}>
+                <LinearGradient colors={['#3b82f6', '#1d4ed8']} style={{ paddingHorizontal: 32, paddingVertical: 16, borderRadius: 20, alignItems: 'center', shadowColor: '#3b82f6', shadowOpacity: 0.4, shadowRadius: 12, shadowOffset: { width: 0, height: 6 }, elevation: 6, zIndex: 10 }}>
+                  <Text style={{ fontSize: 18, fontWeight: '900', color: '#fff' }}>SGroup Corporation</Text>
+                  <Text style={{ fontSize: 12, fontWeight: '700', color: 'rgba(255,255,255,0.8)', marginTop: 2 }}>{departments.length} Phòng ban • {positions.length} Chức vụ</Text>
+                </LinearGradient>
+                {/* Vertical line down from Root */}
+                <View style={{ width: 2, height: 32, backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', marginTop: -2 }} />
+              </Animated.View>
+
+              {/* Departments Row */}
+              <View style={{ flexDirection: 'row', gap: 40, position: 'relative' }}>
+                {/* Horizontal line connecting all departments */}
+                {departments.length > 1 && (
+                  <View style={{ position: 'absolute', top: -2, left: '50%', right: '50%', height: 2, backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1',
+                    transform: [{ translateX: '-50%' }, { scaleX: (departments.length - 1) / departments.length * 1.5 }] // Approx width
+                  }} />
+                )}
+                
+                {departments.map((dept: any, dIdx: number) => {
+                  const deptTeams = dept.teams || [];
+                  return (
+                    <Animated.View entering={FadeInDown.delay(300 + dIdx * 100).duration(400)} key={dept.id} style={{ alignItems: 'center' }}>
+                      {/* Vertical line to Department */}
+                      <View style={{ width: 2, height: 16, backgroundColor: isDark ? 'rgba(255,255,255,0.2)' : '#cbd5e1', marginTop: -16, marginBottom: 0 }} />
+                      
+                      {/* Department Node */}
+                      <View style={{ width: 220, padding: 20, borderRadius: 20, backgroundColor: isDark ? 'rgba(236,72,153,0.1)' : '#fdf2f8', borderWidth: 1, borderColor: isDark ? 'rgba(236,72,153,0.3)' : '#fbcfe8', alignItems: 'center', marginBottom: deptTeams.length > 0 ? 32 : 0, shadowColor: '#ec4899', shadowOpacity: 0.1, shadowRadius: 10, elevation: 2 }}>
+                        <Building size={24} color="#ec4899" style={{ marginBottom: 8 }} />
+                        <Text style={{ fontSize: 15, fontWeight: '800', color: cText, textAlign: 'center' }}>{dept.name}</Text>
+                        <View style={{ paddingHorizontal: 8, paddingVertical: 2, borderRadius: 6, backgroundColor: 'rgba(236,72,153,0.15)', marginTop: 6 }}>
+                          <Text style={{ fontSize: 11, fontWeight: '900', color: '#ec4899' }}>{dept.code}</Text>
+                        </View>
+                        <Text style={{ fontSize: 12, fontWeight: '600', color: cSub, marginTop: 8 }}>{dept._count?.employees ?? 0} NS • {deptTeams.length} Teams</Text>
+                      </View>
+
+                      {/* Teams under Department */}
+                      {deptTeams.length > 0 && (
+                        <View style={{ alignItems: 'center' }}>
+                           {/* Vertical line from Dept down */}
+                           <View style={{ width: 2, height: 32, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0', marginTop: -32 }} />
+                           <View style={{ gap: 16 }}>
+                             {deptTeams.map((t: any, tIdx: number) => (
+                               <Animated.View entering={FadeInDown.delay(500 + tIdx * 50).duration(400)} key={t.id} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                 {/* Horizontal connector to team */}
+                                 <View style={{ width: 24, height: 2, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0', marginRight: 8, marginLeft: -32 }} />
+                                 {/* Team Node */}
+                                 <View style={{ width: 180, padding: 14, borderRadius: 16, backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff', borderWidth: 1, borderColor: isDark ? 'rgba(59,130,246,0.2)' : '#bfdbfe' }}>
+                                   <Text style={{ fontSize: 13, fontWeight: '800', color: cText }}>{t.name}</Text>
+                                   <Text style={{ fontSize: 11, fontWeight: '600', color: '#3b82f6', marginTop: 2 }}>{t.code}</Text>
+                                 </View>
+                               </Animated.View>
+                             ))}
+                           </View>
+                           {/* Extend vertical line down alongside teams */}
+                           <View style={{ position: 'absolute', left: -16, top: 0, bottom: 20, width: 2, backgroundColor: isDark ? 'rgba(255,255,255,0.15)' : '#e2e8f0' }} />
+                        </View>
+                      )}
+                    </Animated.View>
+                  );
+                })}
+              </View>
+            </View>
+          </ScrollView>
         ) : (
+          /* ═══ LIST VIEW (ACCORDION) ═══ */
           <View style={{ gap: 20 }}>
             {departments.map((dept: any, idx: number) => {
               const isExpanded = expandedDept === dept.id;
