@@ -49,7 +49,7 @@ export function SGSkeletonLoader({ type = 'table', rows = 5, columns = 4, count 
   if (type === 'stat') {
     return (
       <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
-        {Array.from({ length: count }).map((_, i) => (
+        {new Array(count).fill(0).map((_, i) => (
           <View key={i} style={{
             flex: 1, minWidth: 200, padding: 24, borderRadius: 20,
             backgroundColor: bg, borderWidth: 1, borderColor: border,
@@ -68,7 +68,7 @@ export function SGSkeletonLoader({ type = 'table', rows = 5, columns = 4, count 
   if (type === 'card') {
     return (
       <View style={{ gap: 12 }}>
-        {Array.from({ length: count }).map((_, i) => (
+        {new Array(count).fill(0).map((_, i) => (
           <View key={i} style={{
             padding: 20, borderRadius: 20, flexDirection: 'row', alignItems: 'center', gap: 16,
             backgroundColor: bg, borderWidth: 1, borderColor: border,
@@ -100,17 +100,17 @@ export function SGSkeletonLoader({ type = 'table', rows = 5, columns = 4, count 
         backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : '#f8fafc',
         borderBottomWidth: 1, borderBottomColor: border,
       }}>
-        {Array.from({ length: columns }).map((_, i) => (
+        {new Array(columns).fill(0).map((_, i) => (
           <ShimmerBar key={i} width={`${Math.floor(100 / columns)}%`} height={12} isDark={isDark} delay={i * 50} />
         ))}
       </View>
       {/* Data rows */}
-      {Array.from({ length: rows }).map((_, r) => (
+      {new Array(rows).fill(0).map((_, r) => (
         <View key={r} style={{
           flexDirection: 'row', padding: 16, gap: 16,
           borderBottomWidth: r < rows - 1 ? 1 : 0, borderBottomColor: border,
         }}>
-          {Array.from({ length: columns }).map((_, c) => (
+          {new Array(columns).fill(0).map((_, c) => (
             <ShimmerBar
               key={c}
               width={`${Math.floor(100 / columns)}%`}

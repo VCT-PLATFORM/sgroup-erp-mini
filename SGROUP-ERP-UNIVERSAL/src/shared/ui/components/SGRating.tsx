@@ -17,7 +17,7 @@ export function SGRating({ value, onChange, max = 5, size = 24, color, readOnly,
   const c = useTheme();
   const clr = color || '#f59e0b';
   const [hovered, setHovered] = useState(-1);
-  const scales = useRef(Array.from({ length: max }, () => new Animated.Value(1))).current;
+  const scales = useRef(new Array(max).fill(0).map(() => new Animated.Value(1))).current;
 
   const handlePress = (idx: number) => {
     if (readOnly) return;
@@ -30,7 +30,7 @@ export function SGRating({ value, onChange, max = 5, size = 24, color, readOnly,
 
   return (
     <View style={[styles.row, style]}>
-      {Array.from({ length: max }, (_, i) => {
+      {new Array(max).fill(0).map((_, i) => {
         const active = i < (hovered >= 0 ? hovered + 1 : value);
         return (
           <Animated.View key={i} style={{ transform: [{ scale: scales[i] }] }}>

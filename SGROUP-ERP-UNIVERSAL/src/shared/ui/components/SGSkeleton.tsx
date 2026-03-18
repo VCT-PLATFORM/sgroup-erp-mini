@@ -39,7 +39,7 @@ export function SGSkeleton({ width, height, borderRadius, variant = 'rect', coun
   if (count <= 1) return <Item width={width} height={height} borderRadius={borderRadius} variant={variant} style={style} />;
   return (
     <View style={{ gap }}>
-      {Array.from({ length: count }).map((_, i) => (
+      {new Array(count).fill(0).map((_, i) => (
         <Item key={i} width={width} height={height} borderRadius={borderRadius} variant={variant} style={style} />
       ))}
     </View>

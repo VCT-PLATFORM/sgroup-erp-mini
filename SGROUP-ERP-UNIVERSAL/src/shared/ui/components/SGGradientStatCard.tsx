@@ -61,7 +61,7 @@ export function SGGradientStatCard({ icon, label, value, unit, change, changeGoo
 }
 
 const styles = StyleSheet.create({
-  card: { flex: 1, minWidth: 220, borderRadius: radius['2xl'], padding: spacing['2xl'], borderWidth: 1 },
+  card: { flex: 1, minWidth: 140, borderRadius: radius['2xl'], padding: spacing['2xl'], borderWidth: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 },
   iconBox: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   valueRow: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },

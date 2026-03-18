@@ -14,7 +14,7 @@ interface Props {
 export function SGPagination({ currentPage, totalPages, onPageChange, siblingCount = 1, style }: Props) {
   const c = useTheme();
 
-  const range = (start: number, end: number) => Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  const range = (start: number, end: number) => new Array(end - start + 1).fill(0).map((_, i) => start + i);
 
   const pages = (() => {
     const total = siblingCount * 2 + 5;
