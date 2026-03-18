@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { BookOpen, ChevronDown, ChevronUp, Shield, Clock, AlertTriangle, Users, Briefcase } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 
 type PolicySection = {
@@ -81,21 +82,21 @@ export function PoliciesScreen() {
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
       <ScrollView contentContainerStyle={{ padding: 32, gap: 24, paddingBottom: 120 }}>
         {/* Header */}
-        <View>
+        <Animated.View entering={FadeInDown.duration(400)}>
           <Text style={{ fontSize: 14, fontWeight: '700', color: '#ec4899', textTransform: 'uppercase', marginBottom: 4 }}>NHÂN SỰ</Text>
           <Text style={{ fontSize: 28, fontWeight: '900', color: cText, letterSpacing: -0.5 }}>Chính Sách Cẩm Nang SGroup</Text>
           <Text style={{ fontSize: 14, fontWeight: '600', color: cSub, marginTop: 8 }}>
             Cập nhật lần cuối: 01/01/2026 • Ban Hành: Giám Đốc Nhân Sự
           </Text>
-        </View>
+        </Animated.View>
 
         {/* Accordion List */}
         <View style={{ gap: 12 }}>
-          {policies.map(section => {
+          {policies.map((section, idx) => {
             const isExpanded = expandedId === section.id;
             const SectionIcon = section.icon;
             return (
-              <View key={section.id} style={cardStyle}>
+              <Animated.View entering={FadeInDown.delay(100 + idx * 50).duration(400).springify()} key={section.id} style={cardStyle}>
                 <TouchableOpacity
                   onPress={() => setExpandedId(isExpanded ? null : section.id)}
                   style={{
@@ -126,7 +127,7 @@ export function PoliciesScreen() {
                     ))}
                   </View>
                 )}
-              </View>
+              </Animated.View>
             );
           })}
         </View>

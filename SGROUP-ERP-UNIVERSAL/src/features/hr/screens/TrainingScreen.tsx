@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { GraduationCap, Trophy, CheckCircle, Clock, Search, MoreHorizontal, BookOpen, Users, PlayCircle, Star, ArrowRight } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
@@ -96,7 +97,7 @@ export function TrainingScreen({ userRole }: { userRole?: HRRole }) {
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         
         {/* Premium LMS Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
             <LinearGradient 
               colors={['#06b6d4', '#3b82f6']} start={{x:0,y:0}} end={{x:1,y:1}}
@@ -119,10 +120,10 @@ export function TrainingScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>TẠO KHÓA HỌC</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Learning KPI Cards */}
-        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
             { label: 'KHÓA ĐANG MỞ', val: '12', unit: 'khóa', icon: BookOpen, color: '#3b82f6', shadow: '#3b82f6' },
             { label: 'GIỜ ĐÀO TẠO YTD', val: '1,420', unit: 'giờ', icon: Clock, color: '#f59e0b', shadow: '#f59e0b' },
@@ -150,10 +151,10 @@ export function TrainingScreen({ userRole }: { userRole?: HRRole }) {
               </View>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         {/* Featured Courses Carousel */}
-        <View>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Khóa học Nổi bật</Text>
             <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -175,7 +176,7 @@ export function TrainingScreen({ userRole }: { userRole?: HRRole }) {
               const cGrad = gradients[idx % gradients.length];
 
               return (
-                <View key={course.id} style={{
+                <Animated.View entering={FadeInDown.delay(300 + idx * 50).duration(400).springify()} key={course.id} style={{
                   width: 320, borderRadius: 28, overflow: 'hidden',
                   backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#ffffff', 
                   borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
@@ -215,14 +216,14 @@ export function TrainingScreen({ userRole }: { userRole?: HRRole }) {
                       </View>
                     </View>
                   </View>
-                </View>
+                </Animated.View>
               );
             })}
           </ScrollView>
-        </View>
+        </Animated.View>
 
         {/* Dynamic Trainees Progress Table */}
-        <View style={{ marginTop: 12 }}>
+        <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{ marginTop: 12 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Tiến độ Học viên</Text>
             <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -262,7 +263,7 @@ export function TrainingScreen({ userRole }: { userRole?: HRRole }) {
               />
             )}
           </View>
-        </View>
+        </Animated.View>
 
       </ScrollView>
     </View>

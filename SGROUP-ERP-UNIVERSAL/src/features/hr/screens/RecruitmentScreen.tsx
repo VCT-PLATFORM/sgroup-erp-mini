@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { UserPlus, Briefcase, Clock, CheckCircle, Search, Filter, MoreHorizontal, UserCog, Users, MapPin, Star } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
@@ -22,6 +23,8 @@ const STAGE_CONFIG: Record<string, { bg: string; text: string; label: string }> 
   OFFERRED: { bg: '#dcfce7', text: '#16a34a', label: 'ĐÃ OFFER' },
   REJECTED: { bg: '#fee2e2', text: '#dc2626', label: 'TỪ CHỐI' },
 };
+
+const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
 
 export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
   const { theme, isDark } = useAppTheme();
@@ -61,7 +64,7 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         
         {/* Premium Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
             <LinearGradient 
               colors={['#f59e0b', '#d97706']} start={{x:0,y:0}} end={{x:1,y:1}}
@@ -84,10 +87,10 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>TẠO TIN TUYỂN DỤNG</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Stats Summary */}
-        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
             { label: 'VỊ TRÍ ĐANG TUYỂN', val: '3', unit: 'jobs', icon: Briefcase, color: '#f59e0b', shadow: '#f59e0b' },
             { label: 'TỔNG CV MỚI (Tháng)', val: '89', unit: 'CVs', icon: UserPlus, color: '#3b82f6', shadow: '#3b82f6' },
@@ -115,16 +118,16 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
               </View>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         {/* Active Jobs Horizon List */}
-        <View>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
           <Text style={{ fontSize: 20, fontWeight: '900', color: cText, marginBottom: 20 }}>Vị trí Đang mở</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 20 }}>
             {loadingJobs ? (
               <View style={{ padding: 40, alignItems: 'center' }}><ActivityIndicator size="large" color="#f59e0b" /></View>
-            ) : allJobs.map((job: any) => (
-              <View key={job.id} style={{
+            ) : allJobs.map((job: any, idx: number) => (
+              <Animated.View entering={FadeInDown.delay(300 + idx * 50).duration(400).springify()} key={job.id} style={{
                 width: 300, padding: 24, borderRadius: 24,
                 backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#ffffff', 
                 borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9',
@@ -155,13 +158,13 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
                     <Text style={{ fontSize: 14, fontWeight: '800', color: '#f59e0b' }}>Chi tiết</Text>
                   </TouchableOpacity>
                 </View>
-              </View>
+              </Animated.View>
             ))}
           </ScrollView>
-        </View>
+        </Animated.View>
 
         {/* KANBAN BOARD for Candidates */}
-        <View style={{ marginTop: 12 }}>
+        <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{ marginTop: 12 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
             <View>
               <Text style={{ fontSize: 20, fontWeight: '900', color: cText }}>Pipeline Ứng viên</Text>
@@ -174,12 +177,12 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
           </View>
           
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 24 }}>
-            {STAGES.map(stage => {
+            {STAGES.map((stage, sIdx) => {
               const conf = STAGE_CONFIG[stage];
               const stageCandidates = allCandidates.filter((c: any) => c.stage === stage);
               
               return (
-                <View key={stage} style={{ 
+                <Animated.View entering={FadeInDown.delay(400 + sIdx * 50).duration(400).springify()} key={stage} style={{ 
                   width: 320, 
                   backgroundColor: isDark ? 'rgba(255,255,255,0.02)' : '#f8fafc', 
                   borderRadius: 24, 
@@ -205,8 +208,11 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
                       <View style={{ padding: 30, alignItems: 'center', borderWidth: 2, borderStyle: 'dashed', borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1', borderRadius: 16 }}>
                         <Text style={{ color: cSub, fontSize: 13, fontWeight: '600' }}>Trống</Text>
                       </View>
-                    ) : stageCandidates.map((c: any) => (
-                      <TouchableOpacity key={c.id} style={{
+                    ) : stageCandidates.map((c: any, cIdx: number) => (
+                      <AnimatedTouchableOpacity 
+                        entering={FadeInDown.delay(500 + sIdx * 50 + cIdx * 30).duration(300).springify()}
+                        key={c.id} 
+                        style={{
                         backgroundColor: isDark ? '#1e293b' : '#ffffff',
                         borderRadius: 16, padding: 16,
                         borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0',
@@ -232,14 +238,14 @@ export function RecruitmentScreen({ userRole }: { userRole?: HRRole }) {
                           </View>
                           <Text style={{ fontSize: 11, fontWeight: '700', color: '#94a3b8' }}>{c.date}</Text>
                         </View>
-                      </TouchableOpacity>
+                      </AnimatedTouchableOpacity>
                     ))}
                   </View>
-                </View>
+                </Animated.View>
               );
             })}
           </ScrollView>
-        </View>
+        </Animated.View>
 
       </ScrollView>
     </View>

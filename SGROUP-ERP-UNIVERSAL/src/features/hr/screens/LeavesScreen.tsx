@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Calendar, Search, CheckCircle, Clock, XCircle, FileText, LayoutGrid, List } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
@@ -23,6 +24,8 @@ const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }>
   PENDING: { bg: '#fef3c7', text: '#d97706', label: 'CHỜ DUYỆT' },
   REJECTED: { bg: '#fee2e2', text: '#dc2626', label: 'TỪ CHỐI' },
 };
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export function LeavesScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
@@ -88,7 +91,7 @@ export function LeavesScreen() {
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
       <ScrollView contentContainerStyle={{ padding: 28, gap: 24, paddingBottom: 120 }}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: '#f59e0b20', alignItems: 'center', justifyContent: 'center' }}>
               <FileText size={24} color="#f59e0b" />
@@ -98,10 +101,10 @@ export function LeavesScreen() {
               <Text style={{ ...sgds.typo.body, color: cSub, marginTop: 2 }}>Duyệt đơn xin phép, thai sản, công tác</Text>
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Stats Summary */}
-        <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
           {[
             { label: 'CHỜ DUYỆT', val: String(pendingCount), icon: Clock, color: '#f59e0b', gradient: ['#f59e0b', '#d97706'], shadow: '#f59e0b' },
             { label: 'ĐÃ DUYỆT', val: String(approvedCount), icon: CheckCircle, color: '#10b981', gradient: ['#10b981', '#059669'], shadow: '#10b981' },
@@ -128,10 +131,10 @@ export function LeavesScreen() {
               <Text style={{ fontSize: 36, fontWeight: '900', color: cText, letterSpacing: -1 }}>{s.val}</Text>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         {/* Table actions */}
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
           <View style={{
             flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
             borderRadius: 16, padding: 4,
@@ -151,7 +154,7 @@ export function LeavesScreen() {
             <Search size={18} color={cSub} />
             <Text style={{ color: cSub, fontSize: 14 }}>Tìm nhân viên...</Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Content View */}
         {isLoading ? (
@@ -160,7 +163,7 @@ export function LeavesScreen() {
             <Text style={{ color: cSub, marginTop: 16, fontSize: 14, fontWeight: '600' }}>Đang tải đơn từ...</Text>
           </View>
         ) : viewMode === 'table' ? (
-          <View style={{
+          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{
             backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
             borderRadius: 28, overflow: 'hidden',
             borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
@@ -175,7 +178,7 @@ export function LeavesScreen() {
               data={leavesData} 
               style={{ borderWidth: 0, backgroundColor: 'transparent' }}
             />
-          </View>
+          </Animated.View>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
             {leavesData.length === 0 ? (
@@ -184,7 +187,8 @@ export function LeavesScreen() {
             {leavesData.map((item: any, idx: number) => {
               const s = STATUS_CONFIG[item.status] || STATUS_CONFIG.PENDING;
               return (
-                <LinearGradient
+                <AnimatedLinearGradient
+                  entering={FadeInDown.delay(300 + idx * 40).duration(400).springify()}
                   key={item.id || idx}
                   colors={isDark ? ['rgba(30,41,59,0.5)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
                   style={{
@@ -233,7 +237,7 @@ export function LeavesScreen() {
                       <Text style={{ fontSize: 13, fontWeight: '800', color: '#3b82f6' }}>XEM & DUYỆT</Text>
                     </TouchableOpacity>
                   </View>
-                </LinearGradient>
+                </AnimatedLinearGradient>
               );
             })}
           </View>

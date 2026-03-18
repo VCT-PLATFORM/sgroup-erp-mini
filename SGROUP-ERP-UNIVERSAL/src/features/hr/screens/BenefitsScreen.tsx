@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Briefcase, Search, ShieldCheck, Heart, Plane, Plus, LayoutGrid, List } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
@@ -11,6 +12,8 @@ import { SGCard, SGTable } from '../../../shared/ui/components';
 import { useEmployees } from '../hooks/useHR';
 
 // Benefits screen now uses employee data from the API
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export function BenefitsScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
@@ -58,7 +61,7 @@ export function BenefitsScreen() {
     <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }}>
       <ScrollView contentContainerStyle={{ padding: 28, gap: 24, paddingBottom: 120 }}>
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <View style={{ width: 52, height: 52, borderRadius: 18, backgroundColor: '#10b98120', alignItems: 'center', justifyContent: 'center' }}>
               <ShieldCheck size={24} color="#10b981" />
@@ -76,10 +79,10 @@ export function BenefitsScreen() {
             <Plus size={16} color="#fff" />
             <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff' }}>ĐĂNG KÝ BẢO HIỂM MỚI</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         {/* Categories */}
-        <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
           {[
             { label: 'BHXH / BHYT', desc: 'Bảo hiểm bắt buộc theo luật', icon: ShieldCheck, color: '#3b82f6', info: '240 thành viên', gradient: ['#3b82f6', '#2563eb'] },
             { label: 'BH SỨC KHỎE', desc: 'Khám chữa bệnh 24/7 nội trú', icon: Heart, color: '#ec4899', info: '150 thành viên', gradient: ['#ec4899', '#db2777'] },
@@ -111,10 +114,10 @@ export function BenefitsScreen() {
               </View>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         {/* Table actions */}
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', marginTop: 8 }}>
           <View style={{
             flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
             borderRadius: 16, padding: 4,
@@ -134,7 +137,7 @@ export function BenefitsScreen() {
             <Search size={18} color={cSub} />
             <Text style={{ color: cSub, fontSize: 14 }}>Tìm nhân viên...</Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Content View */}
         {isLoading ? (
@@ -143,7 +146,7 @@ export function BenefitsScreen() {
             <Text style={{ color: cSub, marginTop: 16, fontSize: 14, fontWeight: '600' }}>Đang tải dữ liệu...</Text>
           </View>
         ) : viewMode === 'table' ? (
-          <View style={{
+          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{
             backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
             borderRadius: 28, overflow: 'hidden',
             borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
@@ -158,7 +161,7 @@ export function BenefitsScreen() {
               data={benefitsData} 
               style={{ borderWidth: 0, backgroundColor: 'transparent' }}
             />
-          </View>
+          </Animated.View>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
             {benefitsData.length === 0 ? (
@@ -168,7 +171,8 @@ export function BenefitsScreen() {
               const isActive = item.status === 'ACTIVE';
 
               return (
-                <LinearGradient
+                <AnimatedLinearGradient
+                  entering={FadeInDown.delay(300 + idx * 40).duration(400).springify()}
                   key={item.id || idx}
                   colors={isDark ? ['rgba(30,41,59,0.5)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
                   style={{
@@ -213,7 +217,7 @@ export function BenefitsScreen() {
                       <Text style={{ fontSize: 13, fontWeight: '800', color: '#3b82f6' }}>QUẢN LÝ GÓI</Text>
                     </TouchableOpacity>
                   </View>
-                </LinearGradient>
+                </AnimatedLinearGradient>
               );
             })}
           </View>

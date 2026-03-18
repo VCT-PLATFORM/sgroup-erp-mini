@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowLeft, User, Mail, Phone, MapPin, Briefcase, Calendar, ShieldCheck, Award } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds, typography } from '../../../shared/theme/theme';
 import { useResponsive } from '../../../shared/hooks/useResponsive';
@@ -18,7 +19,8 @@ export function EmployeeProfileScreen() {
 
   return (
     <View style={[styles.root, { backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundAlt }]}>
-      <View
+      <Animated.View
+        entering={FadeInDown.duration(400)}
         style={[
           styles.topBar,
           {
@@ -43,12 +45,13 @@ export function EmployeeProfileScreen() {
           <Text style={[typography.h4, { color: colors.text }]}>Hồ Sơ Nhân Sự</Text>
           <Text style={[typography.caption, { color: colors.textTertiary }]}>Thông tin chi tiết và hiệu suất làm việc</Text>
         </View>
-      </View>
+      </Animated.View>
 
       <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 40 }}>
         <SGPageContainer padding={isMobile ? 16 : 24} maxWidth={1000}>
           <View style={{ gap: isMobile ? 16 : 24 }}>
-            <View
+            <Animated.View
+              entering={FadeInDown.delay(100).duration(400)}
               style={[
                 styles.profileHeaderCard,
                 {
@@ -74,10 +77,10 @@ export function EmployeeProfileScreen() {
                   <SGTag label="Full-time" variant="soft" color={colors.textSecondary} size="md" />
                 </View>
               </View>
-            </View>
+            </Animated.View>
 
             <View style={[styles.contentRow, { flexDirection: isMobile ? 'column' : 'row' }]}>
-              <View style={{ flex: 1, gap: 16 }}>
+              <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flex: 1, gap: 16 }}>
                 <SGSection title="Thông tin liên hệ" titleIcon={<User size={18} color={primaryColor} />} titleColor={primaryColor}>
                   <View style={styles.detailList}>
                     <DetailItem icon={Mail} label="Email" value={user?.email || 'nguyenvana@sgroup.vn'} colors={colors} />
@@ -93,9 +96,9 @@ export function EmployeeProfileScreen() {
                     <DetailItem icon={ShieldCheck} label="Mã nhân viên" value="SG-HR-0042" colors={colors} />
                   </View>
                 </SGSection>
-              </View>
+              </Animated.View>
 
-              <View style={{ flex: 1, gap: 16 }}>
+              <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{ flex: 1, gap: 16 }}>
                 <SGSection title="Tổng quan hiệu suất" titleIcon={<Award size={18} color={colors.warning} />} titleColor={colors.warning}>
                   <SGDataGrid gap={12} minItemWidth={140}>
                     <SGStatCard label="Nhiệm vụ hoàn thành" value="142" unit="task" trend={12} icon={<Briefcase size={16} color={colors.success} />} iconColor={colors.success} />
@@ -104,7 +107,7 @@ export function EmployeeProfileScreen() {
                     <SGStatCard label="Giờ đào tạo" value="48" unit="giờ" gradient icon={<User size={16} color={primaryColor} />} iconColor={primaryColor} />
                   </SGDataGrid>
                 </SGSection>
-              </View>
+              </Animated.View>
             </View>
           </View>
         </SGPageContainer>

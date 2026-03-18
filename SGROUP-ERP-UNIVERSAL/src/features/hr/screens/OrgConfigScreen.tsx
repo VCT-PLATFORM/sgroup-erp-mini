@@ -9,6 +9,7 @@ import {
   Building, Briefcase, Plus, Pencil, Trash2, X, Users, Hash,
   ChevronDown, ChevronRight, UsersRound, Settings
 } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
@@ -231,7 +232,7 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
       {/* ── Main Content ── */}
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         {/* Premium Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
             <LinearGradient 
               colors={['#ec4899', '#f43f5e']} start={{x:0,y:0}} end={{x:1,y:1}}
@@ -265,10 +266,10 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>PHÒNG BAN</Text>
             </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
         {/* ═══ Stats Overview ═══ */}
-        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
             { label: 'PHÒNG BAN', val: departments.length, icon: Building, color: '#ec4899', shadow: '#ec4899' },
             { label: 'TEAMS', val: departments.reduce((s: number, d: any) => s + (d.teams?.length || 0), 0), icon: UsersRound, color: '#3b82f6', shadow: '#3b82f6' },
@@ -294,23 +295,25 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
               </View>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         {/* ═══ DEPARTMENTS — Expandable Cards ═══ */}
         {loadingDepts ? (
           <View style={{ padding: 40, alignItems: 'center' }}><ActivityIndicator size="large" color="#ec4899" /></View>
         ) : departments.length === 0 ? (
-          <SGCard variant="glass" style={{ padding: 40, alignItems: 'center', borderRadius: 24 }}>
-            <Text style={{ fontSize: 48, marginBottom: 16 }}>🏢</Text>
-            <Text style={{ fontSize: 16, fontWeight: '700', color: cSub }}>Chưa có phòng ban nào. Bấm "+ PHÒNG BAN" để khởi tạo.</Text>
-          </SGCard>
+          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+            <SGCard variant="glass" style={{ padding: 40, alignItems: 'center', borderRadius: 24 }}>
+              <Text style={{ fontSize: 48, marginBottom: 16 }}>🏢</Text>
+              <Text style={{ fontSize: 16, fontWeight: '700', color: cSub }}>Chưa có phòng ban nào. Bấm "+ PHÒNG BAN" để khởi tạo.</Text>
+            </SGCard>
+          </Animated.View>
         ) : (
           <View style={{ gap: 20 }}>
-            {departments.map((dept: any) => {
+            {departments.map((dept: any, idx: number) => {
               const isExpanded = expandedDept === dept.id;
               const deptTeams = dept.teams || [];
               return (
-                <View key={dept.id} style={{ 
+                <Animated.View entering={FadeInDown.delay(200 + idx * 50).duration(400).springify()} key={dept.id} style={{ 
                   borderRadius: 24, overflow: 'hidden',
                   backgroundColor: isDark ? 'rgba(30,41,59,0.4)' : '#ffffff', 
                   borderWidth: 1, borderColor: isExpanded ? (isDark ? 'rgba(236,72,153,0.3)' : 'rgba(236,72,153,0.3)') : (isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'),
@@ -463,14 +466,14 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
                       </View>
                     </View>
                   )}
-                </View>
+                </Animated.View>
               );
             })}
           </View>
         )}
 
         {/* ═══ Positions Master List ═══ */}
-        <View style={{ marginTop: 16 }}>
+        <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{ marginTop: 16 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
               <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: 'rgba(139,92,246,0.15)', alignItems: 'center', justifyContent: 'center' }}>
@@ -530,7 +533,7 @@ export function OrgConfigScreen({ userRole }: { userRole?: HRRole }) {
               })}
             </View>
           )}
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );

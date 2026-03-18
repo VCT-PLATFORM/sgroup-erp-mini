@@ -8,6 +8,7 @@ import { View, Text, ScrollView, Pressable, Platform, TextInput, ActivityIndicat
 import {
   UserCog, Plus, Users, Target, Search, Filter, Mail, Hash, Phone, Building, Star, X, Pencil, UsersRound, ArrowRightLeft, History,
 } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
 import { SGCard } from '../../../shared/ui/components';
@@ -54,6 +55,8 @@ function nameToColor(name: string) {
 }
 
 const EMPTY_FORM = { fullName: '', englishName: '', email: '', phone: '', departmentId: '', positionId: '', teamId: '', status: 'ACTIVE' };
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
   const { theme, isDark } = useAppTheme();
@@ -402,7 +405,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
       <ScrollView contentContainerStyle={{ padding: 28, gap: 20, paddingBottom: 120 }}>
 
         {/* ── Header ── */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
             <View style={{
               width: 52, height: 52, borderRadius: 18,
@@ -431,10 +434,10 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 13, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>THÊM HỒ SƠ</Text>
             </Pressable>
           )}
-        </View>
+        </Animated.View>
 
         {/* ── Stat Cards ── */}
-        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {statCards.map((sc, i) => {
             const Icon = sc.icon;
             return (
@@ -466,10 +469,10 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
               </LinearGradient>
             );
           })}
-        </View>
+        </Animated.View>
 
         {/* ── Search & Filter ── */}
-        <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: 'row', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
           <View style={{
             flex: 1, minWidth: 240, flexDirection: 'row', alignItems: 'center', gap: 10,
             backgroundColor: cardBg,
@@ -512,7 +515,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
               })}
             </ScrollView>
           </View>
-        </View>
+        </Animated.View>
 
         {/* ── Loading State ── */}
         {isLoading && (
@@ -551,7 +554,8 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
               const deptName = staff.department?.name || '—';
 
               return (
-                <Pressable
+                <AnimatedPressable
+                  entering={FadeInDown.delay(300 + idx * 40).duration(400).springify()}
                   key={staff.id}
                   onPress={() => canEdit && openEdit(staff)}
                   style={{
@@ -665,7 +669,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                       </View>
                     )}
                   </View>
-                </Pressable>
+                </AnimatedPressable>
               );
             })}
           </View>

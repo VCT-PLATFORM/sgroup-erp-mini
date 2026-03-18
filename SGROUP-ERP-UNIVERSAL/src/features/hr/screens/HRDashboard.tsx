@@ -3,6 +3,7 @@
  */
 import React from 'react';
 import { View, Text, ScrollView, Platform, ActivityIndicator } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { Users, UserMinus, Briefcase, Clock, TrendingUp, Building, Cake, Zap, Radio, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
@@ -70,7 +71,7 @@ export function HRDashboard() {
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         
         {/* Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', gap: 18 }}>
           <LinearGradient 
             colors={['#ec4899', '#8b5cf6']} start={{x:0,y:0}} end={{x:1,y:1}}
             style={{ width: 60, height: 60, borderRadius: 20, alignItems: 'center', justifyContent: 'center', 
@@ -82,10 +83,10 @@ export function HRDashboard() {
             <Text style={{ fontSize: 32, fontWeight: '900', color: cText, letterSpacing: -1 }}>TỔNG QUAN HR</Text>
             <Text style={{ fontSize: 15, fontWeight: '600', color: '#94a3b8', marginTop: 4 }}>Dữ liệu thời gian thực — Hệ thống Nhân sự SGroup</Text>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Premium KPI Cards */}
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24 }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 24 }}>
           {KPI_CARDS.map(k => (
             <LinearGradient
               key={k.id}
@@ -116,11 +117,11 @@ export function HRDashboard() {
               </View>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         <View style={{ flexDirection: 'row', gap: 28, flexWrap: 'wrap' }}>
           {/* Department Breakdown with Progress Bars */}
-          <View style={[sectionCardStyle, { flex: 1.5, minWidth: 480 }]}>
+          <Animated.View entering={FadeInDown.delay(200).duration(400)} style={[sectionCardStyle, { flex: 1.5, minWidth: 480 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>
               <LinearGradient colors={['rgba(236,72,153,0.2)', 'rgba(236,72,153,0.05)']} style={{ width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(236,72,153,0.2)' }}>
                 <Building size={20} color={ACCENT} />
@@ -160,10 +161,10 @@ export function HRDashboard() {
                 </View>
               ))}
             </View>
-          </View>
+          </Animated.View>
 
           {/* Upcoming Events */}
-          <View style={[sectionCardStyle, { flex: 1, minWidth: 340 }]}>
+          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={[sectionCardStyle, { flex: 1, minWidth: 340 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>
               <LinearGradient colors={['rgba(245,158,11,0.2)', 'rgba(245,158,11,0.05)']} style={{ width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(245,158,11,0.2)' }}>
                 <Cake size={20} color="#f59e0b" />
@@ -188,11 +189,11 @@ export function HRDashboard() {
                  <Text style={{ color: cSub, fontSize: 14 }}>Không có sự kiện nào sắp tới.</Text>
               )}
             </View>
-          </View>
+          </Animated.View>
         </View>
 
         {/* Activity Stream - Timeline Style */}
-        <View style={sectionCardStyle}>
+        <Animated.View entering={FadeInDown.delay(400).duration(400)} style={sectionCardStyle}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 28 }}>
             <LinearGradient colors={['rgba(139,92,246,0.2)', 'rgba(139,92,246,0.05)']} style={{ width: 42, height: 42, borderRadius: 12, alignItems: 'center', justifyContent: 'center', borderWidth: 1, borderColor: 'rgba(139,92,246,0.2)' }}>
               <Zap size={20} color="#8b5cf6" />
@@ -225,7 +226,7 @@ export function HRDashboard() {
               <Text style={{ color: cSub, fontSize: 14, marginLeft: 24 }}>Chưa có hoạt động nào được ghi nhận.</Text>
             )}
           </View>
-        </View>
+        </Animated.View>
         
       </ScrollView>
     </View>

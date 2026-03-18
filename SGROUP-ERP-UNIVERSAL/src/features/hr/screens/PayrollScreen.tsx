@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Wallet, DollarSign, ArrowUpRight, ArrowDownRight, Search, FileText, CheckCircle, Clock, Eye, EyeOff, LayoutGrid, List } from 'lucide-react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { sgds } from '../../../shared/theme/theme';
@@ -15,6 +16,8 @@ import { usePayroll } from '../hooks/useHR';
 const fmt = (n: number) => n.toLocaleString('vi-VN');
 const currentMonth = new Date().getMonth() + 1;
 const currentYear = new Date().getFullYear();
+
+const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
   const { theme, isDark } = useAppTheme();
@@ -89,7 +92,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
       <ScrollView contentContainerStyle={{ padding: 32, gap: 32, paddingBottom: 120 }} showsVerticalScrollIndicator={false}>
         
         {/* Fintech Premium Header */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Animated.View entering={FadeInDown.duration(400)} style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
             <LinearGradient 
               colors={['#8b5cf6', '#6366f1']} start={{x:0,y:0}} end={{x:1,y:1}}
@@ -128,10 +131,10 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
               <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff', letterSpacing: 0.5 }}>CHỐT BẢNG LƯƠNG</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </Animated.View>
 
         {/* Financial KPI Cards */}
-        <View style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={{ flexDirection: 'row', gap: 20, flexWrap: 'wrap' }}>
           {[
             { label: 'TỔNG QUỸ LƯƠNG', val: mask(totalFund), unit: '₫', icon: DollarSign, color: '#8b5cf6', shadow: '#8b5cf6', gradient: ['#8b5cf6', '#6366f1'] },
             { label: 'TỔNG THƯỞNG / PHỤ CẤP', val: mask(totalAllowance), unit: '₫', icon: ArrowUpRight, color: '#10b981', shadow: '#10b981', gradient: ['#10b981', '#059669'] },
@@ -162,10 +165,10 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
               </View>
             </LinearGradient>
           ))}
-        </View>
+        </Animated.View>
 
         {/* Filters */}
-        <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 12 }}>
+        <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flexDirection: 'row', gap: 16, alignItems: 'center', marginTop: 12 }}>
           <View style={{
             flexDirection: 'row', backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
             borderRadius: 16, padding: 4,
@@ -195,7 +198,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
           }}>
             <Text style={{ fontSize: 14, fontWeight: '700', color: cText }}>Bộ lọc Trạng thái: Tất cả</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
 
         {/* Content View */}
         {isLoading ? (
@@ -204,7 +207,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
             <Text style={{ color: cSub, marginTop: 16, fontSize: 14, fontWeight: '600' }}>Đang tính toán dữ liệu lương...</Text>
           </View>
         ) : viewMode === 'table' ? (
-          <View style={{
+          <Animated.View entering={FadeInDown.delay(300).duration(400)} style={{
             backgroundColor: isDark ? 'rgba(30,41,59,0.35)' : '#ffffff',
             borderRadius: 28, overflow: 'hidden',
             borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)',
@@ -219,7 +222,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
               data={payrollData} 
               style={{ borderWidth: 0, backgroundColor: 'transparent' }}
             />
-          </View>
+          </Animated.View>
         ) : (
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 20 }}>
             {payrollData.length === 0 ? (
@@ -228,7 +231,8 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
             {payrollData.map((item: any, idx: number) => {
               const isPaid = item.status === 'PAID';
               return (
-                <LinearGradient
+                <AnimatedLinearGradient
+                  entering={FadeInDown.delay(300 + idx * 40).duration(400).springify()}
                   key={item.id || idx}
                   colors={isDark ? ['rgba(30,41,59,0.5)', 'rgba(15,23,42,0.8)'] : ['#ffffff', '#ffffff']}
                   style={{
@@ -276,7 +280,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
                     <Text style={{ fontSize: 14, fontWeight: '800', color: cSub, textTransform: 'uppercase', letterSpacing: 0.5 }}>Thực lãnh</Text>
                     <Text style={{ fontSize: 24, fontWeight: '900', color: '#3b82f6', fontVariant: ['tabular-nums'], letterSpacing: -0.5 }}>{mask(item.total)} ₫</Text>
                   </View>
-                </LinearGradient>
+                </AnimatedLinearGradient>
               );
             })}
           </View>
