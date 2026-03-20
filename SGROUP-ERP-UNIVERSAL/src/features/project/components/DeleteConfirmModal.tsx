@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal, Platform } from 'react-native';
-import { typography, useTheme } from '../../../shared/theme/theme';
-import { useThemeStore } from '../../../shared/theme/themeStore';
+import { typography, sgds } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { SGButton } from '../../../shared/ui/components';
 import { AlertTriangle, X } from 'lucide-react-native';
 
@@ -18,18 +18,18 @@ interface Props {
 export function DeleteConfirmModal({
   visible, onClose, onConfirm, title = 'Xác nhận Xóa', message, confirmLabel = 'Xóa', isLoading = false,
 }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, theme, isDark } = useAppTheme();
 
   const content = (
-    <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+    <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.5)', ...(Platform.OS === 'web' ? { backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' } : {}) } as any]}>
       <View style={[styles.modal, {
-        backgroundColor: isDark ? '#0f172a' : '#fff',
+        backgroundColor: isDark ? colors.bgElevated : '#fff',
         borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-      }]}>
+        ...(Platform.OS === 'web' ? sgds.glass : {}),
+      } as any]}>
         <View style={styles.body}>
           <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#fef2f2' }]}>
-            <AlertTriangle size={32} color="#ef4444" />
+            <AlertTriangle size={32} color={colors.danger} />
           </View>
           <Text style={[typography.h3, { color: colors.text, marginTop: 20, textAlign: 'center' }]}>{title}</Text>
           <Text style={[typography.body, { color: colors.textSecondary, marginTop: 12, textAlign: 'center', lineHeight: 22 }]}>{message}</Text>
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   deleteBtn: {
     flex: 1,
-    backgroundColor: '#ef4444',
+    backgroundColor: '#EF4444', // matches colors.danger
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',

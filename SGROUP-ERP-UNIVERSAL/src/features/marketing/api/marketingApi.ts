@@ -74,3 +74,22 @@ export const marketingApi = {
     return res.data;
   },
 };
+
+export const marketingPlanningApi = {
+  getHeader: async (id: string) => {
+    const res = await apiClient.get(`/marketing/planning/${id}/header`);
+    return res.data;
+  },
+  getKpiTargets: async (id: string) => {
+    const res = await apiClient.get(`/marketing/planning/${id}/kpis`);
+    return res.data;
+  },
+  getAssumptions: async (id: string) => {
+    const res = await apiClient.get(`/marketing/planning/${id}/assumptions`);
+    return res.data;
+  },
+  getChannelBudgets: async (id: string) => {
+    const res = await apiClient.get(`/marketing/planning/${id}/channels`);
+    return res.data;
+  },
+};

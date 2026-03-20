@@ -1,20 +1,19 @@
 /**
- * LeadManagement — MQL/SQL lead pipeline, source attribution, quality scoring
+ * LeadManagement — Premium MQL/SQL lead pipeline with glass funnel & animated scores
+ * SGDS: glass cards, animated score ring, skeleton loading, staggered entry
  */
-import React, { useState, useMemo } from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { Users, Phone, Mail, ArrowRight, TrendingUp } from 'lucide-react-native';
 import { useLeads } from '../hooks/useMarketing';
 import {
-  SGPageContainer,
-  SGButton,
-  SGCard,
-  SGSearchBar,
-  SGPillSelector,
-  SGStatusBadge,
-  SGEmptyState
+  SGPageContainer, SGSearchBar, SGPillSelector,
+  SGStatusBadge, SGEmptyState, SGSkeleton, SGSectionHeader,
 } from '../../../shared/ui';
-import { useTheme, typography, spacing } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
+import { typography, spacing, radius, sgds } from '../../../shared/theme/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const PIPELINE_STAGES = [
   { key: 'mql', label: 'MQL', count: 1245, color: '#3b82f6', pct: 100 },
@@ -28,13 +27,13 @@ type LeadStatus = 'all' | 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'WON';
 
 const STATUS_OPTIONS = [
   { key: 'all', label: 'Tất cả' },
-  { key: 'NEW', label: 'Mới', color: '#3b82f6' },
-  { key: 'CONTACTED', label: 'Đã liên hệ', color: '#D97706' },
-  { key: 'QUALIFIED', label: 'Đủ điều kiện', color: '#8b5cf6' },
-  { key: 'WON', label: 'Chuyển đổi', color: '#16a34a' },
+  { key: 'NEW', label: 'Mới' },
+  { key: 'CONTACTED', label: 'Đã liên hệ' },
+  { key: 'QUALIFIED', label: 'Đủ điều kiện' },
+  { key: 'WON', label: 'Chuyển đổi' },
 ];
 
-const getScoreColor = (score: number, c: any) => score >= 80 ? c.success : score >= 50 ? c.warning : c.textTertiary;
+const getScoreColor = (score: number, colors: any) => score >= 80 ? colors.success : score >= 50 ? colors.warning : colors.textTertiary;
 
 const getLeadStatusColor = (st: string): 'success' | 'warning' | 'info' | 'danger' | 'neutral' => {
   if (st === 'WON') return 'success';
@@ -51,8 +50,23 @@ const getLeadStatusLabel = (st: string) => {
   return map[st] || st;
 };
 
+const AnimatedItem = ({ index, children }: { index: number; children: React.ReactNode }) => {
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
+  useEffect(() => {
+    const delay = index * 50;
+    translateY.value = withDelay(delay, withSpring(0, { damping: 22, stiffness: 90 }));
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    opacity: opacity.value,
+  }));
+  return <Animated.View style={style}>{children}</Animated.View>;
+};
+
 export function LeadManagement() {
-  const c = useTheme();
+  const { theme, isDark, colors } = useAppTheme();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<LeadStatus>('all');
 
@@ -82,119 +96,262 @@ export function LeadManagement() {
   return (
     <SGPageContainer>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-          <View style={{ width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#D97706' }}>
-            <Users size={26} color="#fff" />
-          </View>
-          <View>
-            <Text style={{ fontSize: 26, fontWeight: '900', color: c.text }}>MQL & LEAD MANAGEMENT</Text>
-            <Text style={{ fontSize: 13, fontWeight: '600', color: c.textSecondary, marginTop: 3 }}>
-              {allLeads.length} leads
-            </Text>
+      <AnimatedItem index={0}>
+        <View style={styles.headerRow}>
+          <View style={styles.headerLeft}>
+            <LinearGradient
+              colors={['#F59E0B', '#D97706']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.headerIcon}
+            >
+              <Users size={26} color="#fff" />
+            </LinearGradient>
+            <View>
+              <Text style={[typography.h1, { color: colors.text }]}>MQL & Lead Management</Text>
+              <Text style={[typography.small, { color: colors.textSecondary, marginTop: 3 }]}>
+                {allLeads.length} leads
+              </Text>
+            </View>
           </View>
         </View>
-      </View>
+      </AnimatedItem>
 
       {/* Pipeline Funnel */}
-      <SGCard style={{ marginBottom: 24 }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 20 }}>
-          <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: '#D977061A', alignItems: 'center', justifyContent: 'center' }}>
-            <TrendingUp size={18} color="#D97706" />
-          </View>
-          <Text style={{ fontSize: 18, fontWeight: '900', color: c.text }}>Phễu Chuyển Đổi Lead</Text>
-        </View>
-        <View style={{ flexDirection: 'row', gap: 12, flexWrap: 'wrap' }}>
-          {PIPELINE_STAGES.map((stage, i) => (
-            <View key={stage.key} style={{ flex: 1, minWidth: 140, alignItems: 'center' }}>
-              <View style={{
-                width: '100%', paddingVertical: 20, borderRadius: 16,
-                backgroundColor: `${stage.color}15`,
-                alignItems: 'center', borderWidth: 1, borderColor: `${stage.color}30`,
-              }}>
-                <Text style={{ fontSize: 28, fontWeight: '900', color: stage.color }}>{stage.count.toLocaleString()}</Text>
-                <Text style={{ fontSize: 12, fontWeight: '800', color: stage.color, letterSpacing: 0.5, marginTop: 4, textTransform: 'uppercase' }}>{stage.label}</Text>
-                <Text style={[typography.caption, { color: c.textTertiary, marginTop: 2, fontWeight: '700' }]}>{stage.pct}%</Text>
-              </View>
-              {i < PIPELINE_STAGES.length - 1 && (
-                <View style={{ position: 'absolute', right: -18, top: '50%', zIndex: 1, transform: [{ translateY: -7 }] }}>
-                  <ArrowRight size={14} color={c.textTertiary} />
+      <AnimatedItem index={1}>
+        <View style={[styles.glassSection, {
+          backgroundColor: colors.glass,
+          borderColor: colors.glassBorder,
+        }, Platform.OS === 'web' ? sgds.glass as any : {}]}>
+          <SGSectionHeader title="Phễu Chuyển Đổi Lead" icon={<TrendingUp size={18} color={colors.warning} />} />
+          <View style={styles.funnelRow}>
+            {PIPELINE_STAGES.map((stage, i) => (
+              <View key={stage.key} style={styles.funnelItem}>
+                <View style={[styles.funnelCard, {
+                  backgroundColor: `${stage.color}10`,
+                  borderColor: `${stage.color}25`,
+                }]}>
+                  <Text style={[styles.funnelCount, { color: stage.color }]}>{stage.count.toLocaleString()}</Text>
+                  <Text style={[typography.micro, { color: stage.color }]}>{stage.label}</Text>
+                  <Text style={[typography.caption, { color: colors.textTertiary, marginTop: 2, fontWeight: '700' }]}>{stage.pct}%</Text>
                 </View>
-              )}
-            </View>
-          ))}
+                {i < PIPELINE_STAGES.length - 1 && (
+                  <View style={styles.funnelArrow}>
+                    <ArrowRight size={14} color={colors.textTertiary} />
+                  </View>
+                )}
+              </View>
+            ))}
+          </View>
         </View>
-      </SGCard>
+      </AnimatedItem>
 
       {/* Search + Filter */}
-      <View style={{ flexDirection: 'row', gap: 14, flexWrap: 'wrap', marginBottom: 24, alignItems: 'center' }}>
-        <View style={{ flex: 1, minWidth: 280 }}>
-          <SGSearchBar
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Tìm lead theo tên, SĐT, nguồn..."
+      <AnimatedItem index={2}>
+        <View style={styles.filterRow}>
+          <View style={styles.searchWrap}>
+            <SGSearchBar
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Tìm lead theo tên, SĐT, nguồn..."
+            />
+          </View>
+          <SGPillSelector
+            options={STATUS_OPTIONS}
+            activeKey={filter}
+            onChange={(k) => setFilter(k as LeadStatus)}
           />
         </View>
-        <SGPillSelector
-          options={STATUS_OPTIONS}
-          activeKey={filter}
-          onChange={(k) => setFilter(k as LeadStatus)}
-        />
-      </View>
+      </AnimatedItem>
 
       {/* Lead Cards */}
-      <View style={{ gap: 12 }}>
+      <View style={styles.listGap}>
         {isLoading ? (
-          <View style={{ padding: 40, alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#D97706" />
-            <Text style={[typography.smallBold, { color: c.textSecondary, marginTop: 12 }]}>Đang tải lead...</Text>
-          </View>
+          <>
+            {[0,1,2,3].map(i => (
+              <SGSkeleton key={i} width="100%" height={90} borderRadius={radius.xl} />
+            ))}
+          </>
         ) : filtered.length === 0 ? (
           <SGEmptyState
             title="Không tìm thấy lead nào"
             subtitle="Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm."
-            icon={<Users size={48} color={c.textTertiary} />}
+            icon={<Users size={48} color={colors.textTertiary} />}
           />
-        ) : filtered.map((lead: any) => {
+        ) : filtered.map((lead: any, idx: number) => {
+          const scoreColor = getScoreColor(lead.score, colors);
           return (
-            <SGCard key={lead.id} style={{ padding: spacing.md }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-                {/* Avatar */}
-                <View style={{ width: 48, height: 48, borderRadius: 24, backgroundColor: `${getScoreColor(lead.score, c)}1A`, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text style={{ fontSize: 18, fontWeight: '900', color: getScoreColor(lead.score, c) }}>{lead.name.charAt(0)}</Text>
-                </View>
-                {/* Info */}
-                <View style={{ flex: 1 }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '800', color: c.text }}>{lead.name}</Text>
-                    <SGStatusBadge status={getLeadStatusColor(lead.status)} text={getLeadStatusLabel(lead.status)} size="sm" />
+            <AnimatedItem key={lead.id} index={idx + 3}>
+              <View style={[styles.leadCard, {
+                backgroundColor: colors.glass,
+                borderColor: colors.glassBorder,
+              }, Platform.OS === 'web' ? {
+                ...sgds.glass,
+                ...sgds.transition.fast,
+              } as any : {}]}>
+                <View style={styles.leadRow}>
+                  {/* Avatar */}
+                  <View style={[styles.avatar, { backgroundColor: `${scoreColor}18` }]}>
+                    <Text style={[styles.avatarText, { color: scoreColor }]}>{lead.name.charAt(0)}</Text>
                   </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginTop: 6 }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Phone size={12} color={c.textTertiary} />
-                      <Text style={[typography.caption, { color: c.textSecondary, fontWeight: '600' }]}>{lead.phone || '—'}</Text>
+                  {/* Info */}
+                  <View style={styles.leadInfo}>
+                    <View style={styles.leadNameRow}>
+                      <Text style={[typography.bodyBold, { color: colors.text, fontSize: 15 }]}>{lead.name}</Text>
+                      <SGStatusBadge status={getLeadStatusColor(lead.status)} text={getLeadStatusLabel(lead.status)} size="sm" />
                     </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                      <Mail size={12} color={c.textTertiary} />
-                      <Text style={[typography.caption, { color: c.textSecondary, fontWeight: '600' }]}>{lead.email || '—'}</Text>
+                    <View style={styles.contactRow}>
+                      <View style={styles.contactItem}>
+                        <Phone size={12} color={colors.textTertiary} />
+                        <Text style={[typography.caption, { color: colors.textSecondary }]}>{lead.phone || '—'}</Text>
+                      </View>
+                      <View style={styles.contactItem}>
+                        <Mail size={12} color={colors.textTertiary} />
+                        <Text style={[typography.caption, { color: colors.textSecondary }]}>{lead.email || '—'}</Text>
+                      </View>
                     </View>
+                    <Text style={[typography.caption, { color: colors.textTertiary, marginTop: 4 }]}>
+                      Nguồn: {lead.source} • Campaign: {lead.campaign} • {lead.createdAt}
+                    </Text>
                   </View>
-                  <Text style={[typography.caption, { color: c.textTertiary, marginTop: 6, fontWeight: '600' }]}>
-                    Nguồn: {lead.source} • Campaign: {lead.campaign} • {lead.createdAt}
-                  </Text>
-                </View>
-                {/* Score */}
-                <View style={{ alignItems: 'center', gap: 4 }}>
-                  <View style={{ width: 52, height: 52, borderRadius: 26, borderWidth: 3, borderColor: `${getScoreColor(lead.score, c)}40`, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text style={{ fontSize: 18, fontWeight: '900', color: getScoreColor(lead.score, c) }}>{lead.score}</Text>
+                  {/* Score */}
+                  <View style={styles.scoreWrap}>
+                    <View style={[styles.scoreRing, { borderColor: `${scoreColor}40` }]}>
+                      <Text style={[styles.scoreValue, { color: scoreColor }]}>{lead.score}</Text>
+                    </View>
+                    <Text style={[typography.micro, { color: colors.textTertiary }]}>SCORE</Text>
                   </View>
-                  <Text style={{ fontSize: 10, fontWeight: '700', color: c.textTertiary }}>SCORE</Text>
                 </View>
               </View>
-            </SGCard>
+            </AnimatedItem>
           );
         })}
       </View>
     </SGPageContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  headerIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  glassSection: {
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    padding: spacing.lg,
+    marginBottom: 24,
+  },
+  funnelRow: {
+    flexDirection: 'row',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  funnelItem: {
+    flex: 1,
+    minWidth: 130,
+    alignItems: 'center',
+  },
+  funnelCard: {
+    width: '100%',
+    paddingVertical: 20,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  funnelCount: {
+    fontSize: 28,
+    fontWeight: '900',
+  },
+  funnelArrow: {
+    position: 'absolute',
+    right: -18,
+    top: '50%',
+    zIndex: 1,
+    transform: [{ translateY: -7 }],
+  } as any,
+  filterRow: {
+    flexDirection: 'row',
+    gap: 14,
+    flexWrap: 'wrap',
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  searchWrap: {
+    flex: 1,
+    minWidth: 280,
+  },
+  listGap: {
+    gap: 12,
+  },
+  leadCard: {
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    padding: spacing.md,
+  },
+  leadRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarText: {
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  leadInfo: {
+    flex: 1,
+  },
+  leadNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  contactRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 6,
+  },
+  contactItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  scoreWrap: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  scoreRing: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreValue: {
+    fontSize: 18,
+    fontWeight: '900',
+  },
+});

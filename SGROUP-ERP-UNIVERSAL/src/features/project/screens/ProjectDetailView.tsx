@@ -1,16 +1,13 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Platform, Dimensions } from 'react-native';
-import Animated, { FadeInDown, FadeInLeft, FadeInRight, FadeInUp } from 'react-native-reanimated';
-import { typography, sgds, radius } from '../../../shared/theme/theme';
+import React, { useState, useMemo } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWindowDimensions } from 'react-native';
+import Animated, { FadeInDown, FadeInLeft, FadeInRight } from 'react-native-reanimated';
+import { typography, sgds } from '../../../shared/theme/theme';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
-import { SGCard, SGButton, SGAuroraBackground } from '../../../shared/ui/components';
+import { SGCard, SGButton, SGAuroraBackground, SGSkeletonLoader, SGEmptyState, SGCircularProgress } from '../../../shared/ui/components';
 import { useProject, useProjectProducts } from '../hooks/useProjects';
-import { ArrowLeft, Building2, MapPin, Grid3x3, CheckCircle2, Edit2, TrendingUp, DollarSign, Percent, Layers, Package } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Grid3x3, CheckCircle2, Edit2, DollarSign, Percent, Layers, Package } from 'lucide-react-native';
 import { formatTy } from '../../../shared/utils/formatters';
 import { ProjectFormModal } from '../components/ProjectFormModal';
-
-const { width } = Dimensions.get('window');
-const isDesktop = width > 1024;
 
 interface Props {
   projectId: string;
@@ -20,12 +17,14 @@ interface Props {
 
 export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Props) {
   const { colors, theme, isDark } = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isDesktop = width > 1024;
   const [showEditForm, setShowEditForm] = useState(false);
   
   const { data: project, isLoading: isProjectLoading, isError: isProjectError } = useProject(projectId);
   const { data: products, isLoading: isProductsLoading } = useProjectProducts(projectId);
 
-  const safeProducts = Array.isArray(products) ? products : [];
+  const safeProducts = useMemo(() => Array.isArray(products) ? products : [], [products]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -53,10 +52,22 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
     }
   };
 
+  // Skeleton Loading
   if (isProjectLoading) {
     return (
-      <View style={[styles.centerContainer, { minHeight: 400 }]}>
-        <ActivityIndicator size="large" color="#10b981" />
+      <View style={[styles.container, { padding: isDesktop ? 40 : 20 }]}>
+        {Platform.OS === 'web' && (
+          <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
+            <SGAuroraBackground />
+          </View>
+        )}
+        <View style={{ zIndex: 1, gap: 24 }}>
+          <SGSkeletonLoader type="stat" count={4} isDark={isDark} />
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24 }}>
+            <View style={{ flex: 1 }}><SGSkeletonLoader type="card" count={3} isDark={isDark} /></View>
+            <View style={{ flex: 1.6 }}><SGSkeletonLoader type="table" rows={6} columns={5} isDark={isDark} /></View>
+          </View>
+        </View>
       </View>
     );
   }
@@ -64,8 +75,13 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
   if (isProjectError || !project) {
     return (
       <View style={[styles.centerContainer, { minHeight: 400 }]}>
-        <Text style={[typography.body, { color: '#ef4444' }]}>Lỗi khi tải thông tin chi tiết dự án.</Text>
-        <SGButton title="Quay lại" onPress={onBack} variant="outline" style={{ marginTop: 16 }} />
+        <SGEmptyState
+          emoji="❌"
+          title="Lỗi khi tải dự án"
+          subtitle="Không thể tải thông tin chi tiết dự án. Vui lòng thử lại."
+          actionLabel="Quay lại"
+          onAction={onBack}
+        />
       </View>
     );
   }
@@ -78,6 +94,8 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
     acc[p.status] = (acc[p.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  const liquidityColor = liquidityPct >= 70 ? colors.success : liquidityPct >= 40 ? colors.warning : colors.danger;
 
   const kpiCards = [
     { label: 'Tổng Sản phẩm', value: project.totalUnits || 0, icon: Layers, color: colors.brand, bg: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff' },
@@ -98,7 +116,7 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
       )}
 
       {/* Header */}
-      <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={[styles.header, { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={[styles.header, { paddingHorizontal: isDesktop ? 40 : 20, zIndex: 1 }]}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
           <View style={[styles.backIcon, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : '#f1f5f9' }]}>
             <ArrowLeft size={18} color={colors.textSecondary} />
@@ -122,7 +140,7 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
                 }
               ]}>
                 <Text style={[typography.micro, { 
-                  color: project.status === 'ACTIVE' ? '#10b981' : project.status === 'PAUSED' ? '#f59e0b' : colors.textSecondary, 
+                  color: project.status === 'ACTIVE' ? colors.success : project.status === 'PAUSED' ? colors.warning : colors.textSecondary, 
                   fontWeight: '800', fontSize: 10
                 }]}>
                   {project.status === 'ACTIVE' ? 'ĐANG MỞ BÁN' : project.status === 'PAUSED' ? 'TẠM DỪNG' : 'ĐÃ ĐÓNG'}
@@ -149,15 +167,15 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
       </Animated.View>
 
       {/* KPI Cards Row */}
-      <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.kpiRow, { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.kpiRow, { paddingHorizontal: isDesktop ? 40 : 20, zIndex: 1 }]}>
         {kpiCards.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
             <SGCard key={i} style={[
               styles.kpiCard, 
-              sgds.sectionBase(theme) as any,
+              sgds.sectionBase(theme),
               { padding: 20 }
-            ]}>
+            ] as any}>
               <View style={[styles.kpiIconBox, { backgroundColor: kpi.bg }]}>
                 <Icon size={20} color={kpi.color} />
               </View>
@@ -168,11 +186,11 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
         })}
       </Animated.View>
 
-      <View style={[styles.mainContent, { zIndex: 1 }]}>
+      <View style={[styles.mainContent, { flexDirection: isDesktop ? 'row' : 'column', paddingHorizontal: isDesktop ? 40 : 20, zIndex: 1 }]}>
         {/* Left Column: Info & Stats */}
         <Animated.View entering={FadeInLeft.delay(300).springify().damping(20)} style={{ flex: isDesktop ? 1 : undefined, maxWidth: isDesktop ? 400 : undefined }}>
           {/* General Info Card */}
-          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme) as any, { padding: 28 }]}>
+          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme), { padding: 28 }] as any}>
             <Text style={[typography.h4, { color: colors.text, marginBottom: 24, fontWeight: '800' }]}>Thông tin chung</Text>
             
             {[
@@ -192,32 +210,18 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
           </SGCard>
 
           {/* Progress & Performance */}
-          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme) as any, { padding: 28, marginTop: 24 }]}>
+          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme), { padding: 28, marginTop: 24 }] as any}>
             <Text style={[typography.h4, { color: colors.text, marginBottom: 24, fontWeight: '800' }]}>Tiến độ & Hiệu quả</Text>
             
-            {/* Liquidity Meter */}
+            {/* Liquidity Meter - using SGCircularProgress */}
             <View style={{ alignItems: 'center', marginBottom: 28 }}>
-              <View style={{
-                width: 100, height: 100, borderRadius: 50,
-                borderWidth: 6,
-                borderColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9',
-                justifyContent: 'center', alignItems: 'center',
-                position: 'relative',
-              }}>
-                {/* Overlay colored arc - simplified as colored border */}
-                <View style={{
-                  position: 'absolute', width: 100, height: 100, borderRadius: 50,
-                  borderWidth: 6,
-                  borderColor: liquidityPct >= 70 ? '#10b981' : liquidityPct >= 40 ? '#f59e0b' : '#ef4444',
-                  borderTopColor: 'transparent',
-                  borderRightColor: liquidityPct > 25 ? (liquidityPct >= 70 ? '#10b981' : liquidityPct >= 40 ? '#f59e0b' : '#ef4444') : 'transparent',
-                  borderBottomColor: liquidityPct > 50 ? (liquidityPct >= 70 ? '#10b981' : liquidityPct >= 40 ? '#f59e0b' : '#ef4444') : 'transparent',
-                  borderLeftColor: liquidityPct > 75 ? (liquidityPct >= 70 ? '#10b981' : liquidityPct >= 40 ? '#f59e0b' : '#ef4444') : 'transparent',
-                  transform: [{ rotate: '-45deg' }],
-                }} />
-                <Text style={[typography.h2, { color: colors.text, fontWeight: '800' }]}>{liquidityPct}%</Text>
-              </View>
-              <Text style={[typography.micro, { color: colors.textTertiary, marginTop: 10, fontWeight: '600' }]}>Thanh khoản</Text>
+              <SGCircularProgress
+                progress={liquidityPct}
+                size={100}
+                strokeWidth={6}
+                color={liquidityColor}
+                label="Thanh khoản"
+              />
             </View>
 
             {/* Progress bar */}
@@ -229,7 +233,7 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
                 </Text>
               </View>
               <View style={{ height: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
-                <View style={{ width: `${Math.min(liquidityPct, 100)}%`, height: '100%', backgroundColor: '#10b981', borderRadius: 4 } as any} />
+                <View style={{ width: `${Math.min(liquidityPct, 100)}%`, height: '100%', backgroundColor: liquidityColor, borderRadius: 4 } as any} />
               </View>
             </View>
 
@@ -238,9 +242,9 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
             {/* Value Stats */}
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               {[
-                { label: 'Giá TB', value: project.avgPrice ? formatTy(project.avgPrice) : 'N/A', color: '#3b82f6' },
-                { label: 'Hoa hồng', value: `${project.feeRate || 0}%`, color: '#f59e0b' },
-                { label: 'Tổng GT', value: formatTy(totalValue), color: '#8b5cf6' },
+                { label: 'Giá TB', value: project.avgPrice ? formatTy(project.avgPrice) : 'N/A', color: colors.brand },
+                { label: 'Hoa hồng', value: `${project.feeRate || 0}%`, color: colors.warning },
+                { label: 'Tổng GT', value: formatTy(totalValue), color: colors.purple },
               ].map((s, i) => (
                 <View key={i} style={{ alignItems: 'center' }}>
                   <Text style={[typography.micro, { color: colors.textTertiary, fontWeight: '600' }]}>{s.label}</Text>
@@ -253,11 +257,11 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
 
         {/* Right Column: Inventory */}
         <Animated.View entering={FadeInRight.delay(400).springify().damping(20)} style={{ flex: isDesktop ? 1.6 : undefined, marginTop: isDesktop ? 0 : 24 }}>
-          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme) as any, { padding: 28, minHeight: 500 }]}>
+          <SGCard style={[styles.sectionCard, sgds.sectionBase(theme), { padding: 28, minHeight: 500 }] as any}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <View style={[styles.kpiIconBox, { backgroundColor: isDark ? 'rgba(59,130,246,0.1)' : '#eff6ff' }]}>
-                  <Package size={18} color="#3b82f6" />
+                  <Package size={18} color={colors.brand} />
                 </View>
                 <View>
                   <Text style={[typography.h4, { color: colors.text, fontWeight: '800' }]}>Danh sách Sản phẩm</Text>
@@ -295,15 +299,14 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
             )}
 
             {isProductsLoading ? (
-              <View style={[styles.centerContainer, { flex: 1, minHeight: 300 }]}>
-                <ActivityIndicator color="#3b82f6" />
-              </View>
+              <SGSkeletonLoader type="table" rows={6} columns={5} isDark={isDark} />
             ) : safeProducts.length === 0 ? (
-              <View style={[styles.centerContainer, { flex: 1, minHeight: 300 }]}>
-                <Grid3x3 size={56} color={colors.textTertiary} opacity={0.3} style={{ marginBottom: 16 }} />
-                <Text style={[typography.h4, { color: colors.textSecondary, fontWeight: '800' }]}>Chưa có sản phẩm nào</Text>
-                <Text style={[typography.micro, { color: colors.textTertiary, marginTop: 8 }]}>Dự án chưa import bảng hàng</Text>
-              </View>
+              <SGEmptyState
+                icon={<Grid3x3 size={48} color={colors.textTertiary} strokeWidth={1} />}
+                title="Chưa có sản phẩm nào"
+                subtitle="Dự án chưa import bảng hàng"
+                style={{ minHeight: 300 }}
+              />
             ) : (
               <ScrollView style={{ flex: 1 }}>
                 {/* Header row */}
@@ -364,7 +367,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   header: {
-    paddingHorizontal: isDesktop ? 40 : 20,
     paddingTop: 24,
     paddingBottom: 8,
   },
@@ -384,7 +386,6 @@ const styles = StyleSheet.create({
   kpiRow: {
     flexDirection: 'row',
     gap: 20,
-    paddingHorizontal: isDesktop ? 40 : 20,
     marginTop: 24,
     marginBottom: 8,
     flexWrap: 'wrap',
@@ -400,9 +401,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center', alignItems: 'center',
   },
   mainContent: {
-    flexDirection: isDesktop ? 'row' : 'column',
     gap: 24,
-    paddingHorizontal: isDesktop ? 40 : 20,
     marginTop: 24,
   },
   sectionCard: {

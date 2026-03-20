@@ -44,6 +44,7 @@ export { SGProgressBar } from './SGProgressBar';
 export { SGCircularProgress } from './SGCircularProgress';
 export { SGMetricRow } from './SGMetricRow';
 export { SGSkeleton } from './SGSkeleton';
+export { SGSkeletonLoader } from './SGSkeletonLoader';
 export { SGTable } from './SGTable';
 export type { TableColumn } from './SGTable';
 export { SGHeroBanner } from './SGHeroBanner';

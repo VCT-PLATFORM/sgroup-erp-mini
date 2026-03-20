@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { AlertTriangle, RefreshCw } from 'lucide-react-native';
+import { typography, spacing, radius } from '../../../shared/theme/theme';
 
 interface Props {
   children: React.ReactNode;
@@ -11,6 +12,11 @@ interface State {
   error: Error | null;
 }
 
+/**
+ * MarketingErrorBoundary — SGDS-compliant error boundary
+ * Note: Class components can't use hooks, so we use hardcoded dark-theme tokens.
+ * The parent shell provides the correct background context.
+ */
 export class MarketingErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false, error: null };
 
@@ -19,7 +25,10 @@ export class MarketingErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('[MarketingErrorBoundary]', error, errorInfo);
+    // Production: send to error tracking service
+    if (__DEV__) {
+      console.error('[MarketingErrorBoundary]', error, errorInfo);
+    }
   }
 
   handleRetry = () => {
@@ -29,35 +38,21 @@ export class MarketingErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <View style={{
-          flex: 1, alignItems: 'center', justifyContent: 'center',
-          padding: 40, backgroundColor: 'rgba(217,119,6,0.03)',
-          borderRadius: 24, margin: 24,
-        }}>
-          <View style={{
-            width: 64, height: 64, borderRadius: 20,
-            backgroundColor: 'rgba(217,119,6,0.1)',
-            alignItems: 'center', justifyContent: 'center', marginBottom: 20,
-          }}>
-            <AlertTriangle size={32} color="#D97706" />
+        <View style={styles.container}>
+          <View style={styles.iconWrap}>
+            <AlertTriangle size={32} color="#F59E0B" />
           </View>
-          <Text style={{ fontSize: 18, fontWeight: '800', color: '#1e293b', marginBottom: 8 }}>
-            Đã xảy ra lỗi
-          </Text>
-          <Text style={{ fontSize: 14, fontWeight: '600', color: '#64748b', textAlign: 'center', maxWidth: 400, marginBottom: 24 }}>
+          <Text style={styles.title}>Đã xảy ra lỗi</Text>
+          <Text style={styles.message}>
             {this.state.error?.message || 'Không thể tải nội dung này. Vui lòng thử lại.'}
           </Text>
           <TouchableOpacity
             onPress={this.handleRetry}
-            style={{
-              flexDirection: 'row', alignItems: 'center', gap: 8,
-              backgroundColor: '#D97706', paddingHorizontal: 24, paddingVertical: 12,
-              borderRadius: 14,
-              ...(Platform.OS === 'web' ? { cursor: 'pointer' } : {}),
-            } as any}
+            activeOpacity={0.8}
+            style={[styles.retryBtn, Platform.OS === 'web' ? { cursor: 'pointer' } as any : {}]}
           >
             <RefreshCw size={16} color="#fff" />
-            <Text style={{ fontSize: 14, fontWeight: '800', color: '#fff' }}>Thử lại</Text>
+            <Text style={styles.retryText}>Thử lại</Text>
           </TouchableOpacity>
         </View>
       );
@@ -65,3 +60,51 @@ export class MarketingErrorBoundary extends React.Component<Props, State> {
     return this.props.children;
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+    backgroundColor: 'rgba(245,158,11,0.04)',
+    borderRadius: 24,
+    margin: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(245,158,11,0.1)',
+  },
+  iconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: 'rgba(245,158,11,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    ...typography.h2,
+    color: '#F8FAFC',
+    marginBottom: 8,
+  },
+  message: {
+    ...typography.body,
+    color: '#94A3B8',
+    textAlign: 'center',
+    maxWidth: 400,
+    marginBottom: 24,
+  },
+  retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#D97706',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  retryText: {
+    ...typography.smallBold,
+    color: '#fff',
+  },
+});

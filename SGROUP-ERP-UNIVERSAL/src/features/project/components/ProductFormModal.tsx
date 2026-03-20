@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Platform } from 'react-native';
-import { typography, useTheme } from '../../../shared/theme/theme';
-import { useThemeStore } from '../../../shared/theme/themeStore';
+import { typography, sgds } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { SGButton } from '../../../shared/ui/components';
 import { X, AlertCircle } from 'lucide-react-native';
 import { useCreateProduct, useUpdateProduct } from '../hooks/useProjects';
@@ -27,8 +27,7 @@ const PRODUCT_STATUSES = [
 ];
 
 export function ProductFormModal({ visible, onClose, projectId, editData }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, theme, isDark } = useAppTheme();
   const { showToast } = useToast();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
@@ -112,7 +111,7 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
         style={[styles.input, {
           color: colors.text,
           backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc',
-          borderColor: errors[key] ? '#ef4444' : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
+          borderColor: errors[key] ? colors.danger : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
           ...(opts?.multiline ? { height: 80, textAlignVertical: 'top' } : {}),
         }]}
         value={(form as any)[key]}
@@ -134,8 +133,8 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
             key={opt}
             onPress={() => setForm(prev => ({ ...prev, [key]: (prev as any)[key] === opt ? '' : opt }))}
             style={[styles.chip, {
-              backgroundColor: (form as any)[key] === opt ? '#10b981' : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
-              borderColor: (form as any)[key] === opt ? '#10b981' : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
+              backgroundColor: (form as any)[key] === opt ? colors.success : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
+              borderColor: (form as any)[key] === opt ? colors.success : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
             }]}
           >
             <Text style={{
@@ -149,11 +148,12 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
   );
 
   const content = (
-    <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+    <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.5)', ...(Platform.OS === 'web' ? { backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' } : {}) } as any]}>
       <View style={[styles.modal, {
-        backgroundColor: isDark ? '#0f172a' : '#fff',
+        backgroundColor: isDark ? colors.bgElevated : '#fff',
         borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-      }]}>
+        ...(Platform.OS === 'web' ? sgds.glass : {}),
+      } as any]}>
         <View style={[styles.modalHeader, { borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0' }]}>
           <Text style={[typography.h3, { color: colors.text }]}>
             {isEdit ? 'Chỉnh sửa Sản phẩm' : 'Thêm Sản phẩm mới'}
@@ -166,10 +166,10 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
         <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 24 }} showsVerticalScrollIndicator={false}>
           {submitError && (
             <View style={[styles.errorBanner, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#fef2f2' }]}>
-              <AlertCircle size={16} color="#ef4444" />
-              <Text style={{ color: '#ef4444', fontSize: 13, fontWeight: '600', marginLeft: 8, flex: 1 }}>{submitError}</Text>
+              <AlertCircle size={16} color={colors.danger} />
+              <Text style={{ color: colors.danger, fontSize: 13, fontWeight: '600', marginLeft: 8, flex: 1 }}>{submitError}</Text>
               <TouchableOpacity onPress={() => setSubmitError(null)}>
-                <X size={14} color="#ef4444" />
+                <X size={14} color={colors.danger} />
               </TouchableOpacity>
             </View>
           )}
@@ -196,8 +196,8 @@ export function ProductFormModal({ visible, onClose, projectId, editData }: Prop
                   key={s.value}
                   onPress={() => setForm(prev => ({ ...prev, status: s.value }))}
                   style={[styles.chip, {
-                    backgroundColor: form.status === s.value ? '#10b981' : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
-                    borderColor: form.status === s.value ? '#10b981' : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
+                    backgroundColor: form.status === s.value ? colors.success : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
+                    borderColor: form.status === s.value ? colors.success : (isDark ? 'rgba(255,255,255,0.1)' : '#e2e8f0'),
                   }]}
                 >
                   <Text style={{
@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
     fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif",
   },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, borderWidth: 1 },
-  errorText: { color: '#ef4444', fontSize: 12, marginTop: 4, fontWeight: '600' },
+  errorText: { color: '#ef4444', fontSize: 12, marginTop: 4, fontWeight: '600' }, // static style - colors.danger used inline
   errorBanner: {
     flexDirection: 'row', alignItems: 'center', padding: 14, borderRadius: 12,
     marginBottom: 20, borderWidth: 1, borderColor: 'rgba(239,68,68,0.2)',

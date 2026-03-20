@@ -2,8 +2,8 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { View, ScrollView, Text, StyleSheet, Platform } from 'react-native';
 import { ProjectSidebar, ProjectSidebarItem, ProjectRole } from './ProjectSidebar';
 import { SGTopBar } from '../../shared/ui';
-import { useTheme, typography } from '../../shared/theme/theme';
-import { useThemeStore } from '../../shared/theme/themeStore';
+import { typography } from '../../shared/theme/theme';
+import { useAppTheme } from '../../shared/theme/useAppTheme';
 import { useAuthStore } from '../auth/store/authStore';
 import { ToastProvider } from '../sales/components/ToastProvider';
 import { useProjectRoute } from './hooks/useProjectRoute';
@@ -27,8 +27,7 @@ export function ProjectShell() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const [collapsed, setCollapsed] = useState(false);
   const [inventoryProjectId, setInventoryProjectId] = useState<string | undefined>(undefined);
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, isDark } = useAppTheme();
   const { user } = useAuthStore();
 
   const userRole: ProjectRole = user?.role as ProjectRole || 'admin';
@@ -62,8 +61,8 @@ export function ProjectShell() {
       <Text style={[typography.micro, { color: colors.textTertiary, opacity: 0.8 }]}>
         {sectionLabels[activeSection] || 'PROJECT'}
       </Text>
-      <View style={[styles.breadcrumbDot, { backgroundColor: '#10b981' }]} />
-      <Text style={[typography.micro, { color: '#10b981', fontWeight: '800' }]}>
+      <View style={[styles.breadcrumbDot, { backgroundColor: colors.success }]} />
+      <Text style={[typography.micro, { color: colors.success, fontWeight: '800' }]}>
         {activeLabel.toUpperCase()}
       </Text>
     </View>
@@ -95,7 +94,7 @@ export function ProjectShell() {
 
   return (
     <ToastProvider>
-      <View style={[styles.shell, { backgroundColor: isDark ? '#05070A' : '#F8FAFC' }]}>
+      <View style={[styles.shell, { backgroundColor: colors.bg }]}>
         {Platform.OS === 'web' && (
           <View style={StyleSheet.absoluteFill} pointerEvents="none">
             <View style={[styles.aurora, {

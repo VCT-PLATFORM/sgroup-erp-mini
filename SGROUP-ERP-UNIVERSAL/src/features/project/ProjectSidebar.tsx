@@ -2,8 +2,8 @@ import React from 'react';
 import {
   View, Text, TouchableOpacity, ScrollView, StyleSheet, Platform,
 } from 'react-native';
-import { useTheme, typography } from '../../shared/theme/theme';
-import { useThemeStore } from '../../shared/theme/themeStore';
+import { typography } from '../../shared/theme/theme';
+import { useAppTheme } from '../../shared/theme/useAppTheme';
 import { useAuthStore } from '../auth/store/authStore';
 import {
   LayoutDashboard, Building2, Grid3x3, ChevronLeft, ChevronRight, LogOut,
@@ -45,8 +45,7 @@ interface Props {
 }
 
 export function ProjectSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, userRole = 'admin' }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, isDark } = useAppTheme();
   const { logout } = useAuthStore();
 
   const visibleItems = SIDEBAR_ITEMS.filter(item => item.minRole.includes(userRole as any) || userRole === 'admin');
@@ -67,17 +66,17 @@ export function ProjectSidebar({ activeKey, onSelect, collapsed, onToggleCollaps
         style={[styles.menuItem, {
           backgroundColor: isActive ? (isDark ? 'rgba(16,185,129,0.15)' : '#ecfdf5') : 'transparent',
           borderRadius: 16, marginHorizontal: 12, marginBottom: 4, paddingVertical: 12, paddingHorizontal: 12,
-          ...(isActive && !isDark && Platform.OS === 'web' ? { boxShadow: '0 4px 14px rgba(16,185,129,0.12)' } as any : {}),
+          ...(isActive && !isDark && Platform.OS === 'web' ? { boxShadow: `0 4px 14px ${colors.success}20` } as any : {}),
         }]}
       >
         <View style={{ width: 24, alignItems: 'center', justifyContent: 'center' }}>
-          <IconComp size={20} color={isActive ? '#10b981' : (isDark ? '#94A3B8' : '#64748b')} strokeWidth={isActive ? 2.5 : 2} />
+          <IconComp size={20} color={isActive ? colors.success : colors.textSecondary} strokeWidth={isActive ? 2.5 : 2} />
         </View>
         {!collapsed && (
           <Text style={{
             fontSize: 14, fontWeight: isActive ? '800' : '600',
             fontFamily: "'Plus Jakarta Sans', 'Inter', 'Segoe UI', system-ui, sans-serif",
-            color: isActive ? '#10b981' : (isDark ? '#E2E8F0' : '#475569'),
+            color: isActive ? colors.success : colors.text,
             marginLeft: 14, flex: 1, letterSpacing: 0.2
           }} numberOfLines={1}>
             {item.label}
@@ -111,8 +110,8 @@ export function ProjectSidebar({ activeKey, onSelect, collapsed, onToggleCollaps
           </LinearGradient>
           {!collapsed && (
             <View style={{ flex: 1 }}>
-              <Text style={{ fontSize: 14, fontWeight: '800', color: isDark ? '#fff' : '#0f172a', letterSpacing: 0.8, fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" }}>DỰ ÁN</Text>
-              <Text style={{ fontSize: 10, fontWeight: '600', color: isDark ? '#34d399' : '#10b981', letterSpacing: 2, marginTop: 1, fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" }}>MASTER DATA</Text>
+              <Text style={{ fontSize: 14, fontWeight: '800', color: colors.text, letterSpacing: 0.8, fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" }}>DỰ ÁN</Text>
+              <Text style={{ fontSize: 10, fontWeight: '600', color: colors.success, letterSpacing: 2, marginTop: 1, fontFamily: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif" }}>MASTER DATA</Text>
             </View>
           )}
         </View>
@@ -120,7 +119,7 @@ export function ProjectSidebar({ activeKey, onSelect, collapsed, onToggleCollaps
           onPress={onToggleCollapse}
           style={[styles.collapseBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)', borderWidth: 1, borderColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)' }]}
         >
-          {collapsed ? <ChevronRight size={14} color={isDark ? '#94A3B8' : '#64748b'} strokeWidth={2.5} /> : <ChevronLeft size={14} color={isDark ? '#94A3B8' : '#64748b'} strokeWidth={2.5} />}
+          {collapsed ? <ChevronRight size={14} color={colors.textSecondary} strokeWidth={2.5} /> : <ChevronLeft size={14} color={colors.textSecondary} strokeWidth={2.5} />}
         </TouchableOpacity>
       </View>
 
@@ -141,7 +140,7 @@ export function ProjectSidebar({ activeKey, onSelect, collapsed, onToggleCollaps
       <View style={[styles.footer, { flexDirection: collapsed ? 'column' : 'row', justifyContent: collapsed ? 'center' : 'space-between' }]}>
         <SGThemeToggle size="sm" />
         <TouchableOpacity onPress={logout} style={[styles.logoutBtn, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : 'rgba(239,68,68,0.05)', marginTop: collapsed ? 12 : 0 }]}>
-          <LogOut size={16} color="#EF4444" />
+          <LogOut size={16} color={colors.danger} />
         </TouchableOpacity>
       </View>
     </View>
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
   header: { height: 80, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, borderBottomWidth: 1 },
   collapseBtn: { width: 32, height: 32, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
   menuItem: { flexDirection: 'row', alignItems: 'center' },
-  sectionLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 1.8, textTransform: 'uppercase', color: '#94A3B8', paddingHorizontal: 24, marginTop: 16, marginBottom: 10, fontFamily: "'Plus Jakarta Sans', 'Inter', 'Segoe UI', system-ui, sans-serif" },
+  sectionLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 1.8, textTransform: 'uppercase', color: '#94A3B8', paddingHorizontal: 24, marginTop: 16, marginBottom: 10, fontFamily: "'Plus Jakarta Sans', 'Inter', 'Segoe UI', system-ui, sans-serif" }, // uses textSecondary shade
   divider: { height: 1, marginHorizontal: 24, marginVertical: 6 },
   footer: { paddingVertical: 16, paddingHorizontal: 20, borderTopWidth: 1, borderTopColor: 'transparent', gap: 8 },
   logoutBtn: { width: 36, height: 36, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },

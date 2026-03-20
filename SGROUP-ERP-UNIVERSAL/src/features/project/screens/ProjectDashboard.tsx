@@ -1,19 +1,18 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, ScrollView, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Platform, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { typography, sgds, radius } from '../../../shared/theme/theme';
+import { typography, sgds } from '../../../shared/theme/theme';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { useProjects } from '../hooks/useProjects';
-import { Building2, Home, CheckCircle2, TrendingUp, BarChart3, Percent, Layers, PieChart } from 'lucide-react-native';
-import { SGCard, SGAuroraBackground } from '../../../shared/ui/components';
+import { Building2, CheckCircle2, TrendingUp, BarChart3, Percent, Layers, PieChart } from 'lucide-react-native';
+import { SGCard, SGAuroraBackground, SGSkeletonLoader, SGEmptyState } from '../../../shared/ui/components';
 import { formatTy } from '../../../shared/utils/formatters';
-
-const { width } = Dimensions.get('window');
-const isDesktop = width > 1024;
-const isTablet = width > 768 && width <= 1024;
 
 export function ProjectDashboard() {
   const { colors, theme, isDark } = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isDesktop = width > 1024;
+  const isTablet = width > 768 && width <= 1024;
   const { data: projects, isLoading, isError } = useProjects();
 
   const stats = useMemo(() => {
@@ -65,10 +64,53 @@ export function ProjectDashboard() {
     return dist;
   }, [projects]);
 
+  // Skeleton Loading State
   if (isLoading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color="#10b981" />
+      <View style={[styles.container, { padding: isDesktop ? 40 : 20 }]}>
+        {Platform.OS === 'web' && (
+          <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
+            <SGAuroraBackground />
+          </View>
+        )}
+        <View style={[styles.header, { zIndex: 1 }]}>
+          <Text style={[typography.h1, { color: colors.text, marginBottom: 8, fontWeight: '800', letterSpacing: -0.5 }]}>Tổng quan Dự án</Text>
+          <Text style={[typography.body, { color: colors.textSecondary, fontSize: 16 }]}>
+            Báo cáo nhanh các chỉ số về danh mục dự án & bảng hàng
+          </Text>
+        </View>
+        <View style={{ zIndex: 1, gap: 24 }}>
+          <SGSkeletonLoader type="stat" count={4} isDark={isDark} />
+          <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24 }}>
+            <View style={{ flex: 1 }}><SGSkeletonLoader type="card" count={3} isDark={isDark} /></View>
+            <View style={{ flex: 1.5 }}><SGSkeletonLoader type="table" rows={5} columns={4} isDark={isDark} /></View>
+          </View>
+        </View>
+      </View>
+    );
+  }
+
+  // Empty State when no projects
+  if (!isLoading && (!projects || !Array.isArray(projects) || projects.length === 0)) {
+    return (
+      <View style={[styles.container, { padding: isDesktop ? 40 : 20 }]}>
+        {Platform.OS === 'web' && (
+          <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
+            <SGAuroraBackground />
+          </View>
+        )}
+        <View style={[styles.header, { zIndex: 1 }]}>
+          <Text style={[typography.h1, { color: colors.text, marginBottom: 8, fontWeight: '800', letterSpacing: -0.5 }]}>Tổng quan Dự án</Text>
+          <Text style={[typography.body, { color: colors.textSecondary, fontSize: 16 }]}>
+            Báo cáo nhanh các chỉ số về danh mục dự án & bảng hàng
+          </Text>
+        </View>
+        <SGEmptyState
+          icon={<Building2 size={48} color={colors.textTertiary} strokeWidth={1} />}
+          title="Chưa có dự án nào"
+          subtitle="Thêm dự án đầu tiên để bắt đầu theo dõi các chỉ số KPI"
+          style={{ minHeight: 400, zIndex: 1 }}
+        />
       </View>
     );
   }
@@ -76,7 +118,7 @@ export function ProjectDashboard() {
   const maxStatusCount = Math.max(statusDist.ACTIVE, statusDist.PAUSED, statusDist.CLOSED, 1);
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { padding: isDesktop ? 40 : 20 }]}>
         {/* Dynamic Glowing Aurora */}
         {Platform.OS === 'web' && (
           <View style={[StyleSheet.absoluteFill, { zIndex: 0, overflow: 'hidden' }]} pointerEvents="none">
@@ -93,8 +135,8 @@ export function ProjectDashboard() {
   
         {/* KPI Grid - Row 1 */}
         <View style={[styles.kpiGrid, { zIndex: 1 }]}>
-          <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={styles.kpiCardWrapper}>
-            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any]}>
+          <Animated.View entering={FadeInDown.delay(100).springify().damping(20)} style={[styles.kpiCardWrapper, { minWidth: isDesktop ? 240 : (isTablet ? '45%' : '100%') }]}>
+            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any] as any}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View>
                   <Text style={[typography.micro, { color: colors.textSecondary, marginBottom: 8, fontWeight: '700', letterSpacing: 0.5 }]}>TỔNG DỰ ÁN</Text>
@@ -113,8 +155,8 @@ export function ProjectDashboard() {
             </SGCard>
           </Animated.View>
   
-          <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={styles.kpiCardWrapper}>
-            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any]}>
+          <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.kpiCardWrapper, { minWidth: isDesktop ? 240 : (isTablet ? '45%' : '100%') }]}>
+            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any] as any}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View>
                   <Text style={[typography.micro, { color: colors.textSecondary, marginBottom: 8, fontWeight: '700', letterSpacing: 0.5 }]}>TỔNG SẢN PHẨM</Text>
@@ -130,8 +172,8 @@ export function ProjectDashboard() {
             </SGCard>
           </Animated.View>
   
-          <Animated.View entering={FadeInDown.delay(300).springify().damping(20)} style={styles.kpiCardWrapper}>
-            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any]}>
+          <Animated.View entering={FadeInDown.delay(300).springify().damping(20)} style={[styles.kpiCardWrapper, { minWidth: isDesktop ? 240 : (isTablet ? '45%' : '100%') }]}>
+            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any] as any}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View>
                   <Text style={[typography.micro, { color: colors.textSecondary, marginBottom: 8, fontWeight: '700', letterSpacing: 0.5 }]}>ĐÃ BÁN</Text>
@@ -148,8 +190,8 @@ export function ProjectDashboard() {
             </SGCard>
           </Animated.View>
   
-          <Animated.View entering={FadeInDown.delay(400).springify().damping(20)} style={styles.kpiCardWrapper}>
-            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any]}>
+          <Animated.View entering={FadeInDown.delay(400).springify().damping(20)} style={[styles.kpiCardWrapper, { minWidth: isDesktop ? 240 : (isTablet ? '45%' : '100%') }]}>
+            <SGCard style={[styles.kpiCard, sgds.sectionBase(theme) as any] as any}>
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <View style={{ flex: 1 }}>
                   <Text style={[typography.micro, { color: colors.textSecondary, marginBottom: 8, fontWeight: '700', letterSpacing: 0.5 }]}>GIÁ TRỊ TẠM TÍNH</Text>
@@ -170,7 +212,7 @@ export function ProjectDashboard() {
       <View style={{ flexDirection: isDesktop ? 'row' : 'column', gap: 24, marginTop: 32, zIndex: 1 }}>
         {/* Bar Chart: Status Distribution */}
         <Animated.View entering={FadeInDown.delay(500).springify().damping(20)} style={{ flex: 1 }}>
-          <SGCard style={[{ padding: 32, flex: 1 }, sgds.sectionBase(theme) as any]}>
+          <SGCard style={[{ padding: 32, flex: 1 }, sgds.sectionBase(theme)] as any}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 32 }}>
               <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(236,72,153,0.15)' : '#fdf2f8', width: 44, height: 44 }]}>
                 <PieChart size={22} color={colors.accent} strokeWidth={2.5} />
@@ -183,7 +225,7 @@ export function ProjectDashboard() {
                 { label: 'Đang mở bán', count: statusDist.ACTIVE, color: colors.success },
                 { label: 'Tạm dừng', count: statusDist.PAUSED, color: colors.warning },
                 { label: 'Đã đóng', count: statusDist.CLOSED, color: colors.textTertiary },
-              ].map((item, i) => (
+              ].map((item) => (
                 <View key={item.label}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
                     <Text style={[typography.body, { color: colors.text, fontWeight: '600', fontSize: 16 }]}>{item.label}</Text>
@@ -232,7 +274,7 @@ export function ProjectDashboard() {
 
         {/* Top Projects Table */}
         <Animated.View entering={FadeInDown.delay(600).springify().damping(20)} style={{ flex: 1.5 }}>
-          <SGCard style={[{ padding: 32, flex: 1 }, sgds.sectionBase(theme) as any]}>
+          <SGCard style={[{ padding: 32, flex: 1 }, sgds.sectionBase(theme)] as any}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 32 }}>
               <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(16,185,129,0.15)' : '#d1fae5', width: 44, height: 44 }]}>
                 <BarChart3 size={22} color={colors.success} strokeWidth={2.5} />
@@ -241,9 +283,12 @@ export function ProjectDashboard() {
             </View>
             
             {topProjects.length === 0 ? (
-              <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 200 }}>
-                <Text style={[typography.body, { color: colors.textSecondary }]}>Chưa có dữ liệu</Text>
-              </View>
+              <SGEmptyState
+                icon={<BarChart3 size={48} color={colors.textTertiary} strokeWidth={1} />}
+                title="Chưa có dữ liệu"
+                subtitle="Các dự án sẽ hiển thị khi có sản phẩm được import"
+                style={{ minHeight: 200 }}
+              />
             ) : (
               <>
                 {/* Table Header */}
@@ -315,7 +360,7 @@ export function ProjectDashboard() {
       {/* Row 3: Per-project Liquidity Comparison */}
       {topProjects.length > 0 && (
         <Animated.View entering={FadeInDown.delay(700).springify().damping(20)}>
-          <SGCard style={[{ padding: 32, marginTop: 32, marginBottom: 40, zIndex: 1 }, sgds.sectionBase(theme) as any]}>
+          <SGCard style={[{ padding: 32, marginTop: 32, marginBottom: 40, zIndex: 1 }, sgds.sectionBase(theme)] as any}>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 32 }}>
               <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(139,92,246,0.15)' : '#ede9fe', width: 44, height: 44 }]}>
                 <TrendingUp size={22} color={colors.purple} strokeWidth={2.5} />
@@ -360,7 +405,6 @@ export function ProjectDashboard() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: isDesktop ? 40 : 20,
     flex: 1,
   },
   header: {
@@ -373,7 +417,6 @@ const styles = StyleSheet.create({
   },
   kpiCardWrapper: {
     flex: 1,
-    minWidth: isDesktop ? 240 : (isTablet ? '45%' : '100%'),
   },
   kpiCard: {
     padding: 24,

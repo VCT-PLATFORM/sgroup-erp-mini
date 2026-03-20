@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, ScrollView, Platform, TextInput, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Platform, TextInput, useWindowDimensions } from 'react-native';
 import Animated, { FadeInDown, FadeInUp, SlideInUp, SlideOutUp, Layout } from 'react-native-reanimated';
 import { typography, sgds, radius } from '../../../shared/theme/theme';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
-import { SGCard, SGButton, SGAuroraBackground } from '../../../shared/ui/components';
+import { SGCard, SGButton, SGAuroraBackground, SGSkeletonLoader, SGEmptyState } from '../../../shared/ui/components';
 import { useProjects, useProjectProducts, useLockProduct, useUnlockProduct, useDeleteProduct } from '../hooks/useProjects';
 import { Grid3x3, Lock, Unlock, Plus, Edit2, Trash2, Search, Download, Upload, X, Package, ArrowUpDown, Layers } from 'lucide-react-native';
 import { ProductFormModal } from '../components/ProductFormModal';
@@ -12,16 +12,15 @@ import { useAuthStore } from '../../auth/store/authStore';
 import { useToast } from '../../sales/components/ToastProvider';
 import Papa from 'papaparse';
 
-const { width } = Dimensions.get('window');
-const isDesktop = width > 1024;
-const NUM_COLUMNS = isDesktop ? 4 : width > 768 ? 3 : 2;
-
 interface Props {
   initialProjectId?: string;
 }
 
 export function InventoryScreen({ initialProjectId }: Props) {
   const { colors, theme, isDark } = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isDesktop = width > 1024;
+  const NUM_COLUMNS = isDesktop ? 4 : width > 768 ? 3 : 2;
   const { user } = useAuthStore();
   const { showToast } = useToast();
   const { data: projects, isLoading: projectsLoading } = useProjects();
@@ -196,7 +195,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
         layout={Layout.springify()} 
         style={[
           styles.productCard, 
-          sgds.sectionBase(theme),
+          sgds.sectionBase(theme) as any,
           { padding: 0 }
         ]}
       >
@@ -211,7 +210,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
                 <Edit2 size={13} color={colors.textSecondary} />
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setDeletingProduct(item)} style={[styles.miniBtn, { backgroundColor: isDark ? 'rgba(239,68,68,0.08)' : '#fef2f2' }]}>
-                <Trash2 size={13} color="#ef4444" />
+                <Trash2 size={13} color={colors.danger} />
               </TouchableOpacity>
             </View>
           </View>
@@ -242,7 +241,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
             </View>
             
             <View style={[styles.priceRow, { borderTopColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)' }]}>
-              <Text style={[typography.h4, { color: '#3b82f6', fontWeight: '800' }]}>
+              <Text style={[typography.h4, { color: colors.brand, fontWeight: '800' }]}>
                 {item.price ? `${item.price.toLocaleString('vi-VN')} Tỷ` : 'Đang cập nhật'}
               </Text>
             </View>
@@ -269,7 +268,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { padding: isDesktop ? 40 : 20 }]}>
       {selectedProjectId && (
         <ProductFormModal visible={showProductForm} onClose={handleCloseForm} projectId={selectedProjectId} editData={editingProduct} />
       )}
@@ -300,13 +299,13 @@ export function InventoryScreen({ initialProjectId }: Props) {
             style={{ borderColor: isDark ? 'rgba(255,255,255,0.1)' : '#cbd5e1' }} />
           <SGButton title="Thêm SP" icon={<Plus size={20} color="#fff" />}
             onPress={() => { setEditingProduct(null); setShowProductForm(true); }} disabled={!selectedProjectId}
-            style={{ backgroundColor: '#10b981' }} />
+            style={{ backgroundColor: colors.success }} />
         </View>
       </Animated.View>
 
       {/* Batch Import Panel */}
       {showBatchInput && (
-        <Animated.View entering={SlideInUp.springify().damping(20)} exiting={SlideOutUp.springify()} style={[styles.batchPanel, sgds.sectionBase(theme), { zIndex: 1 }]}>
+        <Animated.View entering={SlideInUp.springify().damping(20)} exiting={SlideOutUp.springify()} style={[styles.batchPanel, sgds.sectionBase(theme), { zIndex: 1 }] as any}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <Text style={[typography.h4, { color: colors.text, fontWeight: '800' }]}>Import hàng loạt (CSV)</Text>
             <TouchableOpacity onPress={() => setShowBatchInput(false)} style={[styles.miniBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }]}>
@@ -340,14 +339,14 @@ export function InventoryScreen({ initialProjectId }: Props) {
       {/* Project Selector */}
       <View style={{ marginBottom: 24, zIndex: 1 }}>
         <Text style={[typography.micro, { color: colors.textTertiary, marginBottom: 10, fontWeight: '700', textTransform: 'uppercase', letterSpacing: 1 }]}>Chọn Dự án</Text>
-        {projectsLoading ? <ActivityIndicator size="small" color="#10b981" /> : (
+        {projectsLoading ? <SGSkeletonLoader type="stat" count={4} isDark={isDark} /> : (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10 }}>
             {(Array.isArray(projects) ? projects : []).map((p: any) => (
               <TouchableOpacity key={p.id} onPress={() => setSelectedProjectId(p.id)}
                 style={[styles.projectTab, {
-                  backgroundColor: selectedProjectId === p.id ? '#10b981' : (isDark ? 'rgba(30,41,59,0.6)' : 'rgba(255,255,255,0.85)'),
-                  borderColor: selectedProjectId === p.id ? '#10b981' : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
-                  ...(Platform.OS === 'web' && selectedProjectId === p.id && { boxShadow: '0 4px 16px rgba(16, 185, 129, 0.25)' } as any),
+                  backgroundColor: selectedProjectId === p.id ? colors.success : (isDark ? 'rgba(30,41,59,0.6)' : 'rgba(255,255,255,0.85)'),
+                  borderColor: selectedProjectId === p.id ? colors.success : (isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'),
+                  ...(Platform.OS === 'web' && selectedProjectId === p.id && { boxShadow: `0 4px 16px ${colors.success}40` } as any),
                 }]}>
                 <Text style={[typography.body, { color: selectedProjectId === p.id ? '#fff' : colors.text, fontWeight: '700', fontSize: 13 }]}>{p.name}</Text>
               </TouchableOpacity>
@@ -380,7 +379,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
           {STATUS_FILTERS.map(f => {
             const isActive = statusFilter === f.value;
-            const chipColor = f.value ? getStatusColor(f.value) : '#10b981';
+            const chipColor = f.value ? getStatusColor(f.value) : colors.success;
             return (
               <TouchableOpacity key={f.value || 'all'} onPress={() => setStatusFilter(f.value)}
                 style={[styles.filterChip, {
@@ -403,11 +402,11 @@ export function InventoryScreen({ initialProjectId }: Props) {
       </View>
 
       {/* Grid Section */}
-      <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.gridSection, sgds.sectionBase(theme), { zIndex: 1 }]}>
+      <Animated.View entering={FadeInDown.delay(200).springify().damping(20)} style={[styles.gridSection, sgds.sectionBase(theme), { zIndex: 1 }] as any}>
         <View style={styles.toolbar}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <View style={[styles.toolbarIcon, { backgroundColor: isDark ? 'rgba(16,185,129,0.1)' : '#ecfdf5' }]}>
-              <Package size={18} color="#10b981" />
+              <Package size={18} color={colors.success} />
             </View>
             <View>
               <Text style={[typography.h4, { color: colors.text, fontWeight: '800' }]}>
@@ -421,17 +420,14 @@ export function InventoryScreen({ initialProjectId }: Props) {
         </View>
 
         {productsLoading ? (
-          <View style={styles.centerContainer}><ActivityIndicator size="large" color="#10b981" /></View>
+          <SGSkeletonLoader type="card" count={isDesktop ? 8 : 4} isDark={isDark} />
         ) : filteredProducts.length === 0 ? (
-          <View style={styles.centerContainer}>
-            <Grid3x3 size={56} color={colors.textTertiary} opacity={0.3} style={{ marginBottom: 20 }} />
-            <Text style={[typography.h4, { color: colors.textSecondary, fontWeight: '800' }]}>
-              {searchQuery ? `Không tìm thấy "${searchQuery}"` : statusFilter ? 'Không có sản phẩm với trạng thái này' : 'Chưa có sản phẩm nào'}
-            </Text>
-            <Text style={[typography.body, { color: colors.textTertiary, marginTop: 8 }]}>
-              {!searchQuery && !statusFilter && 'Bấm "Thêm SP" hoặc "Import CSV" để bắt đầu.'}
-            </Text>
-          </View>
+          <SGEmptyState
+            icon={<Grid3x3 size={48} color={colors.textTertiary} strokeWidth={1} />}
+            title={searchQuery ? `Không tìm thấy "${searchQuery}"` : statusFilter ? 'Không có sản phẩm với trạng thái này' : 'Chưa có sản phẩm nào'}
+            subtitle={!searchQuery && !statusFilter ? 'Bấm "Thêm SP" hoặc "Import CSV" để bắt đầu.' : undefined}
+            style={{ minHeight: 300 }}
+          />
         ) : (
           <FlatList data={filteredProducts} keyExtractor={item => item.id} renderItem={renderProductItem}
             numColumns={NUM_COLUMNS} key={`grid-${NUM_COLUMNS}`}
@@ -444,7 +440,7 @@ export function InventoryScreen({ initialProjectId }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: isDesktop ? 40 : 20, flex: 1 },
+  container: { flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 },
   projectTab: { paddingHorizontal: 22, paddingVertical: 10, borderRadius: 12, borderWidth: 1 },
   filterChip: { 

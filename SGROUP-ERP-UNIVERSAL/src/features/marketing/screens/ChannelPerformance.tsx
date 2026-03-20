@@ -1,16 +1,16 @@
 /**
- * ChannelPerformance — Details metrics for each marketing channel
+ * ChannelPerformance — Premium channel metrics with glass cards
+ * SGDS: glass containers, platform-colored accents, skeleton loading, animations
  */
-import React from 'react';
-import { View, Text, ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import Animated, { useSharedValue, useAnimatedStyle, withDelay, withSpring, withTiming } from 'react-native-reanimated';
 import { Radio, BarChart3 } from 'lucide-react-native';
 import { useChannels } from '../hooks/useMarketing';
-import {
-  SGPageContainer,
-  SGCard,
-  SGEmptyState
-} from '../../../shared/ui';
-import { useTheme, typography, spacing } from '../../../shared/theme/theme';
+import { SGPageContainer, SGEmptyState, SGSkeleton, SGSectionHeader } from '../../../shared/ui';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
+import { typography, spacing, radius, sgds } from '../../../shared/theme/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const fmtMoney = (v: number) => {
   if (v >= 1000000) return `${(v / 1000000).toFixed(1)} Tr`;
@@ -19,16 +19,31 @@ const fmtMoney = (v: number) => {
 
 const fmtNum = (n: number) => n.toLocaleString('vi-VN');
 
-export function ChannelPerformance() {
-  const c = useTheme();
+const AnimatedItem = ({ index, children }: { index: number; children: React.ReactNode }) => {
+  const translateY = useSharedValue(20);
+  const opacity = useSharedValue(0);
+  useEffect(() => {
+    const delay = index * 80;
+    translateY.value = withDelay(delay, withSpring(0, { damping: 22, stiffness: 90 }));
+    opacity.value = withDelay(delay, withTiming(1, { duration: 300 }));
+  }, []);
+  const style = useAnimatedStyle(() => ({
+    transform: [{ translateY: translateY.value }],
+    opacity: opacity.value,
+  }));
+  return <Animated.View style={style}>{children}</Animated.View>;
+};
 
-  const CHANNEL_COLORS: Record<string,string> = { 
-    FACEBOOK: '#1877F2', 
-    GOOGLE: '#EA4335', 
-    TIKTOK: c.text, 
-    ZALO: '#0068FF', 
-    YOUTUBE: '#FF0000', 
-    EMAIL: '#8b5cf6' 
+export function ChannelPerformance() {
+  const { theme, isDark, colors } = useAppTheme();
+
+  const CHANNEL_COLORS: Record<string, string> = {
+    FACEBOOK: '#1877F2',
+    GOOGLE: '#EA4335',
+    TIKTOK: isDark ? '#fff' : '#000',
+    ZALO: '#0068FF',
+    YOUTUBE: '#FF0000',
+    EMAIL: '#8b5cf6',
   };
 
   const { data: rawChannels, isLoading } = useChannels();
@@ -36,7 +51,7 @@ export function ChannelPerformance() {
   const channels = (rawChannels || []).map((ch: any) => ({
     id: ch.id,
     name: ch.channelKey,
-    color: CHANNEL_COLORS[ch.channelKey] || c.textSecondary,
+    color: CHANNEL_COLORS[ch.channelKey] || colors.textSecondary,
     spend: Number(ch.spend) || 0,
     revenue: Number(ch.revenue) || 0,
     leads: ch.leads || 0,
@@ -46,70 +61,151 @@ export function ChannelPerformance() {
     clicks: 0,
   }));
 
+  const METRIC_KEYS = [
+    { label: 'Chi phí', key: 'spend', fmt: fmtMoney, colorKey: 'textSecondary' },
+    { label: 'Doanh thu', key: 'revenue', fmt: fmtMoney, colorKey: 'success' },
+    { label: 'Impressions', key: 'impressions', fmt: fmtNum, colorKey: 'textSecondary' },
+    { label: 'Clicks', key: 'clicks', fmt: fmtNum, colorKey: 'info' },
+    { label: 'Leads', key: 'leads', fmt: fmtNum, colorKey: 'success' },
+    { label: 'ROAS', key: 'roas', fmt: (v: number) => `${v}x`, colorKey: 'warning' },
+  ];
+
   return (
     <SGPageContainer>
       {/* Header */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16, marginBottom: 24 }}>
-        <View style={{ width: 52, height: 52, borderRadius: 18, alignItems: 'center', justifyContent: 'center', backgroundColor: '#D97706' }}>
-          <Radio size={26} color="#fff" />
-        </View>
-        <View>
-          <Text style={{ fontSize: 26, fontWeight: '900', color: c.text }}>HIỆU SUẤT KÊNH</Text>
-          <Text style={{ fontSize: 13, fontWeight: '600', color: c.textSecondary, marginTop: 3 }}>
-            Phân tích chuyên sâu hiệu quả từng kênh quảng cáo
-          </Text>
-        </View>
-      </View>
-
-      {/* Channel List */}
-      <View style={{ gap: 16 }}>
-        {isLoading ? (
-          <View style={{ padding: 40, alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#D97706" />
-            <Text style={[typography.smallBold, { marginTop: 16, color: c.textSecondary }]}>
-              Đang tải dữ liệu ROI kênh quảng cáo...
+      <AnimatedItem index={0}>
+        <View style={styles.headerRow}>
+          <LinearGradient
+            colors={['#F59E0B', '#D97706']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerIcon}
+          >
+            <Radio size={26} color="#fff" />
+          </LinearGradient>
+          <View>
+            <Text style={[typography.h1, { color: colors.text }]}>Hiệu Suất Kênh</Text>
+            <Text style={[typography.small, { color: colors.textSecondary, marginTop: 3 }]}>
+              Phân tích chuyên sâu hiệu quả từng kênh quảng cáo
             </Text>
           </View>
+        </View>
+      </AnimatedItem>
+
+      {/* Channel Cards */}
+      <View style={styles.listGap}>
+        {isLoading ? (
+          <>
+            {[0,1,2].map(i => (
+              <SGSkeleton key={i} width="100%" height={180} borderRadius={radius.xl} />
+            ))}
+          </>
         ) : channels.length === 0 ? (
           <SGEmptyState
             title="Không có dữ liệu kênh"
             subtitle="Chưa có dữ liệu hiệu suất của bất kỳ kênh quảng cáo nào."
-            icon={<BarChart3 size={48} color={c.textTertiary} />}
+            icon={<BarChart3 size={48} color={colors.textTertiary} />}
           />
         ) : (
-          channels.map((ch: any) => {
-            const iconColor = ch.color;
-            return (
-              <SGCard key={ch.id} style={{ padding: spacing.xl }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-                  <View style={{ width: 44, height: 44, borderRadius: 14, backgroundColor: `${iconColor}15`, alignItems: 'center', justifyContent: 'center' }}>
-                    <BarChart3 size={22} color={iconColor} />
+          channels.map((ch: any, idx: number) => (
+            <AnimatedItem key={ch.id} index={idx + 1}>
+              <View style={[styles.channelCard, {
+                backgroundColor: colors.glass,
+                borderColor: colors.glassBorder,
+              }, Platform.OS === 'web' ? {
+                ...sgds.glass,
+                ...sgds.transition.normal,
+              } as any : {}]}>
+                {/* Channel Header */}
+                <View style={styles.channelHeader}>
+                  <View style={[styles.channelIcon, { backgroundColor: `${ch.color}15` }]}>
+                    <BarChart3 size={22} color={ch.color} />
                   </View>
-                  <Text style={[typography.h3, { color: c.text }]}>{ch.name}</Text>
+                  <Text style={[typography.h2, { color: colors.text }]}>{ch.name}</Text>
+                  {/* Accent line */}
+                  <View style={[styles.accentDot, { backgroundColor: ch.color }]} />
                 </View>
 
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
-                  {[
-                    { label: 'Spend', value: fmtMoney(ch.spend), tone: c.textSecondary },
-                    { label: 'Revenue', value: fmtMoney(ch.revenue || 0), tone: c.success },
-                    { label: 'Impressions', value: fmtNum(ch.impressions), tone: c.textSecondary },
-                    { label: 'Clicks', value: fmtNum(ch.clicks), tone: c.info },
-                    { label: 'Leads', value: fmtNum(ch.leads), tone: c.success },
-                    { label: 'ROAS', value: `${ch.roas}x`, tone: '#D97706' },
-                  ].map((m, idx) => (
-                    <View key={idx} style={{ flex: 1, minWidth: 100, backgroundColor: c.bgTertiary, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: c.border }}>
-                      <Text style={[typography.caption, { fontWeight: '800', color: c.textTertiary, textTransform: 'uppercase', marginBottom: 4 }]}>
-                        {m.label}
-                      </Text>
-                      <Text style={{ fontSize: 16, fontWeight: '900', color: m.tone }}>{m.value}</Text>
-                    </View>
-                  ))}
+                {/* Metrics Grid */}
+                <View style={styles.metricsGrid}>
+                  {METRIC_KEYS.map((m, mIdx) => {
+                    const colorVal = (colors as any)[m.colorKey] || colors.textSecondary;
+                    return (
+                      <View key={mIdx} style={[styles.metricCard, {
+                        backgroundColor: isDark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                        borderColor: colors.border,
+                      }]}>
+                        <Text style={[typography.micro, { color: colors.textTertiary }]}>{m.label}</Text>
+                        <Text style={[styles.metricValue, { color: colorVal }]}>{m.fmt((ch as any)[m.key])}</Text>
+                      </View>
+                    );
+                  })}
                 </View>
-              </SGCard>
-            );
-          })
+              </View>
+            </AnimatedItem>
+          ))
         )}
       </View>
     </SGPageContainer>
   );
 }
+
+const styles = StyleSheet.create({
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 24,
+  },
+  headerIcon: {
+    width: 52,
+    height: 52,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listGap: {
+    gap: 16,
+  },
+  channelCard: {
+    borderRadius: radius.xl,
+    borderWidth: 1,
+    padding: spacing.xl,
+  },
+  channelHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 20,
+  },
+  channelIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  accentDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginLeft: 'auto',
+  } as any,
+  metricsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  metricCard: {
+    flex: 1,
+    minWidth: 100,
+    padding: 12,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: 6,
+  },
+  metricValue: {
+    fontSize: 16,
+    fontWeight: '900',
+  },
+});

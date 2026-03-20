@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Modal, Platform } from 'react-native';
-import { typography, useTheme } from '../../../shared/theme/theme';
-import { useThemeStore } from '../../../shared/theme/themeStore';
+import { typography, sgds } from '../../../shared/theme/theme';
+import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { SGButton } from '../../../shared/ui/components';
 import { X, AlertCircle } from 'lucide-react-native';
 import { useCreateProject, useUpdateProject } from '../hooks/useProjects';
@@ -22,8 +22,7 @@ const PROJECT_STATUSES = [
 ];
 
 export function ProjectFormModal({ visible, onClose, editData }: Props) {
-  const colors = useTheme();
-  const { isDark } = useThemeStore();
+  const { colors, theme, isDark } = useAppTheme();
   const { showToast } = useToast();
   const createMutation = useCreateProject();
   const updateMutation = useUpdateProject();
@@ -170,11 +169,12 @@ export function ProjectFormModal({ visible, onClose, editData }: Props) {
   );
 
   const content = (
-    <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.5)' }]}>
+    <View style={[styles.overlay, { backgroundColor: 'rgba(0,0,0,0.5)', ...(Platform.OS === 'web' ? { backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' } : {}) } as any]}>
       <View style={[styles.modal, {
-        backgroundColor: isDark ? '#0f172a' : '#fff',
+        backgroundColor: isDark ? colors.bgElevated : '#fff',
         borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)',
-      }]}>
+        ...(Platform.OS === 'web' ? sgds.glass : {}),
+      } as any]}>
         {/* Header */}
         <View style={[styles.modalHeader, { borderBottomColor: isDark ? 'rgba(255,255,255,0.06)' : '#e2e8f0' }]}>
           <Text style={[typography.h3, { color: colors.text }]}>

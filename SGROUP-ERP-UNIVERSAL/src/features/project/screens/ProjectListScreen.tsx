@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, useWindowDimensions } from 'react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
-import { typography, sgds, radius } from '../../../shared/theme/theme';
+import { typography, sgds } from '../../../shared/theme/theme';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
-import { SGCard, SGButton, SGAuroraBackground } from '../../../shared/ui/components';
+import { SGCard, SGButton, SGAuroraBackground, SGSkeletonLoader, SGEmptyState } from '../../../shared/ui/components';
 import { useProjects, useDeleteProject } from '../hooks/useProjects';
 import { Building2, Plus, MapPin, Search, Trash2, TrendingUp, Layers, CheckCircle2 } from 'lucide-react-native';
 import { formatTy } from '../../../shared/utils/formatters';
@@ -12,16 +12,15 @@ import { ProjectFormModal } from '../components/ProjectFormModal';
 import { DeleteConfirmModal } from '../components/DeleteConfirmModal';
 import { useToast } from '../../sales/components/ToastProvider';
 
-const { width } = Dimensions.get('window');
-const isDesktop = width > 1024;
-const isTablet = width > 768 && width <= 1024;
-
 interface Props {
   onNavigateInventory?: (projectId: string) => void;
 }
 
 export function ProjectListScreen({ onNavigateInventory }: Props) {
   const { colors, theme, isDark } = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isDesktop = width > 1024;
+  const isTablet = width > 768 && width <= 1024;
   const { showToast } = useToast();
   const { data: projects, isLoading, isError, refetch, isRefetching } = useProjects();
   const deleteMutation = useDeleteProject();
@@ -61,19 +60,18 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
   };
 
   const renderProjectItem = ({ item, index }: { item: any, index: number }) => {
-    const isEditing = editProject?.id === item.id;
     const liquidity = item.totalUnits ? Math.round((item.soldUnits / item.totalUnits) * 100) : 0;
     
     return (
       <Animated.View entering={FadeInUp.delay(index * 100).springify().damping(20)} style={{ flex: 1 }}>
-        <SGCard style={[styles.card, sgds.sectionBase(theme), { padding: 0 }] as any}>
+        <SGCard style={[styles.card, sgds.sectionBase(theme) as any, { padding: 0 }] as any}>
           {/* Top Gradient Banner matching status */}
           <View style={{
             height: 6, width: '100%',
             backgroundColor: item.status === 'ACTIVE' ? colors.success : item.status === 'PAUSED' ? colors.warning : colors.textTertiary
           }} />
   
-          <View style={[styles.cardHeader, { borderBottomWidth: 1, borderBottomColor: colors.borderLight }]}>
+          <View style={[styles.cardHeader, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
             <View style={{ flexDirection: 'row', alignItems: 'flex-start', flex: 1 }}>
               <View style={[styles.iconBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f8fafc', elevation: 2, ...(Platform.OS==='web'&&{boxShadow:'0 4px 12px rgba(0,0,0,0.05)'} as any) }]}>
                 <Building2 size={24} color={isDark ? '#e2e8f0' : '#475569'} strokeWidth={2} />
@@ -108,7 +106,7 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
             onPress={() => setDeletingProject(item)} 
             style={[styles.miniBtn, { backgroundColor: isDark ? 'rgba(239,68,68,0.1)' : '#fef2f2' }]}
           >
-            <Trash2 size={16} color="#ef4444" />
+            <Trash2 size={16} color={colors.danger} />
           </TouchableOpacity>
         </View>
 
@@ -127,7 +125,7 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
               </View>
               <Text style={[typography.h3, { color: colors.text, fontWeight: '800' }]}>{item.totalUnits || 0}</Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
             <View style={styles.statBox}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                 <CheckCircle2 size={14} color={colors.success} style={{ marginRight: 4 }} />
@@ -135,7 +133,7 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
               </View>
               <Text style={[typography.h3, { color: colors.success, fontWeight: '800' }]}>{item.soldUnits || 0}</Text>
             </View>
-            <View style={[styles.statDivider, { backgroundColor: colors.borderLight }]} />
+            <View style={[styles.statDivider, { backgroundColor: colors.border }]} />
             <View style={styles.statBox}>
               <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
                 <TrendingUp size={14} color={colors.brand} style={{ marginRight: 4 }} />
@@ -190,7 +188,7 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { padding: isDesktop ? 40 : 20 }]}>
       <ProjectFormModal visible={showForm} onClose={() => setShowForm(false)} editData={editProject} />
       <DeleteConfirmModal
         visible={!!deletingProject}
@@ -215,16 +213,16 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
           </Text>
         </View>
         <SGButton title="Thêm Dự án" icon={<Plus size={20} color="#fff" />} onPress={handleOpenCreate} 
-          style={{ backgroundColor: '#10b981', paddingHorizontal: 20 }} />
+          style={{ backgroundColor: colors.success, paddingHorizontal: 20 }} />
       </View>
 
       {isLoading && !isRefetching ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#10b981" />
+        <View style={{ zIndex: 1 }}>
+          <SGSkeletonLoader type="card" count={isDesktop ? 4 : 3} isDark={isDark} />
         </View>
       ) : isError ? (
         <View style={styles.centerContainer}>
-          <Text style={[typography.body, { color: '#ef4444' }]}>Đã xảy ra lỗi khi tải danh sách dự án.</Text>
+          <Text style={[typography.body, { color: colors.danger }]}>Đã xảy ra lỗi khi tải danh sách dự án.</Text>
           <SGButton title="Thử lại" onPress={() => refetch()} variant="outline" style={{ marginTop: 16 }} />
         </View>
       ) : (
@@ -252,14 +250,17 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
                 key={isDesktop ? 'desktop-grid' : 'mobile-list'}
                 columnWrapperStyle={isDesktop ? { gap: 24 } : undefined}
                 refreshControl={
-                  <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#10b981" />
+                  <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={colors.success} />
                 }
                 ListEmptyComponent={
-                  <Animated.View entering={FadeInUp.delay(300).springify().damping(20)} style={styles.centerContainer}>
-                    <Building2 size={64} color={colors.borderStrong || colors.border} style={{ marginBottom: 20 }} />
-                    <Text style={[typography.h3, { color: colors.textSecondary, fontWeight: '800' }]}>Chưa có dự án nào</Text>
-                    <Text style={[typography.body, { color: colors.textTertiary, marginTop: 8 }]}>Bấm "Thêm Dự án" để khởi tạo dữ liệu.</Text>
-                  </Animated.View>
+                  <SGEmptyState
+                    icon={<Building2 size={48} color={colors.textTertiary} strokeWidth={1} />}
+                    title="Chưa có dự án nào"
+                    subtitle='Bấm "Thêm Dự án" để khởi tạo dữ liệu.'
+                    actionLabel="Thêm Dự án"
+                    onAction={handleOpenCreate}
+                    style={{ minHeight: 300 }}
+                  />
                 }
               />
             </View>
@@ -270,7 +271,7 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
 }
 
 const styles = StyleSheet.create({
-  container: { padding: isDesktop ? 40 : 20, flex: 1 },
+  container: { flex: 1 },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 },
   centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', minHeight: 400 },
   card: { flex: 1, overflow: 'hidden', borderRadius: 28 },
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
   infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
   statsRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, borderRadius: 12 },
   statBox: { flex: 1, alignItems: 'center' },
-  statDivider: { width: 1, height: 32, backgroundColor: 'rgba(150,150,150,0.2)' },
+  statDivider: { width: 1, height: 32 },
   cardFooter: { flexDirection: 'row', padding: 24, paddingTop: 28 },
   filterRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 32, zIndex: 1 },
   searchBox: { flex: 1, flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16, height: 48, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(150,150,150,0.1)' },
