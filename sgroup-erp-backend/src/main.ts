@@ -100,6 +100,11 @@ async function bootstrap() {
         return callback(null, true);
       }
 
+      // Tự động cho phép các subdomains của sgroup.com.vn
+      if (origin === 'https://sgroup.com.vn' || /\.sgroup\.com\.vn$/.test(origin)) {
+        return callback(null, true);
+      }
+
       // Production: chỉ cho phép FRONTEND_URL đã cấu hình
       if (isProduction && process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
         return callback(null, true);
