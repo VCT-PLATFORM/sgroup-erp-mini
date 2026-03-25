@@ -88,7 +88,7 @@ export function BatchInventoryModal({ visible, onClose, projectId, projectName }
           defaultPrice: parseFloat(defaultPrice) || 0,
           defaultBedrooms: parseInt(defaultBedrooms) || 0,
         },
-      });
+      }) as { created: number; skipped: number; total: number };
       const msg = `✅ Đã tạo ${result.created} sản phẩm thành công!\n${result.skipped > 0 ? `⚠️ Bỏ qua ${result.skipped} mã đã tồn tại.` : ''}\nTổng sản phẩm: ${result.total}`;
       if (Platform.OS === 'web') {
         alert(msg);
