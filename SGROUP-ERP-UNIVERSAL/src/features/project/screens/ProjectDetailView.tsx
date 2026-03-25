@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Platform, useWind
 import Animated, { FadeInDown, FadeInLeft, FadeInRight } from 'react-native-reanimated';
 import { typography, sgds } from '../../../shared/theme/theme';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
-import { SGCard, SGButton, SGAuroraBackground, SGSkeletonLoader, SGEmptyState, SGCircularProgress } from '../../../shared/ui/components';
+import { SGCard, SGButton, SGAuroraBackground, SGSkeletonLoader, SGEmptyState, SGStackedBar } from '../../../shared/ui/components';
 import { useProject, useProjectProducts } from '../hooks/useProjects';
 import { ArrowLeft, MapPin, Grid3x3, CheckCircle2, Edit2, DollarSign, Percent, Layers, Package } from 'lucide-react-native';
 import { formatTy } from '../../../shared/utils/formatters';
@@ -94,6 +94,23 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
     acc[p.status] = (acc[p.status] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
+
+  const sumProducts = safeProducts.length;
+  const missingUnits = Math.max(0, (project.totalUnits || 0) - sumProducts);
+  
+  const stackItems = Object.entries(statusCounts).map(([status, count]) => ({
+    value: count as number,
+    color: getStatusColor(status),
+    label: getStatusLabel(status),
+  })).sort((a, b) => b.value - a.value);
+
+  if (missingUnits > 0) {
+    stackItems.push({
+      value: missingUnits,
+      color: isDark ? 'rgba(255,255,255,0.05)' : '#e2e8f0',
+      label: 'CHƯA NHẬP',
+    });
+  }
 
   const liquidityColor = liquidityPct >= 70 ? colors.success : liquidityPct >= 40 ? colors.warning : colors.danger;
 
@@ -213,29 +230,35 @@ export function ProjectDetailView({ projectId, onBack, onNavigateInventory }: Pr
           <SGCard style={[styles.sectionCard, sgds.sectionBase(theme), { padding: 28, marginTop: 24 }] as any}>
             <Text style={[typography.h4, { color: colors.text, marginBottom: 24, fontWeight: '800' }]}>Tiến độ & Hiệu quả</Text>
             
-            {/* Liquidity Meter - using SGCircularProgress */}
-            <View style={{ alignItems: 'center', marginBottom: 28 }}>
-              <SGCircularProgress
-                progress={liquidityPct}
-                size={100}
-                strokeWidth={6}
-                color={liquidityColor}
-                label="Thanh khoản"
-              />
-            </View>
-
-            {/* Progress bar */}
-            <View style={{ marginBottom: 8 }}>
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 }}>
-                <Text style={[typography.micro, { color: colors.textTertiary, fontWeight: '600' }]}>Đã bán / Tổng SP</Text>
-                <Text style={[typography.micro, { color: colors.text, fontWeight: '800' }]}>
-                  {project.soldUnits || 0} / {project.totalUnits || 0}
+            {/* Liquidity Meter - using SGStackedBar */}
+            <View style={{ marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 16 }}>
+                <Text style={[typography.body, { color: colors.textSecondary, fontWeight: '600' }]}>Rổ hàng & Trạng thái</Text>
+                <Text style={[typography.body, { color: colors.text, fontWeight: '800' }]}>
+                  {sumProducts} / {project.totalUnits || 0}
                 </Text>
               </View>
-              <View style={{ height: 8, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 4, overflow: 'hidden' }}>
-                <View style={{ width: `${Math.min(liquidityPct, 100)}%`, height: '100%', backgroundColor: liquidityColor, borderRadius: 4 } as any} />
-              </View>
+              
+              {stackItems.length > 0 ? (
+                <SGStackedBar items={stackItems} height={24} />
+              ) : (
+                <View style={{ height: 24, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9', borderRadius: 12, overflow: 'hidden' }}>
+                  <View style={{ width: `${Math.min(liquidityPct, 100)}%`, height: '100%', backgroundColor: liquidityColor, borderRadius: 12 } as any} />
+                </View>
+              )}
             </View>
+
+            {/* Custom Legend */}
+            {stackItems.length > 0 && (
+              <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24, justifyContent: 'center' }}>
+                {stackItems.map((item, idx) => (
+                  <View key={idx} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                    <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: item.color }} />
+                    <Text style={[typography.micro, { color: colors.textSecondary, fontWeight: '600' }]}>{item.label} ({item.value})</Text>
+                  </View>
+                ))}
+              </View>
+            )}
 
             <View style={[styles.divider, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)', marginVertical: 20 }]} />
             

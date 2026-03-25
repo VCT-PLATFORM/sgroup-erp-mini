@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl, TextInput, Platform, useWindowDimensions } from 'react-native';
-import Animated, { FadeInUp } from 'react-native-reanimated';
+import Animated, { FadeInUp, SlideInRight, SlideOutRight } from 'react-native-reanimated';
 import { typography, sgds } from '../../../shared/theme/theme';
 import { useAppTheme } from '../../../shared/theme/useAppTheme';
 import { SGCard, SGButton, SGAuroraBackground, SGSkeletonLoader, SGEmptyState } from '../../../shared/ui/components';
 import { useProjects, useDeleteProject } from '../hooks/useProjects';
-import { Building2, Plus, MapPin, Search, Trash2, TrendingUp, Layers, CheckCircle2 } from 'lucide-react-native';
+import { Building2, Plus, MapPin, Search, Trash2, TrendingUp, Layers, CheckCircle2, SlidersHorizontal, X } from 'lucide-react-native';
 import { formatTy } from '../../../shared/utils/formatters';
 import { ProjectDetailView } from './ProjectDetailView';
 import { ProjectFormModal } from '../components/ProjectFormModal';
@@ -26,6 +26,8 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
   const deleteMutation = useDeleteProject();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  const [showFilters, setShowFilters] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editProject, setEditProject] = useState<any>(null);
@@ -33,14 +35,23 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
 
   const filteredProjects = useMemo(() => {
     const safeProjects = Array.isArray(projects) ? projects : [];
-    if (!searchQuery) return safeProjects;
-    const lowerQ = searchQuery.toLowerCase();
-    return safeProjects.filter((p: any) => 
-      p.name?.toLowerCase().includes(lowerQ) || 
-      p.projectCode?.toLowerCase().includes(lowerQ) ||
-      p.developer?.toLowerCase().includes(lowerQ)
-    );
-  }, [projects, searchQuery]);
+    let result = safeProjects;
+    
+    if (statusFilter !== 'ALL') {
+      result = result.filter(p => p.status === statusFilter);
+    }
+    
+    if (searchQuery) {
+      const lowerQ = searchQuery.toLowerCase();
+      result = result.filter((p: any) => 
+        p.name?.toLowerCase().includes(lowerQ) || 
+        p.projectCode?.toLowerCase().includes(lowerQ) ||
+        p.developer?.toLowerCase().includes(lowerQ)
+      );
+    }
+    
+    return result;
+  }, [projects, searchQuery, statusFilter]);
 
   const handleOpenCreate = () => {
     setEditProject(null);
@@ -227,8 +238,8 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
         </View>
       ) : (
         <>
-          <View style={styles.filterRow}>
-            <View style={[styles.searchBox, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }]}>
+          <View style={[styles.filterRow, { flexDirection: 'row', gap: 12 }]}>
+            <View style={[styles.searchBox, { flex: 1, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9' }]}>
               <Search size={20} color={colors.textTertiary} />
               <TextInput
                 style={[styles.searchInput, { color: colors.text, outlineStyle: 'none' as any }]}
@@ -238,6 +249,20 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
                 onChangeText={setSearchQuery}
               />
             </View>
+            <TouchableOpacity 
+              onPress={() => setShowFilters(true)}
+              style={{
+                width: 48, height: 48, borderRadius: 12, 
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#fff',
+                borderWidth: 1, borderColor: colors.border,
+                alignItems: 'center', justifyContent: 'center'
+              }}
+            >
+              <SlidersHorizontal size={20} color={colors.textSecondary} />
+              {statusFilter !== 'ALL' && (
+                <View style={{ position: 'absolute', top: 12, right: 12, width: 8, height: 8, borderRadius: 4, backgroundColor: colors.danger, borderWidth: 1, borderColor: isDark ? '#000' : '#fff' }} />
+              )}
+            </TouchableOpacity>
           </View>
         
             <View style={{ zIndex: 1 }}>
@@ -266,6 +291,59 @@ export function ProjectListScreen({ onNavigateInventory }: Props) {
             </View>
         </>
       )}
+
+      {/* Glassmorphism Drawer Filter */}
+      {showFilters && (
+        <View style={[StyleSheet.absoluteFill, { zIndex: 100, flexDirection: 'row' }]}>
+          <TouchableOpacity 
+            style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' }} 
+            activeOpacity={1} 
+            onPress={() => setShowFilters(false)} 
+          />
+          <Animated.View 
+            entering={SlideInRight.springify().damping(20)}
+            exiting={SlideOutRight}
+            style={[
+              { width: isDesktop ? 400 : width * 0.85, height: '100%', padding: 24, backgroundColor: isDark ? 'rgba(15,23,42,0.95)' : 'rgba(255,255,255,0.95)' },
+              sgds.glass as any
+            ]}
+          >
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+              <Text style={[typography.h3, { color: colors.text, fontWeight: '800' }]}>Bộ lọc nâng cao</Text>
+              <TouchableOpacity onPress={() => setShowFilters(false)}>
+                <X size={24} color={colors.textTertiary} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={[typography.body, { color: colors.textSecondary, marginBottom: 12, fontWeight: '600' }]}>Trạng thái Mở bán</Text>
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+              {['ALL', 'ACTIVE', 'PAUSED', 'LOCKED'].map(st => (
+                <TouchableOpacity
+                  key={st}
+                  onPress={() => setStatusFilter(st)}
+                  style={{
+                    paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20,
+                    backgroundColor: statusFilter === st ? colors.brand : (isDark ? 'rgba(255,255,255,0.05)' : '#f1f5f9'),
+                    borderWidth: 1, borderColor: statusFilter === st ? colors.brand : colors.border
+                  }}
+                >
+                  <Text style={[typography.body, { color: statusFilter === st ? '#fff' : colors.text, fontWeight: '600' }]}>
+                    {st === 'ALL' ? 'Tất cả' : st === 'ACTIVE' ? 'Đang bán' : st === 'PAUSED' ? 'Tạm dừng' : 'Đã đóng'}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+            
+            <View style={{ flex: 1 }} />
+            
+            <View style={{ flexDirection: 'row', gap: 12, marginTop: 24 }}>
+              <SGButton title="Thiết lập lại" variant="outline" onPress={() => setStatusFilter('ALL')} style={{ flex: 1 }} />
+              <SGButton title="Áp dụng" onPress={() => setShowFilters(false)} style={{ flex: 1, backgroundColor: colors.brand }} />
+            </View>
+          </Animated.View>
+        </View>
+      )}
+
     </View>
   );
 }
