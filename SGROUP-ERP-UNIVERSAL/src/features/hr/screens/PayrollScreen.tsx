@@ -3,7 +3,7 @@
  * Features: View payslips, Privacy Mode (Fintech style), detailed compensations
  */
 import React, { useState } from 'react';
-import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Platform, TouchableOpacity, ActivityIndicator, StyleSheet } from 'react-native';
 import { Wallet, DollarSign, ArrowUpRight, ArrowDownRight, Search, FileText, CheckCircle, Clock, Eye, EyeOff, LayoutGrid, List, BarChart3, TrendingUp, AlertCircle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';

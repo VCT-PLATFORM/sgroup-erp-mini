@@ -44,5 +44,6 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \
   CMD wget -qO- http://localhost:3000/api || exit 1
 
-# Run migrations then start the application
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/main"]
+# Sync schema then start the application
+# Using db push instead of migrate deploy because this project uses schema-first approach
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/main"]
