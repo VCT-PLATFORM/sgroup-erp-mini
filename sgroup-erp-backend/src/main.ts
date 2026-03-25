@@ -77,6 +77,7 @@ async function bootstrap() {
     'http://localhost:8083',
     'http://localhost:19006',
     'https://sgroup-erp.vercel.app',
+    'https://erp.sgroup.com.vn',
   ];
 
   if (process.env.FRONTEND_URL) {
