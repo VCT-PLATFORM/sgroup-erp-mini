@@ -20,11 +20,12 @@ Structured process for reviewing and approving architecture decisions involving 
    - Include context, decision, alternatives, consequences
    - Add architecture diagrams (C4 model)
 
-2. **Tech Lead reviews technical feasibility**
-   - Impact on existing codebase
+2. **Tech Lead reviews technical feasibility & Architecture Rules**
+   - **Clean Architecture Check:** Does the design enforce Dependency Rule (dependencies point inwards to Domain)?
+   - Are interfaces used to abstract Infrastructure, ORMs, and Frameworks?
+   - Impact on existing codebase and migration roadmap (Strangler Fig Pattern)
    - Development effort estimation
-   - Migration/rollback strategy
-   - Testing implications
+   - Testing implications (Domain logic must be testable without UI/DB)
 
 3. **CTO evaluates strategic alignment**
    - Alignment with tech roadmap

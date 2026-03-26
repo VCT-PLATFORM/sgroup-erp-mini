@@ -28,18 +28,18 @@ src/
 │   └── pipes/            # Validation pipes
 ├── modules/              # Feature modules
 │   ├── auth/             # Authentication (JWT login, register)
-│   ├── customers/        # Customer management
-│   ├── products/         # Product catalog
-│   ├── sales-ops/        # Sales operations (staff, teams, KPIs)
-│   ├── sales-planning/   # Sales planning & targets
-│   ├── sales-report/     # Sales reports & analytics
-│   ├── exec-planning/    # Executive planning
-│   ├── marketing-planning/ # Marketing planning
-│   ├── activities/       # Activity logging
-│   ├── appointments/     # Appointment scheduling
-│   ├── ai/               # AI integration module
-│   └── bizfly-sync/      # BizFly CRM data sync
+│   ├── ...               # Other modules
+│   └── project/          # Example Clean Architecture module
+│       ├── domain/       # Core Business Rules (Entities, Repository Interfaces)
+│       ├── application/  # Use Cases, Application Services
+│       ├── infrastructure/# Prisma Repositories, Third-party integrations
+│       └── presentation/ # Controllers, DTOs
 └── prisma/               # Prisma service and module
+
+## Core Architecture Principle: Clean Architecture & Dependency Rule
+1. **Dependency Inward:** Source code dependencies strictly point inward to the Domain layer. `Domain` -> `Application` <- `Infrastructure` & `Presentation`.
+2. **Framework Independence:** Core business logic (Domain/Application) MUST NOT depend on NestJS or Prisma.
+3. **Repository Pattern:** Services call DB through an Abstract Repository Interface defined in the Domain layer, implemented in Infrastructure.
 ```
 
 ## API Response Convention

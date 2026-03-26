@@ -22,16 +22,19 @@ description: Skill for developing React Native / Expo frontend components in the
 ```
 src/
 ├── core/           # App-level config, providers, navigation
-├── features/       # Feature modules (sales, planning, etc.)
+├── features/       # Feature modules (Feature-Sliced Design)
 │   └── <feature>/
-│       ├── screens/      # Screen components
-│       ├── components/   # Feature-specific components
-│       ├── stores/       # Zustand stores
-│       ├── hooks/        # Custom hooks
-│       ├── types/        # TypeScript interfaces
-│       └── utils/        # Helper functions
+│       ├── domain/        # Entities, Pure Business Logic, Models
+│       ├── application/   # Zustand stores, React Query Hooks, Use Cases
+│       ├── infrastructure/# API calls (Axios), DTO to Domain mapping
+│       └── presentation/  # Smart/Dumb UI components and Screens
 ├── shared/         # Shared components, hooks, utils
 └── system/         # System-level configs, themes
+
+## Core Architecture Principle: Clean Feature-Sliced Design
+1. **Separation of Concerns within Features:** UI (`presentation`) only renders data and dispatches actions. Data fetching and state changes are handled by `application`. 
+2. **Infrastructure limits:** `infrastructure` translates external backend data (DTOs) into frontend `domain` models.
+3. **No logic leak:** React components MUST NOT contain complex business rules or raw API configurations.
 ```
 
 ## Coding Standards
