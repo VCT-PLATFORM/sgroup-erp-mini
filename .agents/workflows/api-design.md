@@ -144,3 +144,6 @@ Quy trình thiết kế API RESTful cho SGROUP ERP, từ endpoint design đến 
 
 ## Next Workflow
 → `/feature-development` or `/db-migration` if schema changes needed first
+
+## 🚨 MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/api-architecture-rules.md`. The API responses, RESTful conventions, DTO formats, and versioning rules are non-negotiable for API design.

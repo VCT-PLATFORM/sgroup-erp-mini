@@ -270,3 +270,6 @@ Why this choice over alternatives?
 | Option | Pros | Cons | Rejected Because |
 |--------|------|------|------------------|
 ```
+
+## 🚨 MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/api-architecture-rules.md` when designing APIs. The API responses, DTOs, versioning, and RESTful conventions are non-negotiable standards for SGROUP ERP.

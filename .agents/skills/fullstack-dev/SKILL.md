@@ -323,3 +323,6 @@ fetchStaff: async () => {
 | Duplicate entries | BE | No unique constraint | Add `@unique` in Prisma schema |
 | Slow page load | BE | N+1 query | Use `include` in Prisma |
 
+## 🚨 MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/api-architecture-rules.md` along with the backend and frontend rules when building full-stack features. The API responses, RESTful conventions, DTO formats, and versioning rules are non-negotiable.
+
