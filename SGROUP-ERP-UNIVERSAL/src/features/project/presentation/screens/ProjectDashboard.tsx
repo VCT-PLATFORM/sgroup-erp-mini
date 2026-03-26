@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Building, Users, FileText, CheckSquare } from 'lucide-react-native';
 import { useGetProjects } from '../../application/hooks/useProjectQueries';
 
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const ProjectDashboard = () => {
   const { data: projects, isLoading } = useGetProjects();

@@ -6,7 +6,7 @@ import { Users, Calendar, Banknote, Briefcase, TrendingUp } from 'lucide-react-n
 import { useGetEmployees, useGetLeaves, useGetPayroll } from '../../application/hooks/useHRQueries';
 
 // SGDS - Custom components assumption (SGroup Design System)
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const HRDashboard = () => {
   const { data: employees, isLoading: loadingEmps } = useGetEmployees();

@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Search, Filter, Home, Lock, Unlock } from 'lucide-react-native';
 import { useGetInventory, useLockProduct } from '../../application/hooks/useProjectQueries';
 
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const InventoryScreen = ({ route }: any) => {
   const projectId = route?.params?.projectId || 'sample-project-id';

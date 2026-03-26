@@ -2,7 +2,7 @@ import React from 'react';
 import { View, ScrollView, StyleSheet , Text } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { Users, Briefcase } from 'lucide-react-native';
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const ProjectAssignmentScreen = () => {
   return (

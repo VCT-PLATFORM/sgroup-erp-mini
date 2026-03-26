@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { DollarSign, TrendingUp, TrendingDown, Wallet } from 'lucide-react-native';
 import { useGetAccounts } from '../../application/hooks/useFinanceQueries';
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const FinanceDashboard = () => {
   const { data: accounts } = useGetAccounts();

@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { User, Mail, Phone, MapPin, Briefcase, Calendar } from 'lucide-react-native';
 import { useGetEmployeeById } from '../../application/hooks/useHRQueries';
 
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const EmployeeProfileScreen = ({ route }: any) => {
   const employeeId = route?.params?.id || 'sample-id';

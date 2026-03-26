@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { FileText, Download } from 'lucide-react-native';
 // Note: Assuming useGetDocs is created in the hooks
 import { useGetProjects } from '../../application/hooks/useProjectQueries';
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const ProjectDocsScreen = () => {
   return (

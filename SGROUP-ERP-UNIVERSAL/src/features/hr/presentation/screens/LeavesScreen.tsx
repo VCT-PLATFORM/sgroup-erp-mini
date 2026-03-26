@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import { useGetLeaves, useRequestLeave } from '../../application/hooks/useHRQueries';
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 // Skeletal refactor to comply with Feature-Sliced Design
 export const LeavesScreen = () => {

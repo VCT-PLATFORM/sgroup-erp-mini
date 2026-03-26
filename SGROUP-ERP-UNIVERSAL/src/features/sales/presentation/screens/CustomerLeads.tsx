@@ -4,7 +4,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Search, Filter, Phone, Mail } from 'lucide-react-native';
 import { useGetCustomers } from '../../application/hooks/useSalesQueries';
-import { SGCard } from '../../../../shared/ui/SGCard';
+import { SGCard } from '../../../../shared/ui/components/SGCard';
 
 export const CustomerLeads = () => {
   const [filter, setFilter] = useState('ALL');
