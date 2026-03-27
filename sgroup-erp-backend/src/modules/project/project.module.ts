@@ -6,6 +6,8 @@ import { ProjectDocController } from './presentation/controllers/project-doc.con
 import { ProjectAssignmentController } from './presentation/controllers/project-assignment.controller';
 import { ProjectService } from './application/use-cases/project.service';
 import { PropertyProductService } from './application/use-cases/property-product.service';
+import { PrismaProjectRepository } from './infrastructure/database/prisma-project.repository';
+import { PrismaPropertyProductRepository } from './infrastructure/database/prisma-property-product.repository';
 
 @Module({
   controllers: [
@@ -15,7 +17,18 @@ import { PropertyProductService } from './application/use-cases/property-product
     ProjectDocController,
     ProjectAssignmentController,
   ],
-  providers: [ProjectService, PropertyProductService],
+  providers: [
+    ProjectService,
+    PropertyProductService,
+    {
+      provide: 'IProjectRepository',
+      useClass: PrismaProjectRepository,
+    },
+    {
+      provide: 'IPropertyProductRepository',
+      useClass: PrismaPropertyProductRepository,
+    },
+  ],
   exports: [ProjectService, PropertyProductService],
 })
 export class ProjectModule {}
