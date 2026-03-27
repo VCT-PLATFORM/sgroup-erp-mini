@@ -1,9 +1,9 @@
 ---
 name: vct-accessibility
-description: Web accessibility (WCAG 2.1 AA) compliance for VCT Platform — ARIA patterns, keyboard navigation, screen reader support, color contrast, focus management, and automated testing with axe-core.
+description: Web accessibility (WCAG 2.1 AA) compliance for SGROUP ERP Platform — ARIA patterns, keyboard navigation, screen reader support, color contrast, focus management, and automated testing with axe-core.
 ---
 
-# VCT Platform Accessibility (a11y)
+# SGROUP ERP Platform Accessibility (a11y)
 
 > **When to activate**: Creating new UI components, reviewing pages for WCAG compliance, fixing accessibility issues, or adding screen reader support.
 
@@ -203,3 +203,7 @@ document.getElementById(firstErrorField)?.focus()
 5. ❌ **NEVER** skip `aria-label` on icon-only buttons
 6. ❌ **NEVER** use `aria-hidden="true"` on interactive elements
 7. ❌ **NEVER** auto-play audio/video without user control
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

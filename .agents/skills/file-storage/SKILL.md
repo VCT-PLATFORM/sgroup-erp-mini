@@ -1,9 +1,9 @@
 ---
 name: vct-file-storage
-description: S3-compatible file storage for VCT Platform using MinIO — file upload/download, image handling, document storage, and CDN patterns.
+description: S3-compatible file storage for SGROUP ERP Platform using MinIO — file upload/download, image handling, document storage, and CDN patterns.
 ---
 
-# VCT Platform File Storage (MinIO/S3)
+# SGROUP ERP Platform File Storage (MinIO/S3)
 
 > **When to activate**: Implementing file uploads, image management, document storage, athlete photos, certificate PDFs, or any binary asset handling.
 >
@@ -182,3 +182,7 @@ import { VCT_FileUpload } from '@vct/ui'
 3. ❌ **NEVER** skip file type validation (security risk)
 4. ❌ **NEVER** allow unlimited upload size
 5. ❌ **NEVER** store file content without metadata in PostgreSQL
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

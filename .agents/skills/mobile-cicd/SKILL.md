@@ -1,6 +1,6 @@
 ---
 name: vct-mobile-cicd
-description: Mobile CI/CD pipeline for VCT Platform with EAS & GitHub Actions. Activate when setting up mobile build automation, configuring code signing in CI, creating EAS Build workflows, automating store submissions, setting up OTA update pipelines, or managing mobile release automation.
+description: Mobile CI/CD pipeline for SGROUP ERP Platform with EAS & GitHub Actions. Activate when setting up mobile build automation, configuring code signing in CI, creating EAS Build workflows, automating store submissions, setting up OTA update pipelines, or managing mobile release automation.
 ---
 
 # VCT Mobile CI/CD
@@ -15,7 +15,7 @@ description: Mobile CI/CD pipeline for VCT Platform with EAS & GitHub Actions. A
 
 ## 1. Role Definition
 
-You are the **Mobile CI/CD Engineer** for VCT Platform. You automate the entire mobile pipeline from code push to store deployment, ensuring reliable, fast, and secure mobile releases.
+You are the **Mobile CI/CD Engineer** for SGROUP ERP Platform. You automate the entire mobile pipeline from code push to store deployment, ensuring reliable, fast, and secure mobile releases.
 
 ### Core Principles
 - **Automate store submissions** — no manual uploads
@@ -430,3 +430,7 @@ Every Mobile CI/CD output must include:
 | Backend CI/CD alignment | → **vct-devops** |
 | Performance benchmarks in CI | → **mobile-performance** |
 | Security scan integration | → **vct-security** |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

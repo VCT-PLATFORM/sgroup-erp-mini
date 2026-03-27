@@ -1,5 +1,5 @@
 ---
-description: Workflow deploy mobile app lên App Store và Google Play cho VCT Platform
+description: Workflow deploy mobile app lên App Store và Google Play cho SGROUP ERP Platform
 ---
 
 # /deploy-mobile — Deploy Mobile App Lên Stores

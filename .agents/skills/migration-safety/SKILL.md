@@ -1,9 +1,9 @@
 ---
 name: vct-migration-safety
-description: Zero-downtime database migration patterns for VCT Platform — safe migration workflow, rollback procedures, locking awareness, multi-step column changes, data backfill strategies, and CI migration validation.
+description: Zero-downtime database migration patterns for SGROUP ERP Platform — safe migration workflow, rollback procedures, locking awareness, multi-step column changes, data backfill strategies, and CI migration validation.
 ---
 
-# VCT Platform Migration Safety
+# SGROUP ERP Platform Migration Safety
 
 > **When to activate**: Creating new migrations, modifying tables in production, adding/removing columns, changing constraints, or planning schema changes that affect running applications.
 
@@ -197,3 +197,7 @@ END $$;
 5. ❌ **NEVER** deploy migrations without testing rollback
 6. ❌ **NEVER** modify an already-applied migration — create a new one
 7. ❌ **NEVER** drop columns that running application code still references
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

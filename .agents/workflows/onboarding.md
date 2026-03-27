@@ -1,5 +1,5 @@
 ---
-description: Workflow setup môi trường phát triển VCT Platform từ đầu cho developer mới
+description: Workflow setup môi trường phát triển SGROUP ERP Platform từ đầu cho developer mới
 ---
 
 # /onboarding — Setup Dev Environment

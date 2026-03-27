@@ -1,5 +1,5 @@
 ---
-description: Workflow điều tra và sửa bug cho VCT Platform
+description: Workflow điều tra và sửa bug cho SGROUP ERP Platform
 ---
 
 # /fix-bug — Điều Tra & Sửa Bug

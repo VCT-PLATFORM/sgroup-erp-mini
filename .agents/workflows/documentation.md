@@ -1,5 +1,5 @@
 ---
-description: Workflow viết và cập nhật documentation cho VCT Platform
+description: Workflow viết và cập nhật documentation cho SGROUP ERP Platform
 ---
 
 # /documentation — Viết & Cập Nhật Documentation

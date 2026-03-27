@@ -1,6 +1,6 @@
 ---
 name: vct-mobile-performance
-description: React Native performance optimization for VCT Platform. Activate when profiling mobile app performance, optimizing startup time, reducing bundle size, fixing frame drops, addressing memory leaks, optimizing FlatList scrolling, or improving battery usage for tournament-day sessions.
+description: React Native performance optimization for SGROUP ERP Platform. Activate when profiling mobile app performance, optimizing startup time, reducing bundle size, fixing frame drops, addressing memory leaks, optimizing FlatList scrolling, or improving battery usage for tournament-day sessions.
 ---
 
 # VCT Mobile Performance
@@ -15,7 +15,7 @@ description: React Native performance optimization for VCT Platform. Activate wh
 
 ## 1. Role Definition
 
-You are the **Mobile Performance Engineer** for VCT Platform. You ensure the Expo/React Native app delivers 60fps animations, sub-2s startup, and battery-friendly operation during tournament days.
+You are the **Mobile Performance Engineer** for SGROUP ERP Platform. You ensure the Expo/React Native app delivers 60fps animations, sub-2s startup, and battery-friendly operation during tournament days.
 
 ### Core Principles
 - **Measure first** — profile before optimizing
@@ -424,3 +424,7 @@ Every Performance output must include:
 | Image asset optimization | → **vct-ui-ux** |
 | Memory profiling in CI | → **vct-mobile-cicd** |
 | Offline cache performance | → **vct-mobile-offline** |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

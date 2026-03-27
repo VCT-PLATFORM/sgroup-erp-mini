@@ -1,5 +1,5 @@
 ---
-description: Playbook debug các lỗi thường gặp trong VCT Platform — 401, 502, CORS, double API prefix, JSX errors, deployment 404
+description: Playbook debug các lỗi thường gặp trong SGROUP ERP Platform — 401, 502, CORS, double API prefix, JSX errors, deployment 404
 ---
 
 # /debug-common-errors — Playbook Debug Lỗi Thường Gặp

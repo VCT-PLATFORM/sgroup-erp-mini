@@ -1,5 +1,5 @@
 ---
-description: Workflow review UI/UX design trước khi implementation cho VCT Platform
+description: Workflow review UI/UX design trước khi implementation cho SGROUP ERP Platform
 ---
 
 # /design-review — UI/UX Design Review

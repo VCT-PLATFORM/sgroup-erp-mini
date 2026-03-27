@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo UI component mới trong @vct/ui cho VCT Platform
+description: Workflow tạo UI component mới trong @vct/ui cho SGROUP ERP Platform
 ---
 
 # /add-component — Tạo UI Component Mới

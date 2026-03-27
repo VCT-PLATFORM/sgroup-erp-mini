@@ -1,5 +1,5 @@
 ---
-description: Workflow sửa lỗi khẩn cấp production cho VCT Platform
+description: Workflow sửa lỗi khẩn cấp production cho SGROUP ERP Platform
 ---
 
 # /hotfix — Sửa Lỗi Khẩn Cấp Production

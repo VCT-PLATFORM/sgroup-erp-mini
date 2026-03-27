@@ -1,9 +1,9 @@
 ---
 name: vct-subscription
-description: SaaS subscription and billing management for VCT Platform — plans, subscriptions, billing cycles, renewals, upgrades, and admin management.
+description: SaaS subscription and billing management for SGROUP ERP Platform — plans, subscriptions, billing cycles, renewals, upgrades, and admin management.
 ---
 
-# VCT Platform Subscription & Billing
+# SGROUP ERP Platform Subscription & Billing
 
 > **When to activate**: Working with subscription plans, billing cycles, subscription lifecycle (create/renew/cancel/upgrade/suspend), or the admin subscriptions page.
 
@@ -231,3 +231,7 @@ type Subscription struct {
 2. ❌ **NEVER** delete subscription records — use status changes
 3. ❌ **NEVER** skip billing cycle creation on subscribe/renew
 4. ❌ **NEVER** hardcode plan features — use JSONB `features` array
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

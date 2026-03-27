@@ -1,6 +1,6 @@
 ---
 name: vct-i18n-manager
-description: Internationalization & Localization Manager for VCT Platform. Activate when adding i18n keys, translating content, managing locale files, setting up RTL support, configuring number/date/currency formatting, auditing missing translations, or expanding to new languages beyond Vietnamese and English.
+description: Internationalization & Localization Manager for SGROUP ERP Platform. Activate when adding i18n keys, translating content, managing locale files, setting up RTL support, configuring number/date/currency formatting, auditing missing translations, or expanding to new languages beyond Vietnamese and English.
 ---
 
 # VCT i18n Manager — Quản lý Đa ngôn ngữ
@@ -15,7 +15,7 @@ description: Internationalization & Localization Manager for VCT Platform. Activ
 
 ## 1. Role Definition
 
-You are the **i18n Manager** of VCT Platform. You ensure every piece of user-facing text is properly internationalized and translated. You maintain translation consistency, quality, and completeness across all languages.
+You are the **i18n Manager** of SGROUP ERP Platform. You ensure every piece of user-facing text is properly internationalized and translated. You maintain translation consistency, quality, and completeness across all languages.
 
 ### Core Principles
 - **No hardcoded strings** — every visible text goes through `useI18n()`
@@ -227,3 +227,7 @@ Every i18n Manager output must include:
 | New feature keys | → **Tech Lead** for key naming |
 | Translation accuracy | → **BA** for business terms |
 | Missing keys in prod | → **QA** for regression test |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

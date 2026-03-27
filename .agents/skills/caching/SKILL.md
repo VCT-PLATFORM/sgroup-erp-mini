@@ -1,9 +1,9 @@
 ---
 name: vct-caching
-description: Caching strategy for VCT Platform — CachedStore wrapper, Redis integration, TTL configuration, cache invalidation patterns, and when to cache vs skip cache.
+description: Caching strategy for SGROUP ERP Platform — CachedStore wrapper, Redis integration, TTL configuration, cache invalidation patterns, and when to cache vs skip cache.
 ---
 
-# VCT Platform Caching Strategy
+# SGROUP ERP Platform Caching Strategy
 
 > **When to activate**: Performance optimization, adding cache layers, configuring TTL, invalidating stale data, or setting up Redis for production.
 
@@ -173,3 +173,7 @@ log.Printf("cache: hits=%d misses=%d ratio=%.2f%% size=%d",
 4. ❌ **NEVER** cache error responses — only cache successful results
 5. ❌ **NEVER** skip invalidation on writes — stale data causes bugs
 6. ❌ **NEVER** cache user-specific data in shared cache without key isolation
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

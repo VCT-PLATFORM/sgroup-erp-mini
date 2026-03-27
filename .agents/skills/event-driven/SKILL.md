@@ -1,9 +1,9 @@
 ---
 name: vct-event-driven
-description: Event-driven architecture for VCT Platform — domain events, in-process event bus, event sourcing for scoring, CQRS read models, and event-driven integration patterns.
+description: Event-driven architecture for SGROUP ERP Platform — domain events, in-process event bus, event sourcing for scoring, CQRS read models, and event-driven integration patterns.
 ---
 
-# VCT Platform Event-Driven Architecture
+# SGROUP ERP Platform Event-Driven Architecture
 
 > **When to activate**: Implementing domain events, event sourcing for scoring, building read models (CQRS), publishing notifications on state changes, or creating event-driven integrations.
 
@@ -232,3 +232,7 @@ func (s *Server) setupEventHandlers() {
 4. ❌ **NEVER** mutate events after publishing — events are immutable
 5. ❌ **NEVER** use events for synchronous request-response flows — use direct calls
 6. ❌ **NEVER** skip error handling in event handlers — log and continue
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

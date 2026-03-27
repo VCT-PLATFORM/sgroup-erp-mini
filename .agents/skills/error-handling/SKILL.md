@@ -1,9 +1,9 @@
 ---
 name: vct-error-handling
-description: Standardized error handling patterns for VCT Platform — APIError envelope, error codes, domain-to-HTTP mapping, Vietnamese error messages, frontend error display, and i18n error keys.
+description: Standardized error handling patterns for SGROUP ERP Platform — APIError envelope, error codes, domain-to-HTTP mapping, Vietnamese error messages, frontend error display, and i18n error keys.
 ---
 
-# VCT Platform Error Handling
+# SGROUP ERP Platform Error Handling
 
 > **When to activate**: Creating API handlers, defining business errors, mapping domain errors to HTTP responses, or implementing frontend error display.
 
@@ -271,3 +271,7 @@ Error occurred?
       ├─ Cold start → Render free tier sleeps after 15min → add cron ping
       └─ Env vars → Check all VCT_* vars set in platform dashboard
 ```
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

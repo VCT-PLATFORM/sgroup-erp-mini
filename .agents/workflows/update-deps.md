@@ -1,5 +1,5 @@
 ---
-description: Workflow cập nhật dependencies cho VCT Platform (Go modules + npm packages)
+description: Workflow cập nhật dependencies cho SGROUP ERP Platform (Go modules + npm packages)
 ---
 
 # /update-deps — Cập Nhật Dependencies

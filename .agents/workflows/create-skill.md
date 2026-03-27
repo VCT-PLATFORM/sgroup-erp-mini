@@ -88,7 +88,7 @@ description: [mô tả khi nào activate, keywords trigger]
 - ✅ **Checklists** cho quy trình quan trọng
 - ✅ **Examples** cụ thể cho project VCT
 - ❌ **KHÔNG** copy-paste từ skill khác mà không customize
-- ❌ **KHÔNG** quá generic — phải tailored cho VCT Platform
+- ❌ **KHÔNG** quá generic — phải tailored cho SGROUP ERP Platform
 
 ### Description phải chứa keywords trigger:
 ```yaml
@@ -96,7 +96,7 @@ description: [mô tả khi nào activate, keywords trigger]
 description: Helps with coding
 
 # ✅ ĐÚNG — chứa trigger keywords cụ thể
-description: QA Engineer role for VCT Platform. Activate when writing tests, 
+description: QA Engineer role for SGROUP ERP Platform. Activate when writing tests, 
   setting up E2E automation, performing regression testing, creating test plans, 
   or analyzing code coverage metrics.
 ```

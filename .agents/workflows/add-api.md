@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo API endpoint backend mới cho VCT Platform
+description: Workflow tạo API endpoint backend mới cho SGROUP ERP Platform
 ---
 
 # /add-api — Tạo API Endpoint Backend

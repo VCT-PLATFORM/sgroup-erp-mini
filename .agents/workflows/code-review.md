@@ -1,5 +1,5 @@
 ---
-description: Workflow review chất lượng code cho VCT Platform (CTO role)
+description: Workflow review chất lượng code cho SGROUP ERP Platform (CTO role)
 ---
 
 # /code-review — Review Chất Lượng Code

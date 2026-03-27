@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo và quản lý database migration cho VCT Platform
+description: Workflow tạo và quản lý database migration cho SGROUP ERP Platform
 ---
 
 # /db-migration — Database Migration

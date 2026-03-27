@@ -68,8 +68,8 @@ grep -rn "useI18n" packages/app/features/
 ## Learning Summary: [Chủ đề]
 
 ### Key Findings:
-1. [Finding 1] — [impact on VCT Platform]
-2. [Finding 2] — [impact on VCT Platform]
+1. [Finding 1] — [impact on SGROUP ERP Platform]
+2. [Finding 2] — [impact on SGROUP ERP Platform]
 
 ### Patterns Discovered:
 - [Pattern 1]: [mô tả + khi nào dùng]

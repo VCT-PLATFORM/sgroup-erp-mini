@@ -1,9 +1,9 @@
 ---
 name: vct-search
-description: Full-text search integration for VCT Platform using Meilisearch — indexing strategy, search API design, autocomplete, faceted search, and Vietnamese language support.
+description: Full-text search integration for SGROUP ERP Platform using Meilisearch — indexing strategy, search API design, autocomplete, faceted search, and Vietnamese language support.
 ---
 
-# VCT Platform Search (Meilisearch)
+# SGROUP ERP Platform Search (Meilisearch)
 
 > **When to activate**: Implementing full-text search, autocomplete, fuzzy matching, faceted search, or Vietnamese-language search features.
 >
@@ -164,3 +164,7 @@ function SearchBar() {
 8. [ ] Add batch reindex admin endpoint
 9. [ ] Frontend: search component with debounce
 10. [ ] Vietnamese language testing
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

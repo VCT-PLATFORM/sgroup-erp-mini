@@ -1,9 +1,9 @@
 ---
 name: vct-ui-ux
-description: VCT Platform UI/UX design reference — delegates to docs/architecture/ui-architecture.md for design tokens, component catalog, theming, accessibility, animation, and visual quality standards.
+description: SGROUP ERP Platform UI/UX design reference — delegates to docs/architecture/ui-architecture.md for design tokens, component catalog, theming, accessibility, animation, and visual quality standards.
 ---
 
-# VCT Platform UI/UX Design System
+# SGROUP ERP Platform UI/UX Design System
 
 > **When to activate**: Tasks involving UI design, styling, component creation, theming, layout, visual polish, or accessibility review.
 >
@@ -52,3 +52,7 @@ Monorepo, routing, state, API, i18n, testing → see `vct-frontend` SKILL / `doc
 | 6 | ✅ ALWAYS test both Light + Dark |
 | 7 | ✅ ALWAYS responsive 375/768/1024/1440 |
 | 8 | ✅ ALWAYS keyboard navigable + ARIA |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

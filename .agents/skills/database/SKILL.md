@@ -191,3 +191,7 @@ pg_dump -U postgres -h localhost -d sgroup_erp > backup_$(date +%Y%m%d).sql
 # Restore
 psql -U postgres -h localhost -d sgroup_erp < backup_20260312.sql
 ```
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

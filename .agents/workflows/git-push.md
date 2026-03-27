@@ -1,5 +1,5 @@
 ---
-description: Workflow tự động commit, push code và cập nhật lên GitHub cho VCT Platform
+description: Workflow tự động commit, push code và cập nhật lên GitHub cho SGROUP ERP Platform
 ---
 
 # /git-push — Đẩy Code Lên GitHub

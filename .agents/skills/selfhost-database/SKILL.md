@@ -1,9 +1,9 @@
 ---
 name: vct-selfhost-database
-description: VCT Platform self-hosted PostgreSQL — Docker setup, local development, backup/restore, migrations, replication, and production hardening.
+description: SGROUP ERP Platform self-hosted PostgreSQL — Docker setup, local development, backup/restore, migrations, replication, and production hardening.
 ---
 
-# VCT Platform Self-Hosted Database
+# SGROUP ERP Platform Self-Hosted Database
 
 > **When to activate**: Any task involving local PostgreSQL setup, Docker database, backups, migrations, database administration, or self-hosted production deployment.
 
@@ -15,9 +15,9 @@ description: VCT Platform self-hosted PostgreSQL — Docker setup, local develop
 
 ## 1. Overview
 
-> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/database-architecture.md](file:///d:/VCT PLATFORM/vct-platform/docs/architecture/database-architecture.md) for Multi-Tenancy (RLS), Connection Pooling, Migrations, and Soft Deletes.
+> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/database-architecture.md](file:///d:/SGROUP ERP FULL/docs/architecture/database-architecture.md) for Multi-Tenancy (RLS), Connection Pooling, Migrations, and Soft Deletes.
 
-VCT Platform uses **PostgreSQL 17 Alpine** via Docker for self-hosted deployments.
+SGROUP ERP Platform uses **PostgreSQL 17 Alpine** via Docker for self-hosted deployments.
 
 ```
 ┌─────────────┐     ┌─────────────┐     ┌──────────────┐
@@ -359,3 +359,7 @@ services:
 | Out of disk space | Check WAL files, run `VACUUM FULL` |
 | Slow queries | Check indexes, run `EXPLAIN ANALYZE` |
 | Data not persisting | Ensure `postgres_data` volume is not deleted (`docker compose down` without `-v`) |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

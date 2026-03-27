@@ -1,9 +1,9 @@
 ---
 name: vct-multi-tenancy
-description: Multi-tenant architecture for VCT Platform — tenant isolation, schema design, data scoping, auth context switching, and tenant-aware queries.
+description: Multi-tenant architecture for SGROUP ERP Platform — tenant isolation, schema design, data scoping, auth context switching, and tenant-aware queries.
 ---
 
-# VCT Platform Multi-Tenancy
+# SGROUP ERP Platform Multi-Tenancy
 
 > **When to activate**: Adding tenant-scoped features, creating tenant-aware queries, implementing data isolation, managing tenant configuration, or working with the `core.tenants` schema.
 
@@ -15,7 +15,7 @@ description: Multi-tenant architecture for VCT Platform — tenant isolation, sc
 
 ## 1. Architecture Overview
 
-VCT Platform uses a **shared-database, schema-separated** multi-tenancy model with `tenant_id` foreign keys for data isolation.
+SGROUP ERP Platform uses a **shared-database, schema-separated** multi-tenancy model with `tenant_id` foreign keys for data isolation.
 
 ```
 ┌──────────────────────────────────────────┐
@@ -210,3 +210,7 @@ Frontend page: `Page_admin_tenants.tsx`
 4. [ ] Scope all queries by `tenant_id` from auth claims
 5. [ ] Test data isolation between tenants
 6. [ ] Add RLS policies if needed (migration 0080)
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

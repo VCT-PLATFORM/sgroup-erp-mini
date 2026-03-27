@@ -326,3 +326,7 @@ if (Platform.OS !== 'web') {
 | List scroll performance | Android | `removeClippedSubviews={true}`, use `FlashList` |
 | Font not loading | Web | Check `expo-font` loaded before render |
 
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

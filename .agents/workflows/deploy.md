@@ -1,5 +1,5 @@
 ---
-description: Workflow build và deployment verification cho VCT Platform
+description: Workflow build và deployment verification cho SGROUP ERP Platform
 ---
 
 # /deploy — Build & Deployment Verification

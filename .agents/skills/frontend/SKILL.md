@@ -1,9 +1,9 @@
 ---
 name: vct-frontend
-description: VCT Platform frontend engineering patterns — delegates to docs/architecture/frontend-architecture.md for monorepo architecture, routing, state management, API integration, i18n, testing, and code patterns.
+description: SGROUP ERP Platform frontend engineering patterns — delegates to docs/architecture/frontend-architecture.md for monorepo architecture, routing, state management, API integration, i18n, testing, and code patterns.
 ---
 
-# VCT Platform Frontend Architecture
+# SGROUP ERP Platform Frontend Architecture
 
 > **When to activate**: Tasks involving frontend engineering — pages, routing, API calls, state management, navigation, i18n, testing, or code structure.
 >
@@ -80,3 +80,7 @@ npm run lint:boundaries     # Custom grep-based check
 npm run typecheck           # TypeScript
 npm run lint                # Full lint
 ```
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

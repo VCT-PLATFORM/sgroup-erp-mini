@@ -134,3 +134,7 @@ Use this format for feedback:
 - [ ] User names use `name` field (not `fullName` which doesn't exist)
 - [ ] Team assignment matches by `email`, not `teamId` (which may not exist on AuthUser)
 
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

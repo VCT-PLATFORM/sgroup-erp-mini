@@ -1,5 +1,5 @@
 ---
-description: Workflow thêm tính năng real-time (WebSocket) cho VCT Platform — scoring live, notifications
+description: Workflow thêm tính năng real-time (WebSocket) cho SGROUP ERP Platform — scoring live, notifications
 ---
 
 # /add-realtime — Thêm Tính Năng Real-time

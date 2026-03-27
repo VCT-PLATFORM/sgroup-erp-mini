@@ -1,9 +1,9 @@
 ---
 name: vct-message-queue
-description: Asynchronous messaging for VCT Platform using NATS — pub/sub patterns, event streaming, background workers, and notification delivery.
+description: Asynchronous messaging for SGROUP ERP Platform using NATS — pub/sub patterns, event streaming, background workers, and notification delivery.
 ---
 
-# VCT Platform Message Queue (NATS)
+# SGROUP ERP Platform Message Queue (NATS)
 
 > **When to activate**: Implementing async event processing, background jobs, notification delivery, inter-service communication, or decoupling heavy operations.
 >
@@ -197,3 +197,7 @@ services:
 3. ❌ **NEVER** skip error handling in subscribers (silent data loss)
 4. ❌ **NEVER** process events out of order without idempotency checks
 5. ❌ **NEVER** put large payloads (>1MB) in messages — use references
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

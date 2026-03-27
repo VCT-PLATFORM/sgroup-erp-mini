@@ -1,9 +1,9 @@
 ---
 name: vct-api-testing
-description: API integration testing patterns for VCT Platform — httptest-based handler tests, test fixtures, authentication mocking, response contract validation, and test data factories.
+description: API integration testing patterns for SGROUP ERP Platform — httptest-based handler tests, test fixtures, authentication mocking, response contract validation, and test data factories.
 ---
 
-# VCT Platform API Testing
+# SGROUP ERP Platform API Testing
 
 > **When to activate**: Writing handler tests, testing API contracts, creating test fixtures, mocking authentication, or verifying endpoint behavior.
 
@@ -214,3 +214,7 @@ func TestAthleteHandler_Validation(t *testing.T) {
 3. ❌ **NEVER** skip error response validation — always check code + message
 4. ❌ **NEVER** test implementation details — test HTTP input/output only
 5. ❌ **NEVER** leave test data in shared state — each test should be independent
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

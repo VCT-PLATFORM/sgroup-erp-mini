@@ -145,3 +145,7 @@ Module 5: AI Features (30 min)
 | User training completion | ≥ 90% | LMS tracking |
 | Training satisfaction | ≥ 4.0/5.0 | Post-training survey |
 | Feature adoption post-training | ≥ 70% | Usage analytics |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

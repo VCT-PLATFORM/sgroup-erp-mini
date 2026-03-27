@@ -1,5 +1,5 @@
 ---
-description: Workflow performance profiling và optimization cho VCT Platform
+description: Workflow performance profiling và optimization cho SGROUP ERP Platform
 ---
 
 # /performance — Performance Optimization

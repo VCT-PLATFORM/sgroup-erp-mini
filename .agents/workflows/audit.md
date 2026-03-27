@@ -1,5 +1,5 @@
 ---
-description: Workflow rà soát toàn diện, phản biện, và đề xuất nâng cấp cho project VCT Platform
+description: Workflow rà soát toàn diện, phản biện, và đề xuất nâng cấp cho project SGROUP ERP Platform
 ---
 
 # /audit — Rà Soát, Phản Biện & Đề Xuất Nâng Cấp

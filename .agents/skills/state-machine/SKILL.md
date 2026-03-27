@@ -1,9 +1,9 @@
 ---
 name: vct-state-machine
-description: State machine patterns for VCT Platform — centralized transition validation, 12 entity lifecycles, guard conditions, side effects, testing state transitions, and extending with new states.
+description: State machine patterns for SGROUP ERP Platform — centralized transition validation, 12 entity lifecycles, guard conditions, side effects, testing state transitions, and extending with new states.
 ---
 
-# VCT Platform State Machine Patterns
+# SGROUP ERP Platform State Machine Patterns
 
 > **When to activate**: Adding/modifying entity states, implementing approval workflows, fixing transition bugs, or extending lifecycle rules for any domain entity.
 
@@ -140,3 +140,7 @@ Common side effects:
 3. ❌ **NEVER** add cycles without explicit escape (risk infinite loops)
 4. ❌ **NEVER** skip domain events on status changes — they drive notifications/integrations
 5. ❌ **NEVER** hardcode status strings in handlers — use constants
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

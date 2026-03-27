@@ -1,5 +1,5 @@
 ---
-description: Workflow kiểm tra bảo mật toàn diện cho VCT Platform
+description: Workflow kiểm tra bảo mật toàn diện cho SGROUP ERP Platform
 ---
 
 # /security-audit — Kiểm Tra Bảo Mật

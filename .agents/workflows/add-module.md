@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo module mới hoàn chỉnh cho VCT Platform (từ BA đến QA)
+description: Workflow tạo module mới hoàn chỉnh cho SGROUP ERP Platform (từ BA đến QA)
 ---
 
 # /add-module — Tạo Module Mới Hoàn Chỉnh

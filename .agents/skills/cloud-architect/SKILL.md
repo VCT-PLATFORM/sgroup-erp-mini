@@ -164,3 +164,7 @@ Internet → Cloud Armor (WAF/DDoS) → Load Balancer → VPC
 - Encryption at rest: AES-256 (default)
 - Encryption in transit: TLS 1.3
 - Backup retention: 30 days minimum
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

@@ -1,5 +1,5 @@
 ---
-description: Workflow viết tests cho VCT Platform (unit, integration, E2E Playwright)
+description: Workflow viết tests cho SGROUP ERP Platform (unit, integration, E2E Playwright)
 ---
 
 # /testing — Viết Tests

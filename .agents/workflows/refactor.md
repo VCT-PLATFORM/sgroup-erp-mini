@@ -1,5 +1,5 @@
 ---
-description: Workflow refactoring code cho VCT Platform
+description: Workflow refactoring code cho SGROUP ERP Platform
 ---
 
 # /refactor — Refactoring Code

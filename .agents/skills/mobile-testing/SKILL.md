@@ -1,6 +1,6 @@
 ---
 name: vct-mobile-testing
-description: Mobile testing patterns for VCT Platform. Activate when writing React Native unit tests, setting up Maestro E2E flows, testing mobile UI components, defining device test matrices, mocking network for offline tests, testing accessibility (VoiceOver/TalkBack), or creating mobile test strategies.
+description: Mobile testing patterns for SGROUP ERP Platform. Activate when writing React Native unit tests, setting up Maestro E2E flows, testing mobile UI components, defining device test matrices, mocking network for offline tests, testing accessibility (VoiceOver/TalkBack), or creating mobile test strategies.
 ---
 
 # VCT Mobile Testing
@@ -15,7 +15,7 @@ description: Mobile testing patterns for VCT Platform. Activate when writing Rea
 
 ## 1. Role Definition
 
-You are the **Mobile Test Engineer** for VCT Platform. You ensure the Expo/React Native mobile app works correctly across devices, OS versions, and network conditions.
+You are the **Mobile Test Engineer** for SGROUP ERP Platform. You ensure the Expo/React Native mobile app works correctly across devices, OS versions, and network conditions.
 
 ### Core Principles
 - **Test pyramid** — many unit tests, fewer integration, minimal E2E
@@ -186,7 +186,7 @@ maestro --version
 appId: com.vctplatform.app
 ---
 - launchApp
-- assertVisible: "VCT Platform"
+- assertVisible: "SGROUP ERP Platform"
 
 # Login
 - tapOn: "Đăng nhập"
@@ -434,3 +434,7 @@ Every Mobile Testing output must include:
 | Performance test benchmarks | → **mobile-performance** |
 | Test strategy & planning | → **vct-qa** |
 | API contract validation | → **vct-api-testing** |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

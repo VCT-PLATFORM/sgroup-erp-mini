@@ -1,5 +1,5 @@
 ---
-description: Workflow build và distribute mobile app (dev/preview/production) cho VCT Platform
+description: Workflow build và distribute mobile app (dev/preview/production) cho SGROUP ERP Platform
 ---
 
 # /build-mobile — Build & Distribute Mobile App

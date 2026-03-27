@@ -1,5 +1,5 @@
 ---
-description: Workflow phát triển tính năng full-stack end-to-end cho VCT Platform
+description: Workflow phát triển tính năng full-stack end-to-end cho SGROUP ERP Platform
 ---
 
 # /new-feature — Phát triển Tính Năng Full-Stack

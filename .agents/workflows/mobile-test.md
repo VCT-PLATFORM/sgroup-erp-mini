@@ -1,5 +1,5 @@
 ---
-description: Workflow chạy mobile test suite cho VCT Platform — unit, snapshot, E2E Maestro
+description: Workflow chạy mobile test suite cho SGROUP ERP Platform — unit, snapshot, E2E Maestro
 ---
 
 # /mobile-test — Chạy Mobile Test Suite

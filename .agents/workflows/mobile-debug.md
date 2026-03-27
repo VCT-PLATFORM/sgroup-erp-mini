@@ -1,5 +1,5 @@
 ---
-description: Playbook debug các lỗi thường gặp trong mobile app VCT Platform — crash, Metro, native build, layout, performance
+description: Playbook debug các lỗi thường gặp trong mobile app SGROUP ERP Platform — crash, Metro, native build, layout, performance
 ---
 
 # /mobile-debug — Debug Mobile Issues

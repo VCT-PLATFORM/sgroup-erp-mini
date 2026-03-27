@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo trang frontend mới cho VCT Platform
+description: Workflow tạo trang frontend mới cho SGROUP ERP Platform
 ---
 
 # /add-page — Tạo Trang Frontend Mới

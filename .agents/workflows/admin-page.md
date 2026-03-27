@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo admin page với pattern Table + Drawer detail panel cho VCT Platform
+description: Workflow tạo admin page với pattern Table + Drawer detail panel cho SGROUP ERP Platform
 ---
 
 # /admin-page — Tạo Admin Page

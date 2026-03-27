@@ -1,5 +1,5 @@
 ---
-description: Workflow thêm dữ liệu seed/reference cho VCT Platform (đai, hạng cân, quy chế, etc.)
+description: Workflow thêm dữ liệu seed/reference cho SGROUP ERP Platform (đai, hạng cân, quy chế, etc.)
 ---
 
 # /add-seed-data — Thêm Dữ Liệu Seed/Reference

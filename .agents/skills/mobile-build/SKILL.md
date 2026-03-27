@@ -1,6 +1,6 @@
 ---
 name: vct-mobile-build
-description: Expo build pipeline & native app configuration for VCT Platform. Activate when building mobile app binaries, configuring EAS Build profiles, managing app signing (iOS certificates, Android keystore), setting up OTA updates, configuring splash screens/app icons, or troubleshooting build errors.
+description: Expo build pipeline & native app configuration for SGROUP ERP Platform. Activate when building mobile app binaries, configuring EAS Build profiles, managing app signing (iOS certificates, Android keystore), setting up OTA updates, configuring splash screens/app icons, or troubleshooting build errors.
 ---
 
 # VCT Mobile Build
@@ -15,7 +15,7 @@ description: Expo build pipeline & native app configuration for VCT Platform. Ac
 
 ## 1. Role Definition
 
-You are the **Mobile Build Engineer** for VCT Platform. You own the build pipeline that transforms the Expo/React Native codebase into distributable iOS and Android binaries.
+You are the **Mobile Build Engineer** for SGROUP ERP Platform. You own the build pipeline that transforms the Expo/React Native codebase into distributable iOS and Android binaries.
 
 ### Core Principles
 - **Reproducible builds** — same commit = same binary
@@ -43,7 +43,7 @@ You are the **Mobile Build Engineer** for VCT Platform. You own the build pipeli
 ```json
 {
   "expo": {
-    "name": "VCT Platform",
+    "name": "SGROUP ERP Platform",
     "slug": "vct-platform",
     "version": "1.0.0",
     "scheme": "vct-platform",
@@ -241,7 +241,7 @@ import { ExpoConfig, ConfigContext } from 'expo/config'
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: process.env.EXPO_PUBLIC_ENV === 'production'
-    ? 'VCT Platform'
+    ? 'SGROUP ERP Platform'
     : `VCT (${process.env.EXPO_PUBLIC_ENV || 'dev'})`,
   extra: {
     apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL,
@@ -433,3 +433,7 @@ Every Mobile Build output must include:
 | Store submission | → **vct-release-manager** |
 | Environment variables | → **vct-devops** |
 | App icon/splash design | → **vct-ui-ux** |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

@@ -3,7 +3,7 @@ name: vct-troubleshooting
 description: Troubleshooting Expert & Anti-Pattern Catcher. Activate when debugging difficult backend or frontend issues, optimizing code for stability, avoiding common pitfalls, or reviewing code for potential bugs.
 ---
 
-# VCT Platform Troubleshooting & Anti-Patterns
+# SGROUP ERP Platform Troubleshooting & Anti-Patterns
 
 > **When to activate**: Debugging difficult issues, analyzing root causes, reviewing code for common mistakes (anti-patterns), or establishing defensive programming practices.
 
@@ -192,3 +192,7 @@ defer resp.Body.Close()
 ### 13.3 Quên Table-Driven Tests & Parallel Race Conditions
 ❌ **Anti-pattern**: Copy-paste chục khối `t.Run()` giống hệt nhau hoặc bật `t.Parallel()` nhưng lại dùng chung Database test dùng chung state.
 ✅ **Fix**: Sử dụng `[]struct{ name, input, expected }` để loop qua các test cases. Bật `t.Parallel()` nhưng mỗi test phải tự sinh ID độc lập hoặc dùng TestContainers để cô lập DB.
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

@@ -195,3 +195,7 @@ export class PerformanceInterceptor implements NestInterceptor {
 | Memory High | > 80% for 10 min | Warning |
 | Database Slow | avg query > 200ms | Warning |
 | Connection Pool | > 90% used | Critical |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

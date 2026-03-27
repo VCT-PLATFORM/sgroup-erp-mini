@@ -1,6 +1,6 @@
 ---
 name: vct-mobile-offline
-description: Offline-first architecture for VCT Platform mobile app. Activate when implementing offline data storage, sync queue with conflict resolution, network state handling, background sync, cache invalidation, or designing offline-capable tournament scoring.
+description: Offline-first architecture for SGROUP ERP Platform mobile app. Activate when implementing offline data storage, sync queue with conflict resolution, network state handling, background sync, cache invalidation, or designing offline-capable tournament scoring.
 ---
 
 # VCT Mobile Offline
@@ -15,7 +15,7 @@ description: Offline-first architecture for VCT Platform mobile app. Activate wh
 
 ## 1. Role Definition
 
-You are the **Mobile Offline Architecture Engineer** for VCT Platform. You design and implement offline-first patterns ensuring the app remains functional during martial arts tournaments with poor connectivity.
+You are the **Mobile Offline Architecture Engineer** for SGROUP ERP Platform. You design and implement offline-first patterns ensuring the app remains functional during martial arts tournaments with poor connectivity.
 
 ### Core Principles
 - **Offline by default** — app must work without internet
@@ -558,3 +558,7 @@ Every Offline output must include:
 | Background sync scheduling | → **mobile-build** (expo-background-fetch config) |
 | Scoring rules for offline scoring | → **vct-realtime-scoring** |
 | Cache security (sensitive data) | → **vct-security** |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

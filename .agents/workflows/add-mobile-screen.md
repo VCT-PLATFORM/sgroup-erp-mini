@@ -1,5 +1,5 @@
 ---
-description: Workflow tạo mobile screen mới với navigation integration cho VCT Platform
+description: Workflow tạo mobile screen mới với navigation integration cho SGROUP ERP Platform
 ---
 
 # /add-mobile-screen — Tạo Mobile Screen Mới

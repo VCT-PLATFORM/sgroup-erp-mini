@@ -59,3 +59,7 @@ All project documentation is centralized in `d:\SGROUP ERP FULL\docs\`.
 - **Khi cần quyết định kiến trúc** → Đọc `architecture/` và `adr/`
 - **Khi cần biết gaps và ưu tiên** → Đọc các file audit có bảng GAPs
 - **Khi implement tính năng mới** → Đọc file phân tích module tương ứng để hiểu data model, API, và business rules
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

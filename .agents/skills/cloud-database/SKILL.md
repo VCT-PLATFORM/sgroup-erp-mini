@@ -1,9 +1,9 @@
 ---
 name: vct-cloud-database
-description: VCT Platform cloud database setup — Neon & Supabase PostgreSQL integration, connection pooling, SSL, migrations, and production deployment.
+description: SGROUP ERP Platform cloud database setup — Neon & Supabase PostgreSQL integration, connection pooling, SSL, migrations, and production deployment.
 ---
 
-# VCT Platform Cloud Database (Neon & Supabase)
+# SGROUP ERP Platform Cloud Database (Neon & Supabase)
 
 > **When to activate**: Any task involving cloud database setup, Neon/Supabase configuration, production deployment, connection strings, or cloud-specific PostgreSQL features.
 
@@ -15,9 +15,9 @@ description: VCT Platform cloud database setup — Neon & Supabase PostgreSQL in
 
 ## 1. Overview
 
-> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/database-architecture.md](file:///d:/VCT PLATFORM/vct-platform/docs/architecture/database-architecture.md) for Multi-Tenancy (RLS), Connection Pooling, Migrations, and Soft Deletes.
+> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/database-architecture.md](file:///d:/SGROUP ERP FULL/docs/architecture/database-architecture.md) for Multi-Tenancy (RLS), Connection Pooling, Migrations, and Soft Deletes.
 
-VCT Platform supports two cloud PostgreSQL providers:
+SGROUP ERP Platform supports two cloud PostgreSQL providers:
 
 | Provider | Best For | Free Tier |
 |----------|----------|-----------|
@@ -240,3 +240,7 @@ GET /healthz
 | Neon cold start | First request after idle takes ~500ms, use min_conns=1 |
 | Supabase RLS blocking | VCT doesn't use RLS, ensure tables are in `public` |
 | Migration conflict | Use `IF NOT EXISTS` in all DDL statements |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.

@@ -1,6 +1,6 @@
 ---
 name: vct-release-manager
-description: Release Manager role for VCT Platform. Activate when planning releases, managing versioning strategy, coordinating deployment schedules, implementing feature flags, creating rollback plans, managing changelogs, coordinating hotfixes, or ensuring smooth production deployments.
+description: Release Manager role for SGROUP ERP Platform. Activate when planning releases, managing versioning strategy, coordinating deployment schedules, implementing feature flags, creating rollback plans, managing changelogs, coordinating hotfixes, or ensuring smooth production deployments.
 ---
 
 # VCT Release Manager
@@ -15,9 +15,9 @@ description: Release Manager role for VCT Platform. Activate when planning relea
 
 ## 1. Role Definition
 
-> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/devops-architecture.md](file:///d:/VCT PLATFORM/vct-platform/docs/architecture/devops-architecture.md) for CI/CD Pipeline Gates and Zero-Downtime Rolling Update Deployments.
+> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/devops-architecture.md](file:///d:/SGROUP ERP FULL/docs/architecture/devops-architecture.md) for CI/CD Pipeline Gates and Zero-Downtime Rolling Update Deployments.
 
-You are the **Release Manager** of VCT Platform. You coordinate the entire release process — from code freeze to production deployment — ensuring smooth, reliable, and documented releases.
+You are the **Release Manager** of SGROUP ERP Platform. You coordinate the entire release process — from code freeze to production deployment — ensuring smooth, reliable, and documented releases.
 
 ### Distinction from Other Roles
 | Role | Focus |
@@ -222,7 +222,7 @@ if config.IsFeatureEnabled("tournament_v2") {
 
 ### Release Notes Template
 ```markdown
-## VCT Platform v[X.Y.Z] — [Release Title]
+## SGROUP ERP Platform v[X.Y.Z] — [Release Title]
 
 **Released**: [date]
 
@@ -280,3 +280,7 @@ Every Release Manager output must include:
 | Timeline | → **PM** for sprint status |
 | Changelog accuracy | → **Tech Writer** for documentation |
 | Migration safety | → **DBA** for database review |
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.
