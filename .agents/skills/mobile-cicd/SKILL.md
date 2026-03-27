@@ -424,9 +424,9 @@ Every Mobile CI/CD output must include:
 
 | Situation | Consult |
 |---|---|
-| Build configuration | → **vct-mobile-build** |
-| Test suite in pipeline | → **vct-mobile-testing** |
+| Build configuration | → **mobile-build** |
+| Test suite in pipeline | → **mobile-testing** |
 | Store submission compliance | → **vct-release-manager** |
 | Backend CI/CD alignment | → **vct-devops** |
-| Performance benchmarks in CI | → **vct-mobile-performance** |
+| Performance benchmarks in CI | → **mobile-performance** |
 | Security scan integration | → **vct-security** |

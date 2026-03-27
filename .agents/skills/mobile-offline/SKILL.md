@@ -552,9 +552,9 @@ Every Offline output must include:
 
 | Situation | Consult |
 |---|---|
-| API design for offline-friendly responses | → **vct-sa** |
-| Storage performance profiling | → **vct-mobile-performance** |
-| Testing offline scenarios | → **vct-mobile-testing** |
-| Background sync scheduling | → **vct-mobile-build** (expo-background-fetch config) |
+| API design for offline-friendly responses | → **solution-architect-vct** |
+| Storage performance profiling | → **mobile-performance** |
+| Testing offline scenarios | → **mobile-testing** |
+| Background sync scheduling | → **mobile-build** (expo-background-fetch config) |
 | Scoring rules for offline scoring | → **vct-realtime-scoring** |
 | Cache security (sensitive data) | → **vct-security** |

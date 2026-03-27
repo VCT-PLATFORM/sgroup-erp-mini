@@ -1,239 +1,273 @@
 ---
-name: Error Handling
-description: Comprehensive error handling patterns for frontend, backend, and cross-cutting concerns in SGROUP ERP
+name: vct-error-handling
+description: Standardized error handling patterns for VCT Platform — APIError envelope, error codes, domain-to-HTTP mapping, Vietnamese error messages, frontend error display, and i18n error keys.
 ---
 
-# Error Handling Skill — SGROUP ERP
+# VCT Platform Error Handling
 
-> Kinh nghiệm từ thực tế fix lỗi production. Mọi feature PHẢI tuân thủ các pattern này.
+> **When to activate**: Creating API handlers, defining business errors, mapping domain errors to HTTP responses, or implementing frontend error display.
 
 ---
 
-## 1 · Frontend Error Handling
 
-### 1.1 ErrorBoundary (Render-time Crashes)
+> [!IMPORTANT]
+> **SUPREME ARCHITECTURE DIRECTIVE**: You are strictly bound by the 19 architecture pillars documented in `docs/architecture/`. As a VCT AI Agent, your absolute highest priority is 100% compliance with these rules. You MUST NOT generate code, propose designs, or execute workflows that violate these foundational rules. They are unchangeable and strictly enforced.
 
-Mỗi feature module phải được wrap trong ErrorBoundary:
+## 1. Architecture
+
+```
+Domain Layer           → returns Go errors with context
+    ↓
+Service Layer          → wraps errors with fmt.Errorf("context: %w", err)
+    ↓
+HTTP Handler Layer     → maps to APIError via helper functions
+    ↓
+Frontend              → parses JSON error envelope, displays localized message
+```
+
+---
+
+## 2. Backend Error Envelope (APIError)
+
+Located at `backend/internal/httpapi/apierror.go`:
+
+```go
+type APIError struct {
+    Code    string `json:"code"`
+    Message string `json:"message"`
+    Details any    `json:"details,omitempty"`
+}
+```
+
+### JSON Response Format
+```json
+{
+    "success": false,
+    "error": {
+        "code": "VALIDATION_ERROR",
+        "message": "Tên không được để trống",
+        "details": { "field": "name" }
+    }
+}
+```
+
+---
+
+## 3. Standard Error Codes
+
+| Code | HTTP Status | Usage |
+|------|-------------|-------|
+| `NOT_FOUND` | 404 | Entity not found by ID |
+| `VALIDATION_ERROR` | 400 | Input validation failure |
+| `BAD_REQUEST` | 400 | Malformed request / JSON decode |
+| `INTERNAL_ERROR` | 500 | Unexpected server error |
+| `FORBIDDEN` | 403 | Insufficient permissions |
+| `UNAUTHORIZED` | 401 | Invalid/expired token |
+| `CONFLICT` | 409 | Duplicate or state conflict |
+| `RATE_LIMITED` | 429 | Too many requests |
+
+---
+
+## 4. Handler Helper Functions
+
+```go
+// Standard helpers in apierror.go — use these, never raw http.Error()
+notFoundErr(w, "Không tìm thấy giải đấu")
+validationErr(w, "Tên không được để trống")
+validationErrWithDetail(w, "Validation failed", detail)
+badRequestErr(w, err)
+internalErr(w, err)
+forbiddenErr(w)
+unauthorizedErr(w, "Token không hợp lệ")
+conflictErr(w, "Giải đấu đã tồn tại")
+methodNotAllowedErr(w)
+rateLimitErr(w)
+```
+
+---
+
+## 5. Domain Error Patterns
+
+### Service Layer
+```go
+func (s *Service) Create(input CreateInput) (Entity, error) {
+    if input.Name == "" {
+        return Entity{}, fmt.Errorf("tên không được để trống")
+    }
+    existing, _ := s.repo.GetByName(input.Name)
+    if existing.ID != "" {
+        return Entity{}, fmt.Errorf("entity đã tồn tại: %s", input.Name)
+    }
+    // ...
+}
+```
+
+### Handler Layer (mapping domain errors → HTTP)
+```go
+func (s *Server) handleCreate(w http.ResponseWriter, r *http.Request) {
+    var input CreateInput
+    if !decodeJSON(w, r, &input) { return }
+
+    entity, err := s.entitySvc.Create(input)
+    if err != nil {
+        // Map domain errors to appropriate HTTP responses
+        switch {
+        case strings.Contains(err.Error(), "không được để trống"):
+            validationErr(w, err.Error())
+        case strings.Contains(err.Error(), "đã tồn tại"):
+            conflictErr(w, err.Error())
+        case strings.Contains(err.Error(), "không thể chuyển"):
+            badRequestErr(w, err)
+        default:
+            internalErr(w, err)
+        }
+        return
+    }
+    success(w, http.StatusCreated, entity)
+}
+```
+
+---
+
+## 6. Frontend Error Display
 
 ```tsx
-// src/features/<module>/components/<Module>ErrorBoundary.tsx
-import React, { Component, type ReactNode } from 'react';
-import { View, Text, TouchableOpacity, Platform } from 'react-native';
-import { AlertTriangle, RefreshCw } from 'lucide-react-native';
-
-type Props = { children: ReactNode };
-type State = { hasError: boolean; error: Error | null };
-
-export class SalesErrorBoundary extends Component<Props, State> {
-  state: State = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error('[SalesErrorBoundary]', error, info.componentStack);
-    // TODO: Send to error tracking (Sentry)
-  }
-
-  handleReset = () => this.setState({ hasError: false, error: null });
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 48, backgroundColor: '#0f172a' }}>
-          <AlertTriangle size={40} color="#ef4444" />
-          <Text style={{ color: '#fff', fontSize: 22, fontWeight: '900', marginTop: 24 }}>
-            Đã xảy ra lỗi
-          </Text>
-          {__DEV__ && this.state.error && (
-            <Text style={{ color: '#ef4444', fontSize: 11, fontFamily: Platform.OS === 'web' ? 'monospace' : undefined }}>
-              {this.state.error.message}
-            </Text>
-          )}
-          <TouchableOpacity onPress={this.handleReset}>
-            <RefreshCw size={18} color="#fff" />
-            <Text style={{ color: '#fff' }}>Thử Lại</Text>
-          </TouchableOpacity>
-        </View>
-      );
+// Standard API call with error handling
+async function apiCall<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    const res = await fetch(`${API_BASE}${endpoint}`, { ...options })
+    if (!res.ok) {
+        const body = await res.json().catch(() => null)
+        const message = body?.error?.message || `Lỗi ${res.status}`
+        throw new Error(message)
     }
-    return this.props.children;
-  }
+    return res.json()
+}
+
+// In component
+try {
+    await apiCall('/api/v1/entity/', { method: 'POST', body: JSON.stringify(data) })
+} catch (err) {
+    setError(err.message)  // Displays Vietnamese error from backend
 }
 ```
 
-### 1.2 API Error Handling (Async Operations)
+### Error UI Patterns
+| Scenario | Component |
+|----------|-----------|
+| API failure | Error banner with retry button |
+| Form validation | Field-level error messages |
+| 404 Not Found | Full-page 404 with navigation |
+| 401 Unauthorized | Redirect to login |
+| Network offline | Toast notification |
 
-```tsx
-// ✅ Standard pattern in Zustand store
-fetchData: async () => {
-  set({ loading: true, error: null });
-  try {
-    const { data: raw } = await api.get('/endpoint');
-    const items = Array.isArray(raw) ? raw : (Array.isArray(raw?.data) ? raw.data : []);
-    set({ items, loading: false });
-  } catch (error: any) {
-    const status = error?.response?.status;
-    const message = error?.response?.data?.message
-      ?? error?.response?.data?.error?.message
-      ?? error?.message
-      ?? 'Đã có lỗi xảy ra';
+---
 
-    // Don't set error for 401 — interceptor handles logout
-    if (status === 401) { set({ loading: false }); return; }
+## 7. Vietnamese Error Messages
 
-    set({ error: message, loading: false });
-  }
-},
+All backend error messages MUST be in Vietnamese:
 ```
-
-### 1.3 User-Friendly Error Display
-
-```tsx
-// ❌ NEVER show raw error objects
-Alert.alert('Error', error); // Shows [object Object]
-
-// ✅ Extract human-readable message
-const getErrorMessage = (error: any): string => {
-  if (typeof error === 'string') return error;
-  if (error?.response?.data?.message) return error.response.data.message;
-  if (error?.response?.data?.error?.message) return error.response.data.error.message;
-  if (error?.message) return error.message;
-  return 'Đã có lỗi xảy ra. Vui lòng thử lại.';
-};
-```
-
-### 1.4 Screen State Management
-
-Every data-fetching screen must handle ALL states:
-
-```tsx
-const MyScreen = () => {
-  const { items, loading, error } = useMyStore();
-
-  if (loading) return <SGSkeleton count={5} />;
-  if (error) return <SGEmptyState icon={<AlertTriangle />} title="Lỗi" description={error} />;
-  if (!items?.length) return <SGEmptyState title="Chưa có dữ liệu" />;
-
-  return <FlatList data={items} renderItem={...} />;
-};
+"Không tìm thấy giải đấu"           // not_found
+"Tên không được để trống"            // validation
+"Bạn không có quyền thực hiện"       // forbidden
+"Token không hợp lệ hoặc hết hạn"   // unauthorized
+"Quá nhiều yêu cầu, thử lại sau"    // rate_limited
+"Method không được hỗ trợ"           // method_not_allowed
 ```
 
 ---
 
-## 2 · Backend Error Handling
+## 8. Anti-Patterns
 
-### 2.1 Exception Filter (Global)
-
-```typescript
-// src/common/filters/all-exceptions.filter.ts
-@Catch()
-export class AllExceptionsFilter implements ExceptionFilter {
-  catch(exception: unknown, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
-
-    const status = exception instanceof HttpException
-      ? exception.getStatus()
-      : 500;
-
-    const message = exception instanceof HttpException
-      ? exception.message
-      : 'Internal server error';
-
-    // Log for debugging
-    console.error(`[${status}] ${message}`, exception);
-
-    // Consistent error response
-    response.status(status).json({
-      error: { code: status, message }
-    });
-  }
-}
-```
-
-### 2.2 Service Error Patterns
-
-```typescript
-// ✅ Throw specific HTTP exceptions
-async findOne(id: string) {
-  const item = await this.prisma.item.findUnique({ where: { id } });
-  if (!item) throw new NotFoundException(`Item ${id} not found`);
-  return item;
-}
-
-// ✅ Handle Prisma errors
-async create(dto: CreateDto) {
-  try {
-    return await this.prisma.item.create({ data: dto });
-  } catch (error) {
-    if (error.code === 'P2002') {
-      throw new ConflictException('Duplicate entry');
-    }
-    throw new InternalServerErrorException('Failed to create item');
-  }
-}
-```
-
-### 2.3 Guard Authorization Errors
-
-```typescript
-// ✅ Clear 403 messages
-@Injectable()
-export class RolesGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
-      context.getHandler(), context.getClass(),
-    ]);
-    if (!requiredRoles) return true;
-    const { user } = context.switchToHttp().getRequest();
-    if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException(
-        `Role '${user.role}' không có quyền truy cập. Yêu cầu: ${requiredRoles.join(', ')}`
-      );
-    }
-    return true;
-  }
-}
-```
+1. ❌ **NEVER** use `http.Error()` directly — use APIError helpers
+2. ❌ **NEVER** expose internal Go error messages to clients (e.g., `pgx` errors)
+3. ❌ **NEVER** return English error messages — use Vietnamese
+4. ❌ **NEVER** panic for recoverable errors — return errors up the stack
+5. ❌ **NEVER** swallow errors silently — always log and respond
+6. ❌ **NEVER** send 200 OK with error body — use appropriate HTTP status code
 
 ---
 
-## 3 · Cross-Cutting: Axios Interceptor
+## 9. Common Error Playbook (Lessons Learned)
 
-```typescript
-// src/shared/api.ts
-api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const status = error?.response?.status;
+These are real errors encountered during development. Use this playbook for quick diagnosis.
 
-    if (status === 401) {
-      // Token expired — auto logout
-      await AsyncStorage.removeItem('auth_token');
-      // Navigate to login (use navigation ref or event)
-    }
+### 🔴 ERR_INVALID_CREDENTIALS (401)
+**Symptom**: Login returns 401 even with correct credentials.  
+**Debug steps**:
+1. Check `VCT_JWT_SECRET` is set in backend env (not empty/default)
+2. Check `VCT_ADMIN_PASSWORD` matches what you're entering
+3. Check backend logs for specific auth error message
+4. Verify config loads correctly: `GET /healthz` → check running config
+5. Common cause: `.env` not loaded, or env var name mismatch
 
-    // Always reject so individual catch blocks can handle
-    return Promise.reject(error);
-  }
-);
-```
+### 🔴 502 Bad Gateway
+**Symptom**: Frontend gets 502 from API.  
+**Debug steps**:
+1. Check if backend container is running (Render/Fly.io dashboard)
+2. Check backend logs for panic/crash → fix code error
+3. Check database connection: `VCT_POSTGRES_URL` correct?
+4. Check if Render/Fly.io went to sleep (cold start) → ping `/healthz`
+5. Common cause: Backend crashed on startup due to bad config or migration
+
+### 🟠 CORS Errors
+**Symptom**: Browser shows "Access-Control-Allow-Origin" error.  
+**Debug steps**:
+1. Check `VCT_CORS_ORIGINS` includes frontend URL
+2. Must include **both** `http://localhost:3000` AND production URL
+3. Multiple origins: comma-separated `VCT_CORS_ORIGINS=url1,url2`
+4. Restart backend after changing CORS config
+5. Common cause: Missing production frontend URL in CORS origins
+
+### 🟠 Double API Prefix (`/api/api/v1/...` → 404)
+**Symptom**: All API calls return 404 in production.  
+**Debug steps**:
+1. Check `NEXT_PUBLIC_API_BASE_URL` — should be just the base domain
+2. Frontend `apiClient` already adds `/api/v1` prefix
+3. If base URL is `https://api.example.com/api/v1`, the call becomes `/api/v1/api/v1/...`
+4. **Fix**: Set `NEXT_PUBLIC_API_BASE_URL=https://api.example.com` (no path)
+5. Common cause: Copy-pasting full API URL including path prefix
+
+### 🟡 JSX IntrinsicElements IDE Errors
+**Symptom**: IDE shows "Property does not exist on JSX.IntrinsicElements" but `tsc` compiles fine.  
+**Debug steps**:
+1. Check for duplicate `@types/react` in `node_modules`
+2. Run `npm ls @types/react` — should show only one version
+3. Check `tsconfig.json` → `jsx` should be `"preserve"` for Next.js
+4. Delete `node_modules/.cache` and restart IDE TS server
+5. Common cause: Multiple versions of `@types/react` from different packages
+
+### 🟡 404 on Deployment (Render/Fly.io)
+**Symptom**: Deployed backend returns 404 for all routes.  
+**Debug steps**:
+1. Check container started successfully (logs for "Listening on :18080")
+2. Check `PORT` env var matches what platform expects
+3. Check health endpoint: `GET /healthz` → should return 200
+4. Check migrations ran successfully on startup
+5. Common cause: Container port mismatch or migration failure on first deploy
 
 ---
 
-## 4 · Error Handling Checklist
+## 10. Debug Decision Tree
 
-| Area | Check | Priority |
-|------|-------|----------|
-| Feature Module | ErrorBoundary wraps all routes | 🔴 Must |
-| API Call | `try/catch` in every async function | 🔴 Must |
-| API Response | `Array.isArray()` before `.map()` | 🔴 Must |
-| Property Access | Optional chaining `?.` | 🔴 Must |
-| Screen | Loading / Error / Empty states | 🔴 Must |
-| Error Message | Human-readable (not JSON) | 🟡 Should |
-| 401 Response | Auto logout via interceptor | 🟡 Should |
-| 403 Response | Show "Access Denied" UI | 🟡 Should |
-| Network Error | Show retry option | 🟡 Should |
-| Prisma Error | Catch P2002 (duplicate) | 🟢 Nice |
+```
+Error occurred?
+  │
+  ├─ Frontend error (browser)
+  │   ├─ Network error → Check backend running? CORS config?
+  │   ├─ 401 → Check auth token, JWT secret, login credentials
+  │   ├─ 404 → Check API URL prefix (double /api/api?)
+  │   ├─ 500/502 → Check backend logs for panic/crash
+  │   └─ TypeScript/JSX error → Check tsconfig, @types/react versions
+  │
+  ├─ Backend error (Go)
+  │   ├─ Compile error → go build ./... , check imports
+  │   ├─ Runtime panic → Check nil pointer, map access, slice bounds
+  │   ├─ DB error → Check VCT_POSTGRES_URL, migration status
+  │   └─ Auth error → Check VCT_JWT_SECRET, token expiry
+  │
+  └─ Deployment error
+      ├─ Build fails → Check Dockerfile, go.mod, package.json
+      ├─ Health check fails → Check /healthz, port config
+      ├─ Cold start → Render free tier sleeps after 15min → add cron ping
+      └─ Env vars → Check all VCT_* vars set in platform dashboard
+```

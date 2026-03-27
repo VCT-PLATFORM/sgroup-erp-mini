@@ -12,7 +12,7 @@ description: Workflow phát triển tính năng full-stack end-to-end cho VCT Pl
 
 ## Bước 1: Phân Tích Yêu Cầu (BA)
 
-Đọc skill **vct-ba** (`.agents/skills/vct-ba/SKILL.md`) và thực hiện:
+Đọc skill **business-analyst** (`.agents/skills/business-analyst/SKILL.md`) và thực hiện:
 
 1. Xác định rõ yêu cầu:
    - WHO — user role nào sử dụng? (admin, athlete, coach, referee, etc.)
@@ -33,7 +33,7 @@ description: Workflow phát triển tính năng full-stack end-to-end cho VCT Pl
 
 ## Bước 2: Thiết Kế Kiến Trúc (SA)
 
-Đọc skill **vct-sa** (`.agents/skills/vct-sa/SKILL.md`) và thực hiện:
+Đọc skill **solution-architect-vct** (`.agents/skills/solution-architect-vct/SKILL.md`) và thực hiện:
 
 1. Xác định cần tạo/sửa những file nào
 2. Thiết kế database schema (nếu cần bảng mới):
@@ -152,7 +152,7 @@ packages/app/features/{module}/Page_{module}_{sub}.tsx
 
 ## Bước 5: Kiểm Tra Chất Lượng (CTO)
 
-Đọc skill **vct-cto** (`.agents/skills/vct-cto/SKILL.md`) và kiểm tra:
+Đọc skill **cto** (`.agents/skills/cto/SKILL.md`) và kiểm tra:
 
 ### Backend Checklist
 - [ ] Clean Architecture respected

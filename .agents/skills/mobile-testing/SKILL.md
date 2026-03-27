@@ -428,9 +428,9 @@ Every Mobile Testing output must include:
 
 | Situation | Consult |
 |---|---|
-| Building test binaries | → **vct-mobile-build** |
+| Building test binaries | → **mobile-build** |
 | CI test pipeline | → **vct-mobile-cicd** |
 | Testing offline features | → **vct-mobile-offline** |
-| Performance test benchmarks | → **vct-mobile-performance** |
+| Performance test benchmarks | → **mobile-performance** |
 | Test strategy & planning | → **vct-qa** |
 | API contract validation | → **vct-api-testing** |

@@ -13,7 +13,7 @@ description: Workflow tạo module mới hoàn chỉnh cho VCT Platform (từ BA
 
 ## Bước 1: Phân Tích Requirements (BA)
 
-Đọc skill **vct-ba** (`/.agents/skills/vct-ba/SKILL.md`):
+Đọc skill **business-analyst** (`/.agents/skills/business-analyst/SKILL.md`):
 
 1. Module này thuộc domain nào? (25+ modules hiện tại)
    ```
@@ -32,7 +32,7 @@ description: Workflow tạo module mới hoàn chỉnh cho VCT Platform (từ BA
 
 ## Bước 2: Thiết Kế Kiến Trúc (SA)
 
-Đọc skill **vct-sa** (`/.agents/skills/vct-sa/SKILL.md`):
+Đọc skill **solution-architect-vct** (`/.agents/skills/solution-architect-vct/SKILL.md`):
 
 1. **Database Schema** — ERD với tables, columns, relationships
 2. **API Contract** — Endpoints list với method, path, request/response
@@ -182,7 +182,7 @@ Thêm sidebar entries cho roles có quyền truy cập:
 
 ## Bước 10: Quality Review & Verify (CTO)
 
-Đọc skill **vct-cto** (`/.agents/skills/vct-cto/SKILL.md`) và kiểm tra:
+Đọc skill **cto** (`/.agents/skills/cto/SKILL.md`) và kiểm tra:
 
 ### Backend
 - [ ] Clean Architecture layers respected

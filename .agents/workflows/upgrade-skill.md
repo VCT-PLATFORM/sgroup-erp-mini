@@ -5,7 +5,7 @@ description: Workflow nâng cấp skill AI đã có dựa trên bài học và t
 # /upgrade-skill — Nâng Cấp Skill Hiện Có
 
 > Sử dụng khi cần cập nhật một skill AI đã có với kiến thức mới, patterns mới, hoặc sửa lỗi trong skill.
-> Đọc skill **vct-skill-evolver** (`/.agents/skills/vct-skill-evolver/SKILL.md`) trước khi bắt đầu.
+> Đọc skill **skill-evolver** (`/.agents/skills/skill-evolver/SKILL.md`) trước khi bắt đầu.
 
 // turbo-all
 

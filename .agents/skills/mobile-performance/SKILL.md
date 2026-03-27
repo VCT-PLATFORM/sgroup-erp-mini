@@ -418,8 +418,8 @@ Every Performance output must include:
 
 | Situation | Consult |
 |---|---|
-| Build optimization (bundle) | → **vct-mobile-build** |
-| Performance regression tests | → **vct-mobile-testing** |
+| Build optimization (bundle) | → **mobile-build** |
+| Performance regression tests | → **mobile-testing** |
 | API response time issues | → **vct-backend-go** (DBA for query optimization) |
 | Image asset optimization | → **vct-ui-ux** |
 | Memory profiling in CI | → **vct-mobile-cicd** |

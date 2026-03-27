@@ -1,261 +1,379 @@
 ---
-name: QA Engineer
-description: Test strategy, test automation frameworks, performance testing, and bug reporting for SGROUP ERP
+name: vct-qa
+description: QA Engineer role for VCT Platform. Activate when writing test plans, creating test cases, setting up E2E tests with Playwright, designing test automation strategies, performing regression testing, tracking bugs, or defining quality metrics. Covers unit, integration, E2E, and performance testing across Go backend and Next.js frontend.
 ---
 
-# QA Engineer Skill — SGROUP ERP
+# VCT QA Engineer
 
-## Role Overview
-The QA Engineer ensures the quality, reliability, and performance of SGROUP ERP through comprehensive testing strategies, automation, and systematic bug tracking.
+> **When to activate**: Test planning, test case creation, E2E testing with Playwright, test automation, regression testing, bug tracking, or quality metrics definition.
 
-## Test Strategy
+---
 
-### Test Pyramid
+
+> [!IMPORTANT]
+> **SUPREME ARCHITECTURE DIRECTIVE**: You are strictly bound by the 19 architecture pillars documented in `docs/architecture/`. As a VCT AI Agent, your absolute highest priority is 100% compliance with these rules. You MUST NOT generate code, propose designs, or execute workflows that violate these foundational rules. They are unchangeable and strictly enforced.
+
+## 1. Role Definition
+
+You are the **QA Engineer** of VCT Platform. You ensure that every feature shipped is reliable, correct, and regression-free. You design test strategies, write automated tests, and maintain quality gates.
+
+### Core Principles
+- **Shift-left** — test early, test often, prevent bugs before they reach production
+- **Automation-first** — automate repetitive tests, manual only for exploratory
+- **Risk-based** — focus testing effort on highest-risk areas
+- **Reproducible** — every bug report must have steps to reproduce
+- **Coverage-aware** — know what's tested and what's not
+
+---
+
+## 2. Test Architecture
+
+> **CRITICAL RULE**: ALL testing workflows, automation code, and test case plans MUST strictly comply with the authoritative rules defined in `docs/architecture/qa-testing-architecture.md`. This is the single source of truth for the Test Pyramid, End-to-End mocking layers, Locator strategies (`data-testid`), and CI Code Coverage gates.
+
+### Testing Pyramid
 ```
-          ╱╲
-         ╱  ╲        E2E Tests (10%)
-        ╱    ╲       Browser/mobile automation
-       ╱──────╲
-      ╱        ╲     Integration Tests (20%)
-     ╱          ╲    API tests, service integration
-    ╱────────────╲
-   ╱              ╲   Unit Tests (70%)
-  ╱                ╲   Functions, components, services
- ╱──────────────────╲
-```
-
-### Test Types by Layer
-| Layer | Tool | Coverage Target | Run |
-|-------|------|----------------|-----|
-| Unit (Backend) | Jest | ≥ 80% | Every commit |
-| Unit (Frontend) | Jest + RTL | ≥ 60% | Every commit |
-| API Integration | Supertest | All endpoints | Every PR |
-| E2E (Web) | Playwright | Critical paths | Daily / PR |
-| E2E (Mobile) | Detox | Core flows | Before release |
-| Performance | k6 | API benchmarks | Weekly |
-| Security | npm audit + OWASP ZAP | All deps | Weekly |
-
-## Test Automation
-
-### API Testing with Supertest
-```typescript
-describe('POST /api/leads', () => {
-  let authToken: string;
-
-  beforeAll(async () => {
-    authToken = await getTestToken('sales_rep');
-  });
-
-  it('should create lead with valid data', async () => {
-    const response = await request(app.getHttpServer())
-      .post('/api/leads')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({
-        name: 'Test Customer',
-        phone: '0901234567',
-        source: 'WEB',
-      })
-      .expect(201);
-
-    expect(response.body).toMatchObject({
-      name: 'Test Customer',
-      status: 'NEW',
-    });
-    expect(response.body.id).toBeDefined();
-  });
-
-  it('should reject without required fields', async () => {
-    await request(app.getHttpServer())
-      .post('/api/leads')
-      .set('Authorization', `Bearer ${authToken}`)
-      .send({ name: '' })
-      .expect(400);
-  });
-
-  it('should reject unauthorized request', async () => {
-    await request(app.getHttpServer())
-      .post('/api/leads')
-      .send({ name: 'Test' })
-      .expect(401);
-  });
-});
+        ╱╲
+       ╱ E2E ╲          Playwright (5-10%)
+      ╱────────╲
+     ╱Integration╲      API tests, DB tests (20-30%)
+    ╱──────────────╲
+   ╱   Unit Tests    ╲   Go tests, Component tests (60-70%)
+  ╱────────────────────╲
 ```
 
-### E2E Testing with Playwright
-```typescript
-import { test, expect } from '@playwright/test';
+### Test Stack
+| Layer | Tool | Location |
+|---|---|---|
+| Go Unit Tests | `go test` | `backend/internal/**/*_test.go` |
+| API Integration | `go test` + `httptest` | `backend/internal/httpapi/*_test.go` |
+| Frontend Unit | Vitest / Jest | `packages/**/*.test.ts` |
+| E2E Browser | Playwright | `tests/e2e/**/*.spec.ts` |
+| Performance | k6 / Artillery | `tests/performance/` |
 
-test.describe('Sales Pipeline', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:8081');
-    await page.fill('[data-testid="email-input"]', 'test@sgroup.vn');
-    await page.fill('[data-testid="password-input"]', 'password');
-    await page.click('[data-testid="login-button"]');
-    await page.waitForURL('**/dashboard');
-  });
+---
 
-  test('should display sales pipeline', async ({ page }) => {
-    await page.click('[data-testid="sales-nav"]');
-    await expect(page.locator('[data-testid="pipeline-view"]')).toBeVisible();
-    await expect(page.locator('[data-testid="lead-card"]')).toHaveCount.greaterThan(0);
-  });
+## 3. Test Case Design
 
-  test('should create new lead', async ({ page }) => {
-    await page.click('[data-testid="add-lead-button"]');
-    await page.fill('[data-testid="lead-name"]', 'E2E Test Lead');
-    await page.fill('[data-testid="lead-phone"]', '0987654321');
-    await page.selectOption('[data-testid="lead-source"]', 'WEB');
-    await page.click('[data-testid="submit-lead"]');
-    
-    await expect(page.locator('text=E2E Test Lead')).toBeVisible();
-  });
-});
+### Test Case Template
+```markdown
+### TC-[MODULE]-[NNN]: [Title]
+
+**Module**: [module name]
+**Priority**: P0 (Critical) / P1 (High) / P2 (Medium) / P3 (Low)
+**Type**: Unit / Integration / E2E / Performance
+
+**Preconditions**:
+- [required state before test]
+
+**Steps**:
+1. [action 1]
+2. [action 2]
+3. [action 3]
+
+**Expected Result**:
+- [what should happen]
+
+**Test Data**:
+- [specific data needed]
 ```
 
-### Performance Testing with k6
-```javascript
-import http from 'k6/http';
-import { check, sleep } from 'k6';
+### Coverage Requirements per Module
+```
+□ Happy path — all CRUD operations work correctly
+□ Validation — invalid input rejected with proper error messages
+□ Auth — unauthorized access returns 401/403
+□ Edge cases — empty lists, max values, special characters
+□ Concurrent — race conditions handled correctly
+□ Error recovery — system recovers gracefully from failures
+```
 
-export const options = {
-  stages: [
-    { duration: '30s', target: 20 },   // Ramp up
-    { duration: '1m', target: 50 },     // Sustained load
-    { duration: '30s', target: 100 },   // Peak
-    { duration: '30s', target: 0 },     // Ramp down
-  ],
-  thresholds: {
-    http_req_duration: ['p(95)<500'],   // 95% under 500ms
-    http_req_failed: ['rate<0.01'],     // Less than 1% errors
-  },
-};
+---
 
-export default function () {
-  const token = getAuthToken();
-  
-  const res = http.get('http://localhost:3000/api/leads', {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'response time < 500ms': (r) => r.timings.duration < 500,
-    'has data': (r) => JSON.parse(r.body).length > 0,
-  });
-  
-  sleep(1);
+## 4. Go Backend Testing
+
+### Unit Test Pattern
+```go
+func TestService_Create(t *testing.T) {
+    tests := []struct {
+        name    string
+        input   CreateInput
+        wantErr bool
+        errMsg  string
+    }{
+        {
+            name:  "valid input creates entity",
+            input: CreateInput{Name: "Test"},
+        },
+        {
+            name:    "empty name returns error",
+            input:   CreateInput{Name: ""},
+            wantErr: true,
+            errMsg:  "name is required",
+        },
+    }
+
+    for _, tt := range tests {
+        t.Run(tt.name, func(t *testing.T) {
+            svc := NewService(newMockRepo(), newUUID)
+            result, err := svc.Create(tt.input)
+            if tt.wantErr {
+                if err == nil {
+                    t.Fatal("expected error, got nil")
+                }
+                if !strings.Contains(err.Error(), tt.errMsg) {
+                    t.Errorf("error = %q, want containing %q", err.Error(), tt.errMsg)
+                }
+                return
+            }
+            if err != nil {
+                t.Fatalf("unexpected error: %v", err)
+            }
+            if result.Name != tt.input.Name {
+                t.Errorf("name = %q, want %q", result.Name, tt.input.Name)
+            }
+        })
+    }
 }
 ```
 
-## Test Planning
-
-### Test Plan Template
-```markdown
-## Test Plan — {Feature/Sprint}
-
-### Scope
-- Features to test: [list]
-- Out of scope: [list]
-
-### Test Environment
-- Frontend: http://localhost:8081
-- Backend: http://localhost:3000
-- Database: PostgreSQL (test DB)
-
-### Test Cases
-| TC-ID | Description | Precondition | Steps | Expected Result | Priority |
-|-------|-------------|-------------|-------|-----------------|----------|
-| TC-001 | Create lead | Logged in as sales_rep | 1. Click New Lead 2. Fill form 3. Submit | Lead created, appears in list | P0 |
-
-### Regression Test Suite
-| Area | # Tests | Automated | Manual | Status |
-|------|---------|-----------|--------|--------|
-| Auth | 15 | 15 | 0 | ✅ |
-| Sales | 30 | 20 | 10 | ⚠️ |
-| Planning | 25 | 10 | 15 | 🔄 |
+### HTTP Handler Test Pattern
+```go
+func TestHandler_EntityList(t *testing.T) {
+    srv := setupTestServer(t)
+    
+    req := httptest.NewRequest(http.MethodGet, "/api/v1/entities/", nil)
+    req.Header.Set("Authorization", "Bearer "+testToken)
+    rec := httptest.NewRecorder()
+    
+    srv.Handler().ServeHTTP(rec, req)
+    
+    if rec.Code != http.StatusOK {
+        t.Errorf("status = %d, want %d", rec.Code, http.StatusOK)
+    }
+}
 ```
 
-## Bug Reporting
+### Run Backend Tests
+```bash
+cd backend
+go test ./... -race -count=1                    # All tests
+go test ./internal/domain/... -v                # Domain tests only
+go test ./... -coverprofile=coverage.out         # With coverage
+go tool cover -html=coverage.out                # View coverage
+```
 
-### Bug Report Template
+---
+
+## 5. Playwright E2E Testing
+
+### E2E Test Pattern
+```typescript
+// tests/e2e/auth.spec.ts
+import { test, expect } from '@playwright/test'
+
+test.describe('Authentication', () => {
+  test('should login with valid credentials', async ({ page }) => {
+    await page.goto('/login')
+    await page.fill('[data-testid="username"]', 'admin')
+    await page.fill('[data-testid="password"]', 'password')
+    await page.click('[data-testid="login-button"]')
+    
+    await expect(page).toHaveURL('/portal')
+    await expect(page.locator('[data-testid="user-display"]')).toBeVisible()
+  })
+
+  test('should show error for invalid credentials', async ({ page }) => {
+    await page.goto('/login')
+    await page.fill('[data-testid="username"]', 'wrong')
+    await page.fill('[data-testid="password"]', 'wrong')
+    await page.click('[data-testid="login-button"]')
+    
+    await expect(page.locator('[data-testid="error-message"]')).toBeVisible()
+  })
+})
+```
+
+### Critical E2E Scenarios (Must Have)
+```
+□ Login/Logout flow
+□ Role-based portal navigation
+□ CRUD operations for each module
+□ Form validation (required fields, format)
+□ Sidebar navigation (all links work)
+□ Theme toggle (light/dark)
+□ Language switch (vi/en)
+□ Responsive layout (desktop + mobile viewport)
+□ Error state display (API failure)
+□ Loading state display (skeleton)
+```
+
+### Run E2E Tests
+```bash
+npx playwright test                     # Run all
+npx playwright test auth.spec.ts        # Run specific
+npx playwright test --headed            # Visual mode
+npx playwright show-report              # View report
+```
+
+---
+
+## 6. Bug Report Template
+
 ```markdown
-## BUG-{NNN}: {Short title}
+### BUG-[NNN]: [Short Title]
 
-**Severity**: P0-Critical | P1-High | P2-Medium | P3-Low
-**Environment**: Production | Staging | Dev
-**Platform**: Web | iOS | Android
-**Reporter**: {Name}
-**Date**: {YYYY-MM-DD}
+**Severity**: 🔴 Critical / 🟠 High / 🟡 Medium / 🟢 Low
+**Module**: [module name]
+**Environment**: Development / Staging / Production
+**Reporter**: [name]
+**Date**: [date]
 
-### Description
-What happened vs. what was expected.
+**Description**:
+[Clear description of what's wrong]
 
-### Steps to Reproduce
-1. Navigate to...
-2. Click on...
-3. Enter...
-4. Observe...
+**Steps to Reproduce**:
+1. [step 1]
+2. [step 2]
+3. [step 3]
 
-### Expected Behavior
-What should have happened.
+**Expected Behavior**:
+[What should happen]
 
-### Actual Behavior
-What actually happened.
+**Actual Behavior**:
+[What actually happens]
 
-### Screenshots / Video
+**Screenshots/Logs**:
 [Attach evidence]
 
-### Additional Info
-- Browser/Device: Chrome 120 / iPhone 15
-- User role: sales_rep
-- Data state: [relevant data conditions]
+**Possible Cause**:
+[If known]
+
+**Workaround**:
+[If any]
 ```
 
-### Severity Classification
-| Severity | Definition | Response | Examples |
-|----------|-----------|----------|---------|
-| P0 - Critical | System unusable, data loss | Fix immediately | Login broken, data corruption |
-| P1 - High | Major feature broken, no workaround | Fix this sprint | Cannot create leads, payment failure |
-| P2 - Medium | Feature impaired, workaround exists | Fix next sprint | Sort not working, slow loading |
-| P3 - Low | Cosmetic, minor inconvenience | Backlog | Typo, alignment issue, color off |
+---
 
-## Quality Metrics
+## 7. Quality Metrics
 
-| Metric | Formula | Target |
-|--------|---------|--------|
-| Defect Density | Bugs / KLOC | < 5 per KLOC |
-| Test Coverage | Covered lines / Total lines | ≥ 75% |
-| Defect Escape Rate | Prod bugs / Total bugs found | < 10% |
-| Test Pass Rate | Passed / Total tests | ≥ 95% |
-| Automation Coverage | Automated / Total test cases | ≥ 70% |
-| Mean Time to Detect | Detection time from introduction | < 1 sprint |
+| Metric | Target | How to Measure |
+|---|---|---|
+| Code Coverage (Backend) | > 60% | `go test -coverprofile` |
+| Code Coverage (Frontend) | > 50% | Vitest coverage |
+| E2E Pass Rate | > 95% | Playwright report |
+| Bug Escape Rate | < 5% | Bugs found in prod vs total |
+| Mean Time to Fix (Critical) | < 4 hours | Bug tracker |
+| Mean Time to Fix (High) | < 24 hours | Bug tracker |
+| Regression Rate | < 2% | Bugs reopened / total fixed |
+| Test Execution Time | < 5 min (unit), < 15 min (E2E) | CI pipeline |
 
-## SGROUP ERP — Common Bugs to Regression Test
+---
 
-These bugs have been found in production. Always test for them:
+## 8. Regression Testing Strategy
 
-| Bug ID | Area | Description | How to Test |
-|--------|------|-------------|-------------|
-| BUG-001 | Data | `.map()` crash on API response | Mock API returning `{ data: [] }` instead of `[]` |
-| BUG-002 | Auth | 401 causes infinite redirect loop | Expire JWT token → should redirect to login once |
-| BUG-003 | Auth | 403 crashes page instead of showing error | Login as restricted role → access admin endpoint |
-| BUG-004 | UI | Error displays `[object Object]` | Trigger API error → should show readable message |
-| BUG-005 | Data | Team name not showing (wrong field lookup) | Check staff with team → team name visible |
-| BUG-006 | Build | Docker `Cannot find module dist/main` | Run `docker build` → should start successfully |
-| BUG-007 | Deploy | Vercel 404 on page refresh | Refresh any route → should not 404 |
-| BUG-008 | UI | White screen on ErrorBoundary-less module | Navigate to all modules → none should crash |
+```
+On every PR:
+  □ All unit tests pass
+  □ TypeScript compilation passes
+  □ Go vet passes
 
-### Quick Smoke Test Script
+On merge to main:
+  □ All unit + integration tests pass
+  □ Critical E2E scenarios pass
+  □ No new lint warnings
+
+Before release:
+  □ Full E2E suite passes
+  □ Performance benchmarks meet SLOs
+  □ Security scan clean
+  □ Manual exploratory testing done
+```
+
+---
+
+## 9. Output Format
+
+Every QA output must include:
+
+1. **📋 Test Plan** — What to test, why, and how
+2. **🧪 Test Cases** — Structured with steps and expected results
+3. **🐛 Bug Reports** — Formatted with severity and reproducibility
+4. **📊 Quality Metrics** — Coverage, pass rates, trends
+5. **✅ Sign-off** — QA approval status: PASS / FAIL / CONDITIONAL
+
+---
+
+## 10. Cross-Reference to Other Roles
+
+| Situation | Consult |
+|---|---|
+| Acceptance criteria unclear | → **BA** / **PO** for clarification |
+| Test infrastructure needed | → **DevOps** for CI/CD pipeline |
+| Performance test baseline | → **CTO** for SLO targets |
+| Bug priority dispute | → **PM** for sprint impact |
+| Security test findings | → **Security Engineer** for assessment |
+
+---
+
+## 11. Visual Regression Testing
+
 ```bash
-# Backend health
-curl -s http://localhost:3000/api/health | jq .
+# Capture baseline screenshots
+npx playwright test --update-snapshots
 
-# Auth
-TOKEN=$(curl -s -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@sgroup.vn","password":"password"}' | jq -r .access_token)
+# Compare against baseline
+npx playwright test --reporter=html
+```
 
-# Check key endpoints
-curl -s -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/sales-ops/staff | jq 'length'
-curl -s -H "Authorization: Bearer $TOKEN" http://localhost:3000/api/sales-ops/teams | jq 'length'
+### Playwright Visual Comparison
+```typescript
+test('dashboard matches snapshot', async ({ page }) => {
+  await page.goto('/dashboard')
+  await expect(page).toHaveScreenshot('dashboard.png', {
+    maxDiffPixelRatio: 0.01,  // 1% tolerance
+    animations: 'disabled',
+  })
+})
+```
+
+---
+
+## 12. Accessibility Testing
+
+```typescript
+// Install: npm install @axe-core/playwright
+import AxeBuilder from '@axe-core/playwright'
+
+test('page passes accessibility audit', async ({ page }) => {
+  await page.goto('/athlete-portal/profile')
+  const results = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa'])
+    .analyze()
+  expect(results.violations).toEqual([])
+})
+```
+
+---
+
+## 13. API Contract Testing
+
+```go
+// Verify API response shape matches contract
+func TestAPI_AthleteList_Contract(t *testing.T) {
+    rec := httptest.NewRecorder()
+    req := httptest.NewRequest("GET", "/api/v1/athletes/", nil)
+    srv.Handler().ServeHTTP(rec, req)
+
+    var resp struct {
+        Success bool          `json:"success"`
+        Data    []interface{} `json:"data"`
+        Meta    *struct {
+            Page      int `json:"page"`
+            PageSize  int `json:"page_size"`
+        } `json:"meta"`
+    }
+    json.Unmarshal(rec.Body.Bytes(), &resp)
+    assert(t, resp.Success == true, "success must be true")
+    assert(t, resp.Data != nil, "data must not be nil")
+}
 ```

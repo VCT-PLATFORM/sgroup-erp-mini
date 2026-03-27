@@ -428,8 +428,8 @@ Every Mobile Build output must include:
 | Situation | Consult |
 |---|---|
 | Build pipeline in CI | → **vct-mobile-cicd** |
-| Performance of built app | → **vct-mobile-performance** |
-| Testing built artifacts | → **vct-mobile-testing** |
+| Performance of built app | → **mobile-performance** |
+| Testing built artifacts | → **mobile-testing** |
 | Store submission | → **vct-release-manager** |
 | Environment variables | → **vct-devops** |
 | App icon/splash design | → **vct-ui-ux** |

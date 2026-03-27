@@ -86,7 +86,7 @@ maestro record tests/mobile/maestro/login-flow.yaml
 - [ ] Navigation flow pass
 - [ ] Offline mode flow pass (nếu có)
 
-> Đọc skill **vct-mobile-testing** (`.agents/skills/vct-mobile-testing/SKILL.md`) để viết Maestro flows mới.
+> Đọc skill **mobile-testing** (`.agents/skills/mobile-testing/SKILL.md`) để viết Maestro flows mới.
 
 ---
 

@@ -101,13 +101,13 @@ description: Workflow retrospective sau khi hoàn thành task — rút kinh nghi
 ### Improvements Made:
 | File | Change | Reason |
 |------|--------|--------|
-| .agents/skills/vct-{name}/SKILL.md | [mô tả] | [lý do] |
+| .agents/skills/{name}/SKILL.md | [mô tả] | [lý do] |
 | .agents/workflows/{name}.md | [mô tả] | [lý do] |
 
 ### New Files Created:
 | File | Purpose |
 |------|---------|
-| .agents/skills/vct-{name}/SKILL.md | [mục đích] |
+| .agents/skills/{name}/SKILL.md | [mục đích] |
 | .agents/workflows/{name}.md | [mục đích] |
 ```
 

@@ -212,7 +212,7 @@ Checklist:
 □ AbortController for fetch?
 ```
 
-> Đọc skill **vct-mobile-performance** (`.agents/skills/vct-mobile-performance/SKILL.md`) cho deep-dive.
+> Đọc skill **mobile-performance** (`.agents/skills/mobile-performance/SKILL.md`) cho deep-dive.
 
 ---
 

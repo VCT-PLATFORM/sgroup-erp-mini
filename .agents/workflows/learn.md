@@ -5,7 +5,7 @@ description: Workflow tự học hỏi từ codebase, documentation, và externa
 # /learn — Học Hỏi & Nâng Cao Kiến Thức
 
 > Sử dụng khi cần nghiên cứu technology mới, học patterns từ codebase, hoặc cập nhật kiến thức từ docs.
-> Đọc skill **vct-skill-evolver** (`/.agents/skills/vct-skill-evolver/SKILL.md`) cho research methodology.
+> Đọc skill **skill-evolver** (`/.agents/skills/skill-evolver/SKILL.md`) cho research methodology.
 
 // turbo-all
 

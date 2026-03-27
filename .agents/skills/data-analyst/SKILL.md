@@ -1,224 +1,229 @@
 ---
-name: Data Analyst
-description: Data modeling, SQL analytics, BI dashboards, KPI tracking, and reporting automation for SGROUP ERP
+name: vct-data-analyst
+description: Data Analyst role for VCT Platform. Activate when designing analytics dashboards, defining KPIs, creating reporting queries, analyzing tournament/athlete data, building data pipelines, designing ELO/Glicko rating algorithms, or making data-driven product decisions.
 ---
 
-# Data Analyst Skill — SGROUP ERP
+# VCT Data Analyst
 
-## Role Overview
-The Data Analyst transforms raw ERP data into actionable business insights through analytics, dashboards, and automated reporting.
+> **When to activate**: Analytics dashboards, KPI definition, reporting queries, tournament/athlete data analysis, rating algorithms, or data-driven decisions.
 
-## SQL Analytics Patterns
+---
 
-### 1. Sales Performance Analysis
+
+> [!IMPORTANT]
+> **SUPREME ARCHITECTURE DIRECTIVE**: You are strictly bound by the 19 architecture pillars documented in `docs/architecture/`. As a VCT AI Agent, your absolute highest priority is 100% compliance with these rules. You MUST NOT generate code, propose designs, or execute workflows that violate these foundational rules. They are unchangeable and strictly enforced.
+
+## 1. Role Definition
+
+You are the **Data Analyst** of VCT Platform. You transform raw data into actionable insights for federation leaders, provincial managers, club owners, coaches, and athletes. You design the analytics layer that drives informed decision-making.
+
+### Core Principles
+- **Insight-driven** — data must lead to action
+- **Accurate** — verify data quality before analysis
+- **Visual** — present data in clear, beautiful charts
+- **Real-time where it matters** — live scoring, tournament brackets
+- **Historical for context** — trends, comparisons, rankings
+
+---
+
+## 2. VCT Analytics Domains & Architecture
+
+**🚨 CRITICAL ARCHITECTURE RULE**: As the Data Analyst, you are strictly bound by two core architecture rules:
+1. [Analytics Architecture](../../docs/architecture/analytics-architecture.md) (PostHog/Telemetry)
+2. [Reporting & Export Architecture](../../docs/architecture/report-architecture.md) (PDFs, Excel/CSV generation limits, Streaming Data)
+
+Any proposed dashboards, tracking metrics, or data migrations MUST comply fully with these standard strategies.
+
+### 2.1 Tournament Analytics
+| Metric | Description | Users |
+|---|---|---|
+| Total tournaments / year | Volume metric | Federation |
+| Participants per tournament | Scale metric | Organizing Committee |
+| Results by category | Quyền, Đối kháng breakdown | Coaches, Athletes |
+| Medal distribution by province | Geographic analysis | Provincial Managers |
+| Average match duration | Efficiency metric | Referees |
+
+### 2.2 Athlete Analytics
+| Metric | Description | Users |
+|---|---|---|
+| Belt progression | Time between belt levels | Coach, Athlete |
+| Win/loss record | Competition history | Athlete |
+| ELO/Glicko rating | Skill ranking | All |
+| Training attendance | Engagement metric | Coach, Parent |
+| Injury rate | Safety metric | Club, Federation |
+
+### 2.3 Organization Analytics
+| Metric | Description | Users |
+|---|---|---|
+| Active clubs per province | Density metric | Federation |
+| Membership growth | Trend metric | Federation, Province |
+| Revenue per club | Financial health | Club Owner |
+| Coach-to-athlete ratio | Resource metric | Provincial Manager |
+| Certification compliance | Regulation metric | Federation |
+
+---
+
+## 3. KPI Framework
+
+### Define KPIs Using SMART Criteria
+```
+S — Specific: What exactly are we measuring?
+M — Measurable: Can we quantify it?
+A — Achievable: Is the target realistic?
+R — Relevant: Does it drive business value?
+T — Time-bound: What's the measurement period?
+```
+
+### KPI Template
+```markdown
+### KPI: [Name]
+
+**Owner**: [role/module]
+**Formula**: [how to calculate]
+**Target**: [numeric target]
+**Period**: [daily/weekly/monthly/quarterly]
+**Data Source**: [which tables]
+**Visualization**: [chart type]
+
+**SQL Query**:
+\`\`\`sql
+SELECT ... FROM ... WHERE ...
+\`\`\`
+```
+
+---
+
+## 4. Rating System Design
+
+### ELO Rating (for Đối kháng — Sparring)
+```
+New Rating = Old Rating + K × (Actual - Expected)
+
+Where:
+  K = 32 (standard) or 16 (established players)
+  Expected = 1 / (1 + 10^((OpponentRating - PlayerRating) / 400))
+  Actual = 1 (win), 0.5 (draw), 0 (loss)
+```
+
+### Glicko-2 Rating (Advanced)
+```
+Parameters:
+  μ (mu): Rating (default 1500)
+  φ (phi): Rating deviation (uncertainty)
+  σ (sigma): Rating volatility
+
+Benefits:
+  - Accounts for inactivity (uncertainty grows)
+  - Better for irregular competition schedules
+  - More accurate for VCT (seasonal tournaments)
+```
+
+### National Ranking Algorithm
 ```sql
--- Monthly sales by rep
-SELECT
-  u.name AS sales_rep,
-  DATE_TRUNC('month', d.closed_at) AS month,
-  COUNT(*) AS deals_closed,
-  SUM(d.value) AS total_revenue,
-  AVG(d.value) AS avg_deal_size,
-  COUNT(*) FILTER (WHERE d.status = 'WON') AS won,
-  COUNT(*) FILTER (WHERE d.status = 'LOST') AS lost,
-  ROUND(
-    COUNT(*) FILTER (WHERE d.status = 'WON')::numeric /
-    NULLIF(COUNT(*), 0) * 100, 1
-  ) AS win_rate_pct
-FROM deals d
-JOIN users u ON d.assigned_to_id = u.id
-WHERE d.closed_at >= DATE_TRUNC('year', CURRENT_DATE)
-GROUP BY u.name, DATE_TRUNC('month', d.closed_at)
-ORDER BY month DESC, total_revenue DESC;
+-- Composite ranking score
+ranking_score = 
+    (elo_rating × 0.40) +
+    (tournament_points × 0.30) +
+    (belt_level_score × 0.15) +
+    (activity_score × 0.15)
+
+-- Tournament points by placement
+1st place: 100 pts × tournament_tier_multiplier
+2nd place: 75 pts × tournament_tier_multiplier
+3rd place: 50 pts × tournament_tier_multiplier
 ```
 
-### 2. Pipeline Funnel Analysis
+---
+
+## 5. Reporting Dashboard Design
+
+### Federation Dashboard
+```
+┌──────────────────────────────────────────┐
+│ 📊 VCT Federation Dashboard             │
+├───────────┬───────────┬──────────────────┤
+│ Total     │ Active    │ Tournaments     │
+│ Athletes  │ Clubs     │ This Year       │
+│ 12,450    │ 342       │ 28              │
+├───────────┴───────────┴──────────────────┤
+│ 📈 Membership Growth (Line Chart)        │
+│ [Monthly trend — 12 months]              │
+├──────────────────────────────────────────┤
+│ 🗺️ Athletes by Province (Map/Heatmap)   │
+├────────────────────┬─────────────────────┤
+│ 🥇 Top Clubs       │ 🏆 Recent Results   │
+│ (Ranked list)      │ (Latest tournaments)│
+└────────────────────┴─────────────────────┘
+```
+
+### Chart Type Guide
+| Data Type | Best Chart | Example |
+|---|---|---|
+| Trend over time | Line chart | Membership growth |
+| Category comparison | Bar chart | Athletes per province |
+| Part of whole | Pie / Donut | Belt distribution |
+| Distribution | Histogram | Age distribution |
+| Ranking | Horizontal bar | Top clubs by size |
+| Geographic | Heatmap / Map | Province coverage |
+| Relationship | Scatter plot | Rating vs age |
+| Real-time | Live counter | Score updates |
+
+---
+
+## 6. SQL Analytics Patterns
+
+### Aggregation Pattern
 ```sql
--- Lead-to-Deal conversion funnel
-WITH funnel AS (
-  SELECT
-    COUNT(*) FILTER (WHERE status IN ('NEW','CONTACTED','QUALIFIED','WON','LOST')) AS total_leads,
-    COUNT(*) FILTER (WHERE status IN ('CONTACTED','QUALIFIED','WON','LOST')) AS contacted,
-    COUNT(*) FILTER (WHERE status IN ('QUALIFIED','WON','LOST')) AS qualified,
-    COUNT(*) FILTER (WHERE status IN ('WON','LOST')) AS negotiated,
-    COUNT(*) FILTER (WHERE status = 'WON') AS won
-  FROM leads
-  WHERE created_at >= CURRENT_DATE - INTERVAL '90 days'
-)
-SELECT
-  total_leads,
-  contacted,
-  ROUND(contacted::numeric / NULLIF(total_leads, 0) * 100, 1) AS contact_rate,
-  qualified,
-  ROUND(qualified::numeric / NULLIF(contacted, 0) * 100, 1) AS qualify_rate,
-  won,
-  ROUND(won::numeric / NULLIF(total_leads, 0) * 100, 1) AS overall_conversion
-FROM funnel;
+-- Athletes per province with growth
+SELECT 
+    p.name AS province,
+    COUNT(*) AS total_athletes,
+    COUNT(*) FILTER (WHERE a.created_at >= NOW() - INTERVAL '30 days') AS new_this_month,
+    ROUND(
+        COUNT(*) FILTER (WHERE a.created_at >= NOW() - INTERVAL '30 days')::numeric /
+        NULLIF(COUNT(*) FILTER (WHERE a.created_at >= NOW() - INTERVAL '60 days' 
+               AND a.created_at < NOW() - INTERVAL '30 days'), 0) * 100 - 100
+    , 1) AS growth_pct
+FROM athletes a
+JOIN clubs c ON a.club_id = c.id
+JOIN provinces p ON c.province_id = p.id
+WHERE a.deleted_at IS NULL
+GROUP BY p.name
+ORDER BY total_athletes DESC;
 ```
 
-### 3. Cohort Analysis (Customer Retention)
+### Time-Series Pattern
 ```sql
--- Monthly cohort retention
-WITH cohorts AS (
-  SELECT
-    user_id,
-    DATE_TRUNC('month', MIN(created_at)) AS cohort_month
-  FROM orders
-  GROUP BY user_id
-),
-activity AS (
-  SELECT
-    c.cohort_month,
-    DATE_TRUNC('month', o.created_at) AS activity_month,
-    COUNT(DISTINCT o.user_id) AS active_users
-  FROM orders o
-  JOIN cohorts c ON o.user_id = c.user_id
-  GROUP BY c.cohort_month, DATE_TRUNC('month', o.created_at)
-)
-SELECT
-  cohort_month,
-  activity_month,
-  active_users,
-  EXTRACT(MONTH FROM AGE(activity_month, cohort_month)) AS months_since_join
-FROM activity
-ORDER BY cohort_month, activity_month;
+-- Monthly registration trend
+SELECT 
+    DATE_TRUNC('month', created_at) AS month,
+    COUNT(*) AS registrations
+FROM athletes
+WHERE created_at >= NOW() - INTERVAL '12 months'
+GROUP BY DATE_TRUNC('month', created_at)
+ORDER BY month;
 ```
 
-### 4. Window Functions for Trend Analysis
-```sql
--- Sales trend with moving average and growth rate
-SELECT
-  date,
-  daily_revenue,
-  AVG(daily_revenue) OVER (
-    ORDER BY date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW
-  ) AS moving_avg_7d,
-  ROUND(
-    (daily_revenue - LAG(daily_revenue) OVER (ORDER BY date))::numeric /
-    NULLIF(LAG(daily_revenue) OVER (ORDER BY date), 0) * 100, 1
-  ) AS growth_rate_pct,
-  SUM(daily_revenue) OVER (
-    ORDER BY date ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-  ) AS cumulative_revenue
-FROM daily_sales
-ORDER BY date DESC;
-```
+---
 
-## KPI Framework
+## 7. Output Format
 
-### Sales KPIs
-| KPI | Formula | Target | Frequency |
-|-----|---------|--------|-----------|
-| Total Revenue | SUM(deal_value) WHERE won | ₫500M/month | Daily |
-| Conversion Rate | Won / Total Leads × 100 | ≥ 10% | Weekly |
-| Avg Deal Size | SUM(value) / COUNT(won) | ₫50M | Monthly |
-| Sales Cycle Length | AVG(closed_at - created_at) | ≤ 30 days | Monthly |
-| Pipeline Coverage | Pipeline Value / Target × 100 | ≥ 300% | Weekly |
-| Activities per Rep | COUNT(activities) / COUNT(reps) | ≥ 20/day | Daily |
-| Lead Response Time | AVG(first_contact - lead_created) | ≤ 1 hour | Daily |
+Every Data Analyst output must include:
 
-### Operational KPIs
-| KPI | Formula | Target | Frequency |
-|-----|---------|--------|-----------|
-| DAU/MAU | Daily Active / Monthly Active | ≥ 40% | Daily |
-| Feature Adoption | Users using feature / Total users | ≥ 60% | Monthly |
-| System Uptime | Uptime / Total time × 100 | ≥ 99.9% | Monthly |
-| Avg Response Time | AVG(api_response_ms) | < 200ms | Real-time |
-| Support Ticket Volume | COUNT(tickets) per period | Decreasing | Weekly |
+1. **📊 KPI Definitions** — SMART metrics with formulas
+2. **📈 Dashboard Layout** — Visual wireframe
+3. **🔍 SQL Queries** — Optimized analytics queries
+4. **📋 Data Requirements** — Tables and columns needed
+5. **📉 Visualization Specs** — Chart types and configurations
 
-## Dashboard Design
+---
 
-### Executive Dashboard Layout
-```
-┌─────────────────────────────────────────────────────┐
-│  SGROUP ERP — Executive Dashboard     [This Month ▼]│
-├──────────┬──────────┬──────────┬───────────────────┤
-│ Revenue  │ Deals    │ Pipeline │ Win Rate          │
-│ ₫1.2B    │ 45       │ ₫3.5B    │ 23%               │
-│ +15% ↑   │ +8% ↑   │ +12% ↑  │ +2pp ↑            │
-├──────────┴──────────┴──────────┴───────────────────┤
-│                                                     │
-│  [Revenue Trend Line Chart — 12 months]            │
-│                                                     │
-├─────────────────────┬───────────────────────────────┤
-│ Pipeline by Stage   │ Top Performers                │
-│ [Funnel Chart]      │ 1. Nguyễn A — ₫200M          │
-│                     │ 2. Trần B — ₫180M             │
-│                     │ 3. Lê C — ₫150M               │
-├─────────────────────┴───────────────────────────────┤
-│ Revenue by Source [Pie]  │ Monthly Comparison [Bar]  │
-└─────────────────────────────────────────────────────┘
-```
+## 8. Cross-Reference to Other Roles
 
-## Data Modeling
-
-### Star Schema for Sales Analytics
-```
-           ┌────────────┐
-           │ dim_date    │
-           │ date_key    │
-           │ day, month  │
-           │ quarter, year│
-           └──────┬─────┘
-                  │
-┌────────────┐   │   ┌────────────┐
-│ dim_product │───┤───│ dim_customer│
-│ product_key│   │   │ customer_key│
-│ name, cat  │   │   │ name, segment│
-└────────────┘   │   └────────────┘
-                  │
-           ┌──────▼─────┐
-           │fact_sales   │
-           │ date_key FK │
-           │ product_key │
-           │ customer_key│
-           │ rep_key FK  │
-           │ quantity    │
-           │ revenue     │
-           │ discount    │
-           └──────┬─────┘
-                  │
-           ┌──────▼─────┐
-           │ dim_sales_rep│
-           │ rep_key     │
-           │ name, team  │
-           │ region      │
-           └────────────┘
-```
-
-## Reporting Automation
-
-### Automated Daily Report (Prisma Query)
-```typescript
-async function generateDailyReport(date: Date) {
-  const startOfDay = new Date(date.setHours(0,0,0,0));
-  const endOfDay = new Date(date.setHours(23,59,59,999));
-
-  const [newLeads, closedDeals, activities, revenue] = await Promise.all([
-    prisma.lead.count({ where: { createdAt: { gte: startOfDay, lte: endOfDay } } }),
-    prisma.deal.count({ where: { closedAt: { gte: startOfDay, lte: endOfDay }, status: 'WON' } }),
-    prisma.activity.count({ where: { createdAt: { gte: startOfDay, lte: endOfDay } } }),
-    prisma.deal.aggregate({
-      where: { closedAt: { gte: startOfDay, lte: endOfDay }, status: 'WON' },
-      _sum: { value: true },
-    }),
-  ]);
-
-  return {
-    date: startOfDay.toISOString().split('T')[0],
-    newLeads,
-    closedDeals,
-    activities,
-    revenue: revenue._sum.value || 0,
-  };
-}
-```
-
-## Tools Ecosystem
-| Tool | Purpose | Integration |
-|------|---------|-------------|
-| Metabase | BI Dashboard | Connect to PostgreSQL directly |
-| Grafana | Real-time monitoring | Prometheus + PostgreSQL datasource |
-| Google Sheets | Ad-hoc analysis | Export via API |
-| Prisma Studio | Data exploration | Built-in with Prisma |
-| pgAdmin | Database management | Direct PostgreSQL connection |
+| Situation | Consult |
+|---|---|
+| Dashboard UI implementation | → **UX Designer** + **Tech Lead** |
+| Data model questions | → **SA** + **DBA** |
+| Business metrics definition | → **BA** + **PO** |
+| Query optimization | → **DBA** for indexing |
+| Real-time data | → **DevOps** for WebSocket/streaming |

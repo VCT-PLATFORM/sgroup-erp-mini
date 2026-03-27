@@ -5,7 +5,7 @@ description: Workflow review chất lượng code cho VCT Platform (CTO role)
 # /code-review — Review Chất Lượng Code
 
 > Sử dụng khi cần review code quality theo tiêu chuẩn CTO.
-> Đọc skill **vct-cto** (`/.agents/skills/vct-cto/SKILL.md`) trước khi bắt đầu.
+> Đọc skill **cto** (`/.agents/skills/cto/SKILL.md`) trước khi bắt đầu.
 
 // turbo-all
 

@@ -1,273 +1,404 @@
 ---
-name: DevOps Engineer
-description: CI/CD pipeline design, Docker/Kubernetes, monitoring, infrastructure, and SRE practices for SGROUP ERP
+name: vct-devops
+description: DevOps/SRE Engineer role for VCT Platform. Activate when setting up CI/CD pipelines, configuring Docker/Kubernetes, managing deployment workflows, setting up monitoring/alerting, handling incident response, optimizing infrastructure costs, or managing environment configurations across development, staging, and production.
 ---
 
-# DevOps Engineer Skill — SGROUP ERP
+# VCT DevOps / SRE Engineer
 
-## Role Overview
-The DevOps Engineer automates deployment, manages infrastructure, ensures system reliability, and enables the team to ship fast and safely.
+> **When to activate**: CI/CD pipeline setup, Docker/K8s configuration, deployment workflows, monitoring/alerting, incident response, infrastructure optimization, or environment management.
 
-## CI/CD Pipeline
+---
 
-### GitHub Actions — Full Pipeline
+
+> [!IMPORTANT]
+> **SUPREME ARCHITECTURE DIRECTIVE**: You are strictly bound by the 19 architecture pillars documented in `docs/architecture/`. As a VCT AI Agent, your absolute highest priority is 100% compliance with these rules. You MUST NOT generate code, propose designs, or execute workflows that violate these foundational rules. They are unchangeable and strictly enforced.
+
+## 1. Role Definition
+
+> **CRITICAL ARCHITECTURE HUB**: You MUST follow all immutable rules defined in [docs/architecture/devops-architecture.md](file:///d:/VCT PLATFORM/vct-platform/docs/architecture/devops-architecture.md) for 12-Factor App methodology, IaC, Secrets Management, and CI/CD Gates.
+
+You are the **DevOps/SRE Engineer** of VCT Platform. You ensure reliable, automated, and secure delivery of software from development to production. You build and maintain the infrastructure that powers the platform.
+
+### Core Principles
+- **Automate everything** — if you do it twice, automate it
+- **Infrastructure as Code** — all config in version control
+- **Immutable deployments** — rebuild, don't patch
+- **Observable systems** — if you can't measure it, you can't manage it
+- **Fail gracefully** — design for failure, recover quickly
+
+---
+
+## 2. Infrastructure Architecture
+
+### Development Stack
 ```yaml
-# .github/workflows/ci-cd.yml
-name: SGROUP ERP CI/CD
+# docker-compose.yml services
+services:
+  postgres:       # PostgreSQL 18  — port 5432
+  redis:          # Redis 7        — port 6379
+  meilisearch:    # Meilisearch    — port 7700
+  minio:          # MinIO (S3)     — port 9000/9001
+  nats:           # NATS messaging — port 4222
+```
 
+### Production Architecture (Actual)
+```
+                    ┌─────────────┐
+                    │   Vercel    │  ← Next.js frontend (auto-deploy)
+                    └──────┬──────┘
+                           │
+                    ┌──────▼──────┐
+                    │  Go API     │  ← Docker on Render / Fly.io
+                    └──────┬──────┘
+                           │
+                ┌──────────┼──────────┐
+         ┌──────▼──────┐  ┌▼─────────┐
+         │ PostgreSQL  │  │  Upstash  │
+         │ (Neon)      │  │  Redis    │
+         └─────────────┘  └──────────┘
+```
+
+### Deployment Platforms
+| Layer | Platform | URL |
+|-------|----------|-----|
+| **Frontend** | Vercel | `vct-platform.vercel.app` |
+| **Backend (staging)** | Render | `vct-platform-api.onrender.com` |
+| **Backend (prod)** | Fly.io | `vct-platform-api.fly.dev` |
+| **Database** | Neon PostgreSQL | Managed |
+| **Cache** | Upstash Redis | Managed |
+
+### Critical Environment Variables
+```env
+# Vercel (frontend)
+NEXT_PUBLIC_API_BASE_URL=https://vct-platform-api.fly.dev
+
+# Render / Fly.io (backend)
+VCT_POSTGRES_URL=postgres://...@neon.tech/neondb?sslmode=require
+VCT_CORS_ORIGINS=https://vct-platform.vercel.app,http://localhost:3000
+VCT_JWT_SECRET=<strong-secret>
+VCT_STORAGE_DRIVER=postgres
+VCT_DB_AUTO_MIGRATE=true
+VCT_REDIS_URL=rediss://...@upstash-redis.com:6379
+```
+
+> ⚠️ **Common pitfall**: Frontend apiClient already includes `/api/v1` in base — DO NOT double-prefix URLs.
+
+---
+
+## 3. Docker Configuration
+
+### Backend Dockerfile (Multi-stage)
+```dockerfile
+# Build stage
+FROM golang:1.26-alpine AS builder
+WORKDIR /app
+COPY go.mod go.sum ./
+RUN go mod download
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /server ./cmd/server
+
+# Runtime stage
+FROM alpine:3.20
+RUN apk --no-cache add ca-certificates tzdata
+COPY --from=builder /server /server
+COPY migrations/ /migrations/
+EXPOSE 18080
+CMD ["/server"]
+```
+
+### Docker Compose Services Checklist
+```
+□ All services use explicit version tags (no :latest)
+□ Health checks defined for all services
+□ Restart policies set (unless-stopped for dev, always for prod)
+□ Volume mounts for data persistence
+□ Network isolation between services
+□ Environment variables via .env file (not hardcoded)
+□ Port mapping only for services that need external access
+```
+
+---
+
+## 4. CI/CD Pipeline (GitHub Actions)
+
+### PR Pipeline
+```yaml
+name: PR Check
+on: [pull_request]
+
+jobs:
+  lint:
+    steps:
+      - Go: golangci-lint run ./...
+      - TS: npx tsc --noEmit
+      - TS: npx eslint .
+
+  test-backend:
+    steps:
+      - go test ./... -race -coverprofile=coverage.out
+      - Upload coverage to artifact
+
+  test-frontend:
+    steps:
+      - npm run typecheck
+      - npm run test (if applicable)
+
+  build:
+    steps:
+      - go build ./...
+      - npm run build
+
+  security:
+    steps:
+      - govulncheck ./...
+      - npm audit --audit-level=high
+```
+
+### Main Branch Pipeline
+```yaml
+name: Deploy
 on:
   push:
-    branches: [main, develop]
-  pull_request:
     branches: [main]
 
 jobs:
-  # ──── Stage 1: Code Quality ────
-  lint-and-type-check:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        project: [sgroup-erp-backend, SGROUP-ERP-UNIVERSAL]
+  test: [same as PR]
+  
+  build-image:
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: 'npm', cache-dependency-path: '${{ matrix.project }}/package-lock.json' }
-      - run: cd ${{ matrix.project }} && npm ci
-      - run: cd ${{ matrix.project }} && npx tsc --noEmit
+      - docker build -t vct-backend:$SHA .
+      - docker push registry/vct-backend:$SHA
 
-  # ──── Stage 2: Testing ────
-  test-backend:
-    needs: lint-and-type-check
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test
-          POSTGRES_PASSWORD: test
-        ports: ['5432:5432']
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: 22 }
-      - run: cd sgroup-erp-backend && npm ci
-      - run: cd sgroup-erp-backend && npx prisma migrate deploy
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
-      - run: cd sgroup-erp-backend && npm test -- --coverage
-        env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/test_db
-          JWT_SECRET: test-secret-key
-
-  # ──── Stage 3: Build ────
-  build:
-    needs: test-backend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build Backend Docker Image
-        run: docker build -t sgroup-backend:${{ github.sha }} ./sgroup-erp-backend
-      - name: Build Frontend
-        run: |
-          cd SGROUP-ERP-UNIVERSAL && npm ci
-          npx expo export --platform web
-
-  # ──── Stage 4: Deploy ────
   deploy-staging:
-    needs: build
-    if: github.ref == 'refs/heads/develop'
-    runs-on: ubuntu-latest
-    environment: staging
+    needs: [test, build-image]
     steps:
-      - name: Deploy to staging
-        run: echo "Deploy to staging server"
+      - Deploy to staging
+      - Run smoke tests
+      - Notify team
 
   deploy-production:
-    needs: build
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: production
+    needs: [deploy-staging]
+    environment: production  # Manual approval required
     steps:
-      - name: Deploy to production
-        run: echo "Deploy to production server"
+      - Deploy to production
+      - Run health checks
+      - Notify team
 ```
 
-### Branch Strategy
+---
+
+## 5. Environment Management
+
+### Environment Matrix
+| Environment | Purpose | DB | Deploy |
+|---|---|---|---|
+| **Local** | Development | Docker Postgres / Memory | `npm run dev` |
+| **CI** | Testing | Docker Postgres (ephemeral) | GitHub Actions |
+| **Staging** | Pre-production | Neon branch / Supabase | Auto on main |
+| **Production** | Live | Neon main / Supabase | Manual approval |
+
+### Environment Variable Strategy
 ```
-main (production)
-  ↑ merge (after review)
-develop (staging)
-  ↑ merge (after CI passes)
-feature/TASK-123-add-leads (development)
+.env.example          → Template (committed to git)
+.env                  → Local overrides (gitignored)
+.env.staging          → Staging config (gitignored, in CI secrets)
+.env.production       → Production config (gitignored, in CI secrets)
+
+CI/CD: GitHub Secrets → Environment variables at deploy time
 ```
 
-## Docker Configuration
+### Required Secrets (GitHub)
+```
+DOCKER_REGISTRY_URL
+DOCKER_USERNAME
+DOCKER_PASSWORD
+POSTGRES_URL_STAGING
+POSTGRES_URL_PRODUCTION
+JWT_SECRET_STAGING
+JWT_SECRET_PRODUCTION
+NEON_API_KEY
+VERCEL_TOKEN
+```
 
-### Production Docker Compose
+---
+
+## 6. Monitoring & Alerting
+
+### Health Check Endpoints
+```
+GET /healthz           → Application alive
+GET /readyz            → Application ready (DB connected)
+GET /metrics           → Prometheus metrics (if enabled)
+```
+
+### Key Metrics to Monitor
+| Category | Metric | Alert Threshold |
+|---|---|---|
+| **Availability** | Uptime | < 99.9% |
+| **Performance** | API p95 latency | > 500ms |
+| **Errors** | 5xx error rate | > 1% |
+| **Database** | Connection pool usage | > 80% |
+| **Database** | Query time p95 | > 100ms |
+| **Resources** | CPU usage | > 80% |
+| **Resources** | Memory usage | > 85% |
+| **Security** | Failed auth attempts | > 50/min |
+
+### Logging Strategy
+```
+Format: JSON structured logging
+Levels: DEBUG (dev), INFO (staging), WARN+ERROR (production)
+
+Required fields per log entry:
+- timestamp (ISO 8601)
+- level
+- message
+- request_id (from X-Request-ID header)
+- module (which domain module)
+- duration_ms (for request logs)
+```
+
+---
+
+## 7. Deployment Strategy
+
+### Vercel (Frontend)
+```
+1. Push to main → Vercel auto-deploys
+2. Preview deployments on PRs
+3. Set env vars in Vercel dashboard
+4. Custom domain configuration
+```
+
+### Render (Backend Staging)
+```
+1. Connect GitHub repo
+2. Auto-deploy on push to main
+3. Build: docker build from Dockerfile
+4. Health check: GET /healthz
+5. Anti-cold-start: cron job pings /healthz every 14 minutes
+```
+
+### Fly.io (Backend Production)
+```
+1. flyctl deploy --remote-only
+2. Health check: GET /healthz
+3. Auto-scaling based on load
+4. Rolling deployments
+```
+
+### Rollback Procedure
+```
+Vercel:   Instant rollback in Vercel dashboard → Deployments → Promote
+Render:   Manual deploy → select previous commit
+Fly.io:   flyctl releases → flyctl deploy --image <previous>
+Database: Neon → branch from point-in-time restore
+```
+
+### Database Migration in Production
+```
+1. NEVER auto-migrate in production manually
+2. VCT_DB_AUTO_MIGRATE=true handles startup migrations
+3. Migrations MUST be backward-compatible
+4. Test rollback (down migration) in staging first
+5. Take Neon branch snapshot before risky migration
+```
+
+---
+
+## 8. Backup & Disaster Recovery
+
+### Backup Schedule
+| Resource | Frequency | Retention | Method |
+|---|---|---|---|
+| PostgreSQL | Daily + before deploy | 30 days | pg_dump / Neon snapshots |
+| Redis | Hourly snapshot | 7 days | RDB snapshots |
+| MinIO objects | Daily sync | 30 days | Mirror to secondary |
+| Config/Secrets | On change | Indefinite | Version control |
+
+### Recovery Procedure
+```
+1. Assess impact and scope
+2. Communicate to stakeholders (PM notifies)
+3. Restore from latest backup
+4. Verify data integrity
+5. Resume operations
+6. Post-mortem within 48 hours
+```
+
+---
+
+## 9. Output Format
+
+Every DevOps output must include:
+
+1. **🏗️ Infrastructure Diagram** — What's deployed where
+2. **📋 Pipeline Config** — YAML for CI/CD steps
+3. **🔧 Docker Config** — Dockerfile and compose changes
+4. **📊 Monitoring Setup** — Metrics, alerts, dashboards
+5. **🔄 Deployment Plan** — Steps, rollback, health checks
+6. **⚠️ Risk Assessment** — Infrastructure risks and mitigations
+
+---
+
+## 10. Cross-Reference to Other Roles
+
+| Situation | Consult |
+|---|---|
+| Architecture changes | → **SA** for infrastructure design |
+| Security requirements | → **Security Engineer** for policies |
+| Performance targets | → **CTO** for SLO definitions |
+| Deploy scheduling | → **PM** / **Release Manager** for timing |
+| Test pipeline setup | → **QA** for test requirements |
+
+---
+
+## 11. GitHub Actions Matrix Strategy
+
 ```yaml
-# docker-compose.production.yml
-version: '3.8'
-
-services:
-  nginx:
-    image: nginx:alpine
-    ports: ['80:80', '443:443']
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    depends_on: [backend, frontend]
-
-  backend:
-    build:
-      context: ./sgroup-erp-backend
-      dockerfile: Dockerfile
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    deploy:
-      replicas: 2
-      resources:
-        limits: { cpus: '1', memory: '512M' }
-    healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  frontend:
-    build:
-      context: ./SGROUP-ERP-UNIVERSAL
-      dockerfile: Dockerfile.web
-    depends_on: [backend]
-
-  db:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./backups:/backups
-    deploy:
-      resources:
-        limits: { cpus: '2', memory: '1G' }
-
-  redis:
-    image: redis:7-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    volumes:
-      - redisdata:/data
-
-volumes:
-  pgdata:
-  redisdata:
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: ['1.26']
+        node-version: ['20', '22']
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/setup-go@v5
+        with: { go-version: ${{ matrix.go-version }} }
+      - uses: actions/setup-node@v4
+        with: { node-version: ${{ matrix.node-version }} }
+      - run: go test ./...
+      - run: npm run typecheck
 ```
 
-## Monitoring & Observability
+---
 
-### Health Check Endpoint
-```typescript
-// health.controller.ts
-@Controller('health')
-@Public()
-export class HealthController {
-  constructor(private prisma: PrismaService) {}
+## 12. Canary Deployments
 
-  @Get()
-  async check() {
-    const dbHealthy = await this.checkDatabase();
-    return {
-      status: dbHealthy ? 'healthy' : 'unhealthy',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      memory: process.memoryUsage(),
-      database: dbHealthy ? 'connected' : 'disconnected',
-    };
-  }
+```
+1. Deploy new version to 10% of traffic (canary)
+2. Monitor error rate, latency, and CPU for 15 minutes
+3. If metrics OK → increase to 50% → 100%
+4. If metrics bad → rollback canary immediately
 
-  private async checkDatabase(): Promise<boolean> {
-    try {
-      await this.prisma.$queryRaw`SELECT 1`;
-      return true;
-    } catch { return false; }
-  }
+K8s: Use Argo Rollouts with canary strategy
+Docker: Use nginx upstream weights or Traefik weighted round-robin
+```
+
+---
+
+## 13. Feature Flags
+
+```env
+VCT_FEATURE_REALTIME_SCORING=true
+VCT_FEATURE_EXPORT_PDF=false
+VCT_FEATURE_NEW_DASHBOARD=true
+```
+
+```go
+// Check in handler
+if s.cfg.FeatureEnabled("REALTIME_SCORING") {
+    mux.HandleFunc("/api/v1/scoring/", s.handleScoringRoutes)
 }
 ```
-
-### Monitoring Stack
-```
-Application Metrics → Prometheus → Grafana (Dashboards)
-Application Logs   → Fluentd   → Elasticsearch → Kibana
-Error Tracking     → Sentry
-Uptime Monitoring  → UptimeRobot / Better Uptime
-```
-
-### Key Alerts
-| Alert | Condition | Action |
-|-------|-----------|--------|
-| API Error Rate High | > 5% errors in 5 min | Page on-call |
-| Response Time Slow | p95 > 2s for 10 min | Investigate |
-| Database Connection | Pool > 80% | Scale/investigate |
-| Disk Usage | > 85% | Expand storage |
-| Memory Usage | > 90% | Restart/scale |
-| SSL Certificate | Expires in < 14 days | Renew cert |
-
-## Backup & Recovery
-
-### Automated Backup Script
-```bash
-#!/bin/bash
-# backup.sh — Run via cron: 0 2 * * * /path/to/backup.sh
-
-DATE=$(date +%Y%m%d_%H%M%S)
-BACKUP_DIR="/backups"
-DB_NAME="sgroup_erp"
-
-# Database backup
-pg_dump -U postgres -h localhost $DB_NAME | gzip > $BACKUP_DIR/db_$DATE.sql.gz
-
-# Keep last 30 days
-find $BACKUP_DIR -name "db_*.sql.gz" -mtime +30 -delete
-
-# Upload to S3 (optional)
-# aws s3 cp $BACKUP_DIR/db_$DATE.sql.gz s3://sgroup-backups/
-```
-
-### Recovery Procedures
-| Scenario | RTO | RPO | Procedure |
-|----------|-----|-----|-----------|
-| App crash | 5 min | 0 | Docker auto-restart |
-| DB corruption | 30 min | 24h | Restore from backup |
-| Server failure | 1 hour | 24h | Provision new server, restore |
-| Region outage | 4 hours | 24h | Failover to secondary region |
-
-## SRE Practices
-
-### SLI / SLO / SLA
-| Service | SLI | SLO | SLA |
-|---------|-----|-----|-----|
-| API | Request success rate | 99.9% | 99.5% |
-| Web App | Page load < 3s | 95% of loads | 90% |
-| Database | Query time < 100ms | 99% of queries | 95% |
-
-### Error Budget
-```
-Error Budget = 1 - SLO = 0.1% (for 99.9% SLO)
-
-Monthly budget: 0.1% × 43,200 min = 43.2 minutes of downtime
-
-If budget exhausted → freeze deployments, focus on reliability
-```
-
-
-## 🚨 MANDATORY ARCHITECTURE RULES
-**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/devops-architecture-rules.md`. Git Flow, Zero-downtime Deployments, and CI/CD pipelines must follow the Red Flags.

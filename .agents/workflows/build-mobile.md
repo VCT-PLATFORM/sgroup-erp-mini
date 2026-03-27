@@ -35,7 +35,7 @@ Checklist:
 | Test nội bộ (team) | `preview` | `eas build --profile preview` |
 | Submit lên Store | `production` | `eas build --profile production` |
 
-> ⚠️ Đọc skill **vct-mobile-build** (`.agents/skills/vct-mobile-build/SKILL.md`) nếu cần cấu hình chi tiết EAS profiles.
+> ⚠️ Đọc skill **mobile-build** (`.agents/skills/mobile-build/SKILL.md`) nếu cần cấu hình chi tiết EAS profiles.
 
 ---
 

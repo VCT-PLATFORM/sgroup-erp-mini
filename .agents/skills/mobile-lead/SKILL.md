@@ -193,12 +193,12 @@ export function ScoreCard() {
 
 | Task Category | Delegate To |
 |---|---|
-| EAS Build, signing, OTA | → **vct-mobile-build** |
-| Unit tests, E2E, device matrix | → **vct-mobile-testing** |
-| FPS, memory, bundle, battery | → **vct-mobile-performance** |
+| EAS Build, signing, OTA | → **mobile-build** |
+| Unit tests, E2E, device matrix | → **mobile-testing** |
+| FPS, memory, bundle, battery | → **mobile-performance** |
 | GitHub Actions, CI pipeline | → **vct-mobile-cicd** |
 | Storage, sync, conflict resolution | → **vct-mobile-offline** |
-| API design/backend integration | → **vct-backend-go** + **vct-sa** |
+| API design/backend integration | → **vct-backend-go** + **solution-architect-vct** |
 | Security (biometrics, storage) | → **vct-security** |
 | UI/UX design review | → **vct-ui-ux** |
 | Release management | → **vct-release-manager** |
@@ -290,12 +290,12 @@ Every Mobile Lead output must include:
 | Situation | Consult |
 |---|---|
 | Shared component design | → **vct-ui-ux** + **vct-tech-lead** |
-| API design for mobile | → **vct-sa** for offline-friendly patterns |
+| API design for mobile | → **solution-architect-vct** for offline-friendly patterns |
 | Mobile CI/CD | → **vct-mobile-cicd** for EAS pipeline |
 | Push notification setup | → **vct-devops** for server config |
 | App store compliance | → **vct-release-manager** for submission |
 | Mobile security | → **vct-security** for biometrics/storage |
-| Build pipeline | → **vct-mobile-build** for EAS configuration |
-| Testing strategy | → **vct-mobile-testing** for test automation |
-| Performance tuning | → **vct-mobile-performance** for profiling |
+| Build pipeline | → **mobile-build** for EAS configuration |
+| Testing strategy | → **mobile-testing** for test automation |
+| Performance tuning | → **mobile-performance** for profiling |
 | Offline architecture | → **vct-mobile-offline** for sync patterns |
