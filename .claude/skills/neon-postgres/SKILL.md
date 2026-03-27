@@ -184,3 +184,7 @@ Key points:
 - Useful for replicating to/from external Postgres systems.
 
 Link: https://neon.com/docs/guides/logical-replication-guide.md
+
+
+## ?? MANDATORY ARCHITECTURE RULES
+**CRITICAL:** You MUST read and strictly adhere to the `docs/architecture/backend-architecture-rules.md` and `docs/architecture/api-architecture-rules.md`. Follow Clean Architecture, DTO validation, UUID v7, Soft Delete, and Decimal precision rules.
