@@ -22,48 +22,45 @@ export class PropertyProductRepository {
     });
   }
 
-  async lockProduct(productId: string, staffName: string): Promise<PropertyProduct> {
+  async lockProduct(productId: string, staffName: string | null, lockedUntil: Date): Promise<any> {
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.propertyProduct.findUnique({
-        where: { id: productId }
-      });
-      
+      const product = await tx.propertyProduct.findUnique({ where: { id: productId } });
       if (!product) throw new BadRequestException('Bất động sản không tồn tại.');
-      if (product.status !== 'AVAILABLE') throw new BadRequestException(`Căn hộ đang ở trạng thái ${product.status}, không thể khóa.`);
 
-      const updated = await tx.propertyProduct.update({
-        where: { id: productId },
+      const result = await tx.propertyProduct.updateMany({
+        where: { id: productId, status: 'AVAILABLE' },
         data: {
           status: 'LOCKED',
           bookedBy: staffName,
-          lockedUntil: new Date(Date.now() + 2 * 60 * 60 * 1000), // Lock 2 hours
+          lockedUntil: lockedUntil,
         }
       });
 
-      // AUDIT LOG - Red Flag 3 Fix: Writing exact history changes safely
+      if (result.count === 0) {
+        throw new BadRequestException('Căn hộ không ở trạng thái AVAILABLE hoặc đã bị lock.');
+      }
+
       await tx.productStatusLog.create({
         data: {
-          productId: product.id,
-          oldStatus: product.status,
+          productId,
+          oldStatus: 'AVAILABLE',
           newStatus: 'LOCKED',
           changedBy: staffName,
-          reason: 'System Auto-Lock for Sale',
+          reason: 'System Auto-Lock',
         }
       });
 
-      return updated;
+      return tx.propertyProduct.findUnique({ where: { id: productId } });
     });
   }
 
-  async unlockProduct(productId: string): Promise<PropertyProduct> {
+  async unlockProduct(productId: string): Promise<any> {
     return this.prisma.$transaction(async (tx) => {
-      const product = await tx.propertyProduct.findUnique({
-        where: { id: productId }
-      });
+      const product = await tx.propertyProduct.findUnique({ where: { id: productId } });
       if (!product) throw new BadRequestException('Bất động sản không tồn tại.');
 
-      const updated = await tx.propertyProduct.update({
-        where: { id: productId },
+      const result = await tx.propertyProduct.updateMany({
+        where: { id: productId, status: 'LOCKED' },
         data: {
           status: 'AVAILABLE',
           bookedBy: null,
@@ -71,18 +68,21 @@ export class PropertyProductRepository {
         }
       });
 
-      // AUDIT LOG
+      if (result.count === 0) {
+        throw new BadRequestException('Căn hộ không ở trạng thái LOCKED, không thể unlock.');
+      }
+
       await tx.productStatusLog.create({
         data: {
-          productId: product.id,
-          oldStatus: product.status,
+          productId,
+          oldStatus: 'LOCKED',
           newStatus: 'AVAILABLE',
           changedBy: 'SYSTEM',
           reason: 'Manual Unlock / Expiration',
         }
       });
 
-      return updated;
+      return tx.propertyProduct.findUnique({ where: { id: productId } });
     });
   }
 }

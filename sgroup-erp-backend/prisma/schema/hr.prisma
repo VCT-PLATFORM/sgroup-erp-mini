@@ -115,7 +115,7 @@ model HrTransferHistory {
   id               String        @id @default(uuid(7))
   employeeId       String
   employee         HrEmployee    @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  transferType     String        // DEPARTMENT, TEAM, BOTH
+  transferType     String // DEPARTMENT, TEAM, BOTH
   fromDepartmentId String?
   fromDepartment   HrDepartment? @relation("TransferFromDept", fields: [fromDepartmentId], references: [id], onDelete: SetNull)
   toDepartmentId   String?
@@ -327,7 +327,7 @@ model HrCourse {
 
 model HrTrainee {
   id           String    @id @default(uuid(7))
-  courseId      String?
+  courseId     String?
   course       HrCourse? @relation(fields: [courseId], references: [id], onDelete: SetNull)
   employeeCode String?
   name         String
@@ -346,18 +346,18 @@ model HrTrainee {
 // 9. Quản lý Phép năm (Leave Balance)
 // ══════════════════════════════════════════════════════════════════
 model HrLeaveBalance {
-  id              String     @id @default(uuid(7))
-  employeeId      String
-  employee        HrEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  year            Int
-  totalEntitled   Float      @default(12) // Tổng phép năm được hưởng
-  used            Float      @default(0)  // Đã sử dụng
-  pending         Float      @default(0)  // Đang chờ duyệt
-  carriedOver     Float      @default(0)  // Phép năm trước chuyển sang
-  remaining       Float      @default(12) // Còn lại = totalEntitled + carriedOver - used - pending
-  lastCalculated  DateTime   @default(now())
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id             String     @id @default(uuid(7))
+  employeeId     String
+  employee       HrEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  year           Int
+  totalEntitled  Float      @default(12) // Tổng phép năm được hưởng
+  used           Float      @default(0) // Đã sử dụng
+  pending        Float      @default(0) // Đang chờ duyệt
+  carriedOver    Float      @default(0) // Phép năm trước chuyển sang
+  remaining      Float      @default(12) // Còn lại = totalEntitled + carriedOver - used - pending
+  lastCalculated DateTime   @default(now())
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   @@unique([employeeId, year])
   @@index([year])
@@ -368,22 +368,22 @@ model HrLeaveBalance {
 // 10. Phúc lợi & Bảo hiểm (Benefits)
 // ══════════════════════════════════════════════════════════════════
 model HrBenefit {
-  id              String     @id @default(uuid(7))
-  employeeId      String
-  employee        HrEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  benefitType     String     // BHXH, BHYT, BHTN, HEALTH_INSURANCE, MEAL, TRANSPORT, PHONE
-  benefitName     String     // "BHXH Bắt buộc", "Gói BH Sức khỏe PVI"
-  provider        String?    // Tên đơn vị cung cấp
-  policyNumber    String?    // Mã số sổ BHXH / Mã hợp đồng BH
-  startDate       DateTime?
-  endDate         DateTime?
-  employeeRate    Float      @default(0)  // % NLĐ đóng (VD: 10.5% cho BHXH)
-  companyRate     Float      @default(0)  // % Công ty đóng (VD: 21.5%)
-  monthlyAmount   Decimal    @default(0) @db.Decimal(18, 2) // Số tiền cố định/tháng
-  status          String     @default("ACTIVE") // ACTIVE, EXPIRED, PENDING, CANCELLED
-  note            String?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  id            String     @id @default(uuid(7))
+  employeeId    String
+  employee      HrEmployee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  benefitType   String // BHXH, BHYT, BHTN, HEALTH_INSURANCE, MEAL, TRANSPORT, PHONE
+  benefitName   String // "BHXH Bắt buộc", "Gói BH Sức khỏe PVI"
+  provider      String? // Tên đơn vị cung cấp
+  policyNumber  String? // Mã số sổ BHXH / Mã hợp đồng BH
+  startDate     DateTime?
+  endDate       DateTime?
+  employeeRate  Float      @default(0) // % NLĐ đóng (VD: 10.5% cho BHXH)
+  companyRate   Float      @default(0) // % Công ty đóng (VD: 21.5%)
+  monthlyAmount Decimal    @default(0) @db.Decimal(18, 2) // Số tiền cố định/tháng
+  status        String     @default("ACTIVE") // ACTIVE, EXPIRED, PENDING, CANCELLED
+  note          String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
   @@index([employeeId])
   @@index([benefitType])
@@ -395,19 +395,19 @@ model HrBenefit {
 // 11. Chính sách HR (Policies — dynamic from DB)
 // ══════════════════════════════════════════════════════════════════
 model HrPolicy {
-  id           String   @id @default(uuid(7))
-  title        String
-  category     String   // ATTENDANCE, SALARY, CULTURE, DISCIPLINE, SECURITY
-  icon         String?  // lucide icon name
-  color        String   @default("#3b82f6")
-  items        String   @db.Text // JSON array of policy items
-  sortOrder    Int      @default(0)
-  isActive     Boolean  @default(true)
+  id            String    @id @default(uuid(7))
+  title         String
+  category      String // ATTENDANCE, SALARY, CULTURE, DISCIPLINE, SECURITY
+  icon          String? // lucide icon name
+  color         String    @default("#3b82f6")
+  items         String    @db.Text // JSON array of policy items
+  sortOrder     Int       @default(0)
+  isActive      Boolean   @default(true)
   effectiveDate DateTime?
-  issuedBy     String?  // "Giám Đốc Nhân Sự"
-  version      String   @default("1.0")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  issuedBy      String? // "Giám Đốc Nhân Sự"
+  version       String    @default("1.0")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   @@index([category])
   @@index([isActive])
@@ -418,23 +418,23 @@ model HrPolicy {
 // 12. Quản lý Tăng ca (Overtime)
 // ══════════════════════════════════════════════════════════════════
 model HrOvertimeRecord {
-  id             String     @id @default(uuid(7))
-  employeeId     String
-  employee       HrEmployee @relation("OvertimeEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
-  date           DateTime
-  startTime      DateTime
-  endTime        DateTime
-  hours          Float      @default(0)
-  overtimeType   String     @default("WEEKDAY") // WEEKDAY (x1.5), WEEKEND (x2.0), HOLIDAY (x3.0)
-  multiplier     Float      @default(1.5)
-  reason         String?
-  status         String     @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
-  approverId     String?
-  approver       HrEmployee? @relation("OvertimeApprover", fields: [approverId], references: [id], onDelete: SetNull)
-  approvedAt     DateTime?
-  note           String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  id           String      @id @default(uuid(7))
+  employeeId   String
+  employee     HrEmployee  @relation("OvertimeEmployee", fields: [employeeId], references: [id], onDelete: Cascade)
+  date         DateTime
+  startTime    DateTime
+  endTime      DateTime
+  hours        Float       @default(0)
+  overtimeType String      @default("WEEKDAY") // WEEKDAY (x1.5), WEEKEND (x2.0), HOLIDAY (x3.0)
+  multiplier   Float       @default(1.5)
+  reason       String?
+  status       String      @default("PENDING") // PENDING, APPROVED, REJECTED, CANCELLED
+  approverId   String?
+  approver     HrEmployee? @relation("OvertimeApprover", fields: [approverId], references: [id], onDelete: SetNull)
+  approvedAt   DateTime?
+  note         String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@index([employeeId])
   @@index([date])

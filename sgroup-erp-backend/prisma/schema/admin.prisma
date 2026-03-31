@@ -4,8 +4,8 @@
 
 model RolePermission {
   id         String   @id @default(uuid(7))
-  role       String   // admin, ceo, hr, sales, employee
-  module     String   // admin, hr, sales, finance, project, marketing, planning, reports
+  role       String // admin, ceo, hr, sales, employee
+  module     String // admin, hr, sales, finance, project, marketing, planning, reports
   permission String   @default("none") // full, write, read, none
   updatedBy  String?  @map("updated_by") // who changed this permission
   createdAt  DateTime @default(now()) @map("created_at")
@@ -21,7 +21,7 @@ model SystemSetting {
   key         String   @unique
   value       String
   group       String   @default("general") // general, email, security, notification
-  label       String?  // UI display label
+  label       String? // UI display label
   description String?
   valueType   String   @default("string") @map("value_type") // string, boolean, number, json
   createdAt   DateTime @default(now()) @map("created_at")
@@ -33,10 +33,10 @@ model SystemSetting {
 
 model FeatureFlag {
   id          String   @id @default(uuid(7))
-  key         String   @unique       // e.g. "module.hr.enabled", "feature.2fa", "feature.dark_mode"
+  key         String   @unique // e.g. "module.hr.enabled", "feature.2fa", "feature.dark_mode"
   enabled     Boolean  @default(false)
   description String?
-  module      String?                // which module this flag belongs to
+  module      String? // which module this flag belongs to
   updatedBy   String?  @map("updated_by")
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -47,13 +47,13 @@ model FeatureFlag {
 
 model AdminNotification {
   id        String   @id @default(uuid(7))
-  type      String                // LOGIN_FAIL, SETTING_CHANGE, USER_LOCKED, PASSWORD_EXPIRED, USER_CREATED, SYSTEM
+  type      String // LOGIN_FAIL, SETTING_CHANGE, USER_LOCKED, PASSWORD_EXPIRED, USER_CREATED, SYSTEM
   title     String
   message   String
   severity  String   @default("info") // info, warning, danger, success
-  userId    String?  @map("user_id")   // target admin user (null = broadcast to all)
+  userId    String?  @map("user_id") // target admin user (null = broadcast to all)
   isRead    Boolean  @default(false) @map("is_read")
-  metadata  String?                // JSON extra data
+  metadata  String? // JSON extra data
   createdAt DateTime @default(now()) @map("created_at")
 
   @@index([userId, isRead])
@@ -63,9 +63,9 @@ model AdminNotification {
 
 model Changelog {
   id          String   @id @default(uuid(7))
-  version     String                // e.g. "1.2.0"
+  version     String // e.g. "1.2.0"
   title       String
-  description String               // markdown content
+  description String // markdown content
   type        String   @default("feature") // feature, bugfix, improvement, security, breaking
   author      String?
   publishedAt DateTime @default(now()) @map("published_at")

@@ -76,10 +76,6 @@ export class PropertyProductService {
     const lockedUntil = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
     const result = await this.productRepo.lockProduct(id, staffName || null, lockedUntil);
     
-    if (result.count === 0) {
-       throw new BadRequestException('Sản phẩm không khả dụng để Lock hoặc đã bị Lock bởi người khác.');
-    }
-    
     const updated = await this.findOne(id);
     await this.productRepo.logStatusChange(id, 'AVAILABLE', 'LOCKED', staffName || 'system', 'Lock căn');
     return updated;
@@ -87,10 +83,6 @@ export class PropertyProductService {
 
   async unlockProduct(id: string) {
     const result = await this.productRepo.unlockProduct(id);
-
-    if (result.count === 0) {
-      throw new BadRequestException('Sản phẩm không trong trạng thái Lock.');
-    }
 
     const updated = await this.findOne(id);
     await this.productRepo.logStatusChange(id, 'LOCKED', 'AVAILABLE', undefined, 'Unlock căn');

@@ -6,6 +6,7 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  Sse,
 } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { AiAgentsService } from './ai-agents.service';
@@ -132,4 +133,25 @@ export class AiController {
       body.context,
     );
   }
+
+  @Post('team/collaborate/stream')
+  @Sse()
+  @HttpCode(HttpStatus.OK)
+  runTeamCollaborationStream(
+    @Body()
+    body: {
+      task: string;
+      agents: string[];
+      coordinator?: string;
+      context?: Record<string, any>;
+    },
+  ) {
+    return this.aiAgentsService.runTeamCollaborationStream(
+      body.task,
+      body.agents,
+      body.coordinator,
+      body.context,
+    );
+  }
 }
+

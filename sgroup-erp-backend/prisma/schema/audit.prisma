@@ -6,13 +6,13 @@ model AuditLog {
   id             String   @id @default(uuid(7))
   userId         String?  @map("user_id")
   userName       String?  @map("user_name")
-  action         String   // POST /admin/users, PATCH /hr/employees/:id, etc.
-  resource       String?  // admin/users, hr/employees, auth/login
-  method         String?  // POST, PATCH, PUT, DELETE
+  action         String // POST /admin/users, PATCH /hr/employees/:id, etc.
+  resource       String? // admin/users, hr/employees, auth/login
+  method         String? // POST, PATCH, PUT, DELETE
   requestBody    String?  @map("request_body") @db.Text
   responseStatus String?  @map("response_status") // SUCCESS, FAILED
   errorMessage   String?  @map("error_message") @db.Text
-  duration       Int?     // milliseconds
+  duration       Int? // milliseconds
   ip             String?
   userAgent      String?  @map("user_agent") // Browser / Device info
   createdAt      DateTime @default(now()) @map("created_at")

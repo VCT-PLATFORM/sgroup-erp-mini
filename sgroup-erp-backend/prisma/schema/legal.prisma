@@ -24,18 +24,18 @@ model LegalProjectDoc {
 }
 
 model ProjectPolicy {
-  id          String   @id @default(uuid(7))
+  id          String    @id @default(uuid(7))
   projectId   String?
   name        String
   startDate   DateTime?
   endDate     DateTime?
-  status      String   @default("DRAFT") // ACTIVE, DRAFT, EXPIRED
-  rules       String?  // JSON array of rule strings
-  color       String   @default("#10b981")
+  status      String    @default("DRAFT") // ACTIVE, DRAFT, EXPIRED
+  rules       String? // JSON array of rule strings
+  color       String    @default("#10b981")
   description String?
   createdBy   String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   @@index([status])
   @@index([projectId])
@@ -46,7 +46,7 @@ model ProjectAssignment {
   id         String   @id @default(uuid(7))
   projectId  String?
   userId     String?
-  name       String   // User display name
+  name       String // User display name
   email      String?
   role       String   @default("Sales Rep") // Project Manager, Sales Director, Sales Manager, etc.
   status     String   @default("ACTIVE") // ACTIVE, INACTIVE
