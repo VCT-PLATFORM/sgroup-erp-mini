@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IProjectRepository } from '../../domain/repositories/project.repository.interface';
 import { CreateProjectDto } from '../../presentation/dtos/create-project.dto';
 import { UpdateProjectDto } from '../../presentation/dtos/update-project.dto';
@@ -8,10 +9,13 @@ export class ProjectService {
   constructor(
     @Inject('IProjectRepository')
     private readonly projectRepo: IProjectRepository,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   async create(createProjectDto: CreateProjectDto) {
-    return this.projectRepo.create(createProjectDto);
+    const project = await this.projectRepo.create(createProjectDto);
+    this.eventEmitter.emit('project.upserted', project);
+    return project;
   }
 
   async findAll() {
@@ -28,7 +32,9 @@ export class ProjectService {
 
   async update(id: string, updateProjectDto: UpdateProjectDto) {
     await this.findOne(id); // verify exists
-    return this.projectRepo.update(id, updateProjectDto);
+    const project = await this.projectRepo.update(id, updateProjectDto);
+    this.eventEmitter.emit('project.upserted', project);
+    return project;
   }
 
   async remove(id: string) {

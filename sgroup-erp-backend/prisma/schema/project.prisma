@@ -1,0 +1,174 @@
+// ══════════════════════════════════════════════════════════════════
+// PROJECT MODULE — Master Data Hub: Zones, Blocks, Units, Allocations
+// ══════════════════════════════════════════════════════════════════
+
+model DimProject {
+  id          String    @id @default(uuid(7))
+  projectCode String    @unique
+  name        String
+  developer   String?
+  location    String?
+  type        String? // "Chung cư", "Biệt thự", "Shophouse"
+  feeRate     Float     @default(0) // Phí MG mặc định (%)
+  avgPrice    Decimal   @default(0) @db.Decimal(18, 4) // Giá bán TB (Tỷ)
+  totalUnits  Int       @default(0)
+  soldUnits   Int       @default(0)
+  status      String    @default("ACTIVE") // ACTIVE, PAUSED, CLOSED
+  startDate   DateTime?
+  endDate     DateTime?
+  note        String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  deals               FactDeal[]
+  legalDocs           LegalProjectDoc[]
+  products            PropertyProduct[]
+  financeTransactions FinanceTransaction[]
+  debtRecords         DebtRecord[]
+  bookings            SalesBooking[]
+  deposits            SalesDeposit[]
+  appointments        Appointment[]
+
+  // New Enhanced Master Data Features
+  zones             ProjectZone[]
+  blocks            ProjectBlock[]
+  mediaAssets       ProjectMedia[]
+  paymentSchedules  ProjectPaymentSchedule[]
+  agencyAllocations ProjectAgencyAllocation[]
+
+  @@index([status])
+  @@index([deletedAt])
+  @@map("dim_projects")
+}
+
+// ── Architecture & Real-estate Layout ──────────────────────────
+
+model ProjectZone {
+  id          String         @id @default(uuid(7))
+  projectId   String
+  project     DimProject     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  code        String         @unique
+  name        String
+  description String?
+  blocks      ProjectBlock[]
+
+  @@index([projectId])
+  @@map("project_zones")
+}
+
+model ProjectBlock {
+  id        String            @id @default(uuid(7))
+  projectId String
+  project   DimProject        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  zoneId    String?
+  zone      ProjectZone?      @relation(fields: [zoneId], references: [id], onDelete: SetNull)
+  code      String            @unique
+  name      String
+  floors    Int               @default(0)
+  products  PropertyProduct[]
+
+  @@index([projectId])
+  @@index([zoneId])
+  @@map("project_blocks")
+}
+
+// ── Marketing & Operations ─────────────────────────────────────
+
+model ProjectMedia {
+  id          String     @id @default(uuid(7))
+  projectId   String
+  project     DimProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  title       String
+  type        String // IMAGE_FOLDER, BROCHURE, PDF_CONTRACT, 3D_TOUR
+  url         String
+  sizeMB      Float?
+  accessLevel String     @default("PUBLIC") // PUBLIC, INTERNAL, EXCLUSIVE
+  createdAt   DateTime   @default(now())
+
+  @@index([projectId])
+  @@map("project_media")
+}
+
+// ── Finance & Budgeting ────────────────────────────────────────
+
+model ProjectPaymentSchedule {
+  id          String     @id @default(uuid(7))
+  projectId   String
+  project     DimProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  phase       Int // 1, 2, 3...
+  name        String // VD: "Cọc thiện chí", "Thanh toán đợt 1"
+  percentage  Float      @default(0) // 10%
+  amount      Float? // Or exact amount expected
+  dueDateDesc String? // VD: "Trong vòng 7 ngày sau khi cọc"
+
+  @@index([projectId])
+  @@map("project_payment_schedules")
+}
+
+// ── Agency Distribution ────────────────────────────────────────
+
+model ProjectAgencyAllocation {
+  id             String     @id @default(uuid(7))
+  projectId      String
+  project        DimProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  agencyId       String
+  agency         AgAgency   @relation(fields: [agencyId], references: [id])
+  allocatedUnits Int        @default(0)
+  soldUnits      Int        @default(0)
+  status         String     @default("ACTIVE")
+  validFrom      DateTime?
+  validTo        DateTime?
+
+  @@index([projectId])
+  @@index([agencyId])
+  @@map("project_agency_allocations")
+}
+
+// ── Property Products (Inventory per-unit) ──────────────────────
+
+model PropertyProduct {
+  id            String             @id @default(uuid(7))
+  projectId     String
+  project       DimProject         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectName   String?
+  blockId       String?
+  block         ProjectBlock?      @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  code          String             @unique
+  floor         Int                @default(0)
+  area          Float              @default(0)
+  price         Decimal            @default(0) @db.Decimal(18, 4) // Tỷ VND
+  direction     String?
+  bedrooms      Int                @default(0)
+  status        PropertyUnitStatus @default(AVAILABLE)
+  bookedBy      String?
+  lockedUntil   DateTime?
+  customerPhone String?
+  note          String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  deletedAt     DateTime?
+
+  statusLogs ProductStatusLog[]
+
+  @@index([projectId])
+  @@index([blockId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("property_products")
+}
+
+model ProductStatusLog {
+  id        String          @id @default(uuid(7))
+  productId String
+  product   PropertyProduct @relation(fields: [productId], references: [id], onDelete: Cascade)
+  oldStatus String
+  newStatus String
+  changedBy String?
+  reason    String?
+  createdAt DateTime        @default(now())
+
+  @@index([productId])
+  @@index([createdAt(sort: Desc)])
+  @@map("product_status_logs")
+}

@@ -9,9 +9,10 @@ model AgAgency {
   managedBy String?
   userId    String? @unique // Link to system User account
 
-  tier         AgTier?         @relation(fields: [tierId], references: [id])
-  contracts    AgContract[]
-  transactions AgTransaction[]
+  tier               AgTier?                   @relation(fields: [tierId], references: [id])
+  contracts          AgContract[]
+  transactions       AgTransaction[]
+  projectAllocations ProjectAgencyAllocation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
