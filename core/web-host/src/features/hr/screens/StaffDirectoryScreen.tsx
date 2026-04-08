@@ -510,7 +510,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                          key={d.id}
                          onClick={() => handleDeptChange(d.id)}
                          className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                           ${form.departmentId === d.id ? 'bg-sg-heading text-sg-surface border-sg-heading hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-sg-heading/30 hover:text-sg-heading'}
+                           ${form.departmentId === d.id ? 'bg-sg-red/10 text-sg-red-dark border-sg-red/30 hover:bg-sg-red/15 dark:bg-sg-red/20 dark:text-sg-red-light dark:border-sg-red/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
                          `}
                        >
                          {d.name}
@@ -526,7 +526,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                        <button
                          onClick={() => setForm(f => ({ ...f, teamId: '' }))}
                          className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                           ${!form.teamId ? 'bg-indigo-500 text-white border-indigo-500 hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-indigo-500/30 hover:text-indigo-500'}
+                           ${!form.teamId ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
                          `}
                        >
                          Không gắn
@@ -536,7 +536,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                            key={t.id}
                            onClick={() => setForm(f => ({...f, teamId: f.teamId === t.id ? '' : t.id}))}
                            className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                             ${form.teamId === t.id ? 'bg-indigo-500 text-white border-indigo-500 hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-indigo-500/30 hover:text-indigo-500'}
+                             ${form.teamId === t.id ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
                            `}
                          >
                            {t.name}
@@ -554,7 +554,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                          key={p.id}
                          onClick={() => setForm(f => ({...f, positionId: f.positionId === p.id ? '' : p.id}))}
                          className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                           ${form.positionId === p.id ? 'bg-purple-500 text-white border-purple-500 hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-purple-500/30 hover:text-purple-500'}
+                           ${form.positionId === p.id ? 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
                          `}
                        >
                          {p.name}
