@@ -149,7 +149,7 @@ export function LoginScreen() {
             ]}>
               <View style={wide ? s.logoPlate : s.logoPlateSm}>
                 <Image
-                  source={require('../../../../assets/images/Logo 3_noFont.png')}
+                  source={{ uri: new URL('../../../../assets/images/Logo 3_noFont.png', import.meta.url).href }}
                   style={wide ? s.logoImg : s.logoImgSm}
                   resizeMode="contain"
                 />
@@ -206,7 +206,7 @@ export function LoginScreen() {
                 
                 {!wide && (
                   <View style={s.mobileLogoRow}>
-                    <Image source={require('../../../../assets/images/Logo 3_noFont.png')} style={{width: 32, height: 32}} resizeMode="contain" />
+                    <Image source={{ uri: new URL('../../../../assets/images/Logo 3_noFont.png', import.meta.url).href }} style={{width: 32, height: 32}} resizeMode="contain" />
                     <Text style={s.mobileLogoTxt}>SGROUP</Text>
                   </View>
                 )}

@@ -152,7 +152,7 @@ export function BDHSidebar({ activeKey, onSelect, collapsed, onToggleCollapse }:
             style={[styles.logoBox, css(sgds.cursor)]}
           >
             <View style={styles.logoCircle}>
-               <Image source={require('../../../assets/images/Logo 3_noFont.png')} style={styles.logoImg} resizeMode="contain" />
+               <Image source={{ uri: new URL('../../../assets/images/Logo 3_noFont.png', import.meta.url).href }} style={styles.logoImg} resizeMode="contain" />
             </View>
             <View>
               <Text style={[typography.smallBold, { color: colors.text, letterSpacing: 1 }]}>SGROUP</Text>

@@ -161,7 +161,7 @@ export function WorkspaceScreen() {
         ] as any}>
           <View style={styles.topBarLeft}>
             <View style={[styles.logoPlate, css({ boxShadow: isDark ? '0 8px 32px rgba(212,32,39,0.2)' : '0 4px 16px rgba(0,0,0,0.08)' })]}>
-              <Image source={require('../../../../assets/images/Logo 3_noFont.png')} style={styles.logoImg} resizeMode="contain" />
+              <Image source={{ uri: new URL('../../../../assets/images/Logo 3_noFont.png', import.meta.url).href }} style={styles.logoImg} resizeMode="contain" />
             </View>
             <View style={styles.brandTextWrap}>
               <Text style={[styles.brandMain, { color: isDark ? '#FFF' : '#0F172A' }]}>SGROUP</Text>
