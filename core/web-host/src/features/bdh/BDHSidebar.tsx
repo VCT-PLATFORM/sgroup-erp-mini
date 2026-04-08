@@ -37,6 +37,7 @@ import {
   Calculator,
 } from 'lucide-react-native';
 import { SGThemeToggle } from '@sgroup/ui/src/ui/components/SGThemeToggle';
+import sgroupLogo from '../../../../assets/images/Logo 3_noFont.png';
 
 export interface SidebarItem {
   key: string;
@@ -152,7 +153,7 @@ export function BDHSidebar({ activeKey, onSelect, collapsed, onToggleCollapse }:
             style={[styles.logoBox, css(sgds.cursor)]}
           >
             <View style={styles.logoCircle}>
-               <Image source={{ uri: new URL('../../../assets/images/Logo 3_noFont.png', import.meta.url).href }} style={styles.logoImg} resizeMode="contain" />
+               <Image source={sgroupLogo} style={styles.logoImg} resizeMode="contain" />
             </View>
             <View>
               <Text style={[typography.smallBold, { color: colors.text, letterSpacing: 1 }]}>SGROUP</Text>

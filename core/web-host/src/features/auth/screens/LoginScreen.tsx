@@ -13,6 +13,7 @@ import { sgds } from '@sgroup/ui/src/theme/theme';
 import { useAuthStore } from '../store/authStore';
 import { apiAuthProvider } from '../services/providers/apiAuth';
 import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react-native';
+import sgroupLogo from '../../../../assets/images/Logo 3_noFont.png';
 
 const R = '#D42027';
 const R_DARK = '#9F1219';
@@ -149,7 +150,7 @@ export function LoginScreen() {
             ]}>
               <View style={wide ? s.logoPlate : s.logoPlateSm}>
                 <Image
-                  source={{ uri: new URL('../../../../assets/images/Logo 3_noFont.png', import.meta.url).href }}
+                  source={sgroupLogo}
                   style={wide ? s.logoImg : s.logoImgSm}
                   resizeMode="contain"
                 />
@@ -206,7 +207,7 @@ export function LoginScreen() {
                 
                 {!wide && (
                   <View style={s.mobileLogoRow}>
-                    <Image source={{ uri: new URL('../../../../assets/images/Logo 3_noFont.png', import.meta.url).href }} style={{width: 32, height: 32}} resizeMode="contain" />
+                    <Image source={sgroupLogo} style={{width: 32, height: 32}} resizeMode="contain" />
                     <Text style={s.mobileLogoTxt}>SGROUP</Text>
                   </View>
                 )}
