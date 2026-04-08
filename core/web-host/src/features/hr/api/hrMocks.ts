@@ -42,6 +42,21 @@ export const mockHRData = {
       { type: 'anniversary', date: 'Ngày mai 16/04', name: 'Huỳnh Bảo Tuân', desc: 'Kỷ niệm 1 năm làm việc', role: 'Giám đốc Công nghệ' }
     ]
   },
+  getContracts: { data: [] },
+  getAttendance: { data: [] },
+  getLeaves: { data: [] },
+  getPayroll: { data: [] },
+  getPerformance: { data: [] },
+  getJobs: { data: [] },
+  getCandidates: { data: [] },
+  getCourses: { data: [] },
+  getTrainees: { data: [] },
+  getTransfers: { data: [] },
+  getLeaveBalances: { data: [] },
+  getLeaveBalance: { data: [] },
+  getBenefits: { data: [] },
+  getPolicies: { data: [] },
+  getOvertime: { data: [] },
   getDashboardActivities: {
     data: [
       { id: 1, title: 'Bổ nhiệm Giám đốc', time: 'Vừa xong', detail: 'Công bố quyết định bổ nhiệm Giám đốc Công nghệ khu vực Miền Nam', tone: '#8b5cf6' },
