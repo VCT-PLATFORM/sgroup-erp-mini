@@ -118,13 +118,7 @@ export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, us
         </button>
       </div>
 
-      {/* Quick Action Button */}
-      <div className="px-4 py-4">
-        <button className="w-full h-12 rounded-xl bg-sg-red flex flex-row items-center justify-center gap-2 shadow-sg-brand hover:bg-sg-red-light transition-colors hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]">
-          <Plus size={20} className="text-white" strokeWidth={3} />
-          {!collapsed && <span className="text-sm font-extrabold text-white truncate">Thêm Mới</span>}
-        </button>
-      </div>
+
 
       {/* Menu */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar py-2">
