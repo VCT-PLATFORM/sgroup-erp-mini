@@ -466,51 +466,51 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
           {/* Overlay to close */}
           <div className="absolute inset-0" onClick={() => setModalMode(null)} />
           
-          <div className="relative w-full max-w-[560px] max-h-full flex flex-col bg-sg-portal-bg rounded-[32px] border border-sg-border shadow-2xl animate-sg-slide-up">
+          <div className="relative w-full max-w-[560px] max-h-[90vh] flex flex-col bg-sg-portal-bg rounded-[32px] border border-sg-border/50 shadow-sg-xl animate-sg-slide-up overflow-hidden ring-1 ring-white/50 dark:ring-white/5">
              
              {/* Modal Header */}
-             <div className="px-8 py-6 border-b border-sg-border flex items-center justify-between z-10 bg-sg-portal-bg rounded-t-[32px]">
-                <h3 className="text-[22px] font-black text-sg-heading">
+             <div className="px-8 pt-8 pb-4 flex items-center justify-between z-10 bg-sg-portal-bg shrink-0">
+                <h3 className="text-2xl font-black tracking-tight text-sg-heading">
                    {modalMode === 'edit' ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ nhân viên'}
                 </h3>
-                <button onClick={() => setModalMode(null)} className="p-2 -mr-2 text-sg-muted hover:bg-sg-btn-bg rounded-xl transition-colors">
-                  <X size={24} />
+                <button onClick={() => setModalMode(null)} className="p-2 -mr-2 text-sg-muted hover:bg-sg-border rounded-full transition-all hover:rotate-90">
+                  <X size={20} strokeWidth={2.5} />
                 </button>
              </div>
 
              {/* Modal Body */}
-             <div className="p-8 overflow-y-auto custom-scrollbar flex flex-col gap-5">
+             <div className="px-8 pb-4 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-sg-border [&::-webkit-scrollbar-thumb]:rounded-full flex flex-col gap-6">
                 
-                <div className="flex flex-col gap-1.5">
-                   <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Họ và tên *</label>
-                   <input value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} placeholder="Nguyễn Văn A" className="h-12 w-full bg-sg-btn-bg border border-sg-border rounded-xl px-4 text-[14px] font-semibold text-sg-heading placeholder:text-sg-muted focus:outline-none focus:border-sg-red focus:ring-1 focus:ring-sg-red shadow-sm transition-all" />
+                <div className="flex flex-col gap-2">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Họ và tên <span className="text-sg-red">*</span></label>
+                   <input value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} placeholder="Nguyễn Văn A" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                   <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Tên tiếng Anh</label>
-                   <input value={form.englishName} onChange={e => setForm(f => ({ ...f, englishName: e.target.value }))} placeholder="Nguyen Van A" className="h-12 w-full bg-sg-btn-bg border border-sg-border rounded-xl px-4 text-[14px] font-semibold text-sg-heading placeholder:text-sg-muted focus:outline-none focus:border-sg-red focus:ring-1 focus:ring-sg-red shadow-sm transition-all" />
+                <div className="flex flex-col gap-2">
+                   <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Tên tiếng Anh</label>
+                   <input value={form.englishName} onChange={e => setForm(f => ({ ...f, englishName: e.target.value }))} placeholder="Nguyen Van A" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-5">
-                  <div className="flex flex-col gap-1.5 items-start">
-                     <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Email</label>
-                     <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@sgroup.vn" type="email" className="h-12 w-full bg-sg-btn-bg border border-sg-border rounded-xl px-4 text-[14px] font-semibold text-sg-heading placeholder:text-sg-muted focus:outline-none focus:border-sg-red focus:ring-1 focus:ring-sg-red shadow-sm transition-all" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-2 items-start">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Email</label>
+                     <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@sgroup.vn" type="email" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
                   </div>
-                  <div className="flex flex-col gap-1.5 items-start">
-                     <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Số điện thoại</label>
-                     <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="0901234567" type="tel" className="h-12 w-full bg-sg-btn-bg border border-sg-border rounded-xl px-4 text-[14px] font-semibold text-sg-heading placeholder:text-sg-muted focus:outline-none focus:border-sg-red focus:ring-1 focus:ring-sg-red shadow-sm transition-all" />
+                  <div className="flex flex-col gap-2 items-start">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Số điện thoại</label>
+                     <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="0901234567" type="tel" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Phòng ban</label>
-                  <div className="flex overflow-x-auto gap-2 pb-1 custom-scrollbar">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Phòng ban</label>
+                  <div className="flex flex-wrap gap-2">
                      {deptOptions.map((d: any) => (
                        <button
                          key={d.id}
                          onClick={() => handleDeptChange(d.id)}
-                         className={`whitespace-nowrap px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors shadow-sm
-                           ${form.departmentId === d.id ? 'bg-sg-red text-white border-sg-red' : 'bg-sg-card border-sg-border text-sg-heading hover:bg-sg-btn-bg'}
+                         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
+                           ${form.departmentId === d.id ? 'bg-sg-heading text-sg-surface border-sg-heading hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-sg-heading/30 hover:text-sg-heading'}
                          `}
                        >
                          {d.name}
@@ -520,13 +520,13 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                 </div>
 
                 {form.departmentId && teamOptions.length > 0 && (
-                  <div className="flex flex-col gap-1.5 animate-sg-fade-in">
-                    <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext flex items-center gap-1.5"><UsersRound size={12}/> Thuộc Team</label>
-                    <div className="flex overflow-x-auto gap-2 pb-1 custom-scrollbar">
+                  <div className="flex flex-col gap-2 animate-sg-fade-in-up">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 flex items-center gap-1.5"><UsersRound size={12} strokeWidth={2.5}/> Thuộc Team</label>
+                    <div className="flex flex-wrap gap-2">
                        <button
                          onClick={() => setForm(f => ({ ...f, teamId: '' }))}
-                         className={`whitespace-nowrap px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors shadow-sm
-                           ${!form.teamId ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-sg-card border-sg-border text-sg-heading hover:bg-sg-btn-bg'}
+                         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
+                           ${!form.teamId ? 'bg-indigo-500 text-white border-indigo-500 hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-indigo-500/30 hover:text-indigo-500'}
                          `}
                        >
                          Không gắn
@@ -535,8 +535,8 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                          <button
                            key={t.id}
                            onClick={() => setForm(f => ({...f, teamId: f.teamId === t.id ? '' : t.id}))}
-                           className={`whitespace-nowrap px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors shadow-sm
-                             ${form.teamId === t.id ? 'bg-indigo-500 text-white border-indigo-500' : 'bg-sg-card border-sg-border text-sg-heading hover:bg-sg-btn-bg'}
+                           className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
+                             ${form.teamId === t.id ? 'bg-indigo-500 text-white border-indigo-500 hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-indigo-500/30 hover:text-indigo-500'}
                            `}
                          >
                            {t.name}
@@ -546,15 +546,15 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                   </div>
                 )}
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Chức vụ</label>
-                  <div className="flex overflow-x-auto gap-2 pb-1 custom-scrollbar">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Chức vụ</label>
+                  <div className="flex flex-wrap gap-2">
                      {posOptions.map((p: any) => (
                        <button
                          key={p.id}
                          onClick={() => setForm(f => ({...f, positionId: f.positionId === p.id ? '' : p.id}))}
-                         className={`whitespace-nowrap px-4 py-2 rounded-xl text-[13px] font-bold border transition-colors shadow-sm
-                           ${form.positionId === p.id ? 'bg-purple-500 text-white border-purple-500' : 'bg-sg-card border-sg-border text-sg-heading hover:bg-sg-btn-bg'}
+                         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
+                           ${form.positionId === p.id ? 'bg-purple-500 text-white border-purple-500 hover:scale-105' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-purple-500/30 hover:text-purple-500'}
                          `}
                        >
                          {p.name}
@@ -564,15 +564,15 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                 </div>
 
                 {modalMode === 'edit' && (
-                  <div className="flex flex-col gap-1.5 pt-4 border-t border-sg-border">
-                    <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext">Trạng thái làm việc</label>
+                  <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Trạng thái làm việc</label>
                     <div className="flex flex-wrap gap-2">
                        {STATUS_OPTIONS.map(s => (
                          <button
                            key={s.value}
                            onClick={() => setForm(f => ({...f, status: s.value}))}
-                           className={`px-4 py-2 rounded-xl text-[13px] font-bold border transition-all shadow-sm
-                             ${form.status === s.value ? `${s.bg} ${s.border} ${s.color}` : 'bg-sg-card border-sg-border text-sg-heading hover:bg-sg-btn-bg'}
+                           className={`px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
+                             ${form.status === s.value ? `${s.bg} ${s.border} ${s.color} hover:scale-105` : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-sg-heading/30 hover:text-sg-heading'}
                            `}
                          >
                            {s.label}
@@ -583,22 +583,22 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
                 )}
 
                 {modalMode === 'edit' && transfers.length > 0 && (
-                   <div className="flex flex-col gap-1.5 pt-4">
-                     <label className="text-[11px] font-extrabold uppercase tracking-wide text-sg-subtext flex items-center gap-1.5"><History size={12}/> Lịch sử luân chuyển ({transfers.length})</label>
-                     <div className="border border-sg-border rounded-xl overflow-hidden bg-sg-btn-bg">
+                   <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
+                     <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 flex items-center gap-1.5"><History size={12} strokeWidth={2.5}/> Lịch sử luân chuyển ({transfers.length})</label>
+                     <div className="border border-sg-border/50 rounded-2xl overflow-hidden bg-white dark:bg-white/5 shadow-sm">
                         {transfers.map((t: any, idx) => (
-                           <div key={t.id} className={`p-3 flex items-center gap-3 ${idx < transfers.length - 1 ? 'border-b border-sg-border' : ''}`}>
-                              <div className="w-8 h-8 rounded-lg bg-white/50 dark:bg-white/5 flex items-center justify-center shadow-sm border border-sg-border/50">
-                                 <ArrowRightLeft size={14} className="text-sg-muted" />
+                           <div key={t.id} className={`p-4 flex items-center gap-4 hover:bg-black/5 transition-colors ${idx < transfers.length - 1 ? 'border-b border-sg-border/50' : ''}`}>
+                              <div className="w-9 h-9 rounded-full bg-sg-btn-bg flex items-center justify-center border border-sg-border/50">
+                                 <ArrowRightLeft size={14} strokeWidth={2.5} className="text-sg-muted" />
                               </div>
-                              <div>
+                              <div className="flex-1">
                                  {(t.transferType === 'DEPARTMENT' || t.transferType === 'BOTH') && (
-                                    <span className="text-[12px] font-extrabold text-sg-heading block">{t.fromDepartment?.name || '—'} → {t.toDepartment?.name || '—'}</span>
+                                    <span className="text-[13px] font-extrabold text-sg-heading block">{t.fromDepartment?.name || '—'} <ArrowRightLeft size={10} className="inline mx-1 text-sg-muted" /> {t.toDepartment?.name || '—'}</span>
                                  )}
                                  {(t.transferType === 'TEAM' || t.transferType === 'BOTH') && (
-                                    <span className="text-[12px] font-bold text-indigo-500 block">Team: {t.fromTeam?.name || '—'} → {t.toTeam?.name || '—'}</span>
+                                    <span className="text-[12px] font-bold text-indigo-500 block mt-0.5">Team: {t.fromTeam?.name || '—'} → {t.toTeam?.name || '—'}</span>
                                  )}
-                                 <span className="text-[10px] font-semibold text-sg-subtext">
+                                 <span className="text-[10px] font-bold text-sg-subtext/70 uppercase tracking-wider mt-1 block">
                                    {new Date(t.effectiveDate).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' })}
                                  </span>
                               </div>
@@ -611,14 +611,14 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
              </div>
 
              {/* Modal Footer */}
-             <div className="p-6 border-t border-sg-border bg-sg-btn-bg rounded-b-[32px] flex gap-3 z-10 mt-auto">
-                <button onClick={() => setModalMode(null)} className="flex-1 h-14 rounded-xl border border-sg-border bg-sg-card text-sg-subtext font-extrabold text-sm hover:bg-sg-btn-bg hover:text-sg-heading transition-colors shadow-sm">
-                   Hủy
+             <div className="px-8 pb-8 pt-4 flex gap-4 shrink-0 bg-sg-portal-bg rounded-b-[32px]">
+                <button onClick={() => setModalMode(null)} className="flex-1 h-12 rounded-2xl border border-sg-border/50 bg-white dark:bg-white/5 text-sg-subtext font-bold text-[14px] hover:text-sg-heading hover:border-sg-heading/30 transition-all shadow-sm">
+                   Hủy bỏ
                 </button>
-                <button onClick={handleSubmit} disabled={isSaving} className={`flex-1 h-14 rounded-xl font-extrabold text-sm text-white transition-all shadow-sg-brand
-                  ${isSaving ? 'bg-sg-muted cursor-not-allowed' : 'bg-sg-red hover:bg-sg-red-light transform hover:-translate-y-0.5'}
+                <button onClick={handleSubmit} disabled={isSaving} className={`flex-[2] h-12 rounded-2xl font-black text-[14px] text-white transition-all shadow-sg-brand
+                  ${isSaving ? 'bg-sg-muted cursor-not-allowed' : 'bg-sg-red hover:bg-sg-red-light transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]'}
                 `}>
-                   {isSaving ? 'Đang lưu...' : modalMode === 'edit' ? 'Cập nhật hồ sơ' : 'Tạo hồ sơ mới'}
+                   {isSaving ? 'ĐANG LƯU...' : modalMode === 'edit' ? 'CẬP NHẬT HỒ SƠ' : 'TẠO MỚI HỒ SƠ'}
                 </button>
              </div>
           </div>
