@@ -1,0 +1,33 @@
+{
+  "name": "sgroup-erp-full",
+  "version": "1.0.0",
+  "description": "Monorepo chứa toàn bộ hệ thống ERP cho SGROUP.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vctplatform/sgroup-erp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vctplatform/sgroup-erp/issues"
+  },
+  "homepage": "https://github.com/vctplatform/sgroup-erp#readme",
+  "workspaces": [
+    "core/*",
+    "modules/*/web",
+    "modules/*/app",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^2.9.5"
+  }
+}

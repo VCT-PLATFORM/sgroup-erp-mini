@@ -1,0 +1,33 @@
+@import "tailwindcss/preflight";
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --accent-primary: #4F46E5;
+    --accent-success: #10B981;
+    --accent-warning: #F59E0B;
+    --accent-danger: #E11D48;
+
+    --bg-primary: #F8FAFC;
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-elevated: #FFFFFF;
+    
+    --text-primary: #0F172A;
+    --text-secondary: #475569;
+    --text-muted: #94A3B8;
+    
+    --border-subtle: rgba(15, 23, 42, 0.1);
+  }
+
+  .dark {
+    --bg-primary: #020617;
+    --bg-card: rgba(255, 255, 255, 0.03);
+    --bg-elevated: rgba(15, 23, 42, 0.8);
+    
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    --text-muted: #64748B;
+    
+    --border-subtle: rgba(255, 255, 255, 0.05);
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "name": "@sgroup/ui",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "peerDependencies": {
+    "react": "19.2.x",
+    "react-native": "0.85.x"
+  },
+  "dependencies": {
+    "nativewind": "^4.0.0-beta.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^4.2.0",
+    "typescript": "5.8.x",
+    "@types/react": "^19.0.0"
+  }
+}

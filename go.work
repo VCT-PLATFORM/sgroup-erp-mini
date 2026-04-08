@@ -1,0 +1,9 @@
+go 1.26.1
+
+use (
+	./core/api-gateway
+	./modules/accounting/api
+	./modules/crm/api
+	./modules/hr/api
+	./packages/go-common
+)
