@@ -140,30 +140,44 @@ export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, us
       </div>
 
       {/* User Profile & Footer Area */}
-      <div className="p-3 border-t border-sg-border">
-        <button 
-          onClick={() => onSelect({ key: 'HR_PROFILE', label: 'Hồ sơ Của Tôi', icon: UserCircle, section: 'dashboard', minRole: ALL_ROLES })}
-          className={`w-full flex-row items-center flex p-2 rounded-xl transition-all border border-transparent
-            ${activeKey === 'HR_PROFILE' ? (isDark ? 'bg-sg-red/15 border-sg-red/20' : 'bg-red-50 border-red-100') : 'hover:bg-sg-btn-bg'}
-          `}
-        >
-          <div className="w-9 h-9 rounded-full bg-sg-btn-bg flex items-center justify-center flex-shrink-0 border border-sg-border">
-            <UserCircle size={20} className="text-sg-heading" />
-          </div>
-          {!collapsed && (
-            <div className="ml-3 flex-1 flex flex-col text-left truncate">
-              <span className="text-[13px] font-extrabold text-sg-heading truncate">{user?.name || 'User'}</span>
-              <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wide truncate">{userRole.replace('_', ' ')}</span>
-            </div>
-          )}
-        </button>
-      </div>
+      <div className="p-3 border-t border-sg-border flex flex-col gap-2">
+        <div className={`flex items-center ${collapsed ? 'justify-center mx-auto' : 'justify-between'}`}>
+           <button 
+              onClick={() => onSelect({ key: 'HR_PROFILE', label: 'Hồ sơ Của Tôi', icon: UserCircle, section: 'dashboard', minRole: ALL_ROLES })}
+              className={`flex items-center flex-1 rounded-xl transition-all border border-transparent overflow-hidden ${collapsed ? 'p-0 w-9 h-9 justify-center' : 'p-2 mr-2'}
+                ${activeKey === 'HR_PROFILE' ? (isDark ? 'bg-sg-red/15 border-sg-red/20' : 'bg-red-50 border-red-100') : 'hover:bg-sg-btn-bg'}
+              `}
+              title="Hồ sơ của tôi"
+            >
+              <div className="w-9 h-9 rounded-full bg-sg-btn-bg flex items-center justify-center flex-shrink-0 border border-sg-border pointer-events-none">
+                <UserCircle size={18} className="text-sg-heading" />
+              </div>
+              {!collapsed && (
+                <div className="ml-2.5 flex flex-col text-left truncate flex-1 min-w-0 pointer-events-none">
+                  <span className="text-[12px] font-extrabold text-sg-heading truncate">{user?.name || 'User'}</span>
+                  <span className="text-[9px] font-bold text-sg-subtext uppercase tracking-[1px] truncate mt-0.5">{userRole.replace('_', ' ')}</span>
+                </div>
+              )}
+            </button>
 
-      <div className={`border-t border-sg-border py-4 px-5 flex items-center ${collapsed ? 'flex-col gap-3 justify-center' : 'flex-row justify-between'}`}>
-        <span className="text-[10px] font-bold text-sg-muted">v2.0</span>
-        <button onClick={() => window.location.href = '/'} className="w-9 h-9 rounded-xl flex items-center justify-center bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors group" title="Về Workspace">
-          <LayoutDashboard size={16} className="text-sg-muted group-hover:text-sg-heading" />
-        </button>
+            {!collapsed && (
+              <button 
+                onClick={() => window.location.href = '/'} 
+                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors group shadow-sm" title="Về Workspace"
+              >
+                <LayoutDashboard size={15} className="text-sg-muted group-hover:text-sg-heading" />
+              </button>
+            )}
+        </div>
+        
+        {collapsed ? (
+            <button 
+              onClick={() => window.location.href = '/'} 
+              className="w-9 h-9 mt-1 rounded-xl flex items-center justify-center flex-shrink-0 bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors group mx-auto shadow-sm" title="Về Workspace"
+            >
+              <LayoutDashboard size={15} className="text-sg-muted group-hover:text-sg-heading" />
+            </button>
+        ) : null}
       </div>
     </aside>
   );

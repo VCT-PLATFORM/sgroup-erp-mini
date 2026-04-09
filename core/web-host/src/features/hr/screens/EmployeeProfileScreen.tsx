@@ -53,6 +53,25 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
             Thông tin chi tiết và hiệu suất
           </p>
         </div>
+        
+        {/* Employee Selector */}
+        <div className="ml-auto w-64 animate-fade-in-up">
+          <select 
+             className="w-full h-10 px-4 rounded-xl bg-sg-btn-bg border border-sg-border text-sm font-bold text-sg-heading focus:outline-none focus:border-sg-red focus:ring-2 focus:ring-sg-red/20 shadow-sm appearance-none cursor-pointer hover:bg-sg-border transition-colors"
+             value={displayUser?.id || ''}
+             onChange={(e) => {
+                const val = e.target.value;
+                if (val) window.location.hash = `hr_profile?id=${val}`;
+             }}
+          >
+             <option value="">Chọn nhân sự để xem...</option>
+             {employeeList.map((e: any) => (
+                <option key={e.id} value={e.id}>
+                   {e.fullName} {e.employeeCode ? `(${e.employeeCode})` : ''}
+                </option>
+             ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-12">

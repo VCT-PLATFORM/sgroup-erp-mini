@@ -6,11 +6,13 @@ export const mockHRData = {
   },
   getDepartments: {
     data: [
-      { id: '1', name: 'Công nghệ & Sản phẩm', code: 'TECH', _count: { employees: 42 }, manager: { fullName: 'Huỳnh Bảo Tuân' } },
-      { id: '2', name: 'Kinh doanh & Bán hàng', code: 'SALES', _count: { employees: 65 }, manager: { fullName: 'Trần Bình' } },
-      { id: '3', name: 'Truyền thông & Marketing', code: 'MKT', _count: { employees: 20 }, manager: { fullName: 'Lê Hương' } },
-      { id: '4', name: 'Hành chính & Nhân sự', code: 'HR', _count: { employees: 15 }, manager: { fullName: 'Nguyễn Hoàng Oanh' } },
-      { id: '5', name: 'Tài chính Kế toán', code: 'FIN', _count: { employees: 14 }, manager: { fullName: 'Vũ Đức' } }
+      { id: '1', name: 'Kinh Doanh', code: 'SALES', _count: { employees: 120 }, manager: { fullName: 'Ngô Việt' } },
+      { id: '2', name: 'Marketing', code: 'MKT', _count: { employees: 25 }, manager: { fullName: 'Lê Hương' } },
+      { id: '3', name: 'Nhân Sự', code: 'HR', _count: { employees: 15 }, manager: { fullName: 'Nguyễn Hoàng Oanh' } },
+      { id: '4', name: 'Tài Chính Kế Toán', code: 'FIN', _count: { employees: 10 }, manager: { fullName: 'Trần Kế' } },
+      { id: '5', name: 'Dự Án', code: 'PRJ', _count: { employees: 45 }, manager: { fullName: 'Phạm Huỳnh' } },
+      { id: '6', name: 'Đại Lý', code: 'AGC', _count: { employees: 80 }, manager: { fullName: 'Lý Quốc' } },
+      { id: '7', name: 'Hồ Sơ Thủ Tục', code: 'DOC', _count: { employees: 20 }, manager: { fullName: 'Trịnh Thanh' } }
     ]
   },
   getPositions: {

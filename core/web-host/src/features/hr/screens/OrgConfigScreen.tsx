@@ -267,38 +267,70 @@ export function OrgConfigScreen() {
             </div>
           ) : (
             <div className="overflow-x-auto pb-10 custom-scrollbar">
-               {/* Simplified mock tree view for demonstration */}
-               <div className="min-w-max flex flex-col items-center gap-10">
-                 <div className="px-10 py-5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/20 text-center relative z-10 border border-blue-400/30 font-black tracking-wide text-lg">
+               {/* Transformed Dynamic Tree View */}
+               <div className="min-w-max flex flex-col items-center gap-10 mt-6">
+                 <div className="px-10 py-5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 text-center relative z-10 font-black tracking-wide text-lg flex items-center gap-3">
+                   <Building size={24} className="text-white/80" />
                    SGroup Corporation
                  </div>
                  {departments.length > 0 && (
                    <div className="flex gap-8 border-t-2 border-sg-border/60 pt-10 relative">
                      <div className="absolute top-0 left-1/2 w-0.5 h-10 bg-sg-border/60 -translate-x-1/2 -mt-10" />
-                     {departments.map((d: any) => (
-                       <div key={d.id} className="flex flex-col items-center gap-6 relative">
-                         <div className="absolute top-0 left-1/2 w-0.5 h-10 bg-sg-border/60 -translate-x-1/2 -mt-10" />
-                         <div className="w-52 p-5 rounded-2xl bg-sg-card border border-pink-500/30 flex flex-col items-center text-center shadow-lg shadow-pink-500/5">
-                           <Building size={24} className="text-pink-500 mb-3" />
-                           <h3 className="font-extrabold text-sg-heading text-[15px]">{d.name}</h3>
-                           <span className="px-2 py-1 bg-pink-500/10 text-pink-500 text-[10px] font-black rounded-lg mt-2 mb-3">{d.code}</span>
-                           <span className="text-xs font-bold text-sg-subtext">{d._count?.employees ?? 0} NS • {d.teams?.length || 0} Teams</span>
-                         </div>
+                     {departments.map((d: any, idx: number) => {
+                       const colors = [
+                         { top: 'from-blue-500 to-indigo-600', icon: 'text-blue-500', bg: 'bg-blue-500/10 text-blue-500', border: 'border-blue-500/20', shadow: 'shadow-blue-500/10' },
+                         { top: 'from-pink-500 to-rose-600', icon: 'text-pink-500', bg: 'bg-pink-500/10 text-pink-500', border: 'border-pink-500/20', shadow: 'shadow-pink-500/10' },
+                         { top: 'from-purple-500 to-violet-600', icon: 'text-purple-500', bg: 'bg-purple-500/10 text-purple-500', border: 'border-purple-500/20', shadow: 'shadow-purple-500/10' },
+                         { top: 'from-amber-500 to-orange-600', icon: 'text-amber-500', bg: 'bg-amber-500/10 text-amber-500', border: 'border-amber-500/20', shadow: 'shadow-amber-500/10' },
+                         { top: 'from-emerald-500 to-teal-600', icon: 'text-emerald-500', bg: 'bg-emerald-500/10 text-emerald-500', border: 'border-emerald-500/20', shadow: 'shadow-emerald-500/10' },
+                         { top: 'from-cyan-500 to-blue-500', icon: 'text-cyan-500', bg: 'bg-cyan-500/10 text-cyan-500', border: 'border-cyan-500/20', shadow: 'shadow-cyan-500/10' },
+                         { top: 'from-rose-500 to-red-600', icon: 'text-rose-500', bg: 'bg-rose-500/10 text-rose-500', border: 'border-rose-500/20', shadow: 'shadow-rose-500/10' },
+                       ];
+                       const c = colors[idx % colors.length];
 
-                         {d.teams && d.teams.length > 0 && (
-                           <div className="flex flex-col gap-4 border-l-2 border-sg-border/60 pl-6 mt-2 relative">
-                             <div className="absolute top-0 -left-[1px] w-0.5 h-full bg-sg-border/60" />
-                             {d.teams.map((t: any) => (
-                               <div key={t.id} className="w-48 p-3 rounded-xl bg-sg-card border border-blue-500/30 flex flex-col items-start relative">
-                                  <div className="absolute top-1/2 -left-6 w-6 h-0.5 bg-sg-border/60 -translate-y-1/2" />
-                                  <span className="font-extrabold text-sg-text text-[13px]">{t.name}</span>
-                                  <span className="text-[10px] font-bold text-blue-500 mt-1">{t.code}</span>
+                       return (
+                         <div key={d.id} className="flex flex-col items-center gap-6 relative group">
+                           <div className="absolute top-0 left-1/2 w-0.5 h-10 bg-sg-border/60 -translate-x-1/2 -mt-10" />
+                           
+                           {/* Department Card */}
+                           <div className={`w-52 rounded-[24px] bg-sg-card border ${c.border} flex flex-col items-center text-center shadow-lg ${c.shadow} overflow-hidden transform transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl`}>
+                             <div className={`h-1.5 w-full bg-gradient-to-r ${c.top} opacity-80`} />
+                             <div className="p-6 flex flex-col items-center w-full bg-gradient-to-b from-white/5 to-transparent">
+                               <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${c.bg} border ${c.border}`}>
+                                  <Building size={20} className={c.icon} />
                                </div>
-                             ))}
+                               <h3 className="font-extrabold text-sg-heading text-[15px] leading-tight mb-2 h-10 flex items-center justify-center">{d.name}</h3>
+                               <span className={`px-2.5 py-1 ${c.bg} text-[10px] font-black uppercase tracking-wider rounded-lg mb-4`}>{d.code}</span>
+                               
+                               <div className="w-full flex items-center justify-between pt-4 border-t border-sg-border/60">
+                                 <div className="flex flex-col gap-0.5">
+                                    <span className="text-[10px] font-bold text-sg-muted uppercase tracking-widest">Nhân sự</span>
+                                    <span className="text-[13px] font-black text-sg-heading">{d._count?.employees ?? 0}</span>
+                                 </div>
+                                 <div className="flex flex-col gap-0.5">
+                                    <span className="text-[10px] font-bold text-sg-muted uppercase tracking-widest">Teams</span>
+                                    <span className="text-[13px] font-black text-sg-heading">{d.teams?.length ?? 0}</span>
+                                 </div>
+                               </div>
+                             </div>
                            </div>
-                         )}
-                       </div>
-                     ))}
+
+                           {/* Teams Container */}
+                           {d.teams && d.teams.length > 0 && (
+                             <div className="flex flex-col gap-4 border-l-2 border-sg-border/60 pl-6 mt-2 relative w-full">
+                               <div className="absolute top-0 -left-[1px] w-0.5 h-full bg-sg-border/60" />
+                               {d.teams.map((t: any) => (
+                                 <div key={t.id} className="w-full min-w-[160px] p-3.5 rounded-xl bg-sg-bg border border-sg-border flex flex-col items-start relative hover:border-sg-heading/30 transition-colors">
+                                    <div className="absolute top-1/2 -left-6 w-6 h-0.5 bg-sg-border/60 -translate-y-1/2" />
+                                    <span className="font-extrabold text-sg-text text-[13px]">{t.name}</span>
+                                    <span className={`text-[10px] font-black mt-1 ${c.icon}`}>{t.code}</span>
+                                 </div>
+                               ))}
+                             </div>
+                           )}
+                         </div>
+                       )
+                     })}
                    </div>
                  )}
                </div>
