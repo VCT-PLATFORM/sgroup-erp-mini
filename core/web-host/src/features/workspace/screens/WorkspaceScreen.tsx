@@ -150,7 +150,15 @@ export default function WorkspaceScreen() {
               key={mod.id}
               mod={mod}
               index={i}
-              onClick={() => mod.routeName && navigate(mod.routeName)}
+              onClick={() => {
+                if (mod.id === 'project') {
+                  window.location.href = 'http://localhost:3003/projects'
+                } else if (mod.id === 'biz') {
+                  window.location.href = 'http://localhost:3004/transactions'
+                } else if (mod.routeName) {
+                  navigate(mod.routeName)
+                }
+              }}
             />
           ))}
         </div>
