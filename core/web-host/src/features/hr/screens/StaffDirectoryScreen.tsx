@@ -1,50 +1,15 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import {
-  UserCog, Plus, Users, Target, Search, Filter, Mail, Hash, Phone, Building, Star, X, Pencil, UsersRound, ArrowRightLeft, History, Laptop, CheckCircle, Clock, Check, LayoutGrid, List
-} from 'lucide-react';
+import { Users, Plus, Building, Star, Target, Search, LayoutGrid, List } from 'lucide-react';
 import { useEmployees, useHRDashboard, useCreateEmployee, useUpdateEmployee, useDepartments, usePositions, useTeams, useTransferHistory } from '../hooks/useHR';
-import type { HRRole } from '../HRSidebar';
+import type { HRRole } from '../types';
+import { Employee, Department, Position, Team, TransferRecord, HRDashboardData } from '../types';
+import { FILTER_TABS, EMPTY_FORM } from '../constants';
 
-const fmt = (n: number) => n.toLocaleString('vi-VN');
-
-const FILTER_TABS = [
-  { key: 'all', label: 'Tất cả' },
-  { key: 'ACTIVE', label: 'Đang làm' },
-  { key: 'PROBATION', label: 'Thử việc' },
-  { key: 'ON_LEAVE', label: 'Đang nghỉ' },
-  { key: 'TERMINATED', label: 'Đã nghỉ' },
-];
-
-const STATUS_OPTIONS = [
-  { value: 'ACTIVE', label: 'Đang làm', color: 'text-emerald-500', bg: 'bg-emerald-500/15', border: 'border-emerald-500/20' },
-  { value: 'PROBATION', label: 'Thử việc', color: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/20' },
-  { value: 'ON_LEAVE', label: 'Đang nghỉ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20' },
-  { value: 'TERMINATED', label: 'Đã nghỉ', color: 'text-red-500', bg: 'bg-red-500/15', border: 'border-red-500/20' },
-];
-
-function getInitials(name: string) {
-  const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase() || 'U';
-}
-
-function nameToColorClass(name: string) {
-  const colors = [
-    { text: 'text-pink-500', bg: 'bg-pink-500/15', border: 'border-pink-500/30' },
-    { text: 'text-purple-500', bg: 'bg-purple-500/15', border: 'border-purple-500/30' },
-    { text: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/30' },
-    { text: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/30' },
-    { text: 'text-emerald-500', bg: 'bg-emerald-500/15', border: 'border-emerald-500/30' },
-    { text: 'text-cyan-500', bg: 'bg-cyan-500/15', border: 'border-cyan-500/30' },
-    { text: 'text-indigo-500', bg: 'bg-indigo-500/15', border: 'border-indigo-500/30' },
-    { text: 'text-rose-500', bg: 'bg-rose-500/15', border: 'border-rose-500/30' },
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}
-
-const EMPTY_FORM = { fullName: '', englishName: '', email: '', phone: '', departmentId: '', positionId: '', teamId: '', status: 'ACTIVE' };
+import { StaffStatsCard } from '../components/StaffStatsCard';
+import { EmployeeGridView } from '../components/EmployeeGridView';
+import { EmployeeListView } from '../components/EmployeeListView';
+import { EmployeeKanbanBoard } from '../components/EmployeeKanbanBoard';
+import { EmployeeFormModal, EmployeeFormData } from '../components/EmployeeFormModal';
 
 export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
   const [searchText, setSearchText] = useState('');
@@ -52,7 +17,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const [modalMode, setModalMode] = useState<'create' | 'edit' | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] = useState<EmployeeFormData>(EMPTY_FORM);
   const [editId, setEditId] = useState<string | null>(null);
 
   const canEdit = userRole === 'admin' || userRole === 'hr_manager' || userRole === 'hr_director';
@@ -67,14 +32,14 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
   
   const { data: rawDepts } = useDepartments();
   const { data: rawPositions } = usePositions();
-  const deptOptions = Array.isArray(rawDepts) ? rawDepts : (rawDepts as any)?.data ?? [];
-  const posOptions = Array.isArray(rawPositions) ? rawPositions : (rawPositions as any)?.data ?? [];
+  const deptOptions: Department[] = Array.isArray(rawDepts) ? rawDepts : (rawDepts as any)?.data ?? [];
+  const posOptions: Position[] = Array.isArray(rawPositions) ? rawPositions : (rawPositions as any)?.data ?? [];
 
   const { data: rawTeams } = useTeams(form.departmentId || undefined);
-  const teamOptions = useMemo(() => Array.isArray(rawTeams) ? rawTeams : (rawTeams as any)?.data ?? [], [rawTeams]);
+  const teamOptions: Team[] = useMemo(() => Array.isArray(rawTeams) ? rawTeams : (rawTeams as any)?.data ?? [], [rawTeams]);
 
   const { data: rawTransfers } = useTransferHistory(editId || undefined);
-  const transfers = useMemo(() => Array.isArray(rawTransfers) ? rawTransfers : [], [rawTransfers]);
+  const transfers: TransferRecord[] = useMemo(() => Array.isArray(rawTransfers) ? rawTransfers : [], [rawTransfers]);
 
   const handleDeptChange = useCallback((deptId: string) => {
     setForm(f => ({
@@ -84,8 +49,8 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
     }));
   }, []);
 
-  const employees = Array.isArray(employeesData?.data) ? employeesData.data : Array.isArray(employeesData) ? employeesData : [];
-  const db = (dashboardData as any)?.data ?? dashboardData ?? {};
+  const employees: Employee[] = Array.isArray(employeesData?.data) ? employeesData.data : Array.isArray(employeesData) ? employeesData : [];
+  const db: Partial<HRDashboardData> = (dashboardData as any)?.data ?? dashboardData ?? {};
 
   const statCards = [
     { label: 'Tổng nhân sự', value: db?.totalEmployees ?? 0, icon: Users, color: 'text-pink-500', bg: 'bg-pink-500/15', gradient: 'from-pink-500 to-rose-600' },
@@ -102,7 +67,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
     setModalMode('create');
   };
 
-  const openEdit = (staff: any) => {
+  const openEdit = (staff: Employee) => {
     setForm({
       fullName: staff.fullName || '',
       englishName: staff.englishName || '',
@@ -110,7 +75,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
       phone: staff.phone || '',
       departmentId: staff.departmentId || staff.department?.id || '',
       positionId: staff.positionId || staff.position?.id || '',
-      teamId: staff.teamId || '',
+      teamId: staff.teamId || staff.team?.id || '',
       status: staff.status || 'ACTIVE',
     });
     setEditId(staff.id);
@@ -119,18 +84,20 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
   const handleSubmit = async () => {
     if (!form.fullName.trim()) return showAlert('Vui lòng nhập họ tên nhân viên');
-    const payload: any = {
+    const payload: Omit<Employee, 'id'> = {
       fullName: form.fullName,
-      englishName: form.englishName || null,
-      email: form.email || null,
-      phone: form.phone || null,
-      departmentId: form.departmentId || null,
-      positionId: form.positionId || null,
-      teamId: form.teamId || null,
+      englishName: form.englishName || undefined,
+      email: form.email,
+      phone: form.phone,
+      departmentId: form.departmentId || undefined,
+      positionId: form.positionId || undefined,
+      teamId: form.teamId || undefined,
+      status: form.status,
+      employeeCode: form.fullName.substring(0, 3).toUpperCase() + '-' + Math.floor(Math.random() * 1000)
     };
+
     try {
       if (modalMode === 'edit' && editId) {
-        payload.status = form.status;
         await updateEmployee.mutateAsync({ id: editId, data: payload });
       } else {
         await createEmployee.mutateAsync(payload);
@@ -169,19 +136,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
       {/* STAT CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((sc, i) => (
-          <div key={i} className="bg-sg-card border border-sg-border rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-            <div className="flexjustify-between items-start mb-6">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${sc.bg} mix-blend-luminosity group-hover:mix-blend-normal transition-all z-10`}>
-                <sc.icon size={22} className={sc.color} />
-              </div>
-            </div>
-            <div className="relative z-10">
-              <span className="text-4xl font-black text-sg-heading tracking-tight block leading-none">{fmt(sc.value)}</span>
-              <span className="text-xs font-extrabold text-sg-muted uppercase tracking-wider mt-2 block">{sc.label}</span>
-            </div>
-            {/* Hover Gradient Overlay */}
-            <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${sc.gradient} opacity-0 group-hover:opacity-10 blur-2xl rounded-full transition-opacity duration-500 pointer-events-none -mr-10 -mt-10`} />
-          </div>
+          <StaffStatsCard key={i} {...sc} />
         ))}
       </div>
 
@@ -260,369 +215,34 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
       {/* ONBOARDING KANBAN VIEW (When status = PROBATION) */}
       {!isLoading && !error && employees.length > 0 && activeFilter === 'PROBATION' && (
-        <div className="flex gap-6 overflow-x-auto pb-8 custom-scrollbar">
-          {[
-            { id: 'S1', title: 'Ngày 1: Setup', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: Laptop,
-              items: employees.slice(0, Math.max(1, Math.floor(employees.length / 4))) },
-            { id: 'S2', title: 'Tuần 1: Hội nhập', color: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', icon: UsersRound,
-              items: employees.slice(Math.max(1, Math.floor(employees.length / 4)), Math.max(2, Math.floor(employees.length / 2))) },
-            { id: 'S3', title: 'Tháng 1-2: Đánh giá', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: Star,
-              items: employees.slice(Math.max(2, Math.floor(employees.length / 2)), employees.length - 1) },
-            { id: 'S4', title: 'Hoàn tất chờ ký HĐ', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: CheckCircle,
-              items: employees.slice(employees.length - 1) },
-          ].map(stage => (
-            <div key={stage.id} className="w-[340px] flex-shrink-0 bg-sg-btn-bg/30 border border-sg-border rounded-[24px] p-5 flex flex-col h-fit">
-               <div className="flex items-center gap-3 mb-5">
-                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stage.bg} border ${stage.border}`}>
-                    <stage.icon size={18} className={stage.color} />
-                  </div>
-                  <div>
-                     <h4 className="text-[15px] font-extrabold text-sg-heading leading-tight">{stage.title}</h4>
-                     <span className={`text-[12px] font-bold ${stage.color}`}>{stage.items.length} nhân sự</span>
-                  </div>
-               </div>
-               <div className="flex flex-col gap-3">
-                  {stage.items.length === 0 ? (
-                    <div className="py-6 border border-dashed border-sg-border rounded-2xl flex justify-center items-center">
-                       <span className="text-xs font-semibold text-sg-muted">Trống</span>
-                    </div>
-                  ) : stage.items.map((emp: any) => {
-                    const clr = nameToColorClass(emp.fullName || '');
-                    return (
-                      <div 
-                        key={emp.id} 
-                        onClick={() => canEdit && openEdit(emp)}
-                        className="bg-sg-card border border-sg-border rounded-[18px] p-4 shadow-sm hover:shadow-md cursor-pointer hover:border-sg-red/30 transition-all group"
-                      >
-                         <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${clr.bg} border ${clr.border}`}>
-                               <span className={`text-[13px] font-black ${clr.text}`}>{getInitials(emp.fullName || '')}</span>
-                            </div>
-                            <div className="flex-1 overflow-hidden">
-                               <h5 className="text-[14px] font-extrabold text-sg-heading truncate group-hover:text-sg-red transition-colors">{emp.fullName}</h5>
-                               <span className="text-[12px] font-semibold text-sg-subtext truncate block mt-0.5">{emp.position?.name || 'Thực tập sinh'} • {emp.department?.name || 'HR'}</span>
-                            </div>
-                         </div>
-                         <div className="pt-3 border-t border-sg-border flex justify-between items-center">
-                            <div className="flex items-center gap-1.5">
-                              <Clock size={13} className="text-sg-muted" />
-                              <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wider">Từ {new Date().toLocaleDateString('vi-VN')}</span>
-                            </div>
-                            <Check size={14} className={stage.color} />
-                         </div>
-                      </div>
-                    )
-                  })}
-               </div>
-            </div>
-          ))}
-        </div>
+        <EmployeeKanbanBoard employees={employees} canEdit={canEdit} onEdit={openEdit} />
       )}
 
       {/* LIST VIEW */}
       {!isLoading && !error && employees.length > 0 && viewMode === 'list' && activeFilter !== 'PROBATION' && (
-        <div className="bg-sg-card border border-sg-border rounded-[24px] overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse">
-             <thead>
-                <tr className="bg-sg-btn-bg border-b border-sg-border">
-                   <th className="px-6 py-4 text-[11px] font-extrabold text-sg-muted uppercase tracking-[1px] w-2/5">Họ Tên</th>
-                   <th className="px-6 py-4 text-[11px] font-extrabold text-sg-muted uppercase tracking-[1px] w-1/4">Chức vụ / Phòng ban</th>
-                   <th className="px-6 py-4 text-[11px] font-extrabold text-sg-muted uppercase tracking-[1px] w-1/5">Liên hệ</th>
-                   <th className="px-6 py-4 text-[11px] font-extrabold text-sg-muted uppercase tracking-[1px] text-center">Trạng thái</th>
-                   {canEdit && <th className="px-6 py-4 text-[11px] font-extrabold text-sg-muted uppercase tracking-[1px] text-right"></th>}
-                </tr>
-             </thead>
-             <tbody className="divide-y divide-sg-border">
-                {employees.map((staff: any) => {
-                  const clr = nameToColorClass(staff.fullName || '');
-                  const st = STATUS_OPTIONS.find(s => s.value === staff.status) || STATUS_OPTIONS[0];
-                  return (
-                    <tr key={staff.id} className="hover:bg-sg-btn-bg transition-colors group">
-                       <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${clr.bg} border ${clr.border}`}>
-                               <span className={`text-[13px] font-black ${clr.text}`}>{getInitials(staff.fullName || '')}</span>
-                             </div>
-                             <div>
-                                <h5 className="text-[14px] font-extrabold text-sg-heading">{staff.fullName}</h5>
-                                <span className="text-[12px] font-medium text-sg-subtext">{staff.employeeCode}</span>
-                             </div>
-                          </div>
-                       </td>
-                       <td className="px-6 py-4">
-                          <span className="text-[13px] font-bold text-sg-heading block mb-1">{staff.position?.name || 'Nhân viên'}</span>
-                          <div className="flex items-center flex-wrap gap-x-2 gap-y-1">
-                            <span className="text-[12px] font-medium text-sg-subtext">{staff.department?.name || '—'}</span>
-                            {staff.team?.name && (
-                              <div className="flex items-center gap-1 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full">
-                                <span className="text-[11px] font-bold text-indigo-500 uppercase tracking-wide">{staff.team.name}</span>
-                              </div>
-                            )}
-                          </div>
-                       </td>
-                       <td className="px-6 py-4">
-                          <span className="text-[13px] font-medium text-sg-heading block truncate mb-1" title={staff.email}>{staff.email || '—'}</span>
-                          <span className="text-[12px] font-medium text-sg-subtext block">{staff.phone || '—'}</span>
-                       </td>
-                       <td className="px-6 py-4 text-center">
-                          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${st.bg} ${st.color} border ${st.border}`}>
-                            {st.label}
-                          </span>
-                       </td>
-                       {canEdit && (
-                         <td className="px-6 py-4 text-right">
-                            <button onClick={() => openEdit(staff)} className="p-2 rounded-lg text-sg-muted hover:text-sg-heading hover:bg-sg-card transition-colors border border-transparent hover:border-sg-border shadow-sm opacity-0 group-hover:opacity-100">
-                               <Pencil size={16} />
-                            </button>
-                         </td>
-                       )}
-                    </tr>
-                  )
-                })}
-             </tbody>
-          </table>
-        </div>
+        <EmployeeListView employees={employees} canEdit={canEdit} onEdit={openEdit} />
       )}
 
       {/* GRID VIEW */}
       {!isLoading && !error && employees.length > 0 && viewMode === 'grid' && activeFilter !== 'PROBATION' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {employees.map((staff: any) => {
-            const clr = nameToColorClass(staff.fullName || '');
-            const st = STATUS_OPTIONS.find(s => s.value === staff.status) || STATUS_OPTIONS[0];
-            
-            return (
-              <div key={staff.id} className="bg-sg-card border border-sg-border rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-shadow group">
-                 {/* Top Accent Bar */}
-                 <div className={`h-1.5 w-full bg-gradient-to-r ${clr.bg.replace('/15', '')} opacity-40`} />
-                 
-                 <div className="p-6">
-                    {/* Identity Row */}
-                    <div className="flex items-start gap-4 mb-5">
-                       <div className={`w-[56px] h-[56px] rounded-[18px] flex flex-shrink-0 items-center justify-center ${clr.bg} border border-sg-border`}>
-                          <span className={`text-[18px] font-black ${clr.text}`}>{getInitials(staff.fullName || '')}</span>
-                       </div>
-                       <div className="flex-1 min-w-0">
-                          <h4 className="text-[17px] font-extrabold text-sg-heading truncate mb-0.5 group-hover:text-sg-red transition-colors">{staff.fullName}</h4>
-                          {staff.englishName && <span className="text-[13px] font-semibold italic text-sg-subtext truncate block mb-1">{staff.englishName}</span>}
-                          <div className="flex items-center gap-1.5 text-sg-muted">
-                            <Hash size={13} />
-                            <span className="text-[12px] font-bold">{staff.employeeCode}</span>
-                          </div>
-                       </div>
-                    </div>
-
-                    {/* Meta tags */}
-                    <div className="flex flex-wrap items-center gap-2 mb-6">
-                       <span className="px-3 py-1.5 rounded-xl bg-sg-btn-bg border border-sg-border text-[11px] font-black text-sg-heading uppercase tracking-wide">
-                          {staff.position?.name || 'Staff'}
-                       </span>
-                       <span className={`px-2.5 py-1 rounded-xl border ${st.bg} ${st.border} ${st.color} text-[10px] font-black uppercase tracking-wide ml-auto`}>
-                          {st.label}
-                       </span>
-                    </div>
-
-                    {/* Department */}
-                    <div className="flex items-center gap-3 pb-5 mb-5 border-b border-sg-border">
-                       <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                          <Building size={14} className="text-indigo-500" />
-                       </div>
-                       <span className="text-[14px] font-extrabold text-sg-heading flex-1 truncate">{staff.department?.name || '—'}</span>
-                       {staff.team?.name && (
-                         <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sg-btn-bg border border-sg-border">
-                            <UsersRound size={12} className="text-sg-muted" />
-                            <span className="text-[11px] font-bold text-sg-subtext">{staff.team.name}</span>
-                         </div>
-                       )}
-                    </div>
-
-                    {/* Contact */}
-                    <div className="flex gap-3">
-                       <div className="flex-1 flex items-center gap-2 p-3 rounded-2xl bg-sg-btn-bg border border-sg-border" title={staff.email}>
-                          <Mail size={16} className="text-blue-500 flex-shrink-0" />
-                          <span className="text-[13px] font-bold text-sg-heading truncate">{staff.email || '—'}</span>
-                       </div>
-                       <div className="flex-1 flex items-center gap-2 p-3 rounded-2xl bg-sg-btn-bg border border-sg-border">
-                          <Phone size={16} className="text-purple-500 flex-shrink-0" />
-                          <span className="text-[13px] font-bold text-sg-heading truncate">{staff.phone || '—'}</span>
-                       </div>
-                    </div>
-
-                    {canEdit && (
-                       <button onClick={() => openEdit(staff)} className="absolute top-4 right-4 w-9 h-9 rounded-xl bg-sg-card border border-sg-border shadow-sm flex items-center justify-center text-sg-muted hover:text-sg-red hover:border-sg-red/30 transition-all opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0">
-                         <Pencil size={16} />
-                       </button>
-                    )}
-                 </div>
-              </div>
-            )
-          })}
-        </div>
+        <EmployeeGridView employees={employees} canEdit={canEdit} onEdit={openEdit} />
       )}
 
       {/* MODAL */}
       {modalMode !== null && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 animate-sg-fade-in bg-sg-heading/40 backdrop-blur-md">
-          {/* Overlay to close */}
-          <div className="absolute inset-0" onClick={() => setModalMode(null)} />
-          
-          <div className="relative w-full max-w-[560px] max-h-[90vh] flex flex-col bg-sg-portal-bg rounded-[32px] border border-sg-border/50 shadow-sg-xl animate-sg-slide-up overflow-hidden ring-1 ring-white/50 dark:ring-white/5">
-             
-             {/* Modal Header */}
-             <div className="px-8 pt-8 pb-4 flex items-center justify-between z-10 bg-sg-portal-bg shrink-0">
-                <h3 className="text-2xl font-black tracking-tight text-sg-heading">
-                   {modalMode === 'edit' ? 'Chỉnh sửa hồ sơ' : 'Thêm hồ sơ nhân viên'}
-                </h3>
-                <button onClick={() => setModalMode(null)} className="p-2 -mr-2 text-sg-muted hover:bg-sg-border rounded-full transition-all hover:rotate-90">
-                  <X size={20} strokeWidth={2.5} />
-                </button>
-             </div>
-
-             {/* Modal Body */}
-             <div className="px-8 pb-4 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-sg-border [&::-webkit-scrollbar-thumb]:rounded-full flex flex-col gap-6">
-                
-                <div className="flex flex-col gap-2">
-                   <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Họ và tên <span className="text-sg-red">*</span></label>
-                   <input value={form.fullName} onChange={e => setForm(f => ({ ...f, fullName: e.target.value }))} placeholder="Nguyễn Văn A" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                   <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Tên tiếng Anh</label>
-                   <input value={form.englishName} onChange={e => setForm(f => ({ ...f, englishName: e.target.value }))} placeholder="Nguyen Van A" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-2 items-start">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Email</label>
-                     <input value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="email@sgroup.vn" type="email" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
-                  </div>
-                  <div className="flex flex-col gap-2 items-start">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Số điện thoại</label>
-                     <input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} placeholder="0901234567" type="tel" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 shadow-sm transition-all" />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Phòng ban</label>
-                  <div className="flex flex-wrap gap-2">
-                     {deptOptions.map((d: any) => (
-                       <button
-                         key={d.id}
-                         onClick={() => handleDeptChange(d.id)}
-                         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                           ${form.departmentId === d.id ? 'bg-sg-red/10 text-sg-red-dark border-sg-red/30 hover:bg-sg-red/15 dark:bg-sg-red/20 dark:text-sg-red-light dark:border-sg-red/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
-                         `}
-                       >
-                         {d.name}
-                       </button>
-                     ))}
-                  </div>
-                </div>
-
-                {form.departmentId && teamOptions.length > 0 && (
-                  <div className="flex flex-col gap-2 animate-sg-fade-in-up">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 flex items-center gap-1.5"><UsersRound size={12} strokeWidth={2.5}/> Thuộc Team</label>
-                    <div className="flex flex-wrap gap-2">
-                       <button
-                         onClick={() => setForm(f => ({ ...f, teamId: '' }))}
-                         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                           ${!form.teamId ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
-                         `}
-                       >
-                         Không gắn
-                       </button>
-                       {teamOptions.map((t: any) => (
-                         <button
-                           key={t.id}
-                           onClick={() => setForm(f => ({...f, teamId: f.teamId === t.id ? '' : t.id}))}
-                           className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                             ${form.teamId === t.id ? 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
-                           `}
-                         >
-                           {t.name}
-                         </button>
-                       ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="flex flex-col gap-2">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Chức vụ</label>
-                  <div className="flex flex-wrap gap-2">
-                     {posOptions.map((p: any) => (
-                       <button
-                         key={p.id}
-                         onClick={() => setForm(f => ({...f, positionId: f.positionId === p.id ? '' : p.id}))}
-                         className={`whitespace-nowrap px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                           ${form.positionId === p.id ? 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/30' : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:bg-slate-50 dark:hover:bg-white/10 hover:text-sg-heading hover:border-sg-border'}
-                         `}
-                       >
-                         {p.name}
-                       </button>
-                     ))}
-                  </div>
-                </div>
-
-                {modalMode === 'edit' && (
-                  <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Trạng thái làm việc</label>
-                    <div className="flex flex-wrap gap-2">
-                       {STATUS_OPTIONS.map(s => (
-                         <button
-                           key={s.value}
-                           onClick={() => setForm(f => ({...f, status: s.value}))}
-                           className={`px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                             ${form.status === s.value ? `${s.bg} ${s.border} ${s.color} hover:scale-105` : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-sg-heading/30 hover:text-sg-heading'}
-                           `}
-                         >
-                           {s.label}
-                         </button>
-                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {modalMode === 'edit' && transfers.length > 0 && (
-                   <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
-                     <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 flex items-center gap-1.5"><History size={12} strokeWidth={2.5}/> Lịch sử luân chuyển ({transfers.length})</label>
-                     <div className="border border-sg-border/50 rounded-2xl overflow-hidden bg-white dark:bg-white/5 shadow-sm">
-                        {transfers.map((t: any, idx) => (
-                           <div key={t.id} className={`p-4 flex items-center gap-4 hover:bg-black/5 transition-colors ${idx < transfers.length - 1 ? 'border-b border-sg-border/50' : ''}`}>
-                              <div className="w-9 h-9 rounded-full bg-sg-btn-bg flex items-center justify-center border border-sg-border/50">
-                                 <ArrowRightLeft size={14} strokeWidth={2.5} className="text-sg-muted" />
-                              </div>
-                              <div className="flex-1">
-                                 {(t.transferType === 'DEPARTMENT' || t.transferType === 'BOTH') && (
-                                    <span className="text-[13px] font-extrabold text-sg-heading block">{t.fromDepartment?.name || '—'} <ArrowRightLeft size={10} className="inline mx-1 text-sg-muted" /> {t.toDepartment?.name || '—'}</span>
-                                 )}
-                                 {(t.transferType === 'TEAM' || t.transferType === 'BOTH') && (
-                                    <span className="text-[12px] font-bold text-indigo-500 block mt-0.5">Team: {t.fromTeam?.name || '—'} → {t.toTeam?.name || '—'}</span>
-                                 )}
-                                 <span className="text-[10px] font-bold text-sg-subtext/70 uppercase tracking-wider mt-1 block">
-                                   {new Date(t.effectiveDate).toLocaleDateString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric' })}
-                                 </span>
-                              </div>
-                           </div>
-                        ))}
-                     </div>
-                   </div>
-                )}
-
-             </div>
-
-             {/* Modal Footer */}
-             <div className="px-8 pb-8 pt-4 flex gap-4 shrink-0 bg-sg-portal-bg rounded-b-[32px]">
-                <button onClick={() => setModalMode(null)} className="flex-1 h-12 rounded-2xl border border-sg-border/50 bg-white dark:bg-white/5 text-sg-subtext font-bold text-[14px] hover:text-sg-heading hover:border-sg-heading/30 transition-all shadow-sm">
-                   Hủy bỏ
-                </button>
-                <button onClick={handleSubmit} disabled={isSaving} className={`flex-[2] h-12 rounded-2xl font-black text-[14px] text-white transition-all shadow-sg-brand
-                  ${isSaving ? 'bg-sg-muted cursor-not-allowed' : 'bg-sg-red hover:bg-sg-red-light transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]'}
-                `}>
-                   {isSaving ? 'ĐANG LƯU...' : modalMode === 'edit' ? 'CẬP NHẬT HỒ SƠ' : 'TẠO MỚI HỒ SƠ'}
-                </button>
-             </div>
-          </div>
-        </div>
+        <EmployeeFormModal
+          mode={modalMode}
+          form={form}
+          setForm={setForm}
+          deptOptions={deptOptions}
+          posOptions={posOptions}
+          teamOptions={teamOptions}
+          transfers={transfers}
+          isSaving={isSaving}
+          onClose={() => setModalMode(null)}
+          onSubmit={handleSubmit}
+          onDeptChange={handleDeptChange}
+        />
       )}
 
     </div>

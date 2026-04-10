@@ -36,11 +36,12 @@ Chairman → JAVIS (classify + domain check) → BA TEAM (spec) → CODE AGENTS 
 6. **Javis** approves combined spec → dispatches to code agents
 
 ## Operating Principles
-1. **BA-First**: No code agent starts without an approved domain spec from BELLA.
-2. **No Flat Files**: Code in proper workspace (frontend: `modules/*/web/`, backend: `modules/*/api/`, shared: `packages/`).
-3. **No "Magic" Fixes**: Debug via log/trace, do NOT guess.
-4. **Architecture V17**: Fault Isolation per [strategy-v17.md](./shared/strategy-v17.md).
-5. **Definition of Done**: Every module passes [module-done.md](./shared/module-done.md).
+1. **Senior DNA (20+ YOE)**: ALL agents act as Principal Engineers. Prioritize optimal algorithmic solutions and bulletproof code control *before* writing code.
+2. **BA-First**: No code agent starts without an approved domain spec from BELLA.
+3. **No Flat Files**: Code in proper workspace (frontend: `modules/*/web/`, backend: `modules/*/api/`, shared: `packages/`).
+4. **No "Magic" Fixes**: Debug via log/trace, do NOT guess.
+5. **Architecture V17**: Fault Isolation per [strategy-v17.md](./shared/strategy-v17.md).
+6. **Definition of Done**: Every module passes [module-done.md](./shared/module-done.md).
 6. **Turbo Delivery**: `/build-module` workflows executed step-by-step.
 7. **Auto-Learning (V18)**: Read `.agents/knowledge-base/` before coding. 3-Strike Rule applies.
 8. **Guardrails (V19)**: No main branch coding. Mutex Lock per [agent-boundaries.md](./sop/agent-boundaries.md).

@@ -1,5 +1,6 @@
 import { apiClient } from '../../../core/api/apiClient';
 import { mockHRData, mockRespond } from './hrMocks';
+import { Employee, Department, Team, Position } from '../types';
 
 export const hrApi = {
   // Dashboard
@@ -7,11 +8,11 @@ export const hrApi = {
 
   // Departments
   getDepartments: async () => mockRespond(mockHRData.getDepartments),
-  createDepartment: async (data: any) => {
+  createDepartment: async (data: Omit<Department, 'id'>) => {
     const res = await apiClient.post('/hr/departments', data);
     return res.data;
   },
-  updateDepartment: async (id: string, data: any) => {
+  updateDepartment: async (id: string, data: Partial<Department>) => {
     const res = await apiClient.patch(`/hr/departments/${id}`, data);
     return res.data;
   },
@@ -19,37 +20,51 @@ export const hrApi = {
 
   // Positions
   getPositions: async () => mockRespond(mockHRData.getPositions),
-  createPosition: async (data: any) => {
+  createPosition: async (data: Omit<Position, 'id'>) => {
     const res = await apiClient.post('/hr/positions', data);
     return res.data;
   },
-  updatePosition: async (id: string, data: any) => {
+  updatePosition: async (id: string, data: Partial<Position>) => {
     const res = await apiClient.patch(`/hr/positions/${id}`, data);
     return res.data;
   },
 
   // Teams
   getTeams: async (deptId?: string) => mockRespond(mockHRData.getTeams),
-  createTeam: async (data: any) => {
+  createTeam: async (data: Omit<Team, 'id'>) => {
     const res = await apiClient.post('/hr/teams', data);
     return res.data;
   },
-  updateTeam: async (id: string, data: any) => {
+  updateTeam: async (id: string, data: Partial<Team>) => {
     const res = await apiClient.patch(`/hr/teams/${id}`, data);
     return res.data;
   },
   deleteTeam: async (id: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
 
   // Employees
-  getEmployees: async (params?: any) => mockRespond(mockHRData.getEmployees),
+  getEmployees: async (params?: Record<string, unknown>) => mockRespond(mockHRData.getEmployees),
   getEmployee: async (id: string) => mockRespond(mockHRData.getEmployee),
-  createEmployee: async (data: any) => {
-    const res = await apiClient.post('/hr/employees', data);
-    return res.data;
+  createEmployee: async (data: Omit<Employee, 'id'>) => {
+    // Mock: simulate creating employee and add to local mock data
+    const newId = String(Date.now());
+    const newEmployee = {
+      id: newId,
+      employeeCode: `SGR-${String(mockHRData.getEmployees.data.length + 1).padStart(3, '0')}`,
+      ...data,
+      status: 'active',
+      workStatus: 'Đang làm việc',
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+    mockHRData.getEmployees.data.push(newEmployee);
+    mockHRData.getEmployees.meta.total = mockHRData.getEmployees.data.length;
+    return mockRespond(newEmployee as Employee);
   },
-  updateEmployee: async (id: string, data: any) => {
-    const res = await apiClient.patch(`/hr/employees/${id}`, data);
-    return res.data;
+  updateEmployee: async (id: string, data: Partial<Employee>) => {
+    const idx = mockHRData.getEmployees.data.findIndex((e: any) => e.id === id);
+    if (idx >= 0) {
+      mockHRData.getEmployees.data[idx] = { ...mockHRData.getEmployees.data[idx], ...data };
+    }
+    return mockRespond({ success: true });
   },
   deleteEmployee: async (id: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
 

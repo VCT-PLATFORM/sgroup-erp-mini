@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { hrApi } from '../api/hrApi';
+import { Employee, Department, Position, Team } from '../types';
 
 // ═══════════════════════════════════════════
 // DASHBOARD
@@ -132,7 +133,7 @@ export function useEmployee(id: string) {
 export function useCreateEmployee() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => hrApi.createEmployee(data),
+    mutationFn: (data: Omit<Employee, 'id'>) => hrApi.createEmployee(data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr'] }),
   });
 }
@@ -140,7 +141,7 @@ export function useCreateEmployee() {
 export function useUpdateEmployee() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: any }) => hrApi.updateEmployee(id, data),
+    mutationFn: ({ id, data }: { id: string; data: Partial<Employee> }) => hrApi.updateEmployee(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['hr'] }),
   });
 }

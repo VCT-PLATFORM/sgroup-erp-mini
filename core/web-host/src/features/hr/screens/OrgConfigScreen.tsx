@@ -160,7 +160,7 @@ export function OrgConfigScreen() {
                 const isExpanded = expandedDept === dept.id;
                 const deptTeams = dept.teams || [];
                 return (
-                  <div key={dept.id} className={`flex flex-col rounded-3xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'bg-sg-card/50 border-pink-500/30 shadow-lg shadow-pink-500/5' : 'bg-sg-card border-sg-border shadow-sg-light'}`}>
+                  <div key={dept.id} className={`flex flex-col rounded-3xl border transition-all duration-300 overflow-hidden ${isExpanded ? 'bg-sg-card/50 border-pink-500/30 shadow-lg shadow-pink-500/5' : 'bg-sg-card border-sg-border shadow-sg-sm'}`}>
                     {/* Header Row */}
                     <div 
                       className="p-6 flex items-center justify-between cursor-pointer hover:bg-sg-btn-bg transition-colors"
@@ -450,7 +450,7 @@ export function OrgConfigScreen() {
 
 function StatCard({ label, value, icon: Icon, colorClass }: any) {
   return (
-    <div className="p-6 bg-sg-card border border-sg-border rounded-3xl shadow-sg-light flex items-center gap-5">
+    <div className="p-6 bg-sg-card border border-sg-border rounded-3xl shadow-sg-sm flex items-center gap-5">
       <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border ${colorClass}`}>
         <Icon size={24} />
       </div>

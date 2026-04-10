@@ -22,6 +22,9 @@ func NewEmployeeHandler(router *gin.Engine, uc usecase.EmployeeUseCase) {
 	{
 		hrGroup.POST("/employees", handler.Create)
 		hrGroup.GET("/employees", handler.List)
+		hrGroup.GET("/employees/:id", handler.GetByID)
+		hrGroup.PUT("/employees/:id", handler.Update)
+		hrGroup.DELETE("/employees/:id", handler.Delete)
 	}
 }
 
@@ -58,4 +61,56 @@ func (h *EmployeeHandler) List(c *gin.Context) {
 			"size":  pageSize,
 		},
 	})
+}
+
+func (h *EmployeeHandler) GetByID(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
+		return
+	}
+
+	emp, err := h.uc.GetEmployeeByID(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Employee not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": emp})
+}
+
+func (h *EmployeeHandler) Update(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
+		return
+	}
+
+	var updates domain.Employee
+	if err := c.ShouldBindJSON(&updates); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := h.uc.UpdateEmployee(c.Request.Context(), uint(id), &updates); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update employee"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Employee updated successfully"})
+}
+
+func (h *EmployeeHandler) Delete(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
+		return
+	}
+
+	if err := h.uc.DeleteEmployee(c.Request.Context(), uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete employee"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Employee deleted successfully"})
 }

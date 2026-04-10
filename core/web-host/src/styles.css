@@ -14,10 +14,10 @@
   --color-sg-red-50: oklch(0.97 0.01 25);
   --color-sg-red-100: oklch(0.93 0.03 25);
 
-  /* Surface */
-  --color-sg-bg: #F4F7FB;
-  --color-sg-surface: #FFFFFF;
-  --color-sg-glass: rgba(255, 255, 255, 0.7);
+  /* Surface — semantic, changes with dark mode */
+  --color-sg-bg: var(--surface-bg);
+  --color-sg-surface: var(--surface-main);
+  --color-sg-glass: var(--surface-glass);
 
   /* Semantic Portal Colors (Light/Dark mode) */
   --color-sg-portal-bg: var(--portal-bg);
@@ -30,10 +30,10 @@
   --color-sg-muted: var(--muted-color);
   --color-sg-btn-bg: var(--btn-bg);
 
-  /* Text */
-  --color-sg-text: #0F172A;
-  --color-sg-text-secondary: #475569;
-  --color-sg-text-tertiary: #94A3B8;
+  /* Text — semantic, changes with dark mode */
+  --color-sg-text: var(--text-primary);
+  --color-sg-text-secondary: var(--text-secondary);
+  --color-sg-text-tertiary: var(--text-tertiary);
 
   /* Status */
   --color-sg-success: #10B981;
@@ -69,25 +69,37 @@
 :root {
   --portal-bg: #F8FAFC;
   --header-bg: rgba(255, 255, 255, 0.7);
-  --border-color: rgba(0, 0, 0, 0.05);
+  --border-color: rgba(0, 0, 0, 0.06);
   --card-bg: rgba(255, 255, 255, 0.6);
   --card-hover: #FFFFFF;
   --heading-color: #0F172A;
   --subtext-color: #64748B;
   --muted-color: #94A3B8;
   --btn-bg: rgba(0, 0, 0, 0.03);
+  --surface-bg: #F4F7FB;
+  --surface-main: #FFFFFF;
+  --surface-glass: rgba(255, 255, 255, 0.7);
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
 }
 
 .dark {
   --portal-bg: #09090B;
-  --header-bg: rgba(9, 9, 11, 0.7);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --card-bg: rgba(24, 24, 27, 0.5);
-  --card-hover: #18181B;
+  --header-bg: rgba(9, 9, 11, 0.85);
+  --border-color: rgba(255, 255, 255, 0.12);
+  --card-bg: rgba(24, 24, 27, 0.80);
+  --card-hover: #1E1E22;
   --heading-color: #FAFAFA;
-  --subtext-color: #A1A1AA;
-  --muted-color: #71717A;
-  --btn-bg: rgba(255, 255, 255, 0.06);
+  --subtext-color: #A8A8B3;
+  --muted-color: #9CA3AF;
+  --btn-bg: rgba(255, 255, 255, 0.10);
+  --surface-bg: #0C0C0E;
+  --surface-main: #18181B;
+  --surface-glass: rgba(24, 24, 27, 0.7);
+  --text-primary: #F0F0F2;
+  --text-secondary: #B0B0BA;
+  --text-tertiary: #8B8B96;
 }
 
 /* ── Base ── */

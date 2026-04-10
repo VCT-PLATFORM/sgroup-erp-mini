@@ -11,6 +11,8 @@ type EmployeeRepository interface {
 	Create(ctx context.Context, employee *domain.Employee) error
 	GetByID(ctx context.Context, id uint) (*domain.Employee, error)
 	List(ctx context.Context, offset, limit int) ([]domain.Employee, int64, error)
+	Update(ctx context.Context, employee *domain.Employee) error
+	Delete(ctx context.Context, id uint) error
 }
 
 type employeeRepository struct {
@@ -53,4 +55,12 @@ func (r *employeeRepository) List(ctx context.Context, offset, limit int) ([]dom
 		Find(&employees).Error
 
 	return employees, total, err
+}
+
+func (r *employeeRepository) Update(ctx context.Context, employee *domain.Employee) error {
+	return r.db.WithContext(ctx).Save(employee).Error
+}
+
+func (r *employeeRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&domain.Employee{}, id).Error
 }
