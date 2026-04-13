@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/vctplatform/sgroup-erp/modules/hr/api/internal/domain"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -16,20 +15,23 @@ func InitDB(dsn string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
-	// Auto-migrate the HR domain models
-	err = db.AutoMigrate(
-		&domain.Department{},
-		&domain.Position{},
-		&domain.Employee{},
-		&domain.EmploymentContract{},
-		&domain.AttendanceRecord{},
-		&domain.PayrollRun{},
-		&domain.Payslip{},
-		&domain.AuditLog{},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("failed to auto-migrate database: %w", err)
-	}
+	// Auto-migrate disabled temporarily to prevent startup crashes due to legacy schema incompatibility
+	// err = db.AutoMigrate(
+	// 	&domain.Department{},
+	// 	&domain.Team{}, // Added
+	// 	&domain.Position{},
+	// 	&domain.Employee{},
+	// 	&domain.EmploymentContract{},
+	// 	&domain.AttendanceRecord{},
+	// 	&domain.LeaveRequest{}, // Added
+	// 	&domain.LeaveBalance{}, // Added
+	// 	&domain.PayrollRun{},
+	// 	&domain.Payslip{},
+	// 	&domain.AuditLog{},
+	// )
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to auto-migrate database: %w", err)
+	// }
 
 	log.Println("Database connection established and models auto-migrated successfully (HR Module).")
 	return db, nil

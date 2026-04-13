@@ -3,50 +3,56 @@ package usecase
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"strconv"
 	"strings"
 
 	"github.com/vctplatform/sgroup-erp/modules/hr/api/internal/domain"
+	"github.com/vctplatform/sgroup-erp/modules/hr/api/internal/repository"
 )
 
 type BulkUploadUseCase interface {
-	ProcessAttendanceCSV(ctx context.Context, reader io.Reader) (int, error)
+	UploadAttendanceCSV(ctx context.Context, file *multipart.FileHeader) error
 }
 
 type bulkUploadUseCase struct {
-	// Let's assume we have an attendance repo in the future, for now we will interact via a generic DB repo
-	// or create a dedicated attendance repo. To keep this focused, we'll use a transaction directly or an attendance repo.
+	attendanceRepo repository.AttendanceRepository
 }
 
-func NewBulkUploadUseCase() BulkUploadUseCase {
-	return &bulkUploadUseCase{}
+func NewBulkUploadUseCase(repo repository.AttendanceRepository) BulkUploadUseCase {
+	return &bulkUploadUseCase{attendanceRepo: repo}
 }
 
-func (uc *bulkUploadUseCase) ProcessAttendanceCSV(ctx context.Context, reader io.Reader) (int, error) {
-	csvReader := csv.NewReader(reader)
-	
-	// Read header 
-	// Expected format: EmployeeID, Date, TotalHours, Status
-	_, err := csvReader.Read()
+func (u *bulkUploadUseCase) UploadAttendanceCSV(ctx context.Context, fileHeader *multipart.FileHeader) error {
+	file, err := fileHeader.Open()
 	if err != nil {
-		return 0, fmt.Errorf("failed to read CSV header: %w", err)
+		return err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	
+	// Skip header
+	if _, err := reader.Read(); err != nil {
+		return errors.New("invalid or empty CSV file")
 	}
 
-	recordsCount := 0
+	var records []domain.AttendanceRecord
 
 	for {
-		record, err := csvReader.Read()
+		record, err := reader.Read()
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			continue // Skip malformed rows
+			return fmt.Errorf("error reading CSV: %w", err)
 		}
 
 		if len(record) < 4 {
-			continue
+			continue // Skip invalid rows
 		}
 
 		empIDStr := strings.TrimSpace(record[0])
@@ -54,20 +60,25 @@ func (uc *bulkUploadUseCase) ProcessAttendanceCSV(ctx context.Context, reader io
 		hoursStr := strings.TrimSpace(record[2])
 		status := strings.TrimSpace(record[3])
 
-		empID, _ := strconv.ParseUint(empIDStr, 10, 32)
+		empID := empIDStr
 		hours, _ := strconv.ParseFloat(hoursStr, 64)
 
 		attendance := &domain.AttendanceRecord{
-			EmployeeID: uint(empID),
+			EmployeeID: empID,
 			Date:       dateStr,
 			TotalHours: hours,
 			Status:     status,
 		}
 
-		// TODO: Save 'attendance' to Database using GORM Batch Insert or individual inserts in goroutines.
-		_ = attendance
-		recordsCount++
+		records = append(records, *attendance)
 	}
 
-	return recordsCount, nil
+	// Bulk Create should be implemented in repo, but for now we iterate
+	for _, rec := range records {
+		if err := u.attendanceRepo.Create(ctx, &rec); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

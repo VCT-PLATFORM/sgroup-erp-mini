@@ -234,24 +234,27 @@ export function useRejectLeave() {
 // ═══════════════════════════════════════════
 // PAYROLL
 // ═══════════════════════════════════════════
-export function usePayroll(params?: {
-  period?: string;
-  year?: string;
-  month?: string;
-  status?: string;
-}) {
+export function usePayrollRuns(params?: any) {
   return useQuery({
-    queryKey: ['hr', 'payroll', params],
-    queryFn: () => hrApi.getPayroll(params),
+    queryKey: ['hr', 'payroll-runs', params],
+    queryFn: () => hrApi.getPayrollRuns(params),
+  });
+}
+
+export function usePayslips(runId: number | string) {
+  return useQuery({
+    queryKey: ['hr', 'payslips', runId],
+    queryFn: () => hrApi.getPayslips(runId),
+    enabled: !!runId,
   });
 }
 
 export function useGeneratePayroll() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ year, month }: { year: number; month: number }) =>
-      hrApi.generatePayroll(year, month),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'payroll'] }),
+    mutationFn: (data: { title: string, cycle_start: string, cycle_end: string, standard_days: number, admin_id: number }) =>
+      hrApi.generatePayroll(data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['hr', 'payroll-runs'] }),
   });
 }
 

@@ -3,16 +3,16 @@ package service
 import (
 	"context"
 
+	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/infrastructure/messaging"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/model"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/repository"
-	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/infrastructure/messaging"
 )
 
 type ProjectService interface {
 	CreateProject(ctx context.Context, req *model.Project) (*model.Project, error)
 	GetProject(ctx context.Context, id string) (*model.Project, error)
 	ListProjects(ctx context.Context, page, limit int, search string) ([]model.Project, int64, error)
-	UpdateProject(ctx context.Context, req *model.Project) error
+	UpdateProject(ctx context.Context, id string, fields map[string]interface{}) (*model.Project, error)
 	DeleteProject(ctx context.Context, id string) error
 	SyncProjectUnits(ctx context.Context, id string) error
 }
@@ -57,23 +57,51 @@ func (s *projectService) ListProjects(ctx context.Context, page, limit int, sear
 	return s.projectRepo.FindAll(ctx, page, limit, search)
 }
 
-func (s *projectService) UpdateProject(ctx context.Context, req *model.Project) error {
-	existing, err := s.projectRepo.GetByID(ctx, req.ID)
+func (s *projectService) UpdateProject(ctx context.Context, id string, fields map[string]interface{}) (*model.Project, error) {
+	existing, err := s.projectRepo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	existing.Name = req.Name
-	existing.Developer = req.Developer
-	existing.Location = req.Location
-	existing.Type = req.Type
-	existing.FeeRate = req.FeeRate
-	existing.AvgPrice = req.AvgPrice
-	existing.Status = req.Status
-	existing.StartDate = req.StartDate
-	existing.EndDate = req.EndDate
+	// Apply partial update fields
+	if v, ok := fields["name"]; ok {
+		existing.Name = v.(string)
+	}
+	if v, ok := fields["description"]; ok {
+		existing.Description = v.(string)
+	}
+	if v, ok := fields["developer"]; ok {
+		existing.Developer = v.(string)
+	}
+	if v, ok := fields["location"]; ok {
+		existing.Location = v.(string)
+	}
+	if v, ok := fields["type"]; ok {
+		existing.Type = model.PropertyType(v.(string))
+	}
+	if v, ok := fields["feeRate"]; ok {
+		existing.FeeRate = v.(float64)
+	}
+	if v, ok := fields["avgPrice"]; ok {
+		existing.AvgPrice = v.(float64)
+	}
+	if v, ok := fields["status"]; ok {
+		existing.Status = model.ProjectStatus(v.(string))
+	}
+	if v, ok := fields["managerName"]; ok {
+		existing.ManagerName = v.(string)
+	}
+	if v, ok := fields["managerId"]; ok {
+		existing.ManagerID = v.(string)
+	}
 
-	return s.projectRepo.Update(ctx, existing)
+	if err := s.projectRepo.Update(ctx, existing); err != nil {
+		return nil, err
+	}
+
+	_ = s.eventBus.PublishEvent("project.updated", existing)
+
+	return existing, nil
 }
 
 func (s *projectService) DeleteProject(ctx context.Context, id string) error {

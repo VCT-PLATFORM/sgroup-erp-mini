@@ -64,13 +64,9 @@ func (h *EmployeeHandler) List(c *gin.Context) {
 }
 
 func (h *EmployeeHandler) GetByID(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
-		return
-	}
+	idStr := c.Param("id")
 
-	emp, err := h.uc.GetEmployeeByID(c.Request.Context(), uint(id))
+	emp, err := h.uc.GetEmployeeByID(c.Request.Context(), idStr)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Employee not found"})
 		return
@@ -80,11 +76,7 @@ func (h *EmployeeHandler) GetByID(c *gin.Context) {
 }
 
 func (h *EmployeeHandler) Update(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
-		return
-	}
+	idStr := c.Param("id")
 
 	var updates domain.Employee
 	if err := c.ShouldBindJSON(&updates); err != nil {
@@ -92,7 +84,7 @@ func (h *EmployeeHandler) Update(c *gin.Context) {
 		return
 	}
 
-	if err := h.uc.UpdateEmployee(c.Request.Context(), uint(id), &updates); err != nil {
+	if err := h.uc.UpdateEmployee(c.Request.Context(), idStr, &updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update employee"})
 		return
 	}
@@ -101,13 +93,9 @@ func (h *EmployeeHandler) Update(c *gin.Context) {
 }
 
 func (h *EmployeeHandler) Delete(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid employee ID"})
-		return
-	}
+	idStr := c.Param("id")
 
-	if err := h.uc.DeleteEmployee(c.Request.Context(), uint(id)); err != nil {
+	if err := h.uc.DeleteEmployee(c.Request.Context(), idStr); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete employee"})
 		return
 	}

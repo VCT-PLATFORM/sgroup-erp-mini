@@ -160,6 +160,30 @@
   to { transform: rotate(360deg); }
 }
 
+@keyframes sgToastIn {
+  from { opacity: 0; transform: translateX(40px) scale(0.95); }
+  to { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+@keyframes sgToastProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+@keyframes sgSlideUpDialog {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
 /* ── Utility Animations ── */
 @utility animate-sg-float {
   animation: sg-float 6s ease-in-out infinite;

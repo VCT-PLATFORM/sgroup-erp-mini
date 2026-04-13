@@ -16,10 +16,9 @@ import (
 func main() {
 	log.Println("Starting SGroup ERP - HR Module API (Back-office)...")
 
-	// 1. Initialize Database
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		dsn = "host=localhost user=postgres password=postgres dbname=sgroup_hr port=5432 sslmode=disable TimeZone=Asia/Ho_Chi_Minh"
+		dsn = "host=localhost user=sgroup_admin password=sgroup_password! dbname=sgroup_erp port=5433 sslmode=disable TimeZone=Asia/Ho_Chi_Minh"
 		log.Println("DATABASE_URL not set, falling back to default local connection")
 	}
 
@@ -30,10 +29,18 @@ func main() {
 
 	// 2. Setup Layered Architecture
 	empRepo := repository.NewEmployeeRepository(db)
-	_ = repository.NewDepartmentRepository(db) // For future use
+	deptRepo := repository.NewDepartmentRepository(db)
+	teamRepo := repository.NewTeamRepository(db)
+	posRepo := repository.NewPositionRepository(db)
+	attRepo := repository.NewAttendanceRepository(db)
+	leaveRepo := repository.NewLeaveRepository(db)
+	payrollRepo := repository.NewPayrollRepository(db)
 
 	empUC := usecase.NewEmployeeUseCase(empRepo)
-	payrollUC := usecase.NewPayrollEngineUseCase()
+	payrollUC := usecase.NewPayrollEngineUseCase(payrollRepo, attRepo)
+	orgUC := usecase.NewOrgConfigUseCase(deptRepo, teamRepo, posRepo)
+	attUC := usecase.NewAttendanceUseCase(attRepo)
+	leaveUC := usecase.NewLeaveUseCase(leaveRepo)
 
 	// 3. Start Background CRON Scheduler
 	scheduler := jobs.NewScheduler(db)
@@ -59,6 +66,9 @@ func main() {
 
 	hrHTTP.NewEmployeeHandler(router, empUC)
 	hrHTTP.NewPayrollHandler(router, payrollUC)
+	hrHTTP.NewOrgConfigHandler(router, orgUC)
+	hrHTTP.NewAttendanceHandler(router, attUC)
+	hrHTTP.NewLeaveHandler(router, leaveUC)
 
 	// 5. Start Server
 	port := os.Getenv("PORT")

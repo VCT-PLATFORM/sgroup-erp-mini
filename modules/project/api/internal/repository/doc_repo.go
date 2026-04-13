@@ -10,6 +10,7 @@ import (
 type DocRepository interface {
 	Create(ctx context.Context, doc *model.LegalDoc) error
 	ListByProject(ctx context.Context, projectID string) ([]model.LegalDoc, error)
+	UpdateStatus(ctx context.Context, id string, status model.LegalDocStatus) error
 	Delete(ctx context.Context, id string) error
 }
 
@@ -31,6 +32,10 @@ func (r *docRepository) ListByProject(ctx context.Context, projectID string) ([]
 		return nil, err
 	}
 	return docs, nil
+}
+
+func (r *docRepository) UpdateStatus(ctx context.Context, id string, status model.LegalDocStatus) error {
+	return r.db.WithContext(ctx).Model(&model.LegalDoc{}).Where("id = ?", id).Update("status", status).Error
 }
 
 func (r *docRepository) Delete(ctx context.Context, id string) error {

@@ -8,6 +8,8 @@ import {
   usePositions, useCreatePosition, useUpdatePosition,
   useCreateTeam, useUpdateTeam, useDeleteTeam
 } from '../hooks/useHR';
+import { useToast } from '../../../components/ui/SGToast';
+import { SGConfirmDialog } from '../../../components/ui/SGConfirmDialog';
 
 type ModalMode = 'create_dept' | 'edit_dept' | 'create_team' | 'edit_team' | 'create_pos' | 'edit_pos' | null;
 
@@ -25,6 +27,15 @@ export function OrgConfigScreen() {
   const [deptForm, setDeptForm] = useState(EMPTY_DEPT);
   const [teamForm, setTeamForm] = useState(EMPTY_TEAM);
   const [posForm, setPosForm] = useState(EMPTY_POS);
+  
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean;
+    type: 'dept' | 'team';
+    id: string;
+    name: string;
+  } | null>(null);
+
+  const toast = useToast();
 
   const { data: rawDepts, isLoading: loadingDepts } = useDepartments();
   const { data: rawPos, isLoading: loadingPos } = usePositions();
@@ -42,43 +53,63 @@ export function OrgConfigScreen() {
 
   const isPending = createDept.isPending || updateDept.isPending || createTeam.isPending || updateTeam.isPending || createPos.isPending || updatePos.isPending;
 
-  const showAlert = (msg: string) => window.alert(msg);
-
   const handleDeptSubmit = async () => {
-    if (!deptForm.name.trim() || !deptForm.code.trim()) return showAlert('Vui lòng nhập tên và mã phòng ban');
+    if (!deptForm.name.trim() || !deptForm.code.trim()) return toast.warning('Vui lòng nhập tên và mã phòng ban');
     try {
-      if (modalMode === 'edit_dept') await updateDept.mutateAsync({ id: editId, data: deptForm });
-      else await createDept.mutateAsync(deptForm);
+      if (modalMode === 'edit_dept') {
+        await updateDept.mutateAsync({ id: editId, data: deptForm });
+        toast.success(`Đã cập nhật phòng ban "${deptForm.name}" thành công`);
+      } else {
+        await createDept.mutateAsync(deptForm);
+        toast.success(`Đã tạo phòng ban "${deptForm.name}" thành công`);
+      }
       setDeptForm(EMPTY_DEPT); setModalMode(null);
-    } catch (e: any) { showAlert(e?.response?.data?.message || e?.message || 'Lỗi'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
   };
 
   const handleTeamSubmit = async () => {
-    if (!teamForm.name.trim() || !teamForm.code.trim()) return showAlert('Vui lòng nhập tên và mã team');
+    if (!teamForm.name.trim() || !teamForm.code.trim()) return toast.warning('Vui lòng nhập tên và mã team');
     try {
-      if (modalMode === 'edit_team') await updateTeam.mutateAsync({ id: editId, data: { name: teamForm.name, code: teamForm.code, description: teamForm.description } });
-      else await createTeam.mutateAsync(teamForm);
+      if (modalMode === 'edit_team') {
+        await updateTeam.mutateAsync({ id: editId, data: { name: teamForm.name, code: teamForm.code, description: teamForm.description } });
+        toast.success(`Đã cập nhật team "${teamForm.name}" thành công`);
+      } else {
+        await createTeam.mutateAsync(teamForm);
+        toast.success(`Đã tạo team "${teamForm.name}" thành công`);
+      }
       setTeamForm(EMPTY_TEAM); setModalMode(null);
-    } catch (e: any) { showAlert(e?.response?.data?.message || e?.message || 'Lỗi'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
   };
 
   const handlePosSubmit = async () => {
-    if (!posForm.name.trim() || !posForm.code.trim()) return showAlert('Vui lòng nhập tên và mã chức vụ');
+    if (!posForm.name.trim() || !posForm.code.trim()) return toast.warning('Vui lòng nhập tên và mã chức vụ');
     try {
-      if (modalMode === 'edit_pos') await updatePos.mutateAsync({ id: editId, data: posForm });
-      else await createPos.mutateAsync(posForm);
+      if (modalMode === 'edit_pos') {
+        await updatePos.mutateAsync({ id: editId, data: posForm });
+        toast.success(`Đã cập nhật chức vụ "${posForm.name}" thành công`);
+      } else {
+        await createPos.mutateAsync(posForm);
+        toast.success(`Đã tạo chức vụ "${posForm.name}" thành công`);
+      }
       setPosForm(EMPTY_POS); setModalMode(null);
-    } catch (e: any) { showAlert(e?.response?.data?.message || e?.message || 'Lỗi'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
   };
 
-  const handleDeleteDept = async (id: string, name: string) => {
-    if (!window.confirm(`Xóa phòng ban "${name}"? Tất cả team bên trong cũng sẽ bị xóa.`)) return;
-    try { await deleteDept.mutateAsync(id); } catch (e: any) { showAlert(e?.response?.data?.message || 'Không thể xóa'); }
-  };
-
-  const handleDeleteTeam = async (id: string, name: string) => {
-    if (!window.confirm(`Xóa team "${name}"?`)) return;
-    try { await deleteTeam.mutateAsync(id); } catch (e: any) { showAlert(e?.response?.data?.message || 'Không thể xóa'); }
+  const executeDelete = async () => {
+    if (!confirmDialog) return;
+    try {
+      if (confirmDialog.type === 'dept') {
+        await deleteDept.mutateAsync(confirmDialog.id);
+        toast.success(`Đã xóa phòng ban "${confirmDialog.name}"`);
+      } else {
+        await deleteTeam.mutateAsync(confirmDialog.id);
+        toast.success(`Đã xóa team "${confirmDialog.name}"`);
+      }
+      setConfirmDialog(null);
+    } catch (e: any) { 
+      toast.error(e?.response?.data?.message || 'Không thể xóa'); 
+      setConfirmDialog(null);
+    }
   };
 
   const getModalTitle = () => {
@@ -112,7 +143,7 @@ export function OrgConfigScreen() {
       {/* Header */}
       <div className="sticky top-0 z-30 flex items-center justify-between px-6 py-4 border-b border-sg-border bg-sg-card/80 backdrop-blur-xl">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-linear-to-br from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30">
             <Settings size={22} />
           </div>
           <div className="flex flex-col">
@@ -167,7 +198,7 @@ export function OrgConfigScreen() {
                       onClick={() => setExpandedDept(isExpanded ? null : dept.id)}
                     >
                       <div className="flex items-center gap-6">
-                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${isExpanded ? 'bg-gradient-to-br from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30' : 'bg-pink-500/10 text-pink-500'}`}>
+                        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${isExpanded ? 'bg-linear-to-br from-pink-500 to-rose-500 text-white shadow-lg shadow-pink-500/30' : 'bg-pink-500/10 text-pink-500'}`}>
                           <Building size={24} />
                         </div>
                         <div className="flex flex-col">
@@ -198,7 +229,7 @@ export function OrgConfigScreen() {
                             <Pencil size={16} />
                           </button>
                           <button 
-                            onClick={(e) => { e.stopPropagation(); handleDeleteDept(dept.id, dept.name); }}
+                            onClick={(e) => { e.stopPropagation(); setConfirmDialog({ open: true, type: 'dept', id: dept.id, name: dept.name }); }}
                             className="w-10 h-10 rounded-xl flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors"
                           >
                             <Trash2 size={16} />
@@ -252,7 +283,7 @@ export function OrgConfigScreen() {
                                   </div>
                                   <div className="flex gap-2 text-sg-subtext">
                                     <button onClick={() => { setEditId(t.id); setTeamForm({ name: t.name, code: t.code, departmentId: dept.id, description: t.description || '' }); setModalMode('edit_team'); }} className="w-8 h-8 rounded-lg bg-sg-bg hover:bg-sg-border flex items-center justify-center"><Pencil size={14}/></button>
-                                    <button onClick={() => handleDeleteTeam(t.id, t.name)} className="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center"><Trash2 size={14}/></button>
+                                    <button onClick={() => setConfirmDialog({ open: true, type: 'team', id: t.id, name: t.name })} className="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center"><Trash2 size={14}/></button>
                                   </div>
                                 </div>
                               ))}
@@ -269,7 +300,7 @@ export function OrgConfigScreen() {
             <div className="overflow-x-auto pb-10 custom-scrollbar">
                {/* Transformed Dynamic Tree View */}
                <div className="min-w-max flex flex-col items-center gap-10 mt-6">
-                 <div className="px-10 py-5 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 text-center relative z-10 font-black tracking-wide text-lg flex items-center gap-3">
+                 <div className="px-10 py-5 rounded-2xl bg-linear-to-br from-blue-600 to-indigo-600 text-white shadow-xl shadow-blue-500/20 text-center relative z-10 font-black tracking-wide text-lg flex items-center gap-3">
                    <Building size={24} className="text-white/80" />
                    SGroup Corporation
                  </div>
@@ -293,9 +324,9 @@ export function OrgConfigScreen() {
                            <div className="absolute top-0 left-1/2 w-0.5 h-10 bg-sg-border/60 -translate-x-1/2 -mt-10" />
                            
                            {/* Department Card */}
-                           <div className={`w-52 rounded-[24px] bg-sg-card border ${c.border} flex flex-col items-center text-center shadow-lg ${c.shadow} overflow-hidden transform transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl`}>
-                             <div className={`h-1.5 w-full bg-gradient-to-r ${c.top} opacity-80`} />
-                             <div className="p-6 flex flex-col items-center w-full bg-gradient-to-b from-white/5 to-transparent">
+                           <div className={`w-52 rounded-sg-xl bg-sg-card border ${c.border} flex flex-col items-center text-center shadow-lg ${c.shadow} overflow-hidden transform transition-all duration-300 group-hover:-translate-y-1 group-hover:shadow-xl`}>
+                             <div className={`h-1.5 w-full bg-linear-to-r ${c.top} opacity-80`} />
+                             <div className="p-6 flex flex-col items-center w-full bg-linear-to-b from-white/5 to-transparent">
                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${c.bg} border ${c.border}`}>
                                   <Building size={20} className={c.icon} />
                                </div>
@@ -318,7 +349,7 @@ export function OrgConfigScreen() {
                            {/* Teams Container */}
                            {d.teams && d.teams.length > 0 && (
                              <div className="flex flex-col gap-4 border-l-2 border-sg-border/60 pl-6 mt-2 relative w-full">
-                               <div className="absolute top-0 -left-[1px] w-0.5 h-full bg-sg-border/60" />
+                               <div className="absolute top-0 -left-px w-0.5 h-full bg-sg-border/60" />
                                {d.teams.map((t: any) => (
                                  <div key={t.id} className="w-full min-w-[160px] p-3.5 rounded-xl bg-sg-bg border border-sg-border flex flex-col items-start relative hover:border-sg-heading/30 transition-colors">
                                     <div className="absolute top-1/2 -left-6 w-6 h-0.5 bg-sg-border/60 -translate-y-1/2" />
@@ -443,6 +474,18 @@ export function OrgConfigScreen() {
           </div>
         </div>
       )}
+
+      {/* Confirm Dialog */}
+      <SGConfirmDialog
+        open={confirmDialog?.open || false}
+        title={confirmDialog?.type === 'dept' ? 'Xóa phòng ban' : 'Xóa team'}
+        message={confirmDialog?.type === 'dept'
+          ? `Bạn có chắc chắn muốn xóa phòng ban "${confirmDialog?.name}"? Tất cả team trực thuộc cũng sẽ bị xóa vĩnh viễn.`
+          : `Bạn có chắc chắn muốn xóa team "${confirmDialog?.name}"?`}
+        onConfirm={executeDelete}
+        onCancel={() => setConfirmDialog(null)}
+        isLoading={deleteDept.isPending || deleteTeam.isPending}
+      />
 
     </div>
   );

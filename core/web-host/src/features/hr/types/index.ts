@@ -5,12 +5,12 @@ export interface Department {
   id: string;
   name: string;
   code: string;
-  manager?: {
-    fullName: string;
-  };
+  description?: string;
+  manager?: Employee;
   _count?: {
     employees: number;
   };
+  teams?: Team[];
 }
 
 export interface Position {
@@ -18,36 +18,64 @@ export interface Position {
   name: string;
   code: string;
   level: string;
+  description?: string;
 }
 
 export interface Team {
   id: string;
   name: string;
+  code: string;
+  description?: string;
+  departmentId?: string;
+  _count?: {
+    employees: number;
+  };
 }
 
 export interface Employee {
   id: string;
+  code: string; // The backend uses "code" (employeeCode logic mapped to code)
+  firstName: string;
+  lastName: string;
   fullName: string;
   englishName?: string;
-  employeeCode: string;
   email: string;
-  phone: string;
-  
-  departmentId?: string;
+  phone?: string;
+  relativePhone?: string;
+  identityCard?: string;
+  idIssueDate?: string;
+  idIssuePlace?: string;
+  vnId?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  address?: string;
+  permanentAddress?: string;
+  contactAddress?: string;
+  avatarUrl?: string;
+
+  taxCode?: string;
+  insuranceBookNumber?: string;
+  bankName?: string;
+  bankAccount?: string;
+
+  departmentId?: string | number;
   department?: Department;
   
-  positionId?: string;
+  positionId?: string | number;
   position?: Position;
   
-  teamId?: string;
+  teamId?: string | number;
   team?: Team;
 
-  status: WorkStatus;
-  workStatus?: string;
+  status: WorkStatus | string;
+  joinDate?: string;
+  leaveDate?: string;
+
+  managerId?: string | number;
+  manager?: Employee;
 
   createdAt?: string;
-
-  [key: string]: any; // fallback for other extra properties during migration
+  updatedAt?: string;
 }
 
 export interface TransferRecord {

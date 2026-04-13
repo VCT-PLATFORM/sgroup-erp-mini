@@ -3,10 +3,12 @@ import { useProjects, useLegalDocs } from '../hooks/useProjects';
 import { RE_LEGAL_PROCEDURE_STATUS } from '../constants';
 import { RELegalProcedureStatus } from '../types';
 import { FileText, Plus, Search, Calendar, FolderClock } from 'lucide-react';
+import { legalDocApi } from '../api/projectApi';
 
 export function LegalKanbanScreen() {
-  const { data: legalDocs } = useLegalDocs();
+  const { data: legalDocs, refetch } = useLegalDocs();
   const { data: projects } = useProjects();
+  const [isUpdating, setIsUpdating] = React.useState(false);
 
   const columns = useMemo(() => {
     const cols: Record<RELegalProcedureStatus, typeof legalDocs> = {
@@ -22,6 +24,33 @@ export function LegalKanbanScreen() {
     });
     return cols;
   }, [legalDocs]);
+
+  const handleDragStart = (e: React.DragEvent, docId: string, projectId: string) => {
+    e.dataTransfer.setData('docId', docId);
+    e.dataTransfer.setData('projectId', projectId);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault(); // allow drop
+  };
+
+  const handleDrop = async (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault();
+    const docId = e.dataTransfer.getData('docId');
+    const projectId = e.dataTransfer.getData('projectId');
+    
+    if (!docId || !projectId) return;
+
+    try {
+      setIsUpdating(true);
+      await legalDocApi.updateStatus(projectId, docId, newStatus);
+      refetch();
+    } catch(err: any) {
+      alert(err.message || "Không thể cập nhật trạng thái");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full bg-transparent relative z-10 overflow-hidden">
@@ -39,7 +68,7 @@ export function LegalKanbanScreen() {
 
           <div className="flex items-center gap-3">
              <div className="relative group hidden sm:block">
-              <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-purple-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 blur transition-opacity" />
+              <div className="absolute inset-0 bg-linear-to-r from-rose-500/0 via-purple-500/10 to-transparent rounded-xl opacity-0 group-hover:opacity-100 blur transition-opacity" />
               <div className="relative flex items-center h-11 bg-sg-card/80 backdrop-blur-xl border border-sg-border hover:border-rose-500/30 rounded-xl px-4 transition-colors w-64 shadow-sm">
                 <Search size={16} className="text-sg-muted group-hover:text-rose-500 transition-colors" />
                 <input 
@@ -50,7 +79,7 @@ export function LegalKanbanScreen() {
               </div>
             </div>
             
-            <button className="h-11 px-5 flex items-center gap-2 bg-gradient-to-r from-rose-500 to-purple-600 hover:from-rose-400 hover:to-purple-500 rounded-xl transition-all shadow-[0_8px_24px_rgba(244,63,94,0.25)] hover:shadow-[0_12px_32px_rgba(244,63,94,0.4)] hover:-translate-y-0.5 relative overflow-hidden group">
+            <button className="h-11 px-5 flex items-center gap-2 bg-linear-to-r from-rose-500 to-purple-600 hover:from-rose-400 hover:to-purple-500 rounded-xl transition-all shadow-[0_8px_24px_rgba(244,63,94,0.25)] hover:shadow-[0_12px_32px_rgba(244,63,94,0.4)] hover:-translate-y-0.5 relative overflow-hidden group">
               <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-xl" />
               <Plus size={18} className="text-white relative z-10" />
               <span className="text-[13px] font-black text-white relative z-10">Tạo Hồ Sơ</span>
@@ -68,7 +97,12 @@ export function LegalKanbanScreen() {
             const columnDocs = columns[status] || [];
 
             return (
-              <div key={status} className="w-[340px] flex flex-col h-full bg-sg-card/40 backdrop-blur-2xl rounded-[32px] border border-sg-border/60 shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden">
+              <div 
+                key={status} 
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, status)}
+                className={`w-[340px] flex flex-col h-full bg-sg-card/40 backdrop-blur-2xl rounded-sg-2xl border border-sg-border/60 shadow-[0_8px_32px_rgba(0,0,0,0.02)] overflow-hidden transition-all duration-300 ${isUpdating ? 'opacity-50 pointer-events-none' : ''}`}
+              >
                 {/* Column Header */}
                 <div className={`p-5 flex items-center justify-between border-b border-sg-border/60 relative overflow-hidden`}>
                    <div className={`absolute top-0 left-0 right-0 h-1 ${statusCfg.bg}`} />
@@ -88,7 +122,12 @@ export function LegalKanbanScreen() {
                   {columnDocs.map(doc => {
                     const docProject = projects.find(p => p.id === doc.projectId);
                     return (
-                      <div key={doc.id} className="bg-sg-card/80 backdrop-blur-xl border border-sg-border rounded-[24px] p-5 flex flex-col gap-4 shadow-sm hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] hover:border-rose-500/30 transition-all cursor-pointer group hover:-translate-y-1">
+                      <div 
+                        key={doc.id} 
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, doc.id, doc.projectId)}
+                        className="bg-sg-card/80 backdrop-blur-xl border border-sg-border rounded-sg-xl p-5 flex flex-col gap-4 shadow-sm hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)] hover:border-rose-500/30 transition-all cursor-grab active:cursor-grabbing group hover:-translate-y-1"
+                      >
                         <div className="flex items-start justify-between">
                           <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border shadow-inner ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
                             {docProject?.code || 'N/A'}
@@ -105,7 +144,7 @@ export function LegalKanbanScreen() {
                               <Calendar size={12} className="text-sg-muted" />
                               <span className="text-[11px] font-bold text-sg-subtext">{doc.submitDate ? new Date(doc.submitDate).toLocaleDateString('vi') : 'Chưa nộp'}</span>
                            </div>
-                           <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 border border-white/10 shadow-sm flex items-center justify-center text-white text-[10px] font-black">
+                           <div className="w-8 h-8 rounded-full bg-linear-to-br from-indigo-500 to-purple-600 border border-white/10 shadow-sm flex items-center justify-center text-white text-[10px] font-black">
                               {doc.assigneeName ? doc.assigneeName.slice(0, 2).toUpperCase() : 'NA'}
                            </div>
                         </div>

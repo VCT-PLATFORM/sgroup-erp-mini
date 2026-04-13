@@ -10,9 +10,9 @@ import (
 type EmployeeUseCase interface {
 	CreateEmployee(ctx context.Context, emp *domain.Employee) error
 	GetEmployeeList(ctx context.Context, page, pageSize int) ([]domain.Employee, int64, error)
-	GetEmployeeByID(ctx context.Context, id uint) (*domain.Employee, error)
-	UpdateEmployee(ctx context.Context, id uint, updates *domain.Employee) error
-	DeleteEmployee(ctx context.Context, id uint) error
+	GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error)
+	UpdateEmployee(ctx context.Context, id string, updates *domain.Employee) error
+	DeleteEmployee(ctx context.Context, id string) error
 }
 
 type employeeUseCase struct {
@@ -43,11 +43,11 @@ func (uc *employeeUseCase) GetEmployeeList(ctx context.Context, page, pageSize i
 	return uc.repo.List(ctx, offset, pageSize)
 }
 
-func (uc *employeeUseCase) GetEmployeeByID(ctx context.Context, id uint) (*domain.Employee, error) {
+func (uc *employeeUseCase) GetEmployeeByID(ctx context.Context, id string) (*domain.Employee, error) {
 	return uc.repo.GetByID(ctx, id)
 }
 
-func (uc *employeeUseCase) UpdateEmployee(ctx context.Context, id uint, updates *domain.Employee) error {
+func (uc *employeeUseCase) UpdateEmployee(ctx context.Context, id string, updates *domain.Employee) error {
 	emp, err := uc.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
@@ -63,6 +63,6 @@ func (uc *employeeUseCase) UpdateEmployee(ctx context.Context, id uint, updates 
 	return uc.repo.Update(ctx, emp)
 }
 
-func (uc *employeeUseCase) DeleteEmployee(ctx context.Context, id uint) error {
+func (uc *employeeUseCase) DeleteEmployee(ctx context.Context, id string) error {
 	return uc.repo.Delete(ctx, id)
 }

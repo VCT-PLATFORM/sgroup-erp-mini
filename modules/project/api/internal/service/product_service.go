@@ -11,11 +11,12 @@ import (
 
 type ProductService interface {
 	CreateProduct(ctx context.Context, req *model.Product) (*model.Product, error)
+	GetProduct(ctx context.Context, id string) (*model.Product, error)
 	ListProjectProducts(ctx context.Context, projectID string, page, limit int) ([]model.Product, int64, error)
 	LockProduct(ctx context.Context, id string, bookedBy string, lockDurationHours int) error
 	UnlockProduct(ctx context.Context, id string, requestedBy string, isAdmin bool) error
 	DepositProduct(ctx context.Context, id string, requestedBy string) error
-	SoldProduct(ctx context.Context, id string, requestedBy string) error
+	SoldProduct(ctx context.Context, id string, requestedBy string) (string, error) // returns projectID
 	UpdateProductStatus(ctx context.Context, id string, status model.ProductStatus) error
 	DeleteProduct(ctx context.Context, id string) error
 	CleanupLocks(ctx context.Context) (int64, error)
@@ -39,6 +40,10 @@ func (s *productService) CreateProduct(ctx context.Context, req *model.Product) 
 		return nil, err
 	}
 	return req, nil
+}
+
+func (s *productService) GetProduct(ctx context.Context, id string) (*model.Product, error) {
+	return s.productRepo.GetByID(ctx, id)
 }
 
 func (s *productService) ListProjectProducts(ctx context.Context, projectID string, page, limit int) ([]model.Product, int64, error) {
@@ -113,13 +118,14 @@ func (s *productService) DepositProduct(ctx context.Context, id string, requeste
 	return err
 }
 
-func (s *productService) SoldProduct(ctx context.Context, id string, requestedBy string) error {
+// SoldProduct marks product as sold and returns the projectID for sync
+func (s *productService) SoldProduct(ctx context.Context, id string, requestedBy string) (string, error) {
 	product, err := s.productRepo.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return "", err
 	}
 	if product.Status != model.ProductStatusDeposit {
-		return errors.New("căn phải đang ở trạng thái đặt cọc mới có thể giao dịch Thành công (Đã Bán)")
+		return "", errors.New("căn phải đang ở trạng thái đặt cọc mới có thể giao dịch Thành công (Đã Bán)")
 	}
 
 	err = s.productRepo.UpdateStatus(ctx, id, model.ProductStatusSold)
@@ -132,7 +138,10 @@ func (s *productService) SoldProduct(ctx context.Context, id string, requestedBy
 			Details:    "Giao dịch đã bán/Hợp đồng",
 		})
 	}
-	return err
+	if err != nil {
+		return "", err
+	}
+	return product.ProjectID, nil
 }
 
 func (s *productService) UpdateProductStatus(ctx context.Context, id string, status model.ProductStatus) error {

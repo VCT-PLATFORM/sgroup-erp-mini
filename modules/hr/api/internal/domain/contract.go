@@ -8,9 +8,9 @@ import (
 
 // EmploymentContract represents the labor contract for an employee.
 type EmploymentContract struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
+	ID             string      `gorm:"primaryKey" json:"id"`
 	ContractNumber string    `gorm:"size:100;uniqueIndex;not null" json:"contract_number"`
-	EmployeeID     uint      `json:"employee_id"`
+	EmployeeID     string      `json:"employee_id"`
 	Employee       *Employee `gorm:"foreignKey:EmployeeID" json:"employee,omitempty"`
 
 	// Contract details

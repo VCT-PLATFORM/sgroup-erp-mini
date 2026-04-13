@@ -4,6 +4,8 @@ import { useEmployees, useHRDashboard, useCreateEmployee, useUpdateEmployee, use
 import type { HRRole } from '../types';
 import { Employee, Department, Position, Team, TransferRecord, HRDashboardData } from '../types';
 import { FILTER_TABS, EMPTY_FORM } from '../constants';
+import { useToast } from '../../../components/ui/SGToast';
+import { SkeletonStatsCard, SkeletonEmployeeCard } from '../../../components/ui/SGSkeleton';
 
 import { StaffStatsCard } from '../components/StaffStatsCard';
 import { EmployeeGridView } from '../components/EmployeeGridView';
@@ -21,6 +23,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
   const [editId, setEditId] = useState<string | null>(null);
 
   const canEdit = userRole === 'admin' || userRole === 'hr_manager' || userRole === 'hr_director';
+  const toast = useToast();
 
   const { data: dashboardData } = useHRDashboard();
   const { data: employeesData, isLoading, error } = useEmployees({
@@ -59,7 +62,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
     { label: 'Nghỉ phép', value: db?.onLeaveCount ?? 0, icon: Target, color: 'text-blue-500', bg: 'bg-blue-500/15', gradient: 'from-blue-500 to-cyan-600' },
   ];
 
-  const showAlert = (msg: string) => window.alert(msg);
+
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
@@ -73,40 +76,39 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
       englishName: staff.englishName || '',
       email: staff.email || '',
       phone: staff.phone || '',
-      departmentId: staff.departmentId || staff.department?.id || '',
-      positionId: staff.positionId || staff.position?.id || '',
-      teamId: staff.teamId || staff.team?.id || '',
+      departmentId: (staff.departmentId || staff.department?.id || '').toString(),
+      positionId: (staff.positionId || staff.position?.id || '').toString(),
+      teamId: (staff.teamId || staff.team?.id || '').toString(),
       status: staff.status || 'ACTIVE',
     });
     setEditId(staff.id);
     setModalMode('edit');
   };
 
-  const handleSubmit = async () => {
-    if (!form.fullName.trim()) return showAlert('Vui lòng nhập họ tên nhân viên');
+  const handleSubmit = async (formPayload: any) => {
+    const nameParts = (formPayload.fullName || '').trim().split(' ');
+    const lastName = nameParts.length > 1 ? nameParts[0] : '';
+    const firstName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : (formPayload.fullName || '').trim();
+
     const payload: Omit<Employee, 'id'> = {
-      fullName: form.fullName,
-      englishName: form.englishName || undefined,
-      email: form.email,
-      phone: form.phone,
-      departmentId: form.departmentId || undefined,
-      positionId: form.positionId || undefined,
-      teamId: form.teamId || undefined,
-      status: form.status,
-      employeeCode: form.fullName.substring(0, 3).toUpperCase() + '-' + Math.floor(Math.random() * 1000)
+      ...formPayload,
+      firstName,
+      lastName,
+      code: formPayload.fullName.substring(0, 3).toUpperCase() + '-' + Math.floor(Math.random() * 1000)
     };
 
     try {
       if (modalMode === 'edit' && editId) {
         await updateEmployee.mutateAsync({ id: editId, data: payload });
+        toast.success(`Đã cập nhật hồ sơ "${payload.fullName}" thành công`);
       } else {
         await createEmployee.mutateAsync(payload);
+        toast.success(`Đã tạo hồ sơ "${payload.fullName}" thành công`);
       }
-      setForm(EMPTY_FORM);
       setEditId(null);
       setModalMode(null);
     } catch (e: any) {
-      showAlert(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra');
+      toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra khi lưu hồ sơ nhân viên');
     }
   };
 
@@ -143,7 +145,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
       {/* SEARCH AND FILTERS */}
       <div className="flex flex-col xl:flex-row gap-4 mb-8">
         {/* View Toggles */}
-        <div className="flex bg-sg-btn-bg p-1 rounded-[16px] border border-sg-border w-fit">
+        <div className="flex bg-sg-btn-bg p-1 rounded-sg-lg border border-sg-border w-fit">
            <button onClick={() => setViewMode('grid')} className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-sg-card shadow-sm text-sg-heading' : 'text-sg-muted hover:text-sg-heading'}`}>
              <LayoutGrid size={18} />
            </button>
@@ -184,9 +186,10 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
       {/* ERROR & LOADING STATES */}
       {isLoading && (
-        <div className="py-24 flex flex-col items-center justify-center">
-          <div className="w-10 h-10 border-4 border-sg-red/30 border-t-sg-red rounded-full animate-spin mb-4" />
-          <span className="text-sm font-semibold text-sg-subtext">Đang tải dữ liệu nhân sự...</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <SkeletonEmployeeCard key={i} />
+          ))}
         </div>
       )}
 
@@ -232,8 +235,7 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
       {modalMode !== null && (
         <EmployeeFormModal
           mode={modalMode}
-          form={form}
-          setForm={setForm}
+          initialData={form as any}
           deptOptions={deptOptions}
           posOptions={posOptions}
           teamOptions={teamOptions}

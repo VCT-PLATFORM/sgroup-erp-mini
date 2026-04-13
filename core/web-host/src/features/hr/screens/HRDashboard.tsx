@@ -47,7 +47,7 @@ export function HRDashboard() {
       
       {/* Header Area */}
       <div className="flex items-center gap-5 mb-8">
-        <div className="w-16 h-16 rounded-[20px] bg-gradient-to-br from-sg-red to-purple-500 flex items-center justify-center shadow-sg-brand shadow-sg-red/30">
+        <div className="w-16 h-16 rounded-[20px] bg-linear-to-br from-sg-red to-purple-500 flex items-center justify-center shadow-sg-brand shadow-sg-red/30">
           <Briefcase size={28} className="text-white" />
         </div>
         <div>
@@ -137,7 +137,7 @@ export function HRDashboard() {
                 allActivities.map((a: any, i: number) => (
                   <div key={a.id || i} className={`flex gap-5 ${i === allActivities.length - 1 ? '' : 'mb-6'}`}>
                     {/* Timeline Tracker */}
-                    <div className="flex flex-col items-center w-3.5 flex-shrink-0">
+                    <div className="flex flex-col items-center w-3.5 shrink-0">
                       <div 
                         className="w-3.5 h-3.5 rounded-full border-2 border-sg-card z-10 shrink-0 shadow-sm" 
                         style={{ backgroundColor: a.tone || '#3b82f6' }} 
@@ -147,7 +147,7 @@ export function HRDashboard() {
                       )}
                     </div>
                     {/* Activity Content Box */}
-                    <div className="flex-1 -mt-1 bg-sg-btn-bg/50 dark:bg-white/[0.02] p-4 rounded-2xl border border-sg-border">
+                    <div className="flex-1 -mt-1 bg-sg-btn-bg/50 dark:bg-white/2 p-4 rounded-2xl border border-sg-border">
                        <div className="flex justify-between items-start mb-1.5">
                          <span className="text-[15px] font-extrabold text-sg-heading">{a.title}</span>
                          <span className="text-[12px] font-bold text-sg-subtext whitespace-nowrap">{a.time}</span>
@@ -179,22 +179,39 @@ export function HRDashboard() {
               ) : (
                 allEvents.map((e: any, i: number) => {
                   const isBday = e.type === 'birthday';
+                  
+                  // Parse date string like "Hôm nay 15/04"
+                  const dateParts = (e.date || '').split(' ');
+                  const dateStr = dateParts[dateParts.length - 1] || '';
+                  const [dayStr, monthStr] = dateStr.includes('/') ? dateStr.split('/') : [dateStr, ''];
+                  const relativeDay = dateParts.length > 1 ? dateParts.slice(0, -1).join(' ') : '';
+
                   return (
                     <div key={i} className="flex gap-4 group">
                       <div className={`w-[48px] h-[56px] rounded-[14px] flex flex-col items-center justify-center border
                         ${isBday ? 'bg-sg-red/10 border-sg-red/10 group-hover:border-sg-red/30' : 'bg-blue-500/10 border-blue-500/10 group-hover:border-blue-500/30'}
-                        transition-colors
+                        transition-colors shrink-0
                       `}>
                         <span className={`text-[12px] font-extrabold uppercase ${isBday ? 'text-sg-red' : 'text-blue-500'}`}>
-                          {e.date.split(' ')[1]}
+                          {monthStr ? `T${Number(monthStr)}` : ''}
                         </span>
-                        <span className={`text-[20px] font-black leading-none ${isBday ? 'text-sg-red' : 'text-blue-500'}`}>
-                          {e.date.split(' ')[0]}
+                        <span className={`text-[20px] font-black leading-none mt-0.5 ${isBday ? 'text-sg-red' : 'text-blue-500'}`}>
+                          {dayStr || '—'}
                         </span>
                       </div>
-                      <div className="flex flex-col justify-center flex-1">
-                        <span className="text-[15px] font-extrabold text-sg-heading mb-1">{e.name}</span>
-                        <span className="text-[13px] font-bold text-sg-subtext">{e.desc} • {e.role}</span>
+                      <div className="flex flex-col justify-center flex-1 min-w-0">
+                        <span className="text-[15px] font-extrabold text-sg-heading mb-1 truncate">{e.name}</span>
+                        <span className="text-[13px] font-bold text-sg-subtext truncate">
+                          {relativeDay && (
+                            <>
+                              <span className={isBday ? 'text-sg-red' : 'text-blue-500'}>{relativeDay}</span>
+                              <span className="mx-1.5">•</span>
+                            </>
+                          )}
+                          {e.desc}
+                          <span className="mx-1.5">•</span>
+                          {e.role}
+                        </span>
                       </div>
                     </div>
                   );

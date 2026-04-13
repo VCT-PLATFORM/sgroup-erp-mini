@@ -6,7 +6,7 @@ import (
 
 // Position represents a job title or role within the company.
 type Position struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
+	ID          string      `gorm:"primaryKey" json:"id"`
 	Title       string    `gorm:"size:255;not null" json:"title"`
 	Code        string    `gorm:"size:50;uniqueIndex;not null" json:"code"`
 	Description string    `gorm:"type:text" json:"description"`

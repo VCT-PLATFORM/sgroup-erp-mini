@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Bot, Command, Search, X, Send, Sparkles, FileText, Users, Calendar, Sun, Moon } from 'lucide-react';
+import { HRErrorBoundary } from './components/ErrorBoundary';
 import { HRSidebar, HRSidebarItem, HRRole } from './HRSidebar';
 import { useAuthStore } from '../auth/store/authStore';
 import { useHRRoute } from './hooks/useHRRoute';
@@ -128,7 +129,7 @@ export function HRShell() {
       <div className="flex-1 flex flex-col relative z-0 transition-colors duration-300">
         
         {/* TopBar */}
-        <header className="h-[80px] bg-sg-header-bg/80 backdrop-blur-xl border-b border-sg-border px-8 flex items-center justify-between z-10 transition-colors duration-300 flex-shrink-0">
+        <header className="h-[80px] bg-sg-header-bg/80 backdrop-blur-xl border-b border-sg-border px-8 flex items-center justify-between z-10 transition-colors duration-300 shrink-0">
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[11px] font-extrabold text-sg-muted uppercase tracking-[1px]">
@@ -181,7 +182,7 @@ export function HRShell() {
                 <span className="text-sm font-extrabold text-sg-heading shadow-sm">{user?.name || 'User'}</span>
                 <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wide">{userRole.replace('_', ' ')}</span>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sg-red to-sg-red-dark flex items-center justify-center shadow-sg-brand ring-2 ring-white/10">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-sg-red to-sg-red-dark flex items-center justify-center shadow-sg-brand ring-2 ring-white/10">
                 <span className="text-[15px] font-black text-white">{user?.name ? user.name[0].toUpperCase() : 'U'}</span>
               </div>
             </div>
@@ -191,22 +192,24 @@ export function HRShell() {
         {/* Content */}
         <main className="flex-1 overflow-y-auto custom-scrollbar relative z-0">
           <div className="min-h-full pb-20">
-            {ContentComponent ? (
-              <ContentComponent userRole={userRole} routeParams={params} />
-            ) : (
-              <PlaceholderScreen title={activeLabel} />
-            )}
+            <HRErrorBoundary>
+              {ContentComponent ? (
+                <ContentComponent userRole={userRole} routeParams={params} />
+              ) : (
+                <PlaceholderScreen title={activeLabel} />
+              )}
+            </HRErrorBoundary>
           </div>
         </main>
       </div>
 
       {/* ═══ COMMAND PALETTE (Cmd+K) ═══ */}
       {isCommandOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-sg-heading/20 backdrop-blur-sm animate-sg-fade-in">
+        <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 bg-sg-heading/20 backdrop-blur-sm animate-sg-fade-in">
           <div className="absolute inset-0 cursor-default" onClick={() => setCommandOpen(false)} />
           <div className="relative w-full max-w-[640px] bg-sg-portal-bg rounded-2xl overflow-hidden shadow-[0_16px_32px_rgba(0,0,0,0.25)] border border-sg-border animate-sg-slide-up scale-100">
              <div className="flex flex-row items-center px-5 border-b border-sg-border bg-sg-card">
-                <Search size={22} className="text-blue-500 flex-shrink-0" />
+                <Search size={22} className="text-blue-500 shrink-0" />
                 <input
                    autoFocus
                    value={searchQuery}
@@ -240,9 +243,9 @@ export function HRShell() {
 
       {/* ═══ HR COPILOT ═══ */}
       {isCopilotOpen ? (
-        <div className="fixed right-6 bottom-6 w-[380px] h-[600px] bg-sg-card/90 backdrop-blur-2xl rounded-[28px] border border-sg-border shadow-sg-lg z-[10000] flex flex-col overflow-hidden animate-sg-slide-up">
+        <div className="fixed right-6 bottom-6 w-[380px] h-[600px] bg-sg-card/90 backdrop-blur-2xl rounded-[28px] border border-sg-border shadow-sg-lg z-10000 flex flex-col overflow-hidden animate-sg-slide-up">
            {/* Header */}
-           <div className="bg-gradient-to-br from-sg-red to-sg-red-dark p-4 flex flex-row items-center justify-between">
+           <div className="bg-linear-to-br from-sg-red to-sg-red-dark p-4 flex flex-row items-center justify-between">
              <div className="flex flex-row items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center border border-white/20 shadow-sm">
                   <Sparkles size={18} className="text-white" />
@@ -310,9 +313,9 @@ export function HRShell() {
       ) : (
         <button 
           onClick={() => setCopilotOpen(true)} 
-          className="fixed right-6 bottom-6 w-16 h-16 rounded-[32px] flex items-center justify-center shadow-sg-brand hover:-translate-y-1 hover:shadow-sg-lg transition-all z-[10000] animate-sg-slide-up group border-2 border-white/20 overflow-hidden"
+          className="fixed right-6 bottom-6 w-16 h-16 rounded-sg-2xl flex items-center justify-center shadow-sg-brand hover:-translate-y-1 hover:shadow-sg-lg transition-all z-10000 animate-sg-slide-up group border-2 border-white/20 overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-sg-red to-sg-red-dark group-hover:from-sg-red-light group-hover:to-sg-red transition-all" />
+          <div className="absolute inset-0 bg-linear-to-br from-sg-red to-sg-red-dark group-hover:from-sg-red-light group-hover:to-sg-red transition-all" />
           <Bot size={28} className="text-white relative z-10" />
         </button>
       )}

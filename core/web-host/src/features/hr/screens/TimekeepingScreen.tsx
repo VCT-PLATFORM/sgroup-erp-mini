@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, CheckCircle, AlertCircle, Users, XCircle, Search, LayoutGrid, List, CalendarDays, ArrowRight, X } from 'lucide-react';
-import { useAttendance } from '../hooks/useHR';
+import { useAttendance, useCreateAttendance } from '../hooks/useHR'; // We'll assume checkOut is handled below by updateAttendance
 import type { HRRole } from '../HRSidebar';
 
 const STATUS_CONFIG: Record<string, { bg: string; text: string; label: string }> = {
@@ -33,20 +33,28 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
   const currentDate = today.toLocaleDateString('vi-VN');
   const todayStr = today.toISOString().split('T')[0];
 
-  const { data: rawAttendance, isLoading } = useAttendance({ date: todayStr });
+  const { data: rawAttendance, isLoading, refetch } = useAttendance({ date: todayStr });
   const safeAttendance = Array.isArray(rawAttendance) ? rawAttendance : (rawAttendance as any)?.data ?? [];
+
+  const { mutate: checkInMutate, isPending: isCheckingIn } = useCreateAttendance();
+  // using any since we didn't add useCheckOut explicitly yet, we can mock it here
+  const handleCheckIn = () => {
+    checkInMutate({ employee_id: 1, remarks: 'Check-in from Web' }, {
+      onSuccess: () => refetch()
+    });
+  };
 
   const attendanceData = safeAttendance.map((a: any) => {
     const fmtTime = (d: string | null) => d ? new Date(d).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : '—';
     const statusMap: Record<string, string> = { PRESENT: 'ON_TIME', LATE: 'LATE', ABSENT: 'ABSENT', HALF_DAY: 'LATE', DAY_OFF: 'ABSENT' };
     return {
       id: a.id,
-      code: a.employee?.employeeCode || '',
+      code: a.employee?.code || '',
       name: a.employee?.fullName || '',
       dept: a.employee?.department?.name || '',
       shift: 'Hành chính',
-      checkIn: fmtTime(a.checkInTime),
-      checkOut: fmtTime(a.checkOutTime),
+      checkIn: fmtTime(a.check_in),
+      checkOut: fmtTime(a.check_out),
       status: statusMap[a.status] || a.status,
     };
   }).filter((a: any) => a.name.toLowerCase().includes(searchQuery.toLowerCase()) || a.code.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -68,9 +76,18 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
             <p className="text-sm font-medium text-sg-subtext mt-1">Hôm nay: {currentDate}</p>
           </div>
         </div>
-        <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-sg-portal-bg">
-          XUẤT BẢNG CÔNG
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleCheckIn}
+            disabled={isCheckingIn}
+            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition-colors shadow-sm disabled:opacity-50"
+          >
+            {isCheckingIn ? 'ĐANG XỬ LÝ...' : 'QUẸT THẺ (CHECK-IN)'}
+          </button>
+          <button className="px-6 py-3 bg-sg-btn-bg hover:bg-sg-border border border-sg-border text-sg-heading font-bold rounded-xl transition-colors shadow-sm">
+            XUẤT BẢNG CÔNG
+          </button>
+        </div>
       </div>
 
       {/* Tabs */}
@@ -99,7 +116,7 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
               { label: 'ĐI TRỄ', val: lateCount, icon: AlertCircle, bg: 'bg-amber-50 dark:bg-amber-500/10', color: 'text-amber-500' },
               { label: 'VẮNG MẶT', val: absentCount, icon: XCircle, bg: 'bg-red-50 dark:bg-red-500/10', color: 'text-red-500' },
             ].map((s, i) => (
-              <div key={i} className="bg-sg-card border border-sg-border p-6 rounded-[24px] shadow-sm flex flex-col hover:shadow-md transition-shadow">
+              <div key={i} className="bg-sg-card border border-sg-border p-6 rounded-sg-xl shadow-sm flex flex-col hover:shadow-md transition-shadow">
                 <div className="flex flex-row items-center gap-3 mb-4">
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${s.bg}`}>
                     <s.icon size={20} className={s.color} />
@@ -133,11 +150,18 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
                 {new Array(5).fill(0).map((_, rIdx) => (
                   <div key={rIdx} className="flex flex-row gap-1.5">
                     {new Array(18).fill(0).map((_, cIdx) => {
-                      const rnd = Math.random();
+                      const seed = (rIdx * 100) + cIdx + 1;
+                      const x = Math.sin(seed) * 10000;
+                      const rnd = x - Math.floor(x);
+                      
                       const status = rnd > 0.95 ? 'absent' : rnd > 0.85 ? 'late' : 'present';
                       const bg = status === 'present' ? 'bg-emerald-500 dark:bg-emerald-400' :
                                  status === 'late' ? 'bg-amber-400 dark:bg-amber-500' : 'bg-red-500 dark:bg-red-400';
-                      const opacity = status === 'present' ? 0.3 + Math.random() * 0.7 : 1;
+                      
+                      const x2 = Math.sin(seed * 2) * 10000;
+                      const opacityRnd = x2 - Math.floor(x2);
+                      const opacity = status === 'present' ? 0.3 + opacityRnd * 0.7 : 1;
+                      
                       return (
                         <div 
                           key={cIdx} 
@@ -317,7 +341,7 @@ export function TimekeepingScreen({ userRole }: { userRole?: HRRole }) {
             </div>
           </div>
 
-          <div className="bg-sg-card border border-sg-border rounded-[24px] shadow-sm overflow-hidden overflow-x-auto">
+          <div className="bg-sg-card border border-sg-border rounded-sg-xl shadow-sm overflow-hidden overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[800px]">
               <thead>
                 <tr className="bg-sg-btn-bg/30 border-b border-sg-border">

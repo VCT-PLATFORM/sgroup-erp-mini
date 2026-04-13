@@ -9,13 +9,13 @@ import (
 type ProductStatus string
 
 const (
-	ProductStatusAvailable     ProductStatus = "AVAILABLE"
-	ProductStatusLocked        ProductStatus = "LOCKED"
-	ProductStatusBooked        ProductStatus = "BOOKED"
+	ProductStatusAvailable      ProductStatus = "AVAILABLE"
+	ProductStatusLocked         ProductStatus = "LOCKED"
+	ProductStatusReserved       ProductStatus = "RESERVED"
 	ProductStatusPendingDeposit ProductStatus = "PENDING_DEPOSIT"
-	ProductStatusDeposit       ProductStatus = "DEPOSIT"
-	ProductStatusSold          ProductStatus = "SOLD"
-	ProductStatusCompleted     ProductStatus = "COMPLETED"
+	ProductStatusDeposit        ProductStatus = "DEPOSIT"
+	ProductStatusSold           ProductStatus = "SOLD"
+	ProductStatusCompleted      ProductStatus = "COMPLETED"
 )
 
 type Product struct {
@@ -28,10 +28,12 @@ type Product struct {
 	Price         float64        `gorm:"type:decimal(18,4)" json:"price"`
 	Direction     string         `gorm:"type:varchar(50)" json:"direction"`
 	Bedrooms      int            `gorm:"type:integer" json:"bedrooms"`
-	Status        ProductStatus  `gorm:"type:varchar(30);default:'AVAILABLE'" json:"status"`
+	Status        ProductStatus  `gorm:"type:varchar(30);default:'AVAILABLE';index:idx_products_project_status" json:"status"`
 	BookedBy      *string        `gorm:"type:varchar(255)" json:"bookedBy"`
 	LockedUntil   *time.Time     `json:"lockedUntil"`
+	CustomerName  *string        `gorm:"type:varchar(255)" json:"customerName"`
 	CustomerPhone *string        `gorm:"type:varchar(20)" json:"customerPhone"`
+	SalespersonID *string        `gorm:"type:varchar(100)" json:"salespersonId"`
 	CreatedAt     time.Time      `gorm:"autoCreateTime" json:"createdAt"`
 	UpdatedAt     time.Time      `gorm:"autoUpdateTime" json:"updatedAt"`
 	DeletedAt     gorm.DeletedAt `gorm:"index" json:"-"`

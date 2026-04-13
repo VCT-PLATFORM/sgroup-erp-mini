@@ -8,8 +8,8 @@ import (
 
 // AttendanceRecord stores check-ins and time logs for employees.
 type AttendanceRecord struct {
-	ID         uint           `gorm:"primaryKey" json:"id"`
-	EmployeeID uint           `gorm:"index:idx_employee_date" json:"employee_id"`
+	ID         string           `gorm:"primaryKey" json:"id"`
+	EmployeeID string           `gorm:"index:idx_employee_date" json:"employee_id"`
 	Employee   *Employee      `gorm:"foreignKey:EmployeeID" json:"employee,omitempty"`
 	Date       string         `gorm:"size:10;index:idx_employee_date" json:"date"` // Format: YYYY-MM-DD
 	CheckIn    *time.Time     `json:"check_in"`

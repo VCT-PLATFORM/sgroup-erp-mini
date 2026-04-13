@@ -9,10 +9,10 @@ import (
 
 type EmployeeRepository interface {
 	Create(ctx context.Context, employee *domain.Employee) error
-	GetByID(ctx context.Context, id uint) (*domain.Employee, error)
+	GetByID(ctx context.Context, id string) (*domain.Employee, error)
 	List(ctx context.Context, offset, limit int) ([]domain.Employee, int64, error)
 	Update(ctx context.Context, employee *domain.Employee) error
-	Delete(ctx context.Context, id uint) error
+	Delete(ctx context.Context, id string) error
 }
 
 type employeeRepository struct {
@@ -27,10 +27,11 @@ func (r *employeeRepository) Create(ctx context.Context, employee *domain.Employ
 	return r.db.WithContext(ctx).Create(employee).Error
 }
 
-func (r *employeeRepository) GetByID(ctx context.Context, id uint) (*domain.Employee, error) {
+func (r *employeeRepository) GetByID(ctx context.Context, id string) (*domain.Employee, error) {
 	var currentEmployee domain.Employee
 	err := r.db.WithContext(ctx).
 		Preload("Department").
+		Preload("Team").
 		Preload("Position").
 		Preload("Manager").
 		First(&currentEmployee, id).Error
@@ -49,6 +50,7 @@ func (r *employeeRepository) List(ctx context.Context, offset, limit int) ([]dom
 	// Get records with preload
 	err := r.db.WithContext(ctx).
 		Preload("Department").
+		Preload("Team").
 		Preload("Position").
 		Offset(offset).
 		Limit(limit).
@@ -61,6 +63,6 @@ func (r *employeeRepository) Update(ctx context.Context, employee *domain.Employ
 	return r.db.WithContext(ctx).Save(employee).Error
 }
 
-func (r *employeeRepository) Delete(ctx context.Context, id uint) error {
+func (r *employeeRepository) Delete(ctx context.Context, id string) error {
 	return r.db.WithContext(ctx).Delete(&domain.Employee{}, id).Error
 }

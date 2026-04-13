@@ -12,12 +12,18 @@ export const RE_PROPERTY_TYPE: Record<string, { label: string; bg: string; color
   SHOPHOUSE: { label: 'Shophouse', bg: 'bg-rose-500/10', color: 'text-rose-500', border: 'border-rose-500/20' },
 };
 
-export const RE_INVENTORY_STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
+export const RE_PRODUCT_STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
   AVAILABLE: { label: 'Trống', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  RESERVED: { label: 'Đã cọc/Giữ chỗ', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  LOCKED: { label: 'Khóa/Giữ chỗ', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+  RESERVED: { label: 'Đã đặt cọc', color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
+  PENDING_DEPOSIT: { label: 'Chờ cọc', color: 'text-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
+  DEPOSIT: { label: 'Đã cọc', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
   SOLD: { label: 'Đã bán', color: 'text-rose-500', bg: 'bg-rose-500/10', border: 'border-rose-500/20' },
-  LOCKED: { label: 'Khóa ngoại giao', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
+  COMPLETED: { label: 'Hoàn tất', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
 };
+
+// Keep backward-compatible alias
+export const RE_INVENTORY_STATUS = RE_PRODUCT_STATUS;
 
 export const RE_LEGAL_PROCEDURE_STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
   PREPARATION: { label: 'Chuẩn bị hồ sơ', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
@@ -26,8 +32,9 @@ export const RE_LEGAL_PROCEDURE_STATUS: Record<string, { label: string; color: s
   APPROVED: { label: 'Đã phê duyệt', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
 };
 
-export function getInitials(name: string) {
+export function getInitials(name?: string) {
+  if (!name) return 'U';
   const parts = name.trim().split(/\s+/);
-  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  if (parts.length >= 2 && parts[0] && parts[parts.length - 1]) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   return name.slice(0, 2).toUpperCase() || 'U';
 }

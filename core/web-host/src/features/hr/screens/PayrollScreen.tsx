@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Wallet, DollarSign, ArrowUpRight, ArrowDownRight, Search, FileText, CheckCircle, Eye, EyeOff, LayoutGrid, List, BarChart3, X } from 'lucide-react';
-import { usePayroll } from '../hooks/useHR';
+import { usePayrollRuns, usePayslips, useGeneratePayroll } from '../hooks/useHR';
 import type { HRRole } from '../HRSidebar';
 
 const fmt = (n: number) => n.toLocaleString('vi-VN');
@@ -21,26 +21,54 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: rawPayroll, isLoading } = usePayroll({ year: String(currentYear), month: String(currentMonth) });
-  const safePayroll = Array.isArray(rawPayroll) ? rawPayroll : (rawPayroll as any)?.data ?? [];
+  const { data: rawRuns } = usePayrollRuns({ offset: 0, limit: 10 });
+  const runs = Array.isArray(rawRuns) ? rawRuns : (rawRuns as any)?.data ?? [];
+  const latestRun = runs.length > 0 ? runs[0] : null;
 
-  const payrollData = safePayroll.map((r: any) => ({
-    id: r.id,
-    code: r.employee?.employeeCode || '',
-    name: r.employee?.fullName || '',
-    dept: r.employee?.department?.name || '',
-    basic: Number(r.baseSalaryValue) || 0,
-    allowance: Number(r.totalAllowance) || 0,
-    commission: Number(r.commission) || 0,
-    deduction: Number(r.totalDeduction) + Number(r.taxBhiT) || 0,
-    total: Number(r.netPay) || 0,
-    status: r.status === 'PAID' ? 'PAID' : r.status === 'APPROVED' ? 'APPROVED' : 'PENDING',
-  })).filter((r: any) => r.name.toLowerCase().includes(searchQuery.toLowerCase()) || r.code.toLowerCase().includes(searchQuery.toLowerCase()));
+  const { data: rawPayslips, isLoading } = usePayslips(latestRun?.id || '');
+  const safePayslips = Array.isArray(rawPayslips) ? rawPayslips : (rawPayslips as any)?.data ?? [];
 
-  const totalFund = payrollData.reduce((s: number, r: any) => s + r.total, 0);
-  const totalAllowance = payrollData.reduce((s: number, r: any) => s + r.allowance + r.commission, 0);
-  const totalDeduction = payrollData.reduce((s: number, r: any) => s + r.deduction, 0);
-  const paidPct = payrollData.length > 0 ? Math.round(payrollData.filter((r: any) => r.status === 'PAID').length / payrollData.length * 100) : 0;
+  const { mutate: generateMutate, isPending: isGenerating } = useGeneratePayroll();
+
+  const handleGenerate = () => {
+    generateMutate({
+      title: `Tháng ${('0' + currentMonth).slice(-2)}/${currentYear}`,
+      cycle_start: `${currentYear}-${('0' + currentMonth).slice(-2)}-01`,
+      cycle_end: `${currentYear}-${('0' + currentMonth).slice(-2)}-28`, // simplify
+      standard_days: 22,
+      admin_id: 1,
+    });
+  };
+
+  const payrollData = React.useMemo(() => {
+    return safePayslips
+      .map((r: any) => ({
+        id: r.id,
+        code: r.employee?.employeeCode || r.employee?.id || '',
+        name: r.employee?.fullName || 'Nhân viên mới',
+        dept: r.employee?.department?.name || '',
+        basic: Number(r.base_salary) || 0,
+        allowance: Number(r.allowances) || 0,
+        commission: 0,
+        deduction: Number(r.deductions) || 0,
+        total: Number(r.net_salary) || 0,
+        status: r.status === 'PAID' ? 'PAID' : r.status === 'APPROVED' ? 'APPROVED' : 'PENDING',
+      }))
+      .filter((r: any) => 
+        r.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        String(r.code).toLowerCase().includes(searchQuery.toLowerCase())
+      );
+  }, [safePayslips, searchQuery]);
+
+  const { totalFund, totalAllowance, totalDeduction, paidPct } = React.useMemo(() => {
+    const fund = payrollData.reduce((s: number, r: any) => s + r.total, 0);
+    const allow = payrollData.reduce((s: number, r: any) => s + r.allowance + r.commission, 0);
+    const deduct = payrollData.reduce((s: number, r: any) => s + r.deduction, 0);
+    const paidCount = payrollData.filter((r: any) => r.status === 'PAID').length;
+    const pct = payrollData.length > 0 ? Math.round((paidCount / payrollData.length) * 100) : 0;
+    
+    return { totalFund: fund, totalAllowance: allow, totalDeduction: deduct, paidPct: pct };
+  }, [payrollData]);
 
   const mask = (val: number) => isPrivate ? '***,***' : fmt(val);
 
@@ -49,7 +77,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
       {/* Fintech Premium Header */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="flex flex-row items-center gap-5">
-          <div className="w-[60px] h-[60px] rounded-[20px] bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+          <div className="w-[60px] h-[60px] rounded-[20px] bg-linear-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
             <Wallet size={28} className="text-white" />
           </div>
           <div className="flex flex-col">
@@ -73,8 +101,12 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
             </span>
           </button>
 
-          <button className="bg-purple-600 hover:bg-purple-700 text-white px-7 py-3 rounded-xl shadow-lg shadow-purple-500/20 transition-all text-[14px] font-black uppercase tracking-wide">
-            CHỐT BẢNG LƯƠNG
+          <button 
+            onClick={handleGenerate}
+            disabled={isGenerating}
+            className="bg-purple-600 hover:bg-purple-700 text-white px-7 py-3 rounded-xl shadow-lg shadow-purple-500/20 transition-all text-[14px] font-black uppercase tracking-wide disabled:opacity-50"
+          >
+            {isGenerating ? 'ĐANG TÍNH TOÁN...' : 'CHẠY BẢNG LƯƠNG'}
           </button>
         </div>
       </div>
@@ -103,7 +135,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
       </div>
 
       {/* Analytics Dashboard */}
-      <div className="bg-sg-card border border-sg-border rounded-[32px] p-8 shadow-sm">
+      <div className="bg-sg-card border border-sg-border rounded-sg-2xl p-8 shadow-sm">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div className="flex flex-row items-center gap-4">
             <div className="p-3.5 rounded-2xl border border-purple-200 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/10">
@@ -120,11 +152,11 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
               <span className="text-[13px] font-bold text-sg-subtext">Ngân sách Mức trần</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded bg-gradient-to-br from-purple-500 to-indigo-600" />
+              <div className="w-3.5 h-3.5 rounded bg-linear-to-br from-purple-500 to-indigo-600" />
               <span className="text-[13px] font-bold text-sg-subtext">Thực chi</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3.5 h-3.5 rounded bg-gradient-to-br from-amber-400 to-amber-600" />
+              <div className="w-3.5 h-3.5 rounded bg-linear-to-br from-amber-400 to-amber-600" />
               <span className="text-[13px] font-bold text-sg-subtext">Dự báo (AI)</span>
             </div>
           </div>
@@ -154,8 +186,8 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
                   <div 
                     className={`absolute bottom-0 w-12 rounded-xl shadow-lg transition-transform hover:scale-105 origin-bottom ${
                       item.forecast 
-                        ? 'bg-gradient-to-t from-amber-600 to-amber-400 shadow-amber-500/30 blur-[1px]' 
-                        : 'bg-gradient-to-t from-indigo-600 to-purple-500 shadow-purple-500/30'
+                        ? 'bg-linear-to-t from-amber-600 to-amber-400 shadow-amber-500/30 blur-[1px]' 
+                        : 'bg-linear-to-t from-indigo-600 to-purple-500 shadow-purple-500/30'
                     } ${isPrivate ? 'opacity-40' : 'opacity-100'}`}
                     style={{ height: `${actualPct}%` }}
                   />
@@ -252,7 +284,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
                         <span className="text-[16px] font-black text-blue-500 tabular-nums">{mask(item.total)} ₫</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex px-3 py-1.5 rounded-[8px] text-[10px] font-black tracking-wider uppercase ${
+                        <span className={`inline-flex px-3 py-1.5 rounded-sg-sm text-[10px] font-black tracking-wider uppercase ${
                           isPaid ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'
                         }`}>
                           {isPaid ? 'ĐÃ CHI' : 'CHỜ DUYỆT'}
@@ -291,7 +323,7 @@ export function PayrollScreen({ userRole }: { userRole?: HRRole }) {
                       <span className="text-[13px] font-bold text-sg-subtext mt-1">{item.code}</span>
                     </div>
                   </div>
-                  <span className={`inline-flex px-3 py-1.5 rounded-[8px] text-[10px] font-black tracking-wider uppercase ${
+                  <span className={`inline-flex px-3 py-1.5 rounded-sg-sm text-[10px] font-black tracking-wider uppercase ${
                     isPaid ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'
                   }`}>
                     {isPaid ? 'ĐÃ CHI' : 'CHỜ DUYỆT'}

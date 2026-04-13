@@ -10,6 +10,7 @@ import (
 type DocService interface {
 	UploadDoc(ctx context.Context, doc *model.LegalDoc) (*model.LegalDoc, error)
 	ListDocs(ctx context.Context, projectID string) ([]model.LegalDoc, error)
+	UpdateDocStatus(ctx context.Context, id string, status model.LegalDocStatus) error
 	DeleteDoc(ctx context.Context, id string) error
 }
 
@@ -30,6 +31,10 @@ func (s *docService) UploadDoc(ctx context.Context, doc *model.LegalDoc) (*model
 
 func (s *docService) ListDocs(ctx context.Context, projectID string) ([]model.LegalDoc, error) {
 	return s.repo.ListByProject(ctx, projectID)
+}
+
+func (s *docService) UpdateDocStatus(ctx context.Context, id string, status model.LegalDocStatus) error {
+	return s.repo.UpdateStatus(ctx, id, status)
 }
 
 func (s *docService) DeleteDoc(ctx context.Context, id string) error {

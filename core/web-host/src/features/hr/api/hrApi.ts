@@ -7,74 +7,81 @@ export const hrApi = {
   getDashboard: async () => mockRespond(mockHRData.getDashboard),
 
   // Departments
-  getDepartments: async () => mockRespond(mockHRData.getDepartments),
+  getDepartments: async () => {
+    const res = await apiClient.get('/hr/v1/departments');
+    return res.data;
+  },
   createDepartment: async (data: Omit<Department, 'id'>) => {
-    const res = await apiClient.post('/hr/departments', data);
+    const res = await apiClient.post('/hr/v1/departments', data);
     return res.data;
   },
   updateDepartment: async (id: string, data: Partial<Department>) => {
-    const res = await apiClient.patch(`/hr/departments/${id}`, data);
+    const res = await apiClient.put(`/hr/v1/departments/${id}`, data);
     return res.data;
   },
-  deleteDepartment: async (id: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
+  deleteDepartment: async (id: string) => {
+    const res = await apiClient.delete(`/hr/v1/departments/${id}`);
+    return res.data;
+  },
 
   // Positions
-  getPositions: async () => mockRespond(mockHRData.getPositions),
+  getPositions: async () => {
+    const res = await apiClient.get('/hr/v1/positions');
+    return res.data;
+  },
   createPosition: async (data: Omit<Position, 'id'>) => {
-    const res = await apiClient.post('/hr/positions', data);
+    const res = await apiClient.post('/hr/v1/positions', data);
     return res.data;
   },
   updatePosition: async (id: string, data: Partial<Position>) => {
-    const res = await apiClient.patch(`/hr/positions/${id}`, data);
+    const res = await apiClient.put(`/hr/v1/positions/${id}`, data);
+    return res.data;
+  },
+  deletePosition: async (id: string) => {
+    const res = await apiClient.delete(`/hr/v1/positions/${id}`);
     return res.data;
   },
 
   // Teams
-  getTeams: async (deptId?: string) => mockRespond(mockHRData.getTeams),
+  getTeams: async (deptId?: string) => {
+    const url = deptId ? `/hr/v1/teams?departmentId=${deptId}` : '/hr/v1/teams';
+    const res = await apiClient.get(url);
+    return res.data;
+  },
   createTeam: async (data: Omit<Team, 'id'>) => {
-    const res = await apiClient.post('/hr/teams', data);
+    const res = await apiClient.post('/hr/v1/teams', data);
     return res.data;
   },
   updateTeam: async (id: string, data: Partial<Team>) => {
-    const res = await apiClient.patch(`/hr/teams/${id}`, data);
+    const res = await apiClient.put(`/hr/v1/teams/${id}`, data);
     return res.data;
   },
-  deleteTeam: async (id: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
+  deleteTeam: async (id: string) => {
+    const res = await apiClient.delete(`/hr/v1/teams/${id}`);
+    return res.data;
+  },
 
   // Employees
-  getEmployees: async (params?: Record<string, unknown>) => mockRespond(mockHRData.getEmployees),
-  getEmployee: async (id: string) => mockRespond(mockHRData.getEmployee),
+  getEmployees: async (params?: Record<string, unknown>) => {
+    const res = await apiClient.get('/hr/v1/employees', { params });
+    return res.data;
+  },
+  getEmployee: async (id: string) => {
+    const res = await apiClient.get(`/hr/v1/employees/${id}`);
+    return res.data;
+  },
   createEmployee: async (data: Omit<Employee, 'id'>) => {
-    // Mock: simulate creating employee and add to local mock data
-    const newId = String(Date.now());
-    // Map status enum to Vietnamese display text
-    const statusToWorkStatus: Record<string, string> = {
-      'ACTIVE': 'Đang làm việc',
-      'PROBATION': 'Thử việc',
-      'ON_LEAVE': 'Đang nghỉ phép',
-      'TERMINATED': 'Đã nghỉ việc',
-    };
-    const status = data.status || 'ACTIVE';
-    const newEmployee = {
-      id: newId,
-      employeeCode: `SGR-${String(mockHRData.getEmployees.data.length + 1).padStart(3, '0')}`,
-      ...data,
-      status,
-      workStatus: statusToWorkStatus[status] || 'Đang làm việc',
-      createdAt: new Date().toISOString().split('T')[0],
-    };
-    mockHRData.getEmployees.data.push(newEmployee as any);
-    mockHRData.getEmployees.meta.total = mockHRData.getEmployees.data.length;
-    return mockRespond(newEmployee as Employee);
+    const res = await apiClient.post('/hr/v1/employees', data);
+    return res.data;
   },
   updateEmployee: async (id: string, data: Partial<Employee>) => {
-    const idx = mockHRData.getEmployees.data.findIndex((e: any) => e.id === id);
-    if (idx >= 0) {
-      mockHRData.getEmployees.data[idx] = { ...mockHRData.getEmployees.data[idx], ...data };
-    }
-    return mockRespond({ success: true });
+    const res = await apiClient.put(`/hr/v1/employees/${id}`, data);
+    return res.data;
   },
-  deleteEmployee: async (id: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
+  deleteEmployee: async (id: string) => {
+    const res = await apiClient.delete(`/hr/v1/employees/${id}`);
+    return res.data;
+  },
 
   // Contracts
   getContracts: async (params?: any) => mockRespond(mockHRData.getContracts),
@@ -88,33 +95,53 @@ export const hrApi = {
   },
 
   // Attendance
-  getAttendance: async (params?: any) => mockRespond(mockHRData.getAttendance),
+  getAttendance: async (params?: any) => {
+    const res = await apiClient.get('/hr/v1/attendance', { params });
+    return res.data;
+  },
   createAttendance: async (data: any) => {
-    const res = await apiClient.post('/hr/attendance', data);
+    const res = await apiClient.post('/hr/v1/attendance/check-in', data);
     return res.data;
   },
   updateAttendance: async (id: string, data: any) => {
-    const res = await apiClient.patch(`/hr/attendance/${id}`, data);
+    // Usually mapped to check out based on UI payload, or generic update
+    const res = await apiClient.post('/hr/v1/attendance/check-out', data);
     return res.data;
   },
 
   // Leaves
-  getLeaves: async (params?: any) => mockRespond(mockHRData.getLeaves),
+  getLeaves: async (params?: any) => {
+    const res = await apiClient.get('/hr/v1/leaves', { params });
+    return res.data;
+  },
   createLeave: async (data: any) => {
-    const res = await apiClient.post('/hr/leaves', data);
+    const res = await apiClient.post('/hr/v1/leaves', data);
     return res.data;
   },
   updateLeave: async (id: string, data: any) => {
-    const res = await apiClient.patch(`/hr/leaves/${id}`, data);
+    const res = await apiClient.put(`/hr/v1/leaves/${id}`, data);
     return res.data;
   },
-  approveLeave: async (id: string, approverId: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
-  rejectLeave: async (id: string, approverId: string, note?: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
+  approveLeave: async (id: string, approverId: string) => { 
+    const res = await apiClient.put(`/hr/v1/leaves/${id}/approve`, { approver_id: Number(approverId) });
+    return res.data;
+  },
+  rejectLeave: async (id: string, approverId: string, note?: string) => { 
+    const res = await apiClient.put(`/hr/v1/leaves/${id}/reject`, { approver_id: Number(approverId), note });
+    return res.data;
+  },
 
   // Payroll
-  getPayroll: async (params?: any) => mockRespond(mockHRData.getPayroll),
-  generatePayroll: async (year: number, month: number) => {
-    const res = await apiClient.post('/hr/payroll/generate', { year, month });
+  getPayrollRuns: async (params?: any) => {
+    const res = await apiClient.get('/hr/v1/payroll/runs', { params });
+    return res.data;
+  },
+  getPayslips: async (runId: number | string) => {
+    const res = await apiClient.get(`/hr/v1/payroll/runs/${runId}/payslips`);
+    return res.data;
+  },
+  generatePayroll: async (data: { title: string, cycle_start: string, cycle_end: string, standard_days: number, admin_id: number }) => {
+    const res = await apiClient.post('/hr/v1/payroll/generate', data);
     return res.data;
   },
   approvePayroll: async (period: string, approvedBy: string) => { return new Promise(resolve => setTimeout(() => resolve({ success: true }), 400)); },
@@ -183,7 +210,11 @@ export const hrApi = {
 
   // Leave Balance
   getLeaveBalances: async (year?: number) => mockRespond(mockHRData.getLeaveBalances),
-  getLeaveBalance: async (employeeId: string, year?: number) => mockRespond(mockHRData.getLeaveBalance),
+  getLeaveBalance: async (employeeId: string, year?: number) => {
+     const url = year ? `/hr/v1/leaves/balances/${employeeId}?year=${year}` : `/hr/v1/leaves/balances/${employeeId}?year=${new Date().getFullYear()}`;
+     const res = await apiClient.get(url);
+     return res.data;
+  },
   recalculateLeaveBalance: async (employeeId: string, year: number) => {
     const res = await apiClient.post('/hr/leave-balance/recalculate', { employeeId, year });
     return res.data;

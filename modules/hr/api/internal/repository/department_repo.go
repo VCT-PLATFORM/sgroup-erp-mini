@@ -9,6 +9,8 @@ import (
 
 type DepartmentRepository interface {
 	Create(ctx context.Context, dept *domain.Department) error
+	Update(ctx context.Context, id string, data map[string]interface{}) error
+	Delete(ctx context.Context, id string) error
 	List(ctx context.Context) ([]domain.Department, error)
 }
 
@@ -24,6 +26,14 @@ func (r *departmentRepository) Create(ctx context.Context, dept *domain.Departme
 	return r.db.WithContext(ctx).Create(dept).Error
 }
 
+func (r *departmentRepository) Update(ctx context.Context, id string, data map[string]interface{}) error {
+	return r.db.WithContext(ctx).Model(&domain.Department{}).Where("id = ?", id).Updates(data).Error
+}
+
+func (r *departmentRepository) Delete(ctx context.Context, id string) error {
+	return r.db.WithContext(ctx).Delete(&domain.Department{}, id).Error
+}
+
 func (r *departmentRepository) List(ctx context.Context) ([]domain.Department, error) {
 	var depts []domain.Department
 	err := r.db.WithContext(ctx).
@@ -32,3 +42,4 @@ func (r *departmentRepository) List(ctx context.Context) ([]domain.Department, e
 		Find(&depts).Error
 	return depts, err
 }
+

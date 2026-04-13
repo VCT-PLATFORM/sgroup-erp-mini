@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FileText, Clock, CheckCircle, XCircle, Search, LayoutGrid, List, X, Check } from 'lucide-react';
-import { useLeaves, useLeaveBalance } from '../hooks/useHR';
+import { useLeaves, useLeaveBalance, useApproveLeave, useRejectLeave } from '../hooks/useHR';
 import type { HRRole } from '../HRSidebar';
 
 const LEAVE_TYPE_LABELS: Record<string, string> = {
@@ -27,7 +27,30 @@ export function LeavesScreen({ userRole }: { userRole?: HRRole }) {
   const [selectedLeave, setSelectedLeave] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: rawLeaves, isLoading } = useLeaves();
+  const { mutate: approveMutate, isPending: isApproving } = useApproveLeave();
+  const { mutate: rejectMutate, isPending: isRejecting } = useRejectLeave();
+
+  const handleApprove = () => {
+    if (!selectedLeave) return;
+    approveMutate({ id: selectedLeave.id, approverId: '1' }, {
+      onSuccess: () => {
+        setSelectedLeave(null);
+        refetch();
+      }
+    });
+  };
+
+  const handleReject = () => {
+    if (!selectedLeave) return;
+    rejectMutate({ id: selectedLeave.id, approverId: '1', note: 'Rejected by UI' }, {
+      onSuccess: () => {
+        setSelectedLeave(null);
+        refetch();
+      }
+    });
+  };
+
+  const { data: rawLeaves, isLoading, refetch } = useLeaves();
   const fmtDate = (d: string) => new Date(d).toLocaleDateString('vi-VN');
   const safeLeaves = Array.isArray(rawLeaves) ? rawLeaves : (rawLeaves as any)?.data ?? [];
 
@@ -59,12 +82,12 @@ export function LeavesScreen({ userRole }: { userRole?: HRRole }) {
       {selectedLeave && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-sg-fade-in">
           <div className="absolute inset-0" onClick={() => setSelectedLeave(null)} />
-          <div className="relative w-full max-w-lg bg-sg-card border border-sg-border rounded-[32px] p-8 shadow-2xl animate-sg-slide-up">
+          <div className="relative w-full max-w-lg bg-sg-card border border-sg-border rounded-sg-2xl p-8 shadow-2xl animate-sg-slide-up">
             
             {/* Modal Header */}
             <div className="flex flex-row justify-between items-start mb-6">
               <div className="flex flex-row gap-4 items-center">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg">
+                <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg">
                   <FileText size={28} className="text-white" />
                 </div>
                 <div className="flex flex-col">
@@ -139,26 +162,39 @@ export function LeavesScreen({ userRole }: { userRole?: HRRole }) {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex flex-row gap-3">
-              <button 
-                onClick={() => setSelectedLeave(null)}
-                className="flex-1 py-3.5 rounded-xl bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors font-black text-[13px] text-sg-subtext"
-              >
-                TÍNH HỢP LỆ
-              </button>
-              <button 
-                onClick={() => setSelectedLeave(null)}
-                className="flex-1 py-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors font-black text-[13px]"
-              >
-                TỪ CHỐI
-              </button>
-              <button 
-                onClick={() => setSelectedLeave(null)}
-                className="flex-1 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 transition-all font-black text-[13px]"
-              >
-                PHÊ DUYỆT
-              </button>
-            </div>
+            {selectedLeave.status === 'PENDING' ? (
+              <div className="flex flex-row gap-3">
+                <button 
+                  onClick={() => setSelectedLeave(null)}
+                  className="flex-1 py-3.5 rounded-xl bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors font-black text-[13px] text-sg-subtext"
+                >
+                  ĐÓNG
+                </button>
+                <button 
+                  onClick={handleReject}
+                  disabled={isRejecting || isApproving}
+                  className="flex-1 py-3.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 transition-colors font-black text-[13px] disabled:opacity-50"
+                >
+                  {isRejecting ? 'ĐANG XỬ LÝ...' : 'TỪ CHỐI'}
+                </button>
+                <button 
+                  onClick={handleApprove}
+                  disabled={isApproving || isRejecting}
+                  className="flex-1 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/30 transition-all font-black text-[13px] disabled:opacity-50"
+                >
+                  {isApproving ? 'ĐANG XỬ LÝ...' : 'PHÊ DUYỆT'}
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-row gap-3">
+                <button 
+                  onClick={() => setSelectedLeave(null)}
+                  className="flex-1 py-3.5 rounded-xl bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors font-black text-[13px] text-sg-subtext"
+                >
+                  ĐÓNG TÀI LIỆU
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -183,7 +219,7 @@ export function LeavesScreen({ userRole }: { userRole?: HRRole }) {
           { label: 'ĐÃ DUYỆT', val: approvedCount, icon: CheckCircle, bg: 'bg-emerald-50 dark:bg-emerald-500/10', color: 'text-emerald-500' },
           { label: 'TỪ CHỐI', val: rejectedCount, icon: XCircle, bg: 'bg-red-50 dark:bg-red-500/10', color: 'text-red-500' },
         ].map((s, i) => (
-          <div key={i} className="bg-sg-card border border-sg-border p-6 rounded-[24px] shadow-sm flex flex-col hover:shadow-md transition-shadow">
+          <div key={i} className="bg-sg-card border border-sg-border p-6 rounded-sg-xl shadow-sm flex flex-col hover:shadow-md transition-shadow">
             <div className="flex flex-row items-center gap-3 mb-4">
               <div className={`w-11 h-11 rounded-xl flex items-center justify-center ${s.bg}`}>
                 <s.icon size={20} className={s.color} />

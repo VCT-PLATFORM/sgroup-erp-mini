@@ -11,7 +11,7 @@ export interface EmployeeListViewProps {
 
 export function EmployeeListView({ employees, canEdit, onEdit }: EmployeeListViewProps) {
   return (
-    <div className="bg-sg-card border border-sg-border rounded-[24px] overflow-hidden shadow-sm">
+    <div className="bg-sg-card border border-sg-border rounded-sg-xl overflow-hidden shadow-sm">
       <table className="w-full text-left border-collapse">
          <thead>
             <tr className="bg-sg-btn-bg border-b border-sg-border">
@@ -35,7 +35,7 @@ export function EmployeeListView({ employees, canEdit, onEdit }: EmployeeListVie
                          </div>
                          <div>
                             <h5 className="text-[14px] font-extrabold text-sg-heading">{staff.fullName}</h5>
-                            <span className="text-[12px] font-medium text-sg-subtext">{staff.employeeCode}</span>
+                            <span className="text-[12px] font-medium text-sg-subtext">{staff.code}</span>
                          </div>
                       </div>
                    </td>

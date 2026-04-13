@@ -62,6 +62,7 @@ func (h *ProjectHandler) RegisterRoutes(r *gin.RouterGroup) {
 			protectedPj.DELETE("/:id", h.DeleteProject)
 			protectedPj.POST("/:id/products", h.CreateProduct)
 			protectedPj.POST("/:id/docs", h.UploadDoc)
+			protectedPj.PUT("/:id/docs/:docId/status", h.UpdateDocStatus)
 			protectedPj.DELETE("/:id/docs/:docId", h.DeleteDoc)
 		}
 	}
@@ -133,19 +134,19 @@ func (h *ProjectHandler) GetProject(c *gin.Context) {
 }
 
 func (h *ProjectHandler) UpdateProject(c *gin.Context) {
-	var req model.Project
+	var req map[string]interface{}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		sendError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	req.ID = c.Param("id")
+	id := c.Param("id")
 
-	err := h.projectSvc.UpdateProject(c.Request.Context(), &req)
+	updated, err := h.projectSvc.UpdateProject(c.Request.Context(), id, req)
 	if err != nil {
 		sendError(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, wrapper{Data: req})
+	c.JSON(http.StatusOK, wrapper{Data: updated})
 }
 
 func (h *ProjectHandler) DeleteProject(c *gin.Context) {
@@ -272,21 +273,16 @@ func (h *ProjectHandler) SoldProduct(c *gin.Context) {
 		return
 	}
 
-	err := h.productSvc.SoldProduct(c.Request.Context(), id, req.RequestedBy)
+	projectID, err := h.productSvc.SoldProduct(c.Request.Context(), id, req.RequestedBy)
 	if err != nil {
 		sendError(c, http.StatusConflict, err.Error())
 		return
 	}
-	
-	// Trigger sync project units (In real system, event bus should capture 'sold' and update project implicitly)
-	// We'll keep it simple here.
-	var product *model.Product
-	if p, _, _ := h.productSvc.ListProjectProducts(c.Request.Context(), id, 1, 1); len(p) > 0 {
-		product = &p[0] // just for project ID
+
+	// Trigger sync project units using the returned projectID
+	if projectID != "" {
+		go h.projectSvc.SyncProjectUnits(context.Background(), projectID)
 	}
-	if product != nil {
-	    go h.projectSvc.SyncProjectUnits(context.Background(), product.ProjectID)
-    }
 
 	c.JSON(http.StatusOK, wrapper{Data: map[string]string{"message": "Product sold successfully"}})
 }
@@ -332,6 +328,26 @@ func (h *ProjectHandler) UploadDoc(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, wrapper{Data: created})
+}
+
+type UpdateDocStatusRequest struct {
+	Status string `json:"status" binding:"required"`
+}
+
+func (h *ProjectHandler) UpdateDocStatus(c *gin.Context) {
+	docId := c.Param("docId")
+	var req UpdateDocStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		sendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.docSvc.UpdateDocStatus(c.Request.Context(), docId, model.LegalDocStatus(req.Status))
+	if err != nil {
+		sendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: map[string]string{"message": "Doc status updated"}})
 }
 
 func (h *ProjectHandler) DeleteDoc(c *gin.Context) {
