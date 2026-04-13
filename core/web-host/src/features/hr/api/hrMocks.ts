@@ -41,7 +41,7 @@ export const mockHRData = {
         employmentType: 'Toàn thời gian', probationSalary: 25000000, officialSalary: 35000000,
         workStatus: 'Đang làm việc', recruiter: 'Nguyễn Hoàng Oanh', candidateSource: 'LinkedIn',
         totalLeaveDays: 14, remainingLeaveDays: 8,
-        status: 'active', gender: 'male'
+        status: 'ACTIVE', gender: 'male'
       },
       {
         id: '2', fullName: 'Nguyễn Hoàng Oanh', englishName: 'Oanh Nguyen Hoang', employeeCode: 'SGR-002',
@@ -57,7 +57,7 @@ export const mockHRData = {
         employmentType: 'Toàn thời gian', probationSalary: 18000000, officialSalary: 28000000,
         workStatus: 'Đang làm việc', recruiter: 'Trần Bình', candidateSource: 'Giới thiệu nội bộ',
         totalLeaveDays: 16, remainingLeaveDays: 12,
-        status: 'active', gender: 'female'
+        status: 'ACTIVE', gender: 'female'
       },
       {
         id: '3', fullName: 'Trần Minh Khôi', englishName: 'Khoi Tran Minh', employeeCode: 'SGR-003',
@@ -73,7 +73,7 @@ export const mockHRData = {
         employmentType: 'Toàn thời gian', probationSalary: 12000000, officialSalary: 18000000,
         workStatus: 'Đang làm việc', recruiter: 'Nguyễn Hoàng Oanh', candidateSource: 'TopCV',
         totalLeaveDays: 12, remainingLeaveDays: 10,
-        status: 'active', gender: 'male'
+        status: 'ACTIVE', gender: 'male'
       },
       {
         id: '4', fullName: 'Lê Thị Hồng Nhung', englishName: 'Nhung Le Thi Hong', employeeCode: 'SGR-004',
@@ -89,7 +89,7 @@ export const mockHRData = {
         employmentType: 'Toàn thời gian', probationSalary: 8000000, officialSalary: 12000000,
         workStatus: 'Thử việc', recruiter: 'Nguyễn Hoàng Oanh', candidateSource: 'Website công ty',
         totalLeaveDays: 12, remainingLeaveDays: 12,
-        status: 'probation', gender: 'female'
+        status: 'PROBATION', gender: 'female'
       }
     ],
     meta: { total: 4, page: 1, limit: 10 }
@@ -108,7 +108,7 @@ export const mockHRData = {
     employmentType: 'Toàn thời gian', probationSalary: 25000000, officialSalary: 35000000,
     workStatus: 'Đang làm việc', recruiter: 'Nguyễn Hoàng Oanh', candidateSource: 'LinkedIn',
     totalLeaveDays: 14, remainingLeaveDays: 8,
-    status: 'active', gender: 'male'
+    status: 'ACTIVE', gender: 'male'
   },
   getDashboardEvents: {
     data: [

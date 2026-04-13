@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   ArrowLeft, User, Mail, Phone, MapPin, Briefcase, Calendar, ShieldCheck, 
   Award, CreditCard, Building, Users, FileText, Hash, Clock, Star, TrendingUp,
@@ -7,7 +8,8 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../../auth/store/authStore';
 import { useNavigate } from 'react-router-dom';
-import { useEmployees, useUpdateEmployee } from '../hooks/useHR';
+import { useEmployees, useUpdateEmployee, usePositions, useDepartments } from '../hooks/useHR';
+import { WORK_STATUS_OPTIONS, CANDIDATE_SOURCE_OPTIONS, EMPLOYMENT_TYPE_OPTIONS } from '../constants';
 
 const TABS = [
   { key: 'personal', label: 'Thông tin cá nhân', icon: User },
@@ -36,11 +38,11 @@ function getInitials(name: string) {
 }
 
 function getStatusConfig(status?: string) {
-  switch (status?.toLowerCase()) {
-    case 'active': case 'đang làm việc': return { label: 'Đang làm việc', color: 'text-emerald-500', bg: 'bg-emerald-500/15', border: 'border-emerald-500/20' };
-    case 'probation': case 'thử việc': return { label: 'Thử việc', color: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/20' };
-    case 'on_leave': case 'đang nghỉ': return { label: 'Đang nghỉ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20' };
-    case 'terminated': case 'đã nghỉ': return { label: 'Đã nghỉ', color: 'text-red-500', bg: 'bg-red-500/15', border: 'border-red-500/20' };
+  switch (status?.toUpperCase()) {
+    case 'ACTIVE': case 'ĐANG LÀM VIỆC': return { label: 'Đang làm việc', color: 'text-emerald-500', bg: 'bg-emerald-500/15', border: 'border-emerald-500/20' };
+    case 'PROBATION': case 'THỬ VIỆC': return { label: 'Thử việc', color: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/20' };
+    case 'ON_LEAVE': case 'ĐANG NGHỈ': case 'ĐANG NGHỈ PHÉP': return { label: 'Đang nghỉ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20' };
+    case 'TERMINATED': case 'ĐÃ NGHỈ': case 'ĐÃ NGHỈ VIỆC': return { label: 'Đã nghỉ việc', color: 'text-red-500', bg: 'bg-red-500/15', border: 'border-red-500/20' };
     default: return { label: status || 'N/A', color: 'text-sg-muted', bg: 'bg-sg-btn-bg', border: 'border-sg-border' };
   }
 }
@@ -59,6 +61,43 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
   const employeeId = routeParams?.get('id');
   const { data: employeesData } = useEmployees({ search: '' });
   const employeeList = Array.isArray(employeesData?.data) ? employeesData.data : (Array.isArray(employeesData) ? employeesData : []);
+
+  // Fetch positions for dropdown
+  const { data: rawPositions } = usePositions();
+  const positionsList: { id: string; name: string; level?: string }[] = Array.isArray(rawPositions) ? rawPositions : (rawPositions as any)?.data ?? [];
+  const positionOptions = positionsList.map(p => ({ v: p.name, l: p.name }));
+
+  // Build level options from positions data
+  const levelOptions = useMemo(() => {
+    const levels = positionsList.map(p => p.level).filter(Boolean);
+    const unique = [...new Set(levels)];
+    const levelMap: Record<string, string> = {
+      'Director': 'Giám đốc',
+      'Manager': 'Quản lý',
+      'Leader': 'Trưởng nhóm',
+      'Senior': 'Chuyên viên cấp cao',
+      'Staff': 'Nhân viên',
+      'Junior': 'Chuyên viên',
+      'Fresher': 'Nhân viên mới',
+      'Intern': 'Thực tập sinh'
+    };
+    return unique.map(l => ({ v: l!, l: levelMap[l!] || l! }));
+  }, [positionsList]);
+
+  // Fetch departments for dropdown
+  const { data: rawDepartments } = useDepartments();
+  const departmentsList: { id: string; name: string }[] = Array.isArray(rawDepartments) ? rawDepartments : (rawDepartments as any)?.data ?? [];
+  const departmentOptions = useMemo(() => [
+    { v: 'Ban Giám đốc', l: 'Ban Giám đốc' },
+    { v: 'Khối Hỗ trợ', l: 'Khối Hỗ trợ' },
+    ...departmentsList.map(d => ({ v: d.name, l: d.name })),
+  ], [departmentsList]);
+
+  // Build recruiter options from employee list (active employees)
+  const recruiterOptions = useMemo(() => 
+    employeeList.map((e: any) => ({ v: e.fullName, l: `${e.fullName} (${e.employeeCode})` })),
+    [employeeList]
+  );
   
   // Find selected employee or default to first
   let emp: any = null;
@@ -100,7 +139,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
       <div className="sticky top-0 z-40 flex items-center px-6 py-4 border-b border-sg-border bg-sg-card/80 backdrop-blur-xl">
         <button
           onClick={() => window.history.back()}
-          className="w-10 h-10 rounded-xl flex flex-shrink-0 items-center justify-center bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors mr-4"
+          className="w-10 h-10 rounded-xl flex shrink-0 items-center justify-center bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors mr-4"
         >
           <ArrowLeft size={18} className="text-sg-text" />
         </button>
@@ -118,7 +157,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
             className="w-full h-10 px-4 rounded-xl bg-sg-btn-bg border border-sg-border text-sm font-bold text-sg-heading hover:bg-sg-border transition-colors flex items-center justify-between gap-2 shadow-sm"
           >
             <span className="truncate">{emp ? `${emp.fullName} (${emp.employeeCode})` : 'Chọn nhân sự...'}</span>
-            <ChevronDown size={16} className={`text-sg-muted flex-shrink-0 transition-transform ${selectorOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={16} className={`text-sg-muted shrink-0 transition-transform ${selectorOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {selectorOpen && (
@@ -162,7 +201,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                         isSelected ? 'bg-sg-red/8 border-l-3 border-sg-red' : 'hover:bg-sg-btn-bg'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs font-black ${
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-xs font-black ${
                         isSelected ? 'bg-sg-red/15 text-sg-red' : 'bg-sg-btn-bg text-sg-muted border border-sg-border'
                       }`}>
                         {(e.fullName || '?').split(/\s+/).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
@@ -175,7 +214,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                           {e.employeeCode} • {e.department?.name || '—'}
                         </div>
                       </div>
-                      {isSelected && <CheckCircle size={16} className="text-sg-red flex-shrink-0" />}
+                      {isSelected && <CheckCircle size={16} className="text-sg-red shrink-0" />}
                     </button>
                   );
                 })}
@@ -187,14 +226,14 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
 
       <div className="flex-1 overflow-y-auto pb-12">
         {/* Aurora Background */}
-        <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-br from-sg-red/15 via-blue-500/8 to-purple-500/10 blur-3xl opacity-40 pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-48 bg-linear-to-br from-sg-red/15 via-blue-500/8 to-purple-500/10 blur-3xl opacity-40 pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-6 mt-8 relative z-10 w-full flex flex-col gap-6">
           
           {/* ════════ Header Card ════════ */}
           <div className="flex flex-col md:flex-row items-center gap-6 p-7 rounded-3xl bg-sg-card border border-sg-border shadow-sg-sm relative">
             {/* Avatar */}
-            <div className="w-24 h-24 flex-shrink-0 rounded-2xl flex items-center justify-center bg-gradient-to-br from-sg-red/20 to-pink-500/10 border-2 border-sg-red/20 text-sg-red">
+            <div className="w-24 h-24 shrink-0 rounded-2xl flex items-center justify-center bg-linear-to-br from-sg-red/20 to-pink-500/10 border-2 border-sg-red/20 text-sg-red">
               <span className="text-3xl font-black">{emp ? getInitials(emp.fullName) : '?'}</span>
             </div>
             {/* Info */}
@@ -387,7 +426,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                     </div>
                     <div className="h-3 w-full bg-sg-border rounded-full overflow-hidden">
                       <div 
-                        className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-500" 
+                        className="h-full rounded-full bg-linear-to-r from-blue-500 to-cyan-400 transition-all duration-500" 
                         style={{ width: `${(emp.remainingLeaveDays / emp.totalLeaveDays) * 100}%` }} 
                       />
                     </div>
@@ -400,53 +439,62 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
         </div>
       </div>
 
-      {/* ════════ Edit Modal ════════ */}
-      {editOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in-up">
+      {/* ════════ Edit Modal — Premium Redesign ════════ */}
+      {editOpen && createPortal(
+        <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md" style={{ animation: 'fadeIn .2s ease-out' }}>
           <div className="absolute inset-0" onClick={() => setEditOpen(false)} />
-          <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-sg-card border border-sg-border rounded-3xl shadow-2xl overflow-hidden">
-            {/* Modal Header */}
-            <div className="px-8 pt-7 pb-4 flex items-center justify-between border-b border-sg-border flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-sg-red/15 flex items-center justify-center text-sg-red">
-                  <Pencil size={18} />
+          <div className="relative w-full max-w-3xl max-h-[92vh] flex flex-col bg-sg-card rounded-[28px] shadow-2xl shadow-black/20 overflow-hidden border border-sg-border/60 ring-1 ring-white/5" style={{ animation: 'slideUp .3s cubic-bezier(.16,1,.3,1)' }}>
+
+            {/* ──── Header with gradient accent ──── */}
+            <div className="relative shrink-0 border-b border-sg-border/60 bg-sg-card z-10">
+              {/* Gradient bar */}
+              <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-sg-red via-pink-500 to-rose-400" />
+              <div className="px-6 pt-6 pb-4 flex items-center gap-3">
+                {/* Avatar */}
+                <div className="w-11 h-11 rounded-xl bg-linear-to-br from-sg-red/20 to-pink-500/10 border border-sg-red/20 flex items-center justify-center shrink-0">
+                  <span className="text-base font-black text-sg-red">
+                    {(editForm.fullName || '?').split(/\s+/).map((w: string) => w[0]).slice(0, 2).join('').toUpperCase()}
+                  </span>
                 </div>
-                <div>
-                  <h2 className="text-xl font-black text-sg-heading">Cập nhật Hồ sơ</h2>
-                  <p className="text-xs font-bold text-sg-subtext mt-0.5">{editForm.fullName} ({editForm.employeeCode})</p>
+                <div className="flex-1 min-w-0">
+                  <h2 className="text-lg font-black text-sg-heading tracking-tight truncate">Cập nhật Hồ sơ</h2>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-xs font-bold text-sg-subtext truncate">{editForm.fullName}</span>
+                    <span className="px-1.5 py-0.5 rounded bg-sg-btn-bg border border-sg-border text-[10px] font-black text-sg-muted">{editForm.employeeCode}</span>
+                  </div>
                 </div>
+                <button onClick={() => setEditOpen(false)} className="w-9 h-9 rounded-lg bg-sg-btn-bg hover:bg-red-500/10 hover:text-red-500 border border-sg-border flex items-center justify-center text-sg-muted transition-all duration-200 shrink-0">
+                  <X size={16} strokeWidth={2.5} />
+                </button>
               </div>
-              <button onClick={() => setEditOpen(false)} className="w-9 h-9 rounded-full bg-sg-btn-bg hover:bg-sg-border flex items-center justify-center text-sg-muted transition-colors">
-                <X size={18} />
-              </button>
             </div>
 
-            {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar">
-              <div className="flex flex-col gap-8">
+            {/* ──── Body ──── */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
+              <div className="px-8 py-6 flex flex-col gap-2">
 
-                {/* Section: Thông tin cơ bản */}
-                <EditSection title="Thông tin cơ bản">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <EditField label="Tên nhân sự (Tiếng Việt) *" value={editForm.fullName} onChange={v => setEditForm(f => ({...f, fullName: v}))} />
+                {/* Section 1: Thông tin cơ bản */}
+                <EditSection title="Thông tin cơ bản" icon={User} color="sg-red">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                    <EditField label="Tên nhân sự (Tiếng Việt)" value={editForm.fullName} onChange={v => setEditForm(f => ({...f, fullName: v}))} required />
                     <EditField label="Tên nhân sự (Tiếng Anh)" value={editForm.englishName} onChange={v => setEditForm(f => ({...f, englishName: v}))} />
                     <EditField label="Ngày sinh" value={editForm.dob} onChange={v => setEditForm(f => ({...f, dob: v}))} type="date" />
                     <EditField label="Giới tính" value={editForm.gender} onChange={v => setEditForm(f => ({...f, gender: v}))} type="select" options={[{v:'male',l:'Nam'},{v:'female',l:'Nữ'}]} />
                   </div>
                 </EditSection>
 
-                {/* Section: Liên hệ */}
-                <EditSection title="Thông tin liên hệ">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Section 2: Liên hệ */}
+                <EditSection title="Thông tin liên hệ" icon={Phone} color="blue-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
                     <EditField label="SĐT chính" value={editForm.phone} onChange={v => setEditForm(f => ({...f, phone: v}))} />
                     <EditField label="SĐT người thân" value={editForm.relativePhone} onChange={v => setEditForm(f => ({...f, relativePhone: v}))} />
                     <EditField label="Email" value={editForm.email} onChange={v => setEditForm(f => ({...f, email: v}))} type="email" />
                   </div>
                 </EditSection>
 
-                {/* Section: Giấy tờ */}
-                <EditSection title="Giấy tờ tùy thân">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Section 3: Giấy tờ */}
+                <EditSection title="Giấy tờ tùy thân" icon={IdCard} color="purple-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
                     <EditField label="CCCD / Passport" value={editForm.idNumber} onChange={v => setEditForm(f => ({...f, idNumber: v}))} />
                     <EditField label="Ngày cấp" value={editForm.idIssueDate} onChange={v => setEditForm(f => ({...f, idIssueDate: v}))} type="date" />
                     <EditField label="Nơi cấp" value={editForm.idIssuePlace} onChange={v => setEditForm(f => ({...f, idIssuePlace: v}))} />
@@ -456,31 +504,31 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                   </div>
                 </EditSection>
 
-                {/* Section: Địa chỉ */}
-                <EditSection title="Địa chỉ">
+                {/* Section 4: Địa chỉ */}
+                <EditSection title="Địa chỉ" icon={MapPin} color="emerald-500">
                   <div className="grid grid-cols-1 gap-4">
                     <EditField label="Địa chỉ thường trú" value={editForm.permanentAddress} onChange={v => setEditForm(f => ({...f, permanentAddress: v}))} />
                     <EditField label="Địa chỉ liên hệ" value={editForm.contactAddress} onChange={v => setEditForm(f => ({...f, contactAddress: v}))} />
                   </div>
                 </EditSection>
 
-                {/* Section: Công việc */}
-                <EditSection title="Công việc & Hợp đồng">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <EditField label="Cấp bậc" value={editForm.level} onChange={v => setEditForm(f => ({...f, level: v}))} />
-                    <EditField label="Bộ phận" value={editForm.division} onChange={v => setEditForm(f => ({...f, division: v}))} />
-                    <EditField label="Vị trí" value={editForm.position?.name} onChange={v => setEditForm(f => ({...f, position: {...(f.position || {}), name: v}}))} />
-                    <EditField label="Quản lý trực tiếp" value={editForm.directManager} onChange={v => setEditForm(f => ({...f, directManager: v}))} />
-                    <EditField label="Loại hình lao động" value={editForm.employmentType} onChange={v => setEditForm(f => ({...f, employmentType: v}))} />
-                    <EditField label="Tình trạng công việc" value={editForm.workStatus} onChange={v => setEditForm(f => ({...f, workStatus: v}))} />
+                {/* Section 5: Công việc */}
+                <EditSection title="Công việc & Hợp đồng" icon={Briefcase} color="amber-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                    <EditField label="Cấp bậc" value={editForm.level} onChange={v => setEditForm(f => ({...f, level: v}))} type="select" options={levelOptions} />
+                    <EditField label="Bộ phận" value={editForm.division} onChange={v => setEditForm(f => ({...f, division: v}))} type="select" options={departmentOptions} />
+                    <EditField label="Vị trí" value={editForm.position?.name} onChange={v => setEditForm(f => ({...f, position: {...(f.position || {}), name: v}}))} type="select" options={positionOptions} />
+                    <EditField label="Quản lý trực tiếp" value={editForm.directManager} onChange={v => setEditForm(f => ({...f, directManager: v}))} type="select" options={recruiterOptions} />
+                    <EditField label="Loại hình lao động" value={editForm.employmentType} onChange={v => setEditForm(f => ({...f, employmentType: v}))} type="select" options={EMPLOYMENT_TYPE_OPTIONS} />
+                    <EditField label="Tình trạng công việc" value={editForm.workStatus} onChange={v => setEditForm(f => ({...f, workStatus: v}))} type="select" options={WORK_STATUS_OPTIONS} />
                     <EditField label="Ngày ký HĐ" value={editForm.contractDate} onChange={v => setEditForm(f => ({...f, contractDate: v}))} type="date" />
                     <EditField label="Ngày nhận việc" value={editForm.startDate} onChange={v => setEditForm(f => ({...f, startDate: v}))} type="date" />
                   </div>
                 </EditSection>
 
-                {/* Section: Tài chính */}
-                <EditSection title="Tài chính">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Section 6: Tài chính */}
+                <EditSection title="Tài chính" icon={Wallet} color="emerald-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
                     <EditField label="Ngân hàng" value={editForm.bankName} onChange={v => setEditForm(f => ({...f, bankName: v}))} />
                     <EditField label="Số tài khoản" value={editForm.bankAccount} onChange={v => setEditForm(f => ({...f, bankAccount: v}))} />
                     <EditField label="Lương thử việc" value={editForm.probationSalary} onChange={v => setEditForm(f => ({...f, probationSalary: Number(v) || 0}))} type="number" />
@@ -488,11 +536,11 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                   </div>
                 </EditSection>
 
-                {/* Section: Tuyển dụng */}
-                <EditSection title="Tuyển dụng & Phép">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <EditField label="Người tuyển dụng" value={editForm.recruiter} onChange={v => setEditForm(f => ({...f, recruiter: v}))} />
-                    <EditField label="Nguồn ứng viên" value={editForm.candidateSource} onChange={v => setEditForm(f => ({...f, candidateSource: v}))} />
+                {/* Section 7: Tuyển dụng */}
+                <EditSection title="Tuyển dụng & Phép" icon={UserCheck} color="pink-500">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                    <EditField label="Người tuyển dụng" value={editForm.recruiter} onChange={v => setEditForm(f => ({...f, recruiter: v}))} type="select" options={recruiterOptions} />
+                    <EditField label="Nguồn ứng viên" value={editForm.candidateSource} onChange={v => setEditForm(f => ({...f, candidateSource: v}))} type="select" options={CANDIDATE_SOURCE_OPTIONS} />
                     <EditField label="Số ngày phép" value={editForm.totalLeaveDays} onChange={v => setEditForm(f => ({...f, totalLeaveDays: Number(v) || 0}))} type="number" />
                     <EditField label="Số ngày phép còn lại" value={editForm.remainingLeaveDays} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Number(v) || 0}))} type="number" />
                   </div>
@@ -501,37 +549,53 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
               </div>
             </div>
 
-            {/* Modal Footer */}
-            <div className="px-8 py-5 border-t border-sg-border flex justify-end gap-3 flex-shrink-0">
-              <button
-                onClick={() => setEditOpen(false)}
-                className="px-6 py-3 rounded-xl font-extrabold text-sm text-sg-subtext bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-colors"
-              >
-                Hủy bỏ
-              </button>
-              <button
-                disabled={updateEmployee.isPending}
-                onClick={async () => {
-                  if (!editForm.fullName?.trim()) return alert('Vui lòng nhập tên nhân sự');
-                  try {
-                    await updateEmployee.mutateAsync({ id: editForm.id, data: editForm });
-                    setEditOpen(false);
-                  } catch (e: any) {
-                    alert(e?.message || 'Có lỗi xảy ra');
-                  }
-                }}
-                className="px-6 py-3 rounded-xl font-extrabold text-sm text-white bg-sg-red hover:bg-sg-red-light transition-all shadow-sg-brand flex items-center gap-2"
-              >
-                {updateEmployee.isPending ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Save size={16} strokeWidth={2.5} />
-                )}
-                LƯU THAY ĐỔI
-              </button>
+            {/* ──── Footer ──── */}
+            <div className="px-8 py-5 border-t border-sg-border/60 flex items-center justify-between gap-4 shrink-0 bg-sg-card/80 backdrop-blur-sm">
+              <span className="text-[11px] font-bold text-sg-muted hidden sm:block">
+                Nhấn Lưu để cập nhật hồ sơ nhân viên
+              </span>
+              <div className="flex gap-3 ml-auto">
+                <button
+                  onClick={() => setEditOpen(false)}
+                  className="px-6 py-3 rounded-2xl font-extrabold text-sm text-sg-subtext bg-sg-btn-bg hover:bg-sg-border border border-sg-border transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  Hủy bỏ
+                </button>
+                <button
+                  disabled={updateEmployee.isPending}
+                  onClick={async () => {
+                    if (!editForm.fullName?.trim()) return alert('Vui lòng nhập tên nhân sự');
+                    // Sync 'status' enum field from 'workStatus' display field
+                    const workStatusToStatusMap: Record<string, string> = {
+                      'Đang làm việc': 'active',
+                      'Thử việc': 'probation',
+                      'Đang nghỉ phép': 'on_leave',
+                      'Đã nghỉ việc': 'terminated',
+                    };
+                    const syncedStatus = workStatusToStatusMap[editForm.workStatus] || editForm.status;
+                    const payload = { ...editForm, status: syncedStatus };
+                    try {
+                      await updateEmployee.mutateAsync({ id: editForm.id, data: payload });
+                      setEditOpen(false);
+                    } catch (e: any) {
+                      alert(e?.message || 'Có lỗi xảy ra');
+                    }
+                  }}
+                  className={`px-7 py-3 rounded-2xl font-black text-sm text-white flex items-center gap-2.5 transition-all duration-200 shadow-lg
+                    ${updateEmployee.isPending ? 'bg-sg-muted cursor-not-allowed' : 'bg-linear-to-r from-sg-red to-rose-600 hover:from-sg-red-light hover:to-rose-500 hover:-translate-y-0.5 hover:shadow-sg-brand active:translate-y-0'}`}
+                >
+                  {updateEmployee.isPending ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <Save size={16} strokeWidth={2.5} />
+                  )}
+                  LƯU THAY ĐỔI
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
@@ -561,13 +625,13 @@ function InfoRow({ label, value, icon: Icon, valueClassName }: { label: string; 
   return (
     <div className="flex items-start gap-4">
       {Icon && (
-        <div className="w-9 h-9 rounded-xl bg-sg-btn-bg border border-sg-border flex items-center justify-center flex-shrink-0 text-sg-subtext mt-0.5">
+        <div className="w-9 h-9 rounded-xl bg-sg-btn-bg border border-sg-border flex items-center justify-center shrink-0 text-sg-subtext mt-0.5">
           <Icon size={15} />
         </div>
       )}
       <div className="flex flex-col flex-1 min-w-0">
         <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wider mb-0.5">{label}</span>
-        <span className={`text-[14px] font-semibold break-words ${valueClassName || 'text-sg-heading'}`}>
+        <span className={`text-[14px] font-semibold wrap-break-word ${valueClassName || 'text-sg-heading'}`}>
           {value || '—'}
         </span>
       </div>
@@ -575,42 +639,76 @@ function InfoRow({ label, value, icon: Icon, valueClassName }: { label: string; 
   );
 }
 
-function EditSection({ title, children }: { title: string; children: React.ReactNode }) {
+function EditSection({ title, icon: Icon, color, children }: { title: string; icon?: any; color?: string; children: React.ReactNode }) {
+  const colorMap: Record<string, { text: string; bg: string; border: string; accent: string }> = {
+    'sg-red': { text: 'text-sg-red', bg: 'bg-sg-red/10', border: 'border-sg-red/20', accent: 'border-l-sg-red' },
+    'blue-500': { text: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20', accent: 'border-l-blue-500' },
+    'purple-500': { text: 'text-purple-500', bg: 'bg-purple-500/10', border: 'border-purple-500/20', accent: 'border-l-purple-500' },
+    'emerald-500': { text: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', accent: 'border-l-emerald-500' },
+    'amber-500': { text: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20', accent: 'border-l-amber-500' },
+    'pink-500': { text: 'text-pink-500', bg: 'bg-pink-500/10', border: 'border-pink-500/20', accent: 'border-l-pink-500' },
+  };
+  const c = colorMap[color || 'sg-red'] || colorMap['sg-red'];
+
   return (
-    <div>
-      <h4 className="text-xs font-black text-sg-subtext uppercase tracking-[1.5px] mb-3 pl-1">{title}</h4>
-      {children}
+    <div className={`rounded-2xl border border-sg-border/50 bg-sg-card/50 overflow-hidden border-l-[3px] ${c.accent}`}>
+      {/* Section header */}
+      <div className="px-5 py-3.5 flex items-center gap-3 bg-sg-btn-bg/50">
+        {Icon && (
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${c.bg} border ${c.border}`}>
+            <Icon size={15} strokeWidth={2.5} className={c.text} />
+          </div>
+        )}
+        <h4 className={`text-[12px] font-black uppercase tracking-[1.5px] ${c.text}`}>{title}</h4>
+      </div>
+      {/* Section body */}
+      <div className="px-5 py-4">
+        {children}
+      </div>
     </div>
   );
 }
 
-function EditField({ label, value, onChange, type = 'text', options }: {
+function EditField({ label, value, onChange, type = 'text', options, required }: {
   label: string; value?: any; onChange: (v: string) => void; type?: string;
-  options?: { v: string; l: string }[];
+  options?: { v: string; l: string }[]; required?: boolean;
 }) {
+  const baseInputClasses = "h-11 w-full rounded-xl px-4 text-[14px] font-bold text-sg-heading transition-all duration-200 bg-sg-bg/80 border border-sg-border/70 shadow-sm hover:border-sg-border focus:outline-none focus:border-sg-red focus:ring-2 focus:ring-sg-red/10 focus:shadow-md";
+
   if (type === 'select' && options) {
     return (
       <div className="flex flex-col gap-1.5">
-        <label className="text-[10px] font-black text-sg-subtext uppercase tracking-widest pl-1">{label}</label>
-        <select
-          value={value || ''}
-          onChange={e => onChange(e.target.value)}
-          className="h-11 w-full bg-sg-bg border border-sg-border rounded-xl px-4 text-[14px] font-bold text-sg-heading focus:outline-none focus:border-sg-red focus:ring-2 focus:ring-sg-red/10 transition-all"
-        >
-          <option value="">— Chọn —</option>
-          {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-        </select>
+        <label className="text-[10px] font-black text-sg-subtext/80 uppercase tracking-widest pl-0.5 flex items-center gap-1">
+          {label}
+          {required && <span className="text-sg-red">*</span>}
+        </label>
+        <div className="relative">
+          <select
+            value={value || ''}
+            onChange={e => onChange(e.target.value)}
+            className={`${baseInputClasses} appearance-none pr-10 cursor-pointer`}
+          >
+            <option value="">— Chọn —</option>
+            {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
+          </select>
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ChevronDown size={15} strokeWidth={2.5} className="text-sg-muted" />
+          </div>
+        </div>
       </div>
     );
   }
   return (
     <div className="flex flex-col gap-1.5">
-      <label className="text-[10px] font-black text-sg-subtext uppercase tracking-widest pl-1">{label}</label>
+      <label className="text-[10px] font-black text-sg-subtext/80 uppercase tracking-widest pl-0.5 flex items-center gap-1">
+        {label}
+        {required && <span className="text-sg-red">*</span>}
+      </label>
       <input
         type={type}
         value={value ?? ''}
         onChange={e => onChange(e.target.value)}
-        className="h-11 w-full bg-sg-bg border border-sg-border rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-2 focus:ring-sg-red/10 transition-all"
+        className={baseInputClasses}
       />
     </div>
   );

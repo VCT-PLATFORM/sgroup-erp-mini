@@ -35,10 +35,10 @@ type Payslip struct {
 	// Calculation Variables
 	StandardWorkDays float64 `json:"standard_work_days"`
 	ActualWorkDays   float64 `json:"actual_work_days"`
-	BaseSalary       float64 `json:"base_salary"`
-	Allowances       float64 `json:"allowances"`
-	Deductions       float64 `json:"deductions"` // Tax, Insurance, Penalty
-	NetSalary        float64 `json:"net_salary"` // Final payable amount
+	BaseSalary       float64 `gorm:"type:decimal(18,4)" json:"base_salary"`
+	Allowances       float64 `gorm:"type:decimal(18,4)" json:"allowances"`
+	Deductions       float64 `gorm:"type:decimal(18,4)" json:"deductions"` // Tax, Insurance, Penalty
+	NetSalary        float64 `gorm:"type:decimal(18,4)" json:"net_salary"` // Final payable amount
 
 	Status    string         `gorm:"size:50;default:'Generated'" json:"status"` // Generated, Sent, Paid
 	CreatedAt time.Time      `json:"created_at"`

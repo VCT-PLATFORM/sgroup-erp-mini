@@ -2,6 +2,8 @@ package domain
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 // EmploymentContract represents the labor contract for an employee.
@@ -18,15 +20,16 @@ type EmploymentContract struct {
 	Status       string     `gorm:"size:50;default:'Active'" json:"status"` // Active, Expired, Terminated
 
 	// Financials (basic representation)
-	BaseSalary   float64 `json:"base_salary"`
+	BaseSalary   float64 `gorm:"type:decimal(18,4)" json:"base_salary"`
 	Currency     string  `gorm:"size:10;default:'VND'" json:"currency"`
 	WorkingHours int     `json:"working_hours"` // e.g., 40 hours/week
 
 	// Document reference
 	DocumentURL string `gorm:"size:500" json:"document_url"`
 
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
 // TableName overrides the table name

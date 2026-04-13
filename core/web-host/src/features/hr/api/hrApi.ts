@@ -47,12 +47,20 @@ export const hrApi = {
   createEmployee: async (data: Omit<Employee, 'id'>) => {
     // Mock: simulate creating employee and add to local mock data
     const newId = String(Date.now());
+    // Map status enum to Vietnamese display text
+    const statusToWorkStatus: Record<string, string> = {
+      'ACTIVE': 'Đang làm việc',
+      'PROBATION': 'Thử việc',
+      'ON_LEAVE': 'Đang nghỉ phép',
+      'TERMINATED': 'Đã nghỉ việc',
+    };
+    const status = data.status || 'ACTIVE';
     const newEmployee = {
       id: newId,
       employeeCode: `SGR-${String(mockHRData.getEmployees.data.length + 1).padStart(3, '0')}`,
       ...data,
-      status: 'active',
-      workStatus: 'Đang làm việc',
+      status,
+      workStatus: statusToWorkStatus[status] || 'Đang làm việc',
       createdAt: new Date().toISOString().split('T')[0],
     };
     mockHRData.getEmployees.data.push(newEmployee as any);

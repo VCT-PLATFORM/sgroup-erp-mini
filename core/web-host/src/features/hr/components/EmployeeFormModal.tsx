@@ -42,11 +42,11 @@ export function EmployeeFormModal({
   onDeptChange
 }: EmployeeFormModalProps) {
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-8 animate-sg-fade-in bg-sg-heading/40 backdrop-blur-md">
+    <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-8 animate-sg-fade-in bg-sg-heading/40 backdrop-blur-md">
       {/* Overlay to close */}
       <div className="absolute inset-0" onClick={onClose} />
       
-      <div className="relative w-full max-w-[560px] max-h-[90vh] flex flex-col bg-sg-portal-bg rounded-[32px] border border-sg-border/50 shadow-sg-xl animate-sg-slide-up overflow-hidden ring-1 ring-white/50 dark:ring-white/5">
+      <div className="relative w-full max-w-[560px] max-h-[90vh] flex flex-col bg-sg-portal-bg rounded-sg-2xl border border-sg-border/50 shadow-sg-xl animate-sg-slide-up overflow-hidden ring-1 ring-white/50 dark:ring-white/5">
          
          {/* Modal Header */}
          <div className="px-8 pt-8 pb-4 flex items-center justify-between z-10 bg-sg-portal-bg shrink-0">
@@ -143,24 +143,22 @@ export function EmployeeFormModal({
               </div>
             </div>
 
-            {mode === 'edit' && (
-              <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
-                <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Trạng thái làm việc</label>
-                <div className="flex flex-wrap gap-2">
-                   {STATUS_OPTIONS.map(s => (
-                     <button
-                       key={s.value}
-                       onClick={() => setForm(f => ({...f, status: s.value as any}))}
-                       className={`px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
-                         ${form.status === s.value ? `${s.bg} ${s.border} ${s.color} hover:scale-105` : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-sg-heading/30 hover:text-sg-heading'}
-                       `}
-                     >
-                       {s.label}
-                     </button>
-                   ))}
-                </div>
+            <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
+              <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70">Trạng thái làm việc</label>
+              <div className="flex flex-wrap gap-2">
+                 {STATUS_OPTIONS.map(s => (
+                   <button
+                     key={s.value}
+                     onClick={() => setForm(f => ({...f, status: s.value as any}))}
+                     className={`px-4 py-1.5 rounded-full text-[12px] font-bold border transition-all shadow-sm
+                       ${form.status === s.value ? `${s.bg} ${s.border} ${s.color} hover:scale-105` : 'bg-white dark:bg-white/5 border-sg-border/50 text-sg-subtext hover:border-sg-heading/30 hover:text-sg-heading'}
+                     `}
+                   >
+                     {s.label}
+                   </button>
+                 ))}
               </div>
-            )}
+            </div>
 
             {mode === 'edit' && transfers.length > 0 && (
                <div className="flex flex-col gap-2 pt-4 border-t border-sg-border/30">
@@ -191,11 +189,11 @@ export function EmployeeFormModal({
          </div>
 
          {/* Modal Footer */}
-         <div className="px-8 pb-8 pt-4 flex gap-4 shrink-0 bg-sg-portal-bg rounded-b-[32px]">
+         <div className="px-8 pb-8 pt-4 flex gap-4 shrink-0 bg-sg-portal-bg rounded-b-sg-2xl">
             <button onClick={onClose} className="flex-1 h-12 rounded-2xl border border-sg-border/50 bg-white dark:bg-white/5 text-sg-subtext font-bold text-[14px] hover:text-sg-heading hover:border-sg-heading/30 transition-all shadow-sm">
                Hủy bỏ
             </button>
-            <button onClick={onSubmit} disabled={isSaving} className={`flex-[2] h-12 rounded-2xl font-black text-[14px] text-white transition-all shadow-sg-brand
+            <button onClick={onSubmit} disabled={isSaving} className={`flex-2 h-12 rounded-2xl font-black text-[14px] text-white transition-all shadow-sg-brand
               ${isSaving ? 'bg-sg-muted cursor-not-allowed' : 'bg-sg-red hover:bg-sg-red-light transform hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.98]'}
             `}>
                {isSaving ? 'ĐANG LƯU...' : mode === 'edit' ? 'CẬP NHẬT HỒ SƠ' : 'TẠO MỚI HỒ SƠ'}

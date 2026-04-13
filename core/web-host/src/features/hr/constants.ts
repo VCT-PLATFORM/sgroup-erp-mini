@@ -11,6 +11,33 @@ export const STATUS_OPTIONS = [
   { value: 'PROBATION', label: 'Thử việc', color: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/20' },
   { value: 'ON_LEAVE', label: 'Đang nghỉ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20' },
   { value: 'TERMINATED', label: 'Đã nghỉ', color: 'text-red-500', bg: 'bg-red-500/15', border: 'border-red-500/20' },
+]; 
+
+export const WORK_STATUS_OPTIONS = [
+  { v: 'Đang làm việc', l: 'Đang làm việc' },
+  { v: 'Thử việc', l: 'Thử việc' },
+  { v: 'Đang nghỉ phép', l: 'Đang nghỉ phép' },
+  { v: 'Đã nghỉ việc', l: 'Đã nghỉ việc' },
+];
+
+export const CANDIDATE_SOURCE_OPTIONS = [
+  { v: 'LinkedIn', l: 'LinkedIn' },
+  { v: 'TopCV', l: 'TopCV' },
+  { v: 'VietnamWorks', l: 'VietnamWorks' },
+  { v: 'Website công ty', l: 'Website công ty' },
+  { v: 'Giới thiệu nội bộ', l: 'Giới thiệu nội bộ' },
+  { v: 'Facebook', l: 'Facebook' },
+  { v: 'Headhunter', l: 'Headhunter' },
+  { v: 'Job Fair', l: 'Job Fair' },
+  { v: 'Khác', l: 'Khác' },
+];
+
+export const EMPLOYMENT_TYPE_OPTIONS = [
+  { v: 'Toàn thời gian', l: 'Toàn thời gian' },
+  { v: 'Bán thời gian', l: 'Bán thời gian' },
+  { v: 'Thực tập', l: 'Thực tập' },
+  { v: 'Hợp đồng', l: 'Hợp đồng' },
+  { v: 'Freelance', l: 'Freelance' },
 ];
 
 export function getInitials(name: string) {
