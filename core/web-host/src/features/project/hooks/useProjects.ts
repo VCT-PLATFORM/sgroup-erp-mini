@@ -50,6 +50,8 @@ const MOCK_RE_PRODUCTS: REProduct[] = Array.from({ length: 40 }).map((_, i) => {
     area: isProj1 ? 250 + Math.random()*100 : 60 + Math.random()*40,
     direction: ['Đông', 'Tây', 'Nam', 'Bắc', 'Đông Nam', 'Tây Bắc'][Math.floor(Math.random()*6)],
     price: isProj1 ? 15000000000 + Math.random()*5000000000 : 3000000000 + Math.random()*2000000000,
+    commissionAmt: isProj1 ? 350000000 : 80000000,
+    bonusAmt: isProj1 ? (Math.random() > 0.5 ? 50000000 : 0) : 0,
     bedrooms: isProj1 ? 4 : 2 + Math.floor(Math.random()*2),
     createdAt: '2026-01-01T00:00:00Z',
   };
@@ -57,24 +59,24 @@ const MOCK_RE_PRODUCTS: REProduct[] = Array.from({ length: 40 }).map((_, i) => {
 
 const MOCK_RE_LEGAL: RELegalDoc[] = [
   {
-    id: 'leg-1', projectId: 'proj-1', title: 'Giấy phép xây dựng phân khu 1',
-    description: 'GPXD cho 100 căn biệt thự ven sông.', docType: 'GPXD',
-    status: 'APPROVED', approveDate: '2026-03-01', assigneeName: 'Nguyễn Văn Pháp'
+    id: 'leg-1', projectId: 'proj-1', title: 'Cập nhật Bộ Tài liệu bán hàng (Sales Kit)',
+    description: 'Flyer, Mặt bằng và Concept thiết kế 3D.', docType: 'SALESKIT',
+    status: 'APPROVED', approveDate: '2026-03-01', assigneeName: 'Nguyễn Văn Admin'
   },
   {
-    id: 'leg-2', projectId: 'proj-1', title: 'Phê duyệt 1/500 điều chỉnh',
-    description: 'Chờ Sở Xây Dựng phản hồi.', docType: '1/500',
-    status: 'SUBMITTED', submitDate: '2026-04-01', assigneeName: 'Nguyễn Văn Pháp'
+    id: 'leg-2', projectId: 'proj-1', title: 'Chính sách bán hàng (Update Tháng 4)',
+    description: 'Chờ CĐT phê duyệt chiết khấu nhanh 10%.', docType: 'CSBH',
+    status: 'SUBMITTED', submitDate: '2026-04-01', assigneeName: 'Nguyễn Văn Admin'
   },
   {
-    id: 'leg-3', projectId: 'proj-2', title: 'Thẩm định thiết kế cơ sở',
-    description: 'Chuẩn bị hồ sơ nộp Bộ Xây dựng.', docType: 'TKCS',
-    status: 'PREPARATION', assigneeName: 'Trần Thị Lý'
+    id: 'leg-3', projectId: 'proj-2', title: 'Bảng tính dòng tiền & Lịch thanh toán',
+    description: 'Đang soạn thảo theo CSBH mới từ CĐT.', docType: 'SCHEDULE',
+    status: 'PREPARATION', assigneeName: 'Trần Thị Sales'
   },
   {
-    id: 'leg-4', projectId: 'proj-1', title: 'Giấy chứng nhận EIA',
-    description: 'Báo cáo đánh giá tác động môi trường đang xử lý vướng mắc.',
-    docType: 'EIA', status: 'ISSUE_FIXING', submitDate: '2026-02-15', assigneeName: 'Lê Hoàng Nam'
+    id: 'leg-4', projectId: 'proj-1', title: 'Mẫu Hợp đồng Môi giới',
+    description: 'HĐ môi giới F1 đang vướng tỷ lệ phí với CĐT.',
+    docType: 'CONTRACT', status: 'ISSUE_FIXING', submitDate: '2026-02-15', assigneeName: 'Lê Hoàng Giám Đốc'
   },
 ];
 

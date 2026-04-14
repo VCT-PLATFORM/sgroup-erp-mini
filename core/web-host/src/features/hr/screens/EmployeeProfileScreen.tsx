@@ -55,6 +55,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [selectorSearch, setSelectorSearch] = useState('');
   const [editOpen, setEditOpen] = useState(false);
+  const [editStep, setEditStep] = useState(1);
   const [editForm, setEditForm] = useState<Record<string, any>>({});
   const selectorRef = useRef<HTMLDivElement>(null);
   const updateEmployee = useUpdateEmployee();
@@ -270,6 +271,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
               <button
                 onClick={() => {
                   setEditForm({ ...emp });
+                  setEditStep(1);
                   setEditOpen(true);
                 }}
                 className="absolute top-5 right-5 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sg-red text-white font-extrabold text-xs uppercase tracking-wide hover:bg-sg-red-light transition-all shadow-sg-brand hover:-translate-y-0.5"
@@ -420,16 +422,28 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                   valueClassName="text-blue-500 font-black"
                 />
                 {emp?.totalLeaveDays != null && emp?.remainingLeaveDays != null && (
-                  <div className="mt-2">
-                    <div className="flex justify-between text-xs font-bold text-sg-muted mb-2">
-                      <span>Đã sử dụng: {emp.totalLeaveDays - emp.remainingLeaveDays} ngày</span>
-                      <span>Còn lại: {emp.remainingLeaveDays}/{emp.totalLeaveDays}</span>
+                  <div className="mt-4 flex items-center gap-6">
+                    <div className="relative w-20 h-20 shrink-0">
+                      <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" strokeWidth="12" className="opacity-10 text-sg-border" />
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="#3b82f6" strokeWidth="12" strokeLinecap="round"
+                          strokeDasharray={`${(emp.remainingLeaveDays / emp.totalLeaveDays) * 251.2} 251.2`}
+                          className="transition-all duration-1000 ease-out drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-[17px] font-black text-blue-500 leading-none">{emp.remainingLeaveDays}</span>
+                        <span className="text-[9px] font-bold text-sg-subtext uppercase">Còn lại</span>
+                      </div>
                     </div>
-                    <div className="h-3 w-full bg-sg-border rounded-full overflow-hidden">
-                      <div 
-                        className="h-full rounded-full bg-linear-to-r from-blue-500 to-cyan-400 transition-all duration-500" 
-                        style={{ width: `${(emp.remainingLeaveDays / emp.totalLeaveDays) * 100}%` }} 
-                      />
+                    <div className="flex flex-col gap-2 flex-1">
+                       <div className="flex justify-between items-center bg-sg-btn-bg px-3 py-1.5 rounded-lg border border-sg-border">
+                         <span className="text-[11px] font-bold text-sg-subtext">Đã nghỉ:</span>
+                         <span className="text-[13px] font-black text-sg-heading">{emp.totalLeaveDays - emp.remainingLeaveDays} d</span>
+                       </div>
+                       <div className="flex justify-between items-center bg-sg-btn-bg px-3 py-1.5 rounded-lg border border-sg-border">
+                         <span className="text-[11px] font-bold text-sg-subtext">Tổng quỹ phép:</span>
+                         <span className="text-[13px] font-black text-sg-heading">{emp.totalLeaveDays} d</span>
+                       </div>
                     </div>
                   </div>
                 )}
@@ -471,83 +485,113 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
             </div>
 
             {/* ──── Body ──── */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ scrollbarGutter: 'stable' }}>
-              <div className="px-8 py-6 flex flex-col gap-2">
+            <div className="flex-1 flex overflow-hidden">
+               {/* Sidebar Stepper */}
+               <div className="w-56 shrink-0 border-r border-sg-border/60 bg-sg-btn-bg/30 p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+                  {[
+                    { s: 1, l: 'Cơ bản', i: User, h: 'Thông tin cơ bản & Liên Hệ' },
+                    { s: 2, l: 'Địa chỉ & Giấy tờ', i: MapPin, h: 'Hồ sơ pháp lý' },
+                    { s: 3, l: 'Công việc', i: Briefcase, h: 'Hợp đồng & Vị trí' },
+                    { s: 4, l: 'Tài chính & Phép', i: Wallet, h: 'Lương & Ngày phép' }
+                  ].map(step => (
+                     <button
+                        key={step.s}
+                        onClick={() => setEditStep(step.s)}
+                        className={`flex flex-col items-start gap-1 p-3 rounded-xl transition-all ${editStep === step.s ? 'bg-sg-card border border-sg-red/30 shadow-sm' : 'hover:bg-sg-btn-bg border border-transparent'}`}
+                     >
+                       <div className="flex items-center gap-2">
+                         <step.i size={14} className={editStep === step.s ? 'text-sg-red' : 'text-sg-muted'} />
+                         <span className={`text-[13px] font-extrabold ${editStep === step.s ? 'text-sg-red' : 'text-sg-heading'}`}>{step.l}</span>
+                       </div>
+                       <span className="text-[10px] font-bold text-sg-subtext">{step.h}</span>
+                     </button>
+                  ))}
+               </div>
 
-                {/* Section 1: Thông tin cơ bản */}
-                <EditSection title="Thông tin cơ bản" icon={User} color="sg-red">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                    <EditField label="Tên nhân sự (Tiếng Việt)" value={editForm.fullName} onChange={v => setEditForm(f => ({...f, fullName: v}))} required />
-                    <EditField label="Tên nhân sự (Tiếng Anh)" value={editForm.englishName} onChange={v => setEditForm(f => ({...f, englishName: v}))} />
-                    <EditField label="Ngày sinh" value={editForm.dob} onChange={v => setEditForm(f => ({...f, dob: v}))} type="date" />
-                    <EditField label="Giới tính" value={editForm.gender} onChange={v => setEditForm(f => ({...f, gender: v}))} type="select" options={[{v:'male',l:'Nam'},{v:'female',l:'Nữ'}]} />
+               {/* Form Content Area */}
+               <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-sg-bg/30 relative">
+                  <div className="max-w-xl mx-auto flex flex-col gap-6 w-full animate-sg-slide-up">
+                    {editStep === 1 && (
+                      <>
+                        <EditSection title="Thông tin cơ bản" icon={User} color="sg-red">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                            <EditField label="Tên nhân sự (Tiếng Việt)" value={editForm.fullName} onChange={v => setEditForm(f => ({...f, fullName: v}))} required />
+                            <EditField label="Tên nhân sự (Tiếng Anh)" value={editForm.englishName} onChange={v => setEditForm(f => ({...f, englishName: v}))} />
+                            <EditField label="Ngày sinh" value={editForm.dob} onChange={v => setEditForm(f => ({...f, dob: v}))} type="date" />
+                            <EditField label="Giới tính" value={editForm.gender} onChange={v => setEditForm(f => ({...f, gender: v}))} type="select" options={[{v:'male',l:'Nam'},{v:'female',l:'Nữ'}]} />
+                          </div>
+                        </EditSection>
+                        <EditSection title="Thông tin liên hệ" icon={Phone} color="blue-500">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                            <EditField label="SĐT chính" value={editForm.phone} onChange={v => setEditForm(f => ({...f, phone: v}))} />
+                            <EditField label="SĐT người thân" value={editForm.relativePhone} onChange={v => setEditForm(f => ({...f, relativePhone: v}))} />
+                            <EditField label="Email" value={editForm.email} onChange={v => setEditForm(f => ({...f, email: v}))} type="email" />
+                          </div>
+                        </EditSection>
+                      </>
+                    )}
+                    {editStep === 2 && (
+                      <>
+                        <EditSection title="Địa chỉ" icon={MapPin} color="emerald-500">
+                          <div className="grid grid-cols-1 gap-4">
+                            <EditField label="Địa chỉ thường trú" value={editForm.permanentAddress} onChange={v => setEditForm(f => ({...f, permanentAddress: v}))} />
+                            <EditField label="Địa chỉ liên hệ" value={editForm.contactAddress} onChange={v => setEditForm(f => ({...f, contactAddress: v}))} />
+                          </div>
+                        </EditSection>
+                        <EditSection title="Giấy tờ tùy thân" icon={IdCard} color="purple-500">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                            <EditField label="CCCD / Passport" value={editForm.idNumber} onChange={v => setEditForm(f => ({...f, idNumber: v}))} />
+                            <EditField label="Ngày cấp" value={editForm.idIssueDate} onChange={v => setEditForm(f => ({...f, idIssueDate: v}))} type="date" />
+                            <EditField label="Nơi cấp" value={editForm.idIssuePlace} onChange={v => setEditForm(f => ({...f, idIssuePlace: v}))} />
+                            <EditField label="VNID" value={editForm.vnId} onChange={v => setEditForm(f => ({...f, vnId: v}))} />
+                            <EditField label="MST cá nhân" value={editForm.taxCode} onChange={v => setEditForm(f => ({...f, taxCode: v}))} />
+                            <EditField label="Số sổ bảo hiểm" value={editForm.insuranceBook} onChange={v => setEditForm(f => ({...f, insuranceBook: v}))} />
+                          </div>
+                        </EditSection>
+                      </>
+                    )}
+                    {editStep === 3 && (
+                      <EditSection title="Công việc & Hợp đồng" icon={Briefcase} color="amber-500">
+                        <div className="grid grid-cols-1 gap-x-5 gap-y-4">
+                          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+                             <EditField label="Cấp bậc" value={editForm.level} onChange={v => setEditForm(f => ({...f, level: v}))} type="select" options={levelOptions} />
+                             <EditField label="Vị trí" value={editForm.position?.name} onChange={v => setEditForm(f => ({...f, position: {...(f.position || {}), name: v}}))} type="select" options={positionOptions} />
+                          </div>
+                          <EditField label="Bộ phận" value={editForm.division} onChange={v => setEditForm(f => ({...f, division: v}))} type="select" options={departmentOptions} />
+                          <EditField label="Quản lý trực tiếp" value={editForm.directManager} onChange={v => setEditForm(f => ({...f, directManager: v}))} type="select" options={recruiterOptions} />
+                          <div className="grid grid-cols-2 gap-x-5 gap-y-4 pt-2 border-t border-sg-border/50 mt-2">
+                             <EditField label="Loại hình lao động" value={editForm.employmentType} onChange={v => setEditForm(f => ({...f, employmentType: v}))} type="select" options={EMPLOYMENT_TYPE_OPTIONS} />
+                             <EditField label="Tình trạng công việc" value={editForm.workStatus} onChange={v => setEditForm(f => ({...f, workStatus: v}))} type="select" options={WORK_STATUS_OPTIONS} />
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-5 gap-y-4">
+                             <EditField label="Ngày ký HĐ" value={editForm.contractDate} onChange={v => setEditForm(f => ({...f, contractDate: v}))} type="date" />
+                             <EditField label="Ngày nhận việc" value={editForm.startDate} onChange={v => setEditForm(f => ({...f, startDate: v}))} type="date" />
+                          </div>
+                        </div>
+                      </EditSection>
+                    )}
+                    {editStep === 4 && (
+                      <>
+                        <EditSection title="Tài chính" icon={Wallet} color="emerald-500">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                            <EditField label="Ngân hàng" value={editForm.bankName} onChange={v => setEditForm(f => ({...f, bankName: v}))} />
+                            <EditField label="Số tài khoản" value={editForm.bankAccount} onChange={v => setEditForm(f => ({...f, bankAccount: v}))} />
+                            <EditField label="Lương thử việc" value={editForm.probationSalary} onChange={v => setEditForm(f => ({...f, probationSalary: Number(v) || 0}))} type="number" />
+                            <EditField label="Lương chính thức" value={editForm.officialSalary} onChange={v => setEditForm(f => ({...f, officialSalary: Number(v) || 0}))} type="number" />
+                          </div>
+                        </EditSection>
+                        <EditSection title="Tuyển dụng & Phép" icon={UserCheck} color="pink-500">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                            <EditField label="Người tuyển dụng" value={editForm.recruiter} onChange={v => setEditForm(f => ({...f, recruiter: v}))} type="select" options={recruiterOptions} />
+                            <EditField label="Nguồn ứng viên" value={editForm.candidateSource} onChange={v => setEditForm(f => ({...f, candidateSource: v}))} type="select" options={CANDIDATE_SOURCE_OPTIONS} />
+                            <EditField label="Số ngày phép" value={editForm.totalLeaveDays} onChange={v => setEditForm(f => ({...f, totalLeaveDays: Number(v) || 0}))} type="number" />
+                            <EditField label="Số phép còn lại" value={editForm.remainingLeaveDays} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Number(v) || 0}))} type="number" />
+                          </div>
+                        </EditSection>
+                      </>
+                    )}
                   </div>
-                </EditSection>
-
-                {/* Section 2: Liên hệ */}
-                <EditSection title="Thông tin liên hệ" icon={Phone} color="blue-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                    <EditField label="SĐT chính" value={editForm.phone} onChange={v => setEditForm(f => ({...f, phone: v}))} />
-                    <EditField label="SĐT người thân" value={editForm.relativePhone} onChange={v => setEditForm(f => ({...f, relativePhone: v}))} />
-                    <EditField label="Email" value={editForm.email} onChange={v => setEditForm(f => ({...f, email: v}))} type="email" />
-                  </div>
-                </EditSection>
-
-                {/* Section 3: Giấy tờ */}
-                <EditSection title="Giấy tờ tùy thân" icon={IdCard} color="purple-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                    <EditField label="CCCD / Passport" value={editForm.idNumber} onChange={v => setEditForm(f => ({...f, idNumber: v}))} />
-                    <EditField label="Ngày cấp" value={editForm.idIssueDate} onChange={v => setEditForm(f => ({...f, idIssueDate: v}))} type="date" />
-                    <EditField label="Nơi cấp" value={editForm.idIssuePlace} onChange={v => setEditForm(f => ({...f, idIssuePlace: v}))} />
-                    <EditField label="VNID" value={editForm.vnId} onChange={v => setEditForm(f => ({...f, vnId: v}))} />
-                    <EditField label="MST cá nhân" value={editForm.taxCode} onChange={v => setEditForm(f => ({...f, taxCode: v}))} />
-                    <EditField label="Số sổ bảo hiểm" value={editForm.insuranceBook} onChange={v => setEditForm(f => ({...f, insuranceBook: v}))} />
-                  </div>
-                </EditSection>
-
-                {/* Section 4: Địa chỉ */}
-                <EditSection title="Địa chỉ" icon={MapPin} color="emerald-500">
-                  <div className="grid grid-cols-1 gap-4">
-                    <EditField label="Địa chỉ thường trú" value={editForm.permanentAddress} onChange={v => setEditForm(f => ({...f, permanentAddress: v}))} />
-                    <EditField label="Địa chỉ liên hệ" value={editForm.contactAddress} onChange={v => setEditForm(f => ({...f, contactAddress: v}))} />
-                  </div>
-                </EditSection>
-
-                {/* Section 5: Công việc */}
-                <EditSection title="Công việc & Hợp đồng" icon={Briefcase} color="amber-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                    <EditField label="Cấp bậc" value={editForm.level} onChange={v => setEditForm(f => ({...f, level: v}))} type="select" options={levelOptions} />
-                    <EditField label="Bộ phận" value={editForm.division} onChange={v => setEditForm(f => ({...f, division: v}))} type="select" options={departmentOptions} />
-                    <EditField label="Vị trí" value={editForm.position?.name} onChange={v => setEditForm(f => ({...f, position: {...(f.position || {}), name: v}}))} type="select" options={positionOptions} />
-                    <EditField label="Quản lý trực tiếp" value={editForm.directManager} onChange={v => setEditForm(f => ({...f, directManager: v}))} type="select" options={recruiterOptions} />
-                    <EditField label="Loại hình lao động" value={editForm.employmentType} onChange={v => setEditForm(f => ({...f, employmentType: v}))} type="select" options={EMPLOYMENT_TYPE_OPTIONS} />
-                    <EditField label="Tình trạng công việc" value={editForm.workStatus} onChange={v => setEditForm(f => ({...f, workStatus: v}))} type="select" options={WORK_STATUS_OPTIONS} />
-                    <EditField label="Ngày ký HĐ" value={editForm.contractDate} onChange={v => setEditForm(f => ({...f, contractDate: v}))} type="date" />
-                    <EditField label="Ngày nhận việc" value={editForm.startDate} onChange={v => setEditForm(f => ({...f, startDate: v}))} type="date" />
-                  </div>
-                </EditSection>
-
-                {/* Section 6: Tài chính */}
-                <EditSection title="Tài chính" icon={Wallet} color="emerald-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                    <EditField label="Ngân hàng" value={editForm.bankName} onChange={v => setEditForm(f => ({...f, bankName: v}))} />
-                    <EditField label="Số tài khoản" value={editForm.bankAccount} onChange={v => setEditForm(f => ({...f, bankAccount: v}))} />
-                    <EditField label="Lương thử việc" value={editForm.probationSalary} onChange={v => setEditForm(f => ({...f, probationSalary: Number(v) || 0}))} type="number" />
-                    <EditField label="Lương chính thức" value={editForm.officialSalary} onChange={v => setEditForm(f => ({...f, officialSalary: Number(v) || 0}))} type="number" />
-                  </div>
-                </EditSection>
-
-                {/* Section 7: Tuyển dụng */}
-                <EditSection title="Tuyển dụng & Phép" icon={UserCheck} color="pink-500">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                    <EditField label="Người tuyển dụng" value={editForm.recruiter} onChange={v => setEditForm(f => ({...f, recruiter: v}))} type="select" options={recruiterOptions} />
-                    <EditField label="Nguồn ứng viên" value={editForm.candidateSource} onChange={v => setEditForm(f => ({...f, candidateSource: v}))} type="select" options={CANDIDATE_SOURCE_OPTIONS} />
-                    <EditField label="Số ngày phép" value={editForm.totalLeaveDays} onChange={v => setEditForm(f => ({...f, totalLeaveDays: Number(v) || 0}))} type="number" />
-                    <EditField label="Số ngày phép còn lại" value={editForm.remainingLeaveDays} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Number(v) || 0}))} type="number" />
-                  </div>
-                </EditSection>
-
-              </div>
+               </div>
             </div>
 
             {/* ──── Footer ──── */}

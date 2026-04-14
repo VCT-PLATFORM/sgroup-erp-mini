@@ -20,7 +20,7 @@ export const ProjectStats: React.FC<ProjectStatsProps> = ({ project }) => {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
        {stats.map((x, i) => (
-         <div key={i} className="bg-sg-card/50 backdrop-blur-lg border border-sg-border rounded-sg-xl p-5 flex flex-col gap-3 group hover:-translate-y-1 hover:shadow-lg transition-all">
+         <div key={i} className="bg-white dark:bg-black/30 backdrop-blur-lg border border-slate-200 dark:border-white/5 rounded-sg-xl p-5 flex flex-col gap-3 group hover:-translate-y-1 hover:shadow-lg transition-all">
            <div className="flex items-center justify-between">
              <span className="text-[12px] font-bold text-sg-muted uppercase tracking-wide">{x.label}</span>
              <x.icon size={16} className={x.c} />

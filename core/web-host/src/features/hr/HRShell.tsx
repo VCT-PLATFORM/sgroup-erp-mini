@@ -109,10 +109,10 @@ export function HRShell() {
   return (
     <div className="flex w-screen h-screen bg-sg-portal-bg overflow-hidden transition-colors duration-300">
       
-      {/* Aurora backdrop purely using Tailwind */}
+      {/* Dynamic Aurora backdrop */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-[10%] -left-[5%] w-[1000px] h-[1000px] rounded-full bg-sg-red/5 blur-[100px] animate-sg-pulse" />
-        <div className="absolute -bottom-[15%] -right-[8%] w-[900px] h-[900px] rounded-full bg-sg-red-dark/5 blur-[120px] animate-sg-pulse delay-1000" />
+        <div className="absolute top-[-10%] left-[-10%] w-[1200px] h-[1200px] rounded-full bg-linear-to-br from-sg-red/10 via-pink-500/5 to-transparent blur-[120px] animate-sg-pulse mix-blend-screen dark:mix-blend-lighten" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[1000px] h-[1000px] rounded-full bg-linear-to-tl from-purple-500/10 via-sg-red-dark/5 to-transparent blur-[120px] animate-sg-pulse delay-1000 mix-blend-screen dark:mix-blend-lighten" style={{ animationDuration: '10s' }} />
       </div>
 
       <div className="z-10 bg-sg-card border-r border-sg-border transition-colors duration-300">

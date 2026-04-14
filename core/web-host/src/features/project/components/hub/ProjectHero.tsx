@@ -20,7 +20,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({ project }) => {
       
       <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 z-20 flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div className="flex items-end gap-6 relative">
-          <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-sg-2xl bg-sg-card/80 backdrop-blur-3xl border-2 border-sg-border flex items-center justify-center shadow-2xl ${statusCfg.bg} ${statusCfg.border} overflow-hidden group`}>
+          <div className={`w-28 h-28 sm:w-32 sm:h-32 rounded-sg-2xl bg-white/80 dark:bg-black/40 backdrop-blur-3xl border-2 border-slate-200 dark:border-white/5 flex items-center justify-center shadow-2xl ${statusCfg.bg} ${statusCfg.border} overflow-hidden group`}>
              <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
              <Building2 size={48} className={statusCfg.color} strokeWidth={2} />
           </div>
@@ -44,7 +44,7 @@ export const ProjectHero: React.FC<ProjectHeroProps> = ({ project }) => {
         </div>
 
         <div className="flex gap-3 shrink-0">
-           <Link to={`/ProjectModule/inventory?project=${project.id}`} className="h-12 px-5 flex items-center gap-2 bg-sg-card/60 hover:bg-sg-btn-bg border border-sg-border backdrop-blur-xl rounded-xl transition-all shadow-sm font-bold text-sg-heading group">
+           <Link to={`/ProjectModule/inventory?project=${project.id}`} className="h-12 px-5 flex items-center gap-2 bg-white/80 dark:bg-black/40 hover:bg-slate-100 dark:hover:bg-white/5 border border-slate-200 dark:border-white/5 backdrop-blur-xl rounded-xl transition-all shadow-sm font-bold text-sg-heading group">
              <Grid size={18} className="text-cyan-500 group-hover:scale-110 transition-transform" /> Rổ hàng
            </Link>
            <button className="h-12 px-6 flex items-center gap-2 bg-linear-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 rounded-xl transition-all shadow-[0_8px_24px_rgba(6,182,212,0.25)] font-black text-white group overflow-hidden relative">

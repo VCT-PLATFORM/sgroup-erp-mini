@@ -10,7 +10,7 @@ export type ErpModuleId =
   | "legal"
   | "admin";
 
-export type UserRole = "admin" | "hr" | "employee";
+export type UserRole = "admin" | "hr" | "employee" | "sales_manager" | "sales_director";
 
 export interface ErpModuleDefinition {
   id: ErpModuleId;
@@ -96,4 +96,6 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   admin: "Quản trị viên",
   hr: "Quản lý nhân sự",
   employee: "Nhân viên",
+  sales_manager: "Trưởng phòng KD",
+  sales_director: "Giám đốc KD",
 };

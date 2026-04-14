@@ -26,10 +26,10 @@ export const RE_PRODUCT_STATUS: Record<string, { label: string; color: string; b
 export const RE_INVENTORY_STATUS = RE_PRODUCT_STATUS;
 
 export const RE_LEGAL_PROCEDURE_STATUS: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  PREPARATION: { label: 'Chuẩn bị hồ sơ', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
-  SUBMITTED: { label: 'Trình duyệt/Thẩm định', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  ISSUE_FIXING: { label: 'Xử lý vướng mắc', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
-  APPROVED: { label: 'Đã phê duyệt', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  PREPARATION: { label: 'Yêu cầu CĐT', color: 'text-slate-400', bg: 'bg-slate-500/10', border: 'border-slate-500/20' },
+  SUBMITTED: { label: 'Đang soạn thảo', color: 'text-blue-500', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  ISSUE_FIXING: { label: 'Chờ CĐT duyệt', color: 'text-orange-500', bg: 'bg-orange-500/10', border: 'border-orange-500/20' },
+  APPROVED: { label: 'Đã ban hành', color: 'text-emerald-500', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
 };
 
 export function getInitials(name?: string) {

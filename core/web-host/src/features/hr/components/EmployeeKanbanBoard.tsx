@@ -45,8 +45,10 @@ export function EmployeeKanbanBoard({ employees, canEdit, onEdit }: EmployeeKanb
                   <div 
                     key={emp.id} 
                     onClick={() => canEdit && onEdit(emp)}
-                    className="bg-sg-card border border-sg-border rounded-[18px] p-4 shadow-sm hover:shadow-md cursor-pointer hover:border-sg-red/30 transition-all group"
+                    className="bg-sg-card/90 backdrop-blur-sm border border-sg-border/60 hover:border-sg-red/40 rounded-[18px] p-4 shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.12)] cursor-pointer transition-all duration-300 hover:-translate-y-1 ring-1 ring-transparent hover:ring-sg-red/20 group relative overflow-hidden"
                   >
+                     {/* subtle hover gradient */}
+                     <div className="absolute inset-0 bg-linear-to-br from-sg-red/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                      <div className="flex items-center gap-3 mb-4">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${clr.bg} border ${clr.border}`}>
                            <span className={`text-[13px] font-black ${clr.text}`}>{getInitials(emp.fullName || '')}</span>

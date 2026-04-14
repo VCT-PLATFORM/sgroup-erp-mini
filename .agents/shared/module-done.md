@@ -60,3 +60,12 @@ A module is DONE when ALL checkboxes pass:
 - [ ] No new TypeScript errors
 - [ ] No console warnings in build output
 - [ ] go build ./... exits 0 for backend
+
+## HERA Evaluation (MUSE) — V4
+- [ ] MUSE evaluation completed with score ≥ 7.0/10
+- [ ] Credit assignment documented for all involved agents
+- [ ] Full trajectory captured in `experience-library/trajectories/`
+- [ ] `trajectories/_index.md` updated
+- [ ] Agent scorecards updated in `experience-library/scorecards/`
+- [ ] Insights captured in `experience-library/insights/` (if new patterns discovered)
+- [ ] All participating agents self-scored

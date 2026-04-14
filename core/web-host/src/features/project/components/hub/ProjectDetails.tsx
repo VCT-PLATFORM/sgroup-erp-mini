@@ -8,7 +8,7 @@ export interface ProjectDetailsProps {
 
 export const ProjectDetails: React.FC<ProjectDetailsProps> = ({ project }) => {
   return (
-    <div className="bg-sg-card/40 backdrop-blur-xl border border-sg-border rounded-sg-2xl p-8 shadow-sm">
+    <div className="bg-white dark:bg-black/30 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-sg-2xl p-8 shadow-sm">
        <h3 className="text-lg font-black text-sg-heading flex items-center gap-2 mb-6"><Target size={20} className="text-cyan-500" /> Vị trí & Tổng quan</h3>
        <p className="text-sg-subtext font-semibold leading-relaxed mb-6 whitespace-pre-wrap">{project.description}</p>
        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-sg-bg/30 p-5 rounded-[20px] border border-sg-border/50">

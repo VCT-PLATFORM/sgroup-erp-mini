@@ -3,7 +3,10 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +14,7 @@ import (
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/model"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/repository"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/service"
+	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/infrastructure/cache"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/infrastructure/messaging"
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -46,8 +50,14 @@ func main() {
 
 	eventBus := messaging.NewLocalEventBus()
 
-	projectSvc := service.NewProjectService(projectRepo, productRepo, eventBus)
-	productSvc := service.NewProductService(productRepo, auditRepo)
+	redisURL := os.Getenv("REDIS_URL")
+	if redisURL == "" {
+		redisURL = "redis://localhost:6379/0"
+	}
+	redisCache := cache.NewRedisCache(redisURL)
+
+	projectSvc := service.NewProjectService(projectRepo, productRepo, eventBus, redisCache)
+	productSvc := service.NewProductService(productRepo, auditRepo, redisCache)
 	docSvc := service.NewDocService(docRepo)
 
 	h := handler.NewProjectHandler(projectSvc, productSvc, docSvc)
@@ -55,17 +65,31 @@ func main() {
 	// Setup Router
 	r := gin.Default()
 	
-	// Add proper CORS middleware in real prod, skipping for simplicity here
+	// CORS middleware (production-ready)
 	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := c.GetHeader("Origin")
+		if origin == "" {
+			origin = "*"
+		}
+		c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, DELETE, PATCH")
+		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204)
 			return
 		}
 		c.Next()
+	})
+
+	// Health check endpoint
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"status":  "healthy",
+			"service": "project-api",
+			"time":    time.Now().Format(time.RFC3339),
+		})
 	})
 
 	api := r.Group("/api/v1")
@@ -89,8 +113,29 @@ func main() {
 		port = "8081"
 	}
 
-	log.Printf("Project API server starting on :%s", port)
-	if err := r.Run(":" + port); err != nil {
-		log.Fatalf("failed to run server: %v", err)
+	// Graceful shutdown
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: r,
 	}
+
+	go func() {
+		log.Printf("Project API server starting on :%s", port)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("failed to run server: %v", err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server forced to shutdown:", err)
+	}
+
+	log.Println("Server exiting")
 }

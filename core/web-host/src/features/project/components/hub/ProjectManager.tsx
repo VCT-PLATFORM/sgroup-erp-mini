@@ -18,7 +18,7 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({ project }) => {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="bg-sg-card/40 backdrop-blur-xl border border-sg-border rounded-sg-2xl p-6 shadow-sm flex flex-col gap-6">
+      <div className="bg-white dark:bg-black/30 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-sg-2xl p-6 shadow-sm flex flex-col gap-6">
         <h3 className="text-[15px] font-black text-sg-heading flex items-center gap-2">
            <User size={18} className="text-cyan-500" /> Nhân sự phụ trách
         </h3>
@@ -49,7 +49,7 @@ export const ProjectManager: React.FC<ProjectManagerProps> = ({ project }) => {
         </div>
       </div>
 
-      <div className="bg-sg-card/40 backdrop-blur-xl border border-sg-border rounded-sg-2xl p-6 shadow-sm">
+      <div className="bg-white dark:bg-black/30 backdrop-blur-xl border border-slate-200 dark:border-white/5 rounded-sg-2xl p-6 shadow-sm">
           <h3 className="text-[15px] font-black text-sg-heading flex items-center gap-2 mb-4 border-b border-sg-border/60 pb-4">
              Từ khóa định vị
           </h3>

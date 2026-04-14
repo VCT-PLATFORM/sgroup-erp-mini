@@ -73,16 +73,28 @@ export const productApi = {
       body: JSON.stringify(data),
     }),
 
-  lock: (id: string, bookedBy: string) =>
+  lock: (id: string, payload: { bookedBy: string; customerName: string; customerPhone: string }) =>
     apiFetch<ApiResponse<{ message: string }>>(`/products/${id}/lock`, {
       method: 'POST',
-      body: JSON.stringify({ bookedBy }),
+      body: JSON.stringify(payload),
+    }),
+
+  bulkLock: (productIds: string[], payload: { bookedBy: string; customerName: string; customerPhone: string }) =>
+    apiFetch<ApiResponse<{ message: string; count: number }>>(`/products/bulk-lock`, {
+      method: 'POST',
+      body: JSON.stringify({ productIds, ...payload }),
     }),
 
   unlock: (id: string, requestedBy: string, isAdmin = false) =>
     apiFetch<ApiResponse<{ message: string }>>(`/products/${id}/unlock`, {
       method: 'POST',
       body: JSON.stringify({ requestedBy, isAdmin }),
+    }),
+
+  bulkUnlock: (productIds: string[], requestedBy: string, isAdmin = false) =>
+    apiFetch<ApiResponse<{ message: string; count: number }>>(`/products/bulk-unlock`, {
+      method: 'POST',
+      body: JSON.stringify({ productIds, requestedBy, isAdmin }),
     }),
 
   deposit: (id: string, requestedBy: string) =>

@@ -76,7 +76,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative w-full max-w-2xl mx-4 bg-sg-card/95 backdrop-blur-3xl border border-sg-border rounded-sg-2xl shadow-[0_32px_64px_rgba(0,0,0,0.2)] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+      <div className="relative w-full max-w-2xl mx-4 bg-white/95 dark:bg-black/90 backdrop-blur-3xl border border-slate-200 dark:border-sg-border rounded-sg-2xl shadow-[0_32px_64px_rgba(0,0,0,0.2)] overflow-hidden animate-in fade-in zoom-in-95 duration-300">
         {/* Header */}
         <div className="px-8 py-6 border-b border-sg-border/60 flex items-center justify-between bg-sg-header/60">
           <div className="flex items-center gap-4">
@@ -85,10 +85,10 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
             </div>
             <div>
               <h2 className="text-xl font-black text-sg-heading tracking-tight">
-                {isEdit ? 'Chỉnh sửa Dự án' : 'Tạo Dự Án Mới'}
+                {isEdit ? 'Chỉnh sửa Rổ hàng Dự án' : 'Thêm Dự Án Phân Phối'}
               </h2>
               <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-[1.5px]">
-                {isEdit ? `Mã: ${editProject?.code}` : 'Nhập thông tin dự án'}
+                {isEdit ? `Mã: ${editProject?.code}` : 'Thông tin rổ hàng phân phối'}
               </span>
             </div>
           </div>
@@ -247,7 +247,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
             ) : (
               <Save size={18} className="relative z-10" />
             )}
-            <span className="relative z-10">{isEdit ? 'Cập nhật' : 'Tạo Dự Án'}</span>
+            <span className="relative z-10">{isEdit ? 'Cập nhật' : 'Thêm Dự Án'}</span>
           </button>
         </div>
       </div>

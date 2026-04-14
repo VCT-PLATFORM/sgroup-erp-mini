@@ -50,3 +50,18 @@ If you are building Module B (e.g. `crm`), you **MUST NOT** directly edit or imp
 - ALL financial write operations MUST be wrapped in database transactions.
 - ALL financial state changes MUST create an audit log entry.
 - NEVER hard-delete financial records — soft delete only.
+
+## 5. MUSE Agent Boundaries (HERA V4)
+- **MUSE (Evaluator):**
+  - ✅ Permitted files: `.agents/experience-library/**/*` (trajectories, scorecards, insights, evolution).
+  - ✅ Permitted actions: Read ALL agent outputs for scoring purposes.
+  - ❌ DENIED files: ALL source code files. MUSE does NOT code.
+  - ❌ DENIED actions: MUSE does NOT modify agent AGENT.md files directly. MUSE proposes → JAVIS applies.
+
+## 6. Experience Library Access Rules (HERA V4)
+- **Read access:** ALL agents can read `experience-library/` (mandatory before starting tasks).
+- **Write access — Trajectories:** MUSE only (no other agent writes trajectories).
+- **Write access — Scorecards:** MUSE only (agents report self-scores to MUSE).
+- **Write access — Insights:** MUSE + domain agents (when discovering new patterns during work).
+- **Write access — Evolution:** MUSE proposes, JAVIS approves and applies.
+- **Ownership:** MUSE is the primary maintainer. BELLA curates cross-module insights.

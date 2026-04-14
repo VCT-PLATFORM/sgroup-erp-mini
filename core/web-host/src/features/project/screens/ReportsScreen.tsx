@@ -39,7 +39,7 @@ export function ReportsScreen() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pb-10">
         
         {/* Phân bổ Bất Động Sản */}
-        <div className="bg-sg-card/50 backdrop-blur-2xl border border-sg-border rounded-sg-2xl p-7 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+        <div className="bg-white dark:bg-black/30 backdrop-blur-2xl border border-slate-200 dark:border-white/5 rounded-2xl p-7 shadow-md transition-all">
           <div className="flex items-center gap-2 mb-6 border-b border-sg-border/60 pb-4">
              <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500 shadow-sm">
                <PieChart size={20} />
@@ -74,7 +74,7 @@ export function ReportsScreen() {
         </div>
 
         {/* Leaderboard Dự Án */}
-        <div className="bg-sg-card/50 backdrop-blur-2xl border border-sg-border rounded-sg-2xl p-7 shadow-[0_8px_32px_rgba(0,0,0,0.02)]">
+        <div className="bg-white dark:bg-black/30 backdrop-blur-2xl border border-slate-200 dark:border-white/5 rounded-2xl p-7 shadow-md transition-all">
           <div className="flex items-center justify-between mb-6 border-b border-sg-border/60 pb-4">
              <div className="flex items-center gap-2">
                <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-500 shadow-sm">
@@ -92,7 +92,7 @@ export function ReportsScreen() {
             {stats.leaderboard.map((proj, idx) => {
               const progress = Math.max(5, (proj.soldUnits / stats.maxSold) * 100);
               return (
-                <div key={proj.id} className="relative bg-sg-bg/50 border border-sg-border rounded-[20px] p-4 flex items-center gap-4 group hover:-translate-y-1 transition-all overflow-hidden shadow-sm">
+                <div key={proj.id} className="relative bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-[20px] p-4 flex items-center gap-4 group hover:-translate-y-1 hover:bg-slate-100 dark:hover:bg-white/10 transition-all overflow-hidden shadow-sm">
                   {idx === 0 && (
                     <div className="absolute top-0 right-0 p-2 opacity-20 group-hover:opacity-100 transition-opacity">
                       <Crown size={48} className="text-amber-500 blur-sm absolute -top-2 -right-2" />

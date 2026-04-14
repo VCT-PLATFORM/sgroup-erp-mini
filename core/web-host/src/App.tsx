@@ -8,6 +8,7 @@ const WorkspaceScreen = lazy(() => import('./features/workspace/screens/Workspac
 const AccessDeniedScreen = lazy(() => import('./system/navigation/AccessDeniedScreen'))
 const HRShell = lazy(() => import('./features/hr/HRShell').then(m => ({ default: m.HRShell })))
 const ProjectShell = lazy(() => import('./features/project/ProjectShell').then(m => ({ default: m.ProjectShell })))
+const SalesShell = lazy(() => import('./features/sales/SalesShell').then(m => ({ default: m.SalesShell })))
 
 function LoadingFallback() {
   return (
@@ -71,6 +72,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ProjectShell />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/SalesModule/*"
+          element={
+            <ProtectedRoute>
+              <SalesShell />
             </ProtectedRoute>
           }
         />

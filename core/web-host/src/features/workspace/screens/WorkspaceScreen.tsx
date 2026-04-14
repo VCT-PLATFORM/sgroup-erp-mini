@@ -152,7 +152,7 @@ export default function WorkspaceScreen() {
               index={i}
               onClick={() => {
                 if (mod.id === 'biz') {
-                  window.location.href = 'http://localhost:3004/transactions'
+                  navigate('/SalesModule/dashboard')
                 } else if (mod.routeName) {
                   navigate(mod.routeName.startsWith('/') ? mod.routeName : `/${mod.routeName}`)
                 }

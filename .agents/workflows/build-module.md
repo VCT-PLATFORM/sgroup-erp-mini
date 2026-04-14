@@ -5,13 +5,20 @@ description: How to build a complete module end-to-end (full-stack)
 
 # /build-module {module}
 
-End-to-end full-stack build for a single module.
-AGENT FLOW: Javis → BA TEAM [Bella(spec) + Diana(flow) + Oscar(rbac) + Marco(compliance)] → Jenny(schema) → Brian(API) → Sentry(auth) → Fiona(UI) → Quinn(tests) → Atlas(build)
+End-to-end full-stack build for a single module (HERA V4 Enhanced).
+AGENT DAG: Javis → BA TEAM [Bella+Diana+Oscar+Marco ∥] → Jenny → Brian+Sentry [∥] → Fiona+Nova [∥] → Quinn → Atlas → MUSE
 DOMAIN: LOAD shared/domain/{module}.md at EVERY step.
 API: Follow shared/api-contract.md for all endpoints.
-DONE: Check shared/module-done.md at the end.
+HERA: Follow shared/hera-protocol.md for orchestration.
+DONE: Check shared/module-done.md at the end (includes MUSE evaluation).
 
-## Step 0 — JAVIS: Git Sandboxing (V19 Guardrail)
+## Step 0 — JAVIS: Experience Lookup (HERA V4)
+Search `experience-library/trajectories/_index.md` for past module builds.
+If similar module found → read trajectory for lessons learned.
+Check `experience-library/insights/_patterns.md` for cross-module patterns.
+Apply T-shirt sizing: New module = **XL** → activate all 14 agents.
+
+## Step 0.5 — JAVIS: Git Sandboxing (V19 Guardrail)
 ```powershell
 cd "D:\SGROUP ERP"
 git checkout -b "feat/module-{module}"
@@ -102,4 +109,17 @@ cd "D:\SGROUP ERP" ; npx turbo run build
 ```
 
 ## Step 9 — JAVIS: Verify DONE
-Run through shared/module-done.md checklist. All boxes checked → module DONE. Do NOT merge to main, trigger `/code-review` workflow first.
+Run through shared/module-done.md checklist. All boxes checked → continue to MUSE evaluation.
+
+## Step 10 — MUSE: HERA Evaluation (V4 Mandatory)
+MUSE evaluates the entire module build:
+1. Collect self-scores from all participating agents
+2. Score each agent's output (rubric: Correctness 40% + Quality 30% + Efficiency 20% + Learning 10%)
+3. Assign credit (contributed/neutral/blocked) per agent
+4. Capture full trajectory → `experience-library/trajectories/traj-{date}-module-{module}.md`
+5. Update `trajectories/_index.md`
+6. Update agent scorecards in `experience-library/scorecards/`
+7. Extract insights → `experience-library/insights/` (if new patterns)
+8. Module is DONE only if MUSE score ≥ 7.0/10
+
+**Module DONE. Do NOT merge to main, trigger `/code-review` workflow first.**

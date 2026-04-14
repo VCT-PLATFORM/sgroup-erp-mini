@@ -7,6 +7,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/events"
 	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/handler"
 	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/model"
 	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/repository"
@@ -37,16 +38,33 @@ func main() {
 		&model.Customer{},
 		&model.Transaction{},
 		&model.Commission{},
+		&model.SalesStaff{},
+		&model.DimProject{},
+		&model.SalesDeal{},
+		&model.SalesBooking{},
+		&model.SalesDeposit{},
+		&model.SalesTarget{},
 	)
 	if err != nil {
 		log.Fatalf("failed to migrate database: %v", err)
 	}
 
 	// Dependency Injection
+	eventBus := events.GetEventBus()
+	
 	txRepo := repository.NewTransactionRepository(db)
 	commRepo := repository.NewCommissionRepository(db)
+	customerRepo := repository.NewCustomerRepository(db)
+	opsRepo := repository.NewSalesOpsRepository(db)
+	
 	txSvc := service.NewTransactionService(txRepo, commRepo)
+	customerSvc := service.NewCustomerService(customerRepo)
+	opsSvc := service.NewSalesOpsService(opsRepo, eventBus)
+	
 	salesHandler := handler.NewSalesHandler(txSvc)
+	customerHandler := handler.NewCustomerHandler(customerSvc)
+	dashboardHandler := handler.NewDashboardHandler()
+	opsHandler := handler.NewSalesOpsHandler(opsSvc)
 
 	// Setup Router
 	r := gin.Default()
@@ -61,6 +79,9 @@ func main() {
 
 	api := r.Group("/api/v1")
 	salesHandler.RegisterRoutes(api)
+	customerHandler.RegisterRoutes(api)
+	dashboardHandler.RegisterRoutes(api)
+	opsHandler.RegisterRoutes(api)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

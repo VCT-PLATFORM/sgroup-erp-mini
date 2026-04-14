@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ═══════════════════════════════════════════════════════
    SGROUP ERP — Design System v2
    Tailwind v4.2 + CSS Custom Properties

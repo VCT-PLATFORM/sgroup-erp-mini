@@ -1,0 +1,182 @@
+package handler
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/middleware"
+	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/model"
+	"github.com/vctplatform/sgroup-erp/modules/sales/api/internal/service"
+)
+
+type SalesOpsHandler struct {
+	svc service.SalesOpsService
+}
+
+func NewSalesOpsHandler(svc service.SalesOpsService) *SalesOpsHandler {
+	return &SalesOpsHandler{svc: svc}
+}
+
+func (h *SalesOpsHandler) RegisterRoutes(r *gin.RouterGroup) {
+	ops := r.Group("/sales-ops")
+	ops.Use(middleware.AuthMiddleware()) // require login
+
+	// Bookings
+	ops.POST("/bookings", h.CreateBooking)
+	ops.PATCH("/bookings/:id", h.UpdateBooking)
+	ops.POST("/bookings/:id/approve", h.ApproveBooking)
+	ops.POST("/bookings/:id/reject", h.RejectBooking)
+
+	// Deposits
+	ops.POST("/deposits", h.CreateDeposit)
+	ops.PATCH("/deposits/:id", h.UpdateDeposit)
+	ops.POST("/deposits/:id/confirm", h.ConfirmDeposit)
+	ops.POST("/deposits/:id/cancel", h.CancelDeposit)
+
+	// Deals
+	ops.POST("/deals", h.CreateDeal)
+}
+
+func getUserContext(c *gin.Context) service.UserContext {
+	id, _ := c.Get("userId")
+	name, _ := c.Get("userName")
+	role, _ := c.Get("role")
+	salesRole, _ := c.Get("salesRole")
+	teamId, _ := c.Get("teamId")
+	staffId, _ := c.Get("staffId")
+
+	ctx := service.UserContext{}
+	if id != nil { ctx.ID = id.(string) }
+	if name != nil { ctx.Name = name.(string) }
+	if role != nil { ctx.Role = role.(string) }
+	if salesRole != nil { ctx.SalesRole = salesRole.(string) }
+	if teamId != nil { 
+		tStr := teamId.(string)
+		ctx.TeamID = &tStr 
+	}
+	if staffId != nil { 
+		sStr := staffId.(string)
+		ctx.StaffID = &sStr 
+	}
+	return ctx
+}
+
+// Bookings
+func (h *SalesOpsHandler) CreateBooking(c *gin.Context) {
+	var body model.SalesBooking
+	if err := c.ShouldBindJSON(&body); err != nil {
+		sendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx := getUserContext(c)
+	if err := h.svc.CreateBooking(&body, ctx); err != nil {
+		sendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, wrapper{Data: body})
+}
+
+func (h *SalesOpsHandler) UpdateBooking(c *gin.Context) {
+	id := c.Param("id")
+	var body map[string]interface{}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		sendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx := getUserContext(c)
+	if err := h.svc.UpdateBooking(id, body, ctx); err != nil {
+		sendError(c, http.StatusForbidden, err.Error()) // using 403 as generic mapped
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: "success"})
+}
+
+func (h *SalesOpsHandler) ApproveBooking(c *gin.Context) {
+	id := c.Param("id")
+	ctx := getUserContext(c)
+	if err := h.svc.ApproveBooking(id, ctx); err != nil {
+		sendError(c, http.StatusForbidden, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: "approved"})
+}
+
+func (h *SalesOpsHandler) RejectBooking(c *gin.Context) {
+	id := c.Param("id")
+	ctx := getUserContext(c)
+	if err := h.svc.RejectBooking(id, ctx); err != nil {
+		sendError(c, http.StatusForbidden, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: "rejected"})
+}
+
+// Deposits
+func (h *SalesOpsHandler) CreateDeposit(c *gin.Context) {
+	var body model.SalesDeposit
+	if err := c.ShouldBindJSON(&body); err != nil {
+		sendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx := getUserContext(c)
+	if err := h.svc.CreateDeposit(&body, ctx); err != nil {
+		sendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, wrapper{Data: body})
+}
+
+func (h *SalesOpsHandler) UpdateDeposit(c *gin.Context) {
+	id := c.Param("id")
+	var body map[string]interface{}
+	if err := c.ShouldBindJSON(&body); err != nil {
+		sendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx := getUserContext(c)
+	if err := h.svc.UpdateDeposit(id, body, ctx); err != nil {
+		sendError(c, http.StatusForbidden, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: "success"})
+}
+
+func (h *SalesOpsHandler) ConfirmDeposit(c *gin.Context) {
+	id := c.Param("id")
+	ctx := getUserContext(c)
+	if err := h.svc.ConfirmDeposit(id, ctx); err != nil {
+		sendError(c, http.StatusForbidden, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: "confirmed"})
+}
+
+func (h *SalesOpsHandler) CancelDeposit(c *gin.Context) {
+	id := c.Param("id")
+	ctx := getUserContext(c)
+	if err := h.svc.CancelDeposit(id, ctx); err != nil {
+		sendError(c, http.StatusForbidden, err.Error())
+		return
+	}
+	c.JSON(http.StatusOK, wrapper{Data: "cancelled"})
+}
+
+// Deals
+func (h *SalesOpsHandler) CreateDeal(c *gin.Context) {
+	var body model.SalesDeal
+	if err := c.ShouldBindJSON(&body); err != nil {
+		sendError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	ctx := getUserContext(c)
+	if err := h.svc.CreateDeal(&body, ctx); err != nil {
+		sendError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	c.JSON(http.StatusCreated, wrapper{Data: body})
+}

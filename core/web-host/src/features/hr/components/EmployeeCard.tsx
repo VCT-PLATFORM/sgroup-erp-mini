@@ -28,7 +28,7 @@ export const EmployeeCard: React.FC<EmployeeCardProps> = React.memo(({ staff, ca
   return (
     <div 
       onClick={handleCardClick} 
-      className="bg-sg-card border border-sg-border rounded-[28px] overflow-hidden shadow-sm hover:shadow-md transition-shadow group cursor-pointer relative"
+      className="bg-sg-card/80 backdrop-blur-xl border border-sg-border/80 rounded-[28px] overflow-hidden shadow-sm hover:shadow-sg-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer relative before:absolute before:inset-0 before:bg-linear-to-b before:from-white/5 before:to-transparent before:opacity-0 hover:before:opacity-100 before:transition-opacity"
       role="button"
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCardClick(); }}

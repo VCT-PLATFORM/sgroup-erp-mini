@@ -37,8 +37,12 @@ export interface REProduct {
   floor: number;
   area: number;
   price: number;
+  commissionAmt?: number;
+  bonusAmt?: number;
   direction: string;
   bedrooms: number;
+  unitType?: string;
+  viewDesc?: string;
   status: REProductStatus;
   bookedBy?: string;
   lockedUntil?: string;

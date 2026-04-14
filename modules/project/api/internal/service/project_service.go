@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"time"
 
+	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/infrastructure/cache"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/infrastructure/messaging"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/model"
 	"github.com/vctplatform/sgroup-erp/modules/project/api/internal/repository"
@@ -15,19 +17,22 @@ type ProjectService interface {
 	UpdateProject(ctx context.Context, id string, fields map[string]interface{}) (*model.Project, error)
 	DeleteProject(ctx context.Context, id string) error
 	SyncProjectUnits(ctx context.Context, id string) error
+	GetDashboardStats(ctx context.Context) (*repository.DashboardAggregates, error)
 }
 
 type projectService struct {
 	projectRepo repository.ProjectRepository
 	productRepo repository.ProductRepository
 	eventBus    messaging.EventPublisher
+	cache       *cache.RedisCache
 }
 
-func NewProjectService(projectRepo repository.ProjectRepository, productRepo repository.ProductRepository, eventBus messaging.EventPublisher) ProjectService {
+func NewProjectService(projectRepo repository.ProjectRepository, productRepo repository.ProductRepository, eventBus messaging.EventPublisher, redisCache *cache.RedisCache) ProjectService {
 	return &projectService{
 		projectRepo: projectRepo,
 		productRepo: productRepo,
 		eventBus:    eventBus,
+		cache:       redisCache,
 	}
 }
 
@@ -76,6 +81,15 @@ func (s *projectService) UpdateProject(ctx context.Context, id string, fields ma
 	if v, ok := fields["location"]; ok {
 		existing.Location = v.(string)
 	}
+	if v, ok := fields["province"]; ok {
+		existing.Province = v.(string)
+	}
+	if v, ok := fields["district"]; ok {
+		existing.District = v.(string)
+	}
+	if v, ok := fields["imageUrl"]; ok {
+		existing.ImageURL = v.(string)
+	}
 	if v, ok := fields["type"]; ok {
 		existing.Type = model.PropertyType(v.(string))
 	}
@@ -108,6 +122,7 @@ func (s *projectService) DeleteProject(ctx context.Context, id string) error {
 	return s.projectRepo.Delete(ctx, id)
 }
 
+// SyncProjectUnits recalculates totalUnits and soldUnits from actual product records.
 func (s *projectService) SyncProjectUnits(ctx context.Context, id string) error {
 	total, err := s.productRepo.CountByProjectID(ctx, id)
 	if err != nil {
@@ -126,3 +141,26 @@ func (s *projectService) SyncProjectUnits(ctx context.Context, id string) error 
 	}
 	return nil
 }
+
+// GetDashboardStats returns aggregated statistics for the dashboard.
+func (s *projectService) GetDashboardStats(ctx context.Context) (*repository.DashboardAggregates, error) {
+	if s.cache != nil {
+		var stats repository.DashboardAggregates
+		err := s.cache.Get(ctx, "dashboard:stats", &stats)
+		if err == nil {
+			return &stats, nil
+		}
+	}
+
+	stats, err := s.projectRepo.GetDashboardAggregates(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if s.cache != nil {
+		_ = s.cache.Set(ctx, "dashboard:stats", stats, 15*time.Second)
+	}
+
+	return stats, nil
+}
+

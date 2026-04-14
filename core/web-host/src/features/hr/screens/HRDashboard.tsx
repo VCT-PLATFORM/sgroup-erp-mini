@@ -90,34 +90,67 @@ export function HRDashboard() {
               <p className="py-8 text-center text-sg-subtext font-medium text-sm">Chưa có phòng ban nào được thiết lập.</p>
             )}
 
-            <div className="flex flex-col gap-6">
-              {deptList.map((d: any) => (
-                <div key={d.id} className="group">
-                  <div className="flex justify-between items-end mb-2 relative">
-                    <div>
-                      <h4 className="text-[15px] font-extrabold text-sg-heading mb-0.5 group-hover:text-sg-red transition-colors">{d.name}</h4>
-                      <span className="text-[13px] font-bold text-sg-subtext">
-                        {d.manager?.fullName ? `Trưởng phòng: ${d.manager.fullName}` : `Mã: ${d.code}`}
-                      </span>
-                    </div>
-                    <div className="text-right flex flex-col items-end">
-                      <span className="text-base font-black" style={{ color: d.color }}>{d.count} CBNV</span>
-                      <span className="text-[12px] font-bold text-sg-subtext">{d.pct}%</span>
-                    </div>
-                  </div>
-                  {/* Progress Bar Container */}
-                  <div className="h-2 rounded-full w-full overflow-hidden bg-sg-btn-bg dark:bg-white/5">
-                    {/* Progress Fill */}
-                    <div 
-                      className="h-full rounded-full transition-all duration-1000 ease-out"
-                      style={{ 
-                        width: `${d.pct}%`, 
-                        backgroundImage: `linear-gradient(to right, ${d.color}, ${d.color}99)`
-                      }} 
-                    />
-                  </div>
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              {/* Doughnut Chart using SVG stroke-dasharray */}
+              <div className="relative w-[280px] h-[280px] shrink-0">
+                <svg viewBox="0 0 200 200" className="w-full h-full -rotate-90 drop-shadow-sm">
+                  {(() => {
+                    let cumulativePercent = 0;
+                    return deptList.map((d: any, i: number) => {
+                      const radius = 80;
+                      const circumference = 2 * Math.PI * radius;
+                      const strokeDasharray = `${(d.pct / 100) * circumference} ${circumference}`;
+                      const strokeDashoffset = -((cumulativePercent / 100) * circumference);
+                      cumulativePercent += d.pct;
+                      return (
+                        <circle
+                          key={d.id}
+                          cx="100"
+                          cy="100"
+                          r={radius}
+                          fill="none"
+                          stroke={d.color}
+                          strokeWidth="24"
+                          strokeDasharray={strokeDasharray}
+                          strokeDashoffset={strokeDashoffset}
+                          className="transition-all duration-1000 ease-out hover:stroke-[28px] cursor-pointer"
+                          style={{
+                            filter: `drop-shadow(0 0 4px ${d.color}40)`,
+                          }}
+                        />
+                      );
+                    });
+                  })()}
+                </svg>
+                {/* Center Label */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center animate-sg-fade-in pointer-events-none">
+                  <span className="text-4xl font-black text-sg-heading tracking-tight">{dashboard?.totalEmployees || 0}</span>
+                  <span className="text-xs font-bold text-sg-subtext uppercase tracking-widest mt-1">Tổng NS</span>
                 </div>
-              ))}
+              </div>
+
+               {/* Legend & Details */}
+               <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                 {deptList.map((d: any) => (
+                   <div key={d.id} className="flex items-start gap-3 p-3 rounded-2xl hover:bg-sg-btn-bg transition-colors border border-transparent hover:border-sg-border group cursor-pointer">
+                     <div className="w-3 h-3 rounded-full mt-1.5 shrink-0 shadow-sm transition-transform group-hover:scale-125" style={{ backgroundColor: d.color, boxShadow: `0 0 8px ${d.color}60` }} />
+                     <div className="flex-1 min-w-0">
+                       <div className="flex justify-between items-start gap-2">
+                         <h4 className="text-[14px] font-extrabold text-sg-heading truncate group-hover:text-sg-red transition-colors">{d.name}</h4>
+                         <span className="text-[13px] font-black shrink-0" style={{ color: d.color }}>{d.pct}%</span>
+                       </div>
+                       <div className="flex justify-between items-center mt-0.5">
+                         <span className="text-[12px] font-semibold text-sg-subtext truncate">
+                           {d.manager?.fullName ? `QL: ${d.manager.fullName}` : `Mã: ${d.code}`}
+                         </span>
+                         <span className="text-[12px] font-bold text-sg-heading bg-sg-bg px-2 py-0.5 rounded-md border border-sg-border shadow-sm">
+                           {d.count}
+                         </span>
+                       </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
             </div>
           </SGGlassPanel>
 
@@ -147,12 +180,12 @@ export function HRDashboard() {
                       )}
                     </div>
                     {/* Activity Content Box */}
-                    <div className="flex-1 -mt-1 bg-sg-btn-bg/50 dark:bg-white/2 p-4 rounded-2xl border border-sg-border">
+                    <div className="flex-1 -mt-1 bg-linear-to-r from-sg-btn-bg/80 to-transparent dark:from-white/5 p-4 rounded-2xl border border-sg-border/60 hover:border-sg-border hover:from-sg-btn-bg transition-all shadow-sm">
                        <div className="flex justify-between items-start mb-1.5">
-                         <span className="text-[15px] font-extrabold text-sg-heading">{a.title}</span>
-                         <span className="text-[12px] font-bold text-sg-subtext whitespace-nowrap">{a.time}</span>
+                         <span className="text-[15px] font-extrabold text-sg-heading group-hover:text-sg-red transition-colors">{a.title}</span>
+                         <span className="text-[11px] font-bold text-sg-subtext/80 whitespace-nowrap uppercase tracking-wider bg-sg-bg px-2 py-0.5 rounded-md border border-sg-border">{a.time}</span>
                        </div>
-                       <p className="text-[14px] font-semibold text-sg-subtext leading-relaxed">{a.detail}</p>
+                       <p className="text-[13px] font-semibold text-sg-subtext leading-relaxed">{a.detail}</p>
                     </div>
                   </div>
                 ))

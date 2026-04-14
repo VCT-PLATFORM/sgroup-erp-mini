@@ -31,6 +31,9 @@ type Project struct {
 	Description string         `gorm:"type:text" json:"description"`
 	Developer   string         `gorm:"type:varchar(255)" json:"developer"`
 	Location    string         `gorm:"type:text" json:"location"`
+	Province    string         `gorm:"type:varchar(100)" json:"province"`
+	District    string         `gorm:"type:varchar(100)" json:"district"`
+	ImageURL    string         `gorm:"type:varchar(500)" json:"imageUrl"`
 	Type        PropertyType   `gorm:"type:varchar(50);default:'APARTMENT'" json:"type"`
 	FeeRate     float64        `gorm:"type:decimal(5,2)" json:"feeRate"`
 	AvgPrice    float64        `gorm:"type:decimal(18,4)" json:"avgPrice"`
