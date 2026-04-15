@@ -149,7 +149,7 @@ export function ProjectShell() {
         </header>
 
         {/* Nội dung Routing của Project Module */}
-        <main className="flex-1 relative overflow-hidden flex flex-col bg-transparent z-10">
+        <main className="flex-1 relative overflow-hidden flex flex-col bg-transparent">
           <Routes>
             <Route path="/" element={<Navigate to="dashboard" replace />} />
             <Route path="dashboard" element={<ProjectDashboardScreen />} />

@@ -63,7 +63,7 @@ export function ProjectSearchModal({ isOpen, onClose }: ProjectSearchModalProps)
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-110 flex items-start justify-center pt-[15vh]">
+    <div className="fixed inset-0 z-200 flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/40 backdrop-blur-md animate-in fade-in duration-300" 
