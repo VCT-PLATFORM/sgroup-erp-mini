@@ -160,7 +160,7 @@ export function UnitDrawer({ unit, projects, actionLoadingId, onClose, onAction,
               className="flex-1 h-14 flex items-center justify-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-400 hover:to-amber-400 text-white rounded-2xl text-[14px] font-black transition-all shadow-[0_8px_24px_rgba(249,115,22,0.3)] hover:shadow-[0_12px_32px_rgba(249,115,22,0.4)] hover:-translate-y-1 relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-2xl" />
-              <Lock size={18} className="relative z-10" /> <span className="relative z-10">Hold & Lock Booking</span>
+              <Lock size={18} className="relative z-10" /> <span className="relative z-10">Giữ chỗ & Khóa căn</span>
             </button>
           )}
           {(unit.status === 'LOCKED' || unit.status === 'RESERVED') && (
@@ -171,14 +171,14 @@ export function UnitDrawer({ unit, projects, actionLoadingId, onClose, onAction,
                 className="flex-[2] h-14 flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-400 hover:to-indigo-400 text-white rounded-2xl text-[14px] font-black transition-all shadow-[0_8px_24px_rgba(59,130,246,0.3)] hover:shadow-[0_12px_32px_rgba(59,130,246,0.4)] hover:-translate-y-1 relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-2xl" />
-                {actionLoadingId === unit.id ? <Loader2 size={18} className="animate-spin relative z-10" /> : <><Banknote size={18} className="relative z-10" /> <span className="relative z-10">Upgrade to Deposit</span></>}
+                {actionLoadingId === unit.id ? <Loader2 size={18} className="animate-spin relative z-10" /> : <><Banknote size={18} className="relative z-10" /> <span className="relative z-10">Nâng cấp vào cọc</span></>}
               </button>
               <button
                 onClick={() => onAction(unit.id, 'unlock')}
                 disabled={actionLoadingId === unit.id}
                 className="flex-1 h-14 flex items-center justify-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-sg-heading rounded-2xl text-[14px] font-black text-sg-heading transition-all hover:-translate-y-1 disabled:opacity-50 shadow-[0_4px_16px_rgba(0,0,0,0.1)]"
               >
-                <Unlock size={18} /> Cancel
+                <Unlock size={18} /> Hủy lệnh
               </button>
             </>
           )}
@@ -189,13 +189,13 @@ export function UnitDrawer({ unit, projects, actionLoadingId, onClose, onAction,
               className="flex-1 h-14 flex items-center justify-center gap-2 bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-400 hover:to-pink-400 text-white rounded-2xl text-[14px] font-black transition-all shadow-[0_8px_24px_rgba(244,63,94,0.3)] hover:shadow-[0_12px_32px_rgba(244,63,94,0.4)] hover:-translate-y-1 relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-500 rounded-2xl" />
-              {actionLoadingId === unit.id ? <Loader2 size={18} className="animate-spin relative z-10" /> : <><Handshake size={18} className="relative z-10" /> <span className="relative z-10">Confirm Contract (Sold)</span></>}
+              {actionLoadingId === unit.id ? <Loader2 size={18} className="animate-spin relative z-10" /> : <><Handshake size={18} className="relative z-10" /> <span className="relative z-10">Xác nhận Hợp đồng (Đã bán)</span></>}
             </button>
           )}
           {(unit.status === 'SOLD' || unit.status === 'COMPLETED') && (
             <div className="flex-1 h-14 flex flex-col items-center justify-center bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl shadow-inner">
-               <span className="text-[12px] font-black text-emerald-500 drop-shadow-sm flex items-center gap-1"><CheckSquare size={14}/> CONTRACT CLOSED</span>
-               <span className="text-[10px] font-bold text-sg-muted mt-0.5">Contact HR/Finance for more info.</span>
+               <span className="text-[12px] font-black text-emerald-500 drop-shadow-sm flex items-center gap-1"><CheckSquare size={14}/> HỢP ĐỒNG ĐÃ ĐÓNG</span>
+               <span className="text-[10px] font-bold text-sg-muted mt-0.5">Vui lòng liên hệ HR/Finance để biết thêm chi tiết.</span>
             </div>
           )}
         </div>

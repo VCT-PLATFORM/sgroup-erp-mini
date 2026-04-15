@@ -47,7 +47,7 @@ export function InventoryFilter({
       <div>
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 w-fit mb-2">
            <Grid size={14} className="text-cyan-500" />
-           <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">Master Inventory</span>
+           <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400 uppercase tracking-widest">Kho hàng Tổng</span>
         </div>
         <h2 className="text-[32px] font-black text-sg-heading tracking-tight drop-shadow-md">Rổ Hàng Tổng</h2>
         

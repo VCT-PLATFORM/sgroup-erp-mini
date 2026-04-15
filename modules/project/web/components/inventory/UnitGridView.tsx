@@ -82,26 +82,26 @@ export function UnitGridView({
                       <div className="absolute right-0 top-10 w-44 bg-white/90 dark:bg-black/80 backdrop-blur-3xl border border-slate-200 dark:border-sg-border rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.2)] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
                         {item.status === 'AVAILABLE' && (
                           <button onClick={(e) => { e.stopPropagation(); setLockModalOpen(item.id); setMenuOpen(null); }} className="w-full flex items-center gap-3 px-4 py-3 text-[12px] font-black text-orange-500 hover:bg-orange-500/10 transition-colors">
-                             <Lock size={14} /> Request Lock
+                             <Lock size={14} /> Yêu cầu khóa
                           </button>
                         )}
                         {(item.status === 'LOCKED' || item.status === 'RESERVED') && (
                           <>
                             <button onClick={(e) => { e.stopPropagation(); handleAction(item.id, 'deposit'); }} className="w-full flex items-center gap-3 px-4 py-3 text-[12px] font-black text-blue-500 hover:bg-blue-500/10 transition-colors border-b border-sg-border/50">
-                               <Banknote size={14} /> Deposit In
+                               <Banknote size={14} /> Vào cọc
                             </button>
                             <button onClick={(e) => { e.stopPropagation(); handleAction(item.id, 'unlock'); }} className="w-full flex items-center gap-3 px-4 py-3 text-[12px] font-black text-sg-heading hover:bg-sg-btn-bg transition-colors">
-                               <Unlock size={14} /> Force Unlock
+                               <Unlock size={14} /> Mở khoá cưỡng bức
                             </button>
                           </>
                         )}
                         {item.status === 'DEPOSIT' && (
                           <button onClick={(e) => { e.stopPropagation(); handleAction(item.id, 'sold'); }} className="w-full flex items-center gap-3 px-4 py-3 text-[12px] font-black text-rose-500 hover:bg-rose-500/10 transition-colors">
-                             <Handshake size={14} /> Mark as Sold
+                             <Handshake size={14} /> Đã bán hoàn tất
                           </button>
                         )}
                         {(item.status === 'SOLD' || item.status === 'COMPLETED') && (
-                          <div className="px-4 py-3 text-[11px] font-bold text-sg-muted italic text-center uppercase tracking-wider">Locked State</div>
+                          <div className="px-4 py-3 text-[11px] font-bold text-sg-muted italic text-center uppercase tracking-wider">Trạng thái khóa</div>
                         )}
                       </div>
                     )}
@@ -111,16 +111,16 @@ export function UnitGridView({
                 {/* Data Tags */}
                 <div className="mt-1 flex flex-col gap-2.5 relative z-10 w-full overflow-hidden bg-slate-50 dark:bg-black/40 rounded-[16px] p-3 border border-slate-200 dark:border-white/5">
                   <div className="flex items-center justify-between w-full">
-                    <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wider">Area</span>
+                    <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wider">Diện tích</span>
                     <span className="text-[13px] font-black text-sg-heading">{parseFloat(Number(item.area).toFixed(2))} m²</span>
                   </div>
                   <div className="flex items-center justify-between w-full">
-                    <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wider">Price</span>
+                    <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-wider">Giá bán</span>
                     <span className="text-[14px] font-black text-emerald-500 drop-shadow-sm flex items-center gap-1"><Banknote size={14}/> {(item.price / 1000000000).toFixed(2)}B</span>
                   </div>
                   <div className="flex items-center justify-between mt-1 pt-2 w-full border-t border-white/5">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-[10px] font-extrabold text-sg-muted uppercase tracking-wider shrink-0">Comms</span>
+                      <span className="text-[10px] font-extrabold text-sg-muted uppercase tracking-wider shrink-0">Hoa hồng</span>
                     </div>
                     <span className="text-[12px] font-black text-cyan-500 bg-cyan-500/10 px-2 py-0.5 rounded-lg border border-cyan-500/20 shrink-0 shadow-sm">
                       {((item.commissionAmt || 0) / 1000000).toLocaleString('vi')}M
@@ -133,7 +133,7 @@ export function UnitGridView({
                      {item.status === 'SOLD' && item.salespersonId ? (
                        <span className="text-[10px] font-black text-sg-heading tracking-[0.1em] uppercase flex items-center gap-1"><ArrowUpRight size={12} className="text-emerald-500"/> ID {item.salespersonId}</span>
                      ) : item.status === 'RESERVED' ? (
-                       <span className="text-[10px] font-black text-amber-500 tracking-[0.1em] uppercase drop-shadow-sm">Booked: 50M</span>
+                       <span className="text-[10px] font-black text-amber-500 tracking-[0.1em] uppercase drop-shadow-sm">Đã cọc giữ: 50Tr</span>
                      ) : (
                        <span className={`px-2.5 py-1 rounded-[8px] text-[9px] w-fit font-black uppercase tracking-[0.1em] border shadow-xs ${typeCfg.bg} ${typeCfg.color} ${typeCfg.border}`}>
                          {typeCfg.label}
