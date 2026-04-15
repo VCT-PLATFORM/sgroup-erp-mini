@@ -97,8 +97,13 @@ export interface DashboardStats {
   totalProjects: number;
   activeProjects: number;
   totalUnits: number;
+  totalProducts: number;
+  availableProducts: number;
+  lockedProducts: number;
+  soldProducts: number;
   soldUnits: number;
   totalRevenue: number;
+  absorptionRate: number;
 }
 
 export interface StatusCount {
