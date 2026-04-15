@@ -113,22 +113,59 @@ export function ProjectDashboardScreen() {
       <div className="fixed top-20 right-20 w-[600px] h-[600px] bg-cyan-500/8 rounded-full blur-[150px] pointer-events-none -z-10" />
       <div className="fixed bottom-20 left-20 w-[600px] h-[600px] bg-indigo-500/8 rounded-full blur-[150px] pointer-events-none -z-10" />
 
-      {/* ═══════ Chào Mừng ═══════ */}
-      <div className="flex flex-col gap-3 sg-stagger relative" style={{ animationDelay: '0ms' }}>
-        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-linear-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/30 w-fit backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-           <Crown size={14} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-           <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.2em]">Cổng Điều Hành Giám Đốc</span>
+      {/* ═══════ Executive Command Header ═══════ */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 sg-stagger relative group" style={{ animationDelay: '0ms' }}>
+        
+        {/* Title Block */}
+        <div className="flex flex-col gap-4 relative">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-linear-to-r from-amber-500/20 to-yellow-500/10 border border-amber-500/30 backdrop-blur-md shadow-[0_0_20px_rgba(245,158,11,0.1)]">
+              <Crown size={12} className="text-amber-500 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+              <span className="text-[9px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.2em]">Hệ thống Điều Hành Giám Đốc</span>
+            </div>
+            <div className="inline-flex items-center text-emerald-500 font-extrabold text-[10px] bg-emerald-500/5 px-2.5 py-1 rounded-lg border border-emerald-500/10 backdrop-blur-sm">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+              LIVE
+            </div>
+          </div>
+          
+          <div className="flex flex-col">
+            <h2 className="text-[42px] font-black text-sg-heading tracking-tighter leading-[1.1] mb-2 drop-shadow-sm">
+              Quản Trị Chiến Lược<br />
+              <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-500 via-cyan-500 to-emerald-500 drop-shadow-lg">Dự Án Bất Động Sản</span>
+            </h2>
+            <div className="flex items-center gap-4">
+               <p className="text-[14px] font-bold text-sg-subtext max-w-lg leading-relaxed opacity-80">
+                 Phân tích đa chiều dữ liệu rổ hàng, tình trạng pháp lý và chỉ số hấp thụ thị trường theo thời gian thực.
+               </p>
+            </div>
+          </div>
         </div>
-        <h2 className="text-[40px] sm:text-[48px] font-black text-transparent bg-clip-text bg-linear-to-r from-sg-heading to-sg-heading/60 tracking-tight drop-shadow-xl leading-tight">
-          Quản Trị Dự Án<br />
-          <span className="bg-clip-text text-transparent bg-linear-to-r from-blue-500 via-cyan-500 to-emerald-500">Bất Động Sản</span>
-        </h2>
-        <p className="text-[15px] font-semibold text-sg-subtext max-w-2xl leading-relaxed flex items-center gap-2">
-          Báo cáo đa chiều về rổ hàng, pháp lý dự án và các chỉ số kinh doanh lõi với độ trễ 0.
-          <span className="inline-flex items-center text-emerald-500 font-black text-[11px] bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-            <Activity size={12} className="mr-1.5" /> Thời gian thực
-          </span>
-        </p>
+
+        {/* Quick Summary Cards - Integrated into header */}
+        <div className="flex items-center gap-4 bg-white/40 dark:bg-black/20 backdrop-blur-3xl p-4 rounded-[28px] border border-white/20 dark:border-white/5 shadow-xl">
+           <div className="flex flex-col px-4 border-r border-sg-border/50">
+              <span className="text-[10px] font-black text-sg-muted uppercase tracking-widest mb-1">Dự án</span>
+              <div className="flex items-baseline gap-1">
+                 <span className="text-[22px] font-black text-sg-heading">{projects.length}</span>
+                 <span className="text-[12px] font-extrabold text-sg-subtext">Total</span>
+              </div>
+           </div>
+           <div className="flex flex-col px-4 border-r border-sg-border/50">
+              <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest mb-1">Đang bán</span>
+              <div className="flex items-baseline gap-1">
+                 <span className="text-[22px] font-black text-emerald-500">{stats.active}</span>
+                 <span className="text-[12px] font-extrabold text-sg-subtext">Active</span>
+              </div>
+           </div>
+           <div className="flex flex-col px-4">
+              <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest mb-1">Sản phẩm</span>
+              <div className="flex items-baseline gap-1">
+                 <span className="text-[22px] font-black text-blue-500">{inventory.length.toLocaleString()}</span>
+                 <span className="text-[12px] font-extrabold text-sg-subtext">SKU</span>
+              </div>
+           </div>
+        </div>
       </div>
 
       {/* ═══════ 6 Thẻ KPI Chiến Lược ═══════ */}
