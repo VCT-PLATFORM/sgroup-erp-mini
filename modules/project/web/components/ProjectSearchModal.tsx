@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { Search, X, Building2, Package, FileText, ArrowRight, Loader2 } from 'lucide-react';
 import { useProjects, useInventory } from '../hooks/useProjects';
 import { useNavigate } from 'react-router-dom';
@@ -13,8 +14,13 @@ export function ProjectSearchModal({ isOpen, onClose }: ProjectSearchModalProps)
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<{ projects: REProject[]; inventory: REProduct[] }>({ projects: [], inventory: [] });
   const [isSearching, setIsSearching] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const { data: projects } = useProjects();
   const { data: inventory } = useInventory();
@@ -60,9 +66,9 @@ export function ProjectSearchModal({ isOpen, onClose }: ProjectSearchModalProps)
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-200 flex items-start justify-center pt-[15vh]">
       {/* Backdrop */}
       <div 
@@ -200,6 +206,7 @@ export function ProjectSearchModal({ isOpen, onClose }: ProjectSearchModalProps)
            <span className="text-[10px] font-black text-cyan-500 uppercase tracking-widest">SGroup Unified Search</span>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

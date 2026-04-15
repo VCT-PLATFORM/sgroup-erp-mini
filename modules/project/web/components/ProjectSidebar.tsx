@@ -6,15 +6,15 @@ export const MENU_GROUPS = [
     title: 'QUẢN LÝ NGUỒN HÀNG',
     items: [
       { path: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { path: 'list', label: 'Danh mục Dự án', icon: Building2 },
-      { path: 'inventory', label: 'Rổ hàng Tổng', icon: Grid },
+      { path: 'list', label: 'Dự án', icon: Building2 },
+      { path: 'inventory', label: 'Rổ hàng', icon: Grid },
       { path: 'legal', label: 'Kho Sales Kit & Pháp lý', icon: FileText },
     ]
   },
   {
     title: 'ĐIỀU PHỐI & PHÂN TÍCH',
     items: [
-      { path: 'transactions', label: 'Quản lý Giao Dịch Sàn', icon: Handshake },
+      { path: 'transactions', label: 'Quản lý Giao Dịch', icon: Handshake },
       { path: 'commission', label: 'Cấu hình Hoa Hồng', icon: Wallet },
       { path: 'reports', label: 'Báo cáo Phân phối', icon: TrendingUp },
     ]

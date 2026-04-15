@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Building2, Save, Loader2 } from 'lucide-react';
 import { projectApi } from '../api/projectApi';
 import { RE_PROJECT_STATUS, RE_PROPERTY_TYPE } from '../constants';
@@ -15,6 +16,11 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
   const isEdit = !!editProject;
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [form, setForm] = useState({
     code: '', name: '', description: '', developer: '', location: '',
@@ -68,9 +74,9 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-200 flex items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
@@ -251,6 +257,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
