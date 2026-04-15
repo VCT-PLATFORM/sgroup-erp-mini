@@ -92,8 +92,10 @@ export function InventoryFilter({
           <option value="Tây">Tây</option>
           <option value="Nam">Nam</option>
           <option value="Bắc">Bắc</option>
+          <option value="Đông Bắc">Đông Bắc</option>
           <option value="Đông Nam">Đông Nam</option>
           <option value="Tây Bắc">Tây Bắc</option>
+          <option value="Tây Nam">Tây Nam</option>
         </select>
 
         {/* Bedroom Select */}
