@@ -96,6 +96,7 @@ export interface ApiResponse<T> {
 export interface DashboardStats {
   totalProjects: number;
   activeProjects: number;
+  completedProjects: number;
   totalUnits: number;
   totalProducts: number;
   availableProducts: number;
@@ -103,6 +104,7 @@ export interface DashboardStats {
   soldProducts: number;
   soldUnits: number;
   totalRevenue: number;
+  totalCommission: number;
   absorptionRate: number;
 }
 

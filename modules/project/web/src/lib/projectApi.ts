@@ -21,15 +21,59 @@ const MOCK_PROJECTS: Project[] = [
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   },
+  {
+    id: "proj-2",
+    code: "AQC",
+    name: "Aqua City",
+    description: "Đô thị sinh thái thông minh phía Đông",
+    developer: "Novaland",
+    location: "Biên Hòa, Đồng Nai",
+    province: "Đồng Nai",
+    district: "Biên Hòa",
+    type: "VILLA",
+    status: "SELLING",
+    feeRate: 4.0,
+    totalUnits: 800,
+    soldUnits: 320,
+    avgPrice: 15.0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "proj-3",
+    code: "TGC",
+    name: "The Global City",
+    description: "Khu đô thị quốc tế An Phú",
+    developer: "Masterise Homes",
+    location: "An Phú, TP. Thủ Đức",
+    province: "Hồ Chí Minh",
+    district: "TP. Thủ Đức",
+    type: "SHOPHOUSE",
+    status: "UPCOMING",
+    feeRate: 3.0,
+    totalUnits: 500,
+    soldUnits: 0,
+    avgPrice: 35.0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
 ];
 
 let MOCK_PRODUCTS: Product[] = [
+  // Vinhomes Grand Park (proj-1)
   { id: "prd-1", projectId: "proj-1", code: "VHO-S1.01-05", block: "S1.01", floor: 5, area: 45.5, price: 3.25, direction: "Đông", bedrooms: 1, status: "AVAILABLE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: "prd-2", projectId: "proj-1", code: "VHO-S2.05-12A", block: "S2.05", floor: 12, area: 68.0, price: 4.10, direction: "Nam", bedrooms: 2, status: "AVAILABLE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: "prd-3", projectId: "proj-1", code: "VHO-S1.02-15", block: "S1.02", floor: 15, area: 55.4, price: 2.85, direction: "Đông Nam", bedrooms: 2, status: "LOCKED", bookedBy: "Trần Minh Khôi (SGR-003)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: "prd-4", projectId: "proj-1", code: "VHO-S3.01-20", block: "S3.01", floor: 20, area: 88.0, price: 5.50, direction: "Tây Bắc", bedrooms: 3, status: "LOCKED", bookedBy: "Lê Thị Hồng Nhung (SGR-004)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: "prd-5", projectId: "proj-1", code: "VHO-S1.01-08", block: "S1.01", floor: 8, area: 45.5, price: 2.95, direction: "Bắc", bedrooms: 1, status: "DEPOSIT", bookedBy: "Trần Minh Khôi (SGR-003)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
   { id: "prd-6", projectId: "proj-1", code: "VHO-S1.05-22", block: "S1.05", floor: 22, area: 72.0, price: 3.80, direction: "Nam", bedrooms: 2, status: "SOLD", bookedBy: "Trần Minh Khôi (SGR-003)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: "prd-7", projectId: "proj-1", code: "VHO-S6.01-10", block: "S6.01", floor: 10, area: 47.0, price: 3.30, direction: "Đông", bedrooms: 1, status: "AVAILABLE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: "prd-8", projectId: "proj-1", code: "VHO-S6.02-30", block: "S6.02", floor: 30, area: 90.0, price: 6.00, direction: "Nam", bedrooms: 3, status: "SOLD", bookedBy: "Lê Thị Hồng Nhung (SGR-004)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  // Aqua City (proj-2)
+  { id: "prd-9", projectId: "proj-2", code: "AQC-SV-01", block: "Sun Harbor", floor: 1, area: 120.0, price: 15.50, direction: "Nam", bedrooms: 4, status: "AVAILABLE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: "prd-10", projectId: "proj-2", code: "AQC-SV-15", block: "Sun Harbor", floor: 1, area: 160.0, price: 18.20, direction: "Đông", bedrooms: 5, status: "SOLD", bookedBy: "Trần Minh Khôi (SGR-003)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: "prd-11", projectId: "proj-2", code: "AQC-EP-08", block: "Ever Green", floor: 1, area: 110.0, price: 12.00, direction: "Tây", bedrooms: 3, status: "COMPLETED", bookedBy: "Trần Minh Khôi (SGR-003)", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+  { id: "prd-12", projectId: "proj-2", code: "AQC-RV-05", block: "River Park", floor: 1, area: 200.0, price: 25.00, direction: "Nam", bedrooms: 5, status: "AVAILABLE", createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
 ];
 
 let MOCK_DOCS: LegalDoc[] = [
@@ -153,15 +197,22 @@ export async function soldProduct(id: string, requestedBy: string): Promise<void
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   await delay(200);
+  const soldProds = MOCK_PRODUCTS.filter(p => p.status === "SOLD" || p.status === "COMPLETED");
+  const totalRevenue = MOCK_PRODUCTS.reduce((acc, cur) => acc + cur.price, 0);
+  const avgFeeRate = MOCK_PROJECTS.reduce((a, p) => a + p.feeRate, 0) / Math.max(1, MOCK_PROJECTS.length);
   return {
     totalProjects: MOCK_PROJECTS.length,
     activeProjects: MOCK_PROJECTS.filter(p => p.status === "SELLING").length,
+    completedProjects: MOCK_PRODUCTS.filter(p => p.status === "COMPLETED").length,
     totalProducts: MOCK_PRODUCTS.length,
+    totalUnits: MOCK_PROJECTS.reduce((a, p) => a + p.totalUnits, 0),
     availableProducts: MOCK_PRODUCTS.filter(p => p.status === "AVAILABLE").length,
     lockedProducts: MOCK_PRODUCTS.filter(p => p.status === "LOCKED").length,
-    soldProducts: MOCK_PRODUCTS.filter(p => p.status === "SOLD").length,
-    totalRevenue: MOCK_PRODUCTS.filter(p => p.status === "SOLD").reduce((acc, cur) => acc + cur.price, 0),
-    absorptionRate: Math.round((MOCK_PRODUCTS.filter(p => p.status === "SOLD").length / Math.max(1, MOCK_PRODUCTS.length)) * 100)
+    soldProducts: soldProds.length,
+    soldUnits: MOCK_PROJECTS.reduce((a, p) => a + p.soldUnits, 0),
+    totalRevenue: parseFloat(totalRevenue.toFixed(2)),
+    totalCommission: parseFloat((soldProds.reduce((a, p) => a + p.price, 0) * avgFeeRate / 100).toFixed(2)),
+    absorptionRate: Math.round((soldProds.length / Math.max(1, MOCK_PRODUCTS.length)) * 100)
   };
 }
 
