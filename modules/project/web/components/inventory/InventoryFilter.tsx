@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Grid, LayoutList, Download, Building2 } from 'lucide-react';
+import { Search, Grid, LayoutList, Download, Building2, X } from 'lucide-react';
 import { RE_INVENTORY_STATUS } from '../../constants';
 import type { REProject } from '../../types';
 
