@@ -9,7 +9,6 @@ import type { REProject } from '../types';
 
 export function ProjectListScreen() {
   const { data: projects, refetch } = useProjects();
-  const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<REProject | null>(null);
@@ -17,9 +16,8 @@ export function ProjectListScreen() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); // Allow toggle
 
   const filtered = projects.filter(p => {
-    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.code.toLowerCase().includes(search.toLowerCase());
     const matchStatus = statusFilter === 'ALL' || p.status === statusFilter;
-    return matchSearch && matchStatus;
+    return matchStatus;
   });
 
   const handleEdit = (proj: REProject) => {
@@ -74,19 +72,7 @@ export function ProjectListScreen() {
           {/* Action Group */}
           <div className="flex items-center gap-2 bg-white dark:bg-black/30 backdrop-blur-2xl p-1.5 rounded-[20px] border border-slate-200 dark:border-white/5 shadow-sm">
             
-            <div className="relative group">
-              <div className="absolute inset-0 bg-linear-to-r from-cyan-500/0 via-cyan-500/5 to-transparent rounded-xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative flex items-center h-10 px-3 bg-sg-bg/50 border border-transparent hover:border-cyan-500/20 rounded-xl transition-all w-full md:w-64">
-                <Search size={15} className="text-sg-muted group-hover:text-cyan-500 transition-colors" />
-                <input 
-                  type="text" 
-                  placeholder="Tìm dự án..." 
-                  className="bg-transparent border-none outline-none ml-2 text-[13px] font-bold text-sg-heading w-full placeholder:text-sg-muted/50"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                />
-              </div>
-            </div>
+
 
             <div className="relative">
               <select 
