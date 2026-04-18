@@ -11,6 +11,7 @@ import {
 } from '../hooks/useHR';
 import { useToast } from '@sgroup/web-ui';
 import { SGConfirmDialog } from '@sgroup/web-ui';
+import { Department, Position } from '../types';
 
 type ModalMode = 'create_dept' | 'edit_dept' | 'create_team' | 'edit_team' | 'create_pos' | 'edit_pos' | null;
 
@@ -65,7 +66,7 @@ export function OrgConfigScreen() {
         toast.success(`Đã tạo phòng ban "${deptForm.name}" thành công`);
       }
       setDeptForm(EMPTY_DEPT); setModalMode(null);
-    } catch (e: React.ChangeEvent<HTMLInputElement>) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
   };
 
   const handleTeamSubmit = async () => {
@@ -79,7 +80,7 @@ export function OrgConfigScreen() {
         toast.success(`Đã tạo team "${teamForm.name}" thành công`);
       }
       setTeamForm(EMPTY_TEAM); setModalMode(null);
-    } catch (e: React.ChangeEvent<HTMLInputElement>) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
   };
 
   const handlePosSubmit = async () => {
@@ -93,7 +94,7 @@ export function OrgConfigScreen() {
         toast.success(`Đã tạo vị trí "${posForm.name}" thành công`);
       }
       setPosForm(EMPTY_POS); setModalMode(null);
-    } catch (e: React.ChangeEvent<HTMLInputElement>) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
+    } catch (e: any) { toast.error(e?.response?.data?.message || e?.message || 'Có lỗi xảy ra'); }
   };
 
   const executeDelete = async () => {
@@ -107,8 +108,8 @@ export function OrgConfigScreen() {
         toast.success(`Đã xóa team "${confirmDialog.name}"`);
       }
       setConfirmDialog(null);
-    } catch (e: React.ChangeEvent<HTMLInputElement>) { 
-      toast.error(e?.response?.data?.message || 'Không thể xóa'); 
+    } catch (e: any) { 
+      toast.error(e?.response?.data?.message || e?.message || 'Không thể xóa'); 
       setConfirmDialog(null);
     }
   };
@@ -224,7 +225,7 @@ export function OrgConfigScreen() {
                       <div className="flex items-center gap-3">
                         <div className="flex gap-2">
                           <button 
-                            onClick={(e) => { e.stopPropagation(); setEditId(dept.id); setDeptForm({ name: dept.name, code: dept.code, description: dept.description || '' }); setModalMode('edit_dept'); }}
+                            onClick={(e) => { e.stopPropagation(); setEditId(dept.id); setDeptForm({ name: dept.name, code: dept.code || '', description: dept.description || '' }); setModalMode('edit_dept'); }}
                             className="w-10 h-10 rounded-xl flex items-center justify-center bg-sg-btn-bg hover:bg-sg-border text-sg-subtext transition-colors"
                           >
                             <Pencil size={16} />
@@ -283,7 +284,7 @@ export function OrgConfigScreen() {
                                     </div>
                                   </div>
                                   <div className="flex gap-2 text-sg-subtext">
-                                    <button onClick={() => { setEditId(t.id); setTeamForm({ name: t.name, code: t.code, departmentId: dept.id, description: t.description || '' }); setModalMode('edit_team'); }} className="w-8 h-8 rounded-lg bg-sg-bg hover:bg-sg-border flex items-center justify-center"><Pencil size={14}/></button>
+                                    <button onClick={() => { setEditId(t.id); setTeamForm({ name: t.name, code: t.code || '', departmentId: dept.id, description: t.description || '' }); setModalMode('edit_team'); }} className="w-8 h-8 rounded-lg bg-sg-bg hover:bg-sg-border flex items-center justify-center"><Pencil size={14}/></button>
                                     <button onClick={() => setConfirmDialog({ open: true, type: 'team', id: t.id, name: t.name })} className="w-8 h-8 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 flex items-center justify-center"><Trash2 size={14}/></button>
                                   </div>
                                 </div>
@@ -403,7 +404,7 @@ export function OrgConfigScreen() {
                       <div key={p.id} className="p-5 rounded-2xl bg-sg-card border border-sg-border shadow-sm flex flex-col relative group">
                         <div className="flex justify-between items-start mb-4">
                           <h3 className="font-extrabold text-sg-heading flex-1 pr-2">{p.name}</h3>
-                          <button onClick={() => { setEditId(p.id); setPosForm({ name: p.name, code: p.code, level: p.level || '', description: p.description || '' }); setModalMode('edit_pos'); }} className="text-sg-muted hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button onClick={() => { setEditId(p.id); setPosForm({ name: p.name, code: p.code || '', level: p.level || '', description: p.description || '' }); setModalMode('edit_pos'); }} className="text-sg-muted hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Pencil size={16} />
                           </button>
                         </div>

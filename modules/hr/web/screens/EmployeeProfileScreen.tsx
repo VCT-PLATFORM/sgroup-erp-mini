@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEmployees, useUpdateEmployee, usePositions, useDepartments } from '../hooks/useHR';
 import { WORK_STATUS_OPTIONS, CANDIDATE_SOURCE_OPTIONS, EMPLOYMENT_TYPE_OPTIONS } from '../constants';
 import { useToast } from '@sgroup/web-ui';
+import { Employee } from '../types';
 
 const TABS = [
   { key: 'personal', label: 'Thông tin cá nhân', icon: User },
@@ -646,7 +647,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                       await updateEmployee.mutateAsync({ id: editForm.id, data: payload });
                       toast.success('Đã cập nhật hồ sơ thành công');
                       setEditOpen(false);
-                    } catch (e) {
+                    } catch (e: any) {
                       toast.error(e?.message || 'Có lỗi xảy ra khi cập nhật hồ sơ');
                     }
                   }}

@@ -8,7 +8,7 @@ export type WorkStatus = 'ACTIVE' | 'PROBATION' | 'ON_LEAVE' | 'TERMINATED';
 export interface Department {
   id: string;
   name: string;
-  code: string;
+  code?: string;
   description?: string;
   manager?: Employee;
   _count?: {
@@ -20,15 +20,15 @@ export interface Department {
 export interface Position {
   id: string;
   name: string;
-  code: string;
-  level: string;
+  code?: string;
+  level?: string;
   description?: string;
 }
 
 export interface Team {
   id: string;
   name: string;
-  code: string;
+  code?: string;
   description?: string;
   departmentId?: string;
   _count?: {
@@ -38,9 +38,9 @@ export interface Team {
 
 export interface Employee {
   id: string;
-  code: string; // The backend uses "code" (employeeCode logic mapped to code)
-  firstName: string;
-  lastName: string;
+  code?: string; // The backend uses "code" (employeeCode logic mapped to code)
+  firstName?: string;
+  lastName?: string;
   fullName: string;
   englishName?: string;
   email: string;
@@ -83,6 +83,19 @@ export interface Employee {
   employmentType?: string;
   startDate?: string;
   officialSalary?: number;
+  probationSalary?: number;
+  remainingLeaveDays?: number;
+  totalLeaveDays?: number;
+  workStatus?: string;
+  personalDocs?: string;
+  insuranceBook?: string;
+  recruiter?: string;
+  candidateSource?: string;
+  directManager?: string;
+  dob?: string;
+  idNumber?: string;
+  division?: string;
+  contractDate?: string;
 
   createdAt?: string;
   updatedAt?: string;
