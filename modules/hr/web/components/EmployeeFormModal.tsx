@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { X, UsersRound, History, ArrowRightLeft, UserCircle, Briefcase, Building, CreditCard } from 'lucide-react';
+import { X, UsersRound, History, ArrowRightLeft, UserCircle, Briefcase, Building, CreditCard, UploadCloud } from 'lucide-react';
 import { Department, Position, Team, TransferRecord } from '../types';
 import { STATUS_OPTIONS } from '../constants';
 import { useToast } from '@sgroup/web-ui';
@@ -144,7 +144,25 @@ export function EmployeeFormModal({
                        </div>
                        <div>
                          <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Mã định danh VN</label>
-                         <input {...register('vnId')} placeholder="MĐD..." className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                         <div className="relative h-11 w-full bg-sg-bg dark:bg-white/5 border-2 border-dashed border-sg-border hover:border-sg-red/50 rounded-xl overflow-hidden transition-all group">
+                            <input 
+                              type="file" 
+                              title="Tải lên file Mã Định Danh VN"
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" 
+                              accept="image/*,.pdf" 
+                              onChange={(e) => {
+                                if (e.target.files && e.target.files[0]) {
+                                   setValue('vnId', e.target.files[0].name, { shouldValidate: true });
+                                }
+                              }}
+                            />
+                            <div className="absolute inset-0 flex items-center justify-between px-4 text-[13px] font-bold">
+                               <span className="text-sg-muted group-hover:text-sg-heading truncate max-w-[85%] transition-colors">
+                                 {watch('vnId') || 'Tải file lên...'}
+                               </span>
+                               <UploadCloud size={16} className="text-sg-muted group-hover:text-sg-red transition-colors" />
+                            </div>
+                         </div>
                        </div>
                     </div>
                  </div>
