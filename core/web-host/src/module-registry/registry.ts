@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { lazy } from 'react';
-import { Users, Briefcase, TrendingUp } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, Megaphone } from 'lucide-react';
 import {
   ACTIVE_APP_MODULE_IDS,
   getAppModuleById,
@@ -22,6 +22,7 @@ const moduleIcons: Record<ActiveAppModuleId, ModuleConfig['icon']> = {
   hr: Users,
   project: Briefcase,
   sales: TrendingUp,
+  mkt: Megaphone,
 };
 
 /**
@@ -31,6 +32,7 @@ const moduleAccents: Record<ActiveAppModuleId, string> = {
   hr: 'from-sg-red to-sg-red-dark',
   project: 'from-cyan-500 to-blue-600',
   sales: 'from-emerald-500 to-teal-600',
+  mkt: 'from-orange-500 to-pink-600',
 };
 
 /**
@@ -48,6 +50,9 @@ const moduleShells: Record<ActiveAppModuleId, ModuleConfig['Shell']> = {
   ),
   sales: lazy(() =>
     import('@modules/sales').then((m) => ({ default: m.SalesShell })),
+  ),
+  mkt: lazy(() =>
+    import('@modules/mkt').then((m) => ({ default: m.MKTShell })),
   ),
 };
 

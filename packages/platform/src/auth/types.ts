@@ -3,7 +3,9 @@ export type UserRole =
   | 'hr'
   | 'employee'
   | 'sales_manager'
-  | 'sales_director';
+  | 'sales_director'
+  | 'mkt_manager'
+  | 'mkt_director';
 
 export interface AuthUser {
   id: string;

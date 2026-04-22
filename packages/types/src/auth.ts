@@ -9,7 +9,9 @@ export type UserRole =
   | 'hr'
   | 'employee'
   | 'sales_manager'
-  | 'sales_director';
+  | 'sales_director'
+  | 'mkt_manager'
+  | 'mkt_director';
 
 /** Authenticated user profile */
 export interface AuthUser {

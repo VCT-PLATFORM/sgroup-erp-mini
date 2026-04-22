@@ -9,29 +9,29 @@ import { useToast } from '@sgroup/web-ui';
 
 const employeeSchema = z.object({
   fullName: z.string().min(2, 'Họ tên phải có ít nhất 2 ký tự').nonempty('Vui lòng nhập họ tên'),
-  englishName: z.string().optional(),
+  englishName: z.string().nonempty('Vui lòng nhập tên tiếng Anh'),
   email: z.string().email('Email không hợp lệ').nonempty('Vui lòng nhập email'),
-  phone: z.string().regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ').optional().or(z.literal('')),
+  phone: z.string().nonempty('Vui lòng nhập SĐT').regex(/^(0|\+84)[3|5|7|8|9][0-9]{8}$/, 'Số điện thoại không hợp lệ'),
   relativePhone: z.string().optional(),
   
-  identityCard: z.string().optional(),
-  idIssueDate: z.string().optional(),
+  identityCard: z.string().nonempty('Vui lòng nhập số CCCD'),
+  idIssueDate: z.string().nonempty('Vui lòng nhập ngày cấp CCCD'),
   idIssuePlace: z.string().optional(),
   vnId: z.string().optional(),
   
   dateOfBirth: z.string().optional(),
   gender: z.string().optional(),
-  address: z.string().optional(),
+  address: z.string().nonempty('Vui lòng nhập địa chỉ hiện tại'),
   permanentAddress: z.string().optional(),
   contactAddress: z.string().optional(),
 
   taxCode: z.string().optional(),
   insuranceBookNumber: z.string().optional(),
-  bankName: z.string().optional(),
-  bankAccount: z.string().optional(),
+  bankName: z.string().nonempty('Vui lòng nhập tên ngân hàng'),
+  bankAccount: z.string().nonempty('Vui lòng nhập số tài khoản'),
 
-  departmentId: z.string().optional(),
-  positionId: z.string().optional(),
+  departmentId: z.string().nonempty('Vui lòng chọn phòng ban'),
+  positionId: z.string().nonempty('Vui lòng chọn chức danh'),
   teamId: z.string().optional(),
   status: z.string().nonempty('Trạng thái không được để trống'),
 });
@@ -130,17 +130,20 @@ export function EmployeeFormModal({
                        <ErrorMsg name="fullName" />
                     </div>
                     <div>
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Tên tiếng Anh (Tuỳ chọn)</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Tên tiếng Anh <span className="text-sg-red">*</span></label>
                        <input {...register('englishName')} placeholder="VD: John Doe" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                       <ErrorMsg name="englishName" />
                     </div>
                     <div>
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Căn cước công dân (CCCD)</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Căn cước công dân (CCCD) <span className="text-sg-red">*</span></label>
                        <input {...register('identityCard')} placeholder="012345678901" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                       <ErrorMsg name="identityCard" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div>
-                         <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Ngày cấp</label>
+                         <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Ngày cấp <span className="text-sg-red">*</span></label>
                          <input type="date" {...register('idIssueDate')} className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                         <ErrorMsg name="idIssueDate" />
                        </div>
                        <div>
                          <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Mã định danh VN</label>
@@ -182,7 +185,7 @@ export function EmployeeFormModal({
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                        <div>
-                          <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">SĐT Cá nhân</label>
+                          <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">SĐT Cá nhân <span className="text-sg-red">*</span></label>
                           <input {...register('phone')} type="tel" placeholder="090..." className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
                           <ErrorMsg name="phone" />
                        </div>
@@ -192,8 +195,9 @@ export function EmployeeFormModal({
                        </div>
                     </div>
                     <div className="col-span-full">
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Địa chỉ hiện tại</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Địa chỉ hiện tại <span className="text-sg-red">*</span></label>
                        <input {...register('address')} placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành" className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                       <ErrorMsg name="address" />
                     </div>
                  </div>
                </div>
@@ -206,7 +210,7 @@ export function EmployeeFormModal({
                  
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="flex flex-col gap-2">
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 block">Phòng ban</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 block">Phòng ban <span className="text-sg-red">*</span></label>
                        <div className="flex flex-wrap gap-2">
                           {deptOptions.map(d => (
                             <button
@@ -221,6 +225,7 @@ export function EmployeeFormModal({
                             </button>
                           ))}
                        </div>
+                       <ErrorMsg name="departmentId" />
                     </div>
 
                     {(watch('departmentId') && teamOptions.length > 0) && (
@@ -253,7 +258,7 @@ export function EmployeeFormModal({
                     )}
                     
                     <div className="flex flex-col gap-2 col-span-full">
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 block">Chức danh</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 block">Chức danh <span className="text-sg-red">*</span></label>
                        <div className="flex flex-wrap gap-2">
                           {posOptions.map(p => (
                             <button
@@ -268,6 +273,7 @@ export function EmployeeFormModal({
                             </button>
                           ))}
                        </div>
+                       <ErrorMsg name="positionId" />
                     </div>
                  </div>
                </div>
@@ -288,12 +294,14 @@ export function EmployeeFormModal({
                        <input {...register('insuranceBookNumber')} placeholder="..." className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
                     </div>
                     <div>
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Ngân hàng</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Ngân hàng <span className="text-sg-red">*</span></label>
                        <input {...register('bankName')} placeholder="MBBank..." className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                       <ErrorMsg name="bankName" />
                     </div>
                     <div>
-                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Số tài khoản</label>
+                       <label className="text-[10px] font-black uppercase tracking-widest text-sg-subtext/70 mb-1.5 block">Số tài khoản <span className="text-sg-red">*</span></label>
                        <input {...register('bankAccount')} placeholder="..." className="h-11 w-full bg-white dark:bg-white/5 border border-sg-border/50 rounded-xl px-4 text-[14px] font-bold text-sg-heading placeholder:text-sg-muted/50 focus:outline-none focus:border-sg-red focus:ring-4 focus:ring-sg-red/10 transition-all" />
+                       <ErrorMsg name="bankAccount" />
                     </div>
                  </div>
                </div>

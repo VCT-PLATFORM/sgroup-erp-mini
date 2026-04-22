@@ -31,6 +31,7 @@ export default defineConfig({
       '@modules/hr': path.resolve(rootDir, 'modules/hr/web'),
       '@modules/project': path.resolve(rootDir, 'modules/project/web'),
       '@modules/sales': path.resolve(rootDir, 'modules/sales/web'),
+      '@modules/mkt': path.resolve(rootDir, 'modules/mkt/web'),
     },
   },
   server: {

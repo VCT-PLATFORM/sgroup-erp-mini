@@ -1,13 +1,8 @@
 // ═══════════════════════════════════════════════════════════
-// @sgroup/types — Barrel Export
-// Import everything from '@sgroup/types'
+// @sgroup/mkt-web — Barrel Export
 // ═══════════════════════════════════════════════════════════
 
-export * from './auth';
-export * from './api';
-export * from './shared';
-export * from './project';
-export * from './hr';
-export * from './sales';
-export * from './marketing';
-
+export { MKTShell } from './MKTShell';
+export * from './types';
+export * from './constants';
+export * from './api/mktApi';

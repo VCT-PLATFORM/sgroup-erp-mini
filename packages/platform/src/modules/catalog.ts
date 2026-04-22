@@ -30,7 +30,7 @@ export interface AppModuleDefinition {
   legacySources?: readonly string[];
 }
 
-export const ACTIVE_APP_MODULE_IDS = ['hr', 'project', 'sales'] as const;
+export const ACTIVE_APP_MODULE_IDS = ['hr', 'project', 'sales', 'mkt'] as const;
 export type ActiveAppModuleId = typeof ACTIVE_APP_MODULE_IDS[number];
 
 export const MODULE_LEGACY_ALIASES: Record<LegacyModuleId, AppModuleId> = {
@@ -59,7 +59,10 @@ export const APP_MODULES: readonly AppModuleDefinition[] = [
     id: 'mkt',
     name: 'Marketing',
     description: 'Campaign, lead attribution và ngân sách marketing.',
-    status: 'planned',
+    routeName: 'MKTModule',
+    basePath: '/MKTModule',
+    status: 'active',
+    requiredRoles: ['admin', 'mkt_manager', 'mkt_director'],
   },
   {
     id: 'agency',

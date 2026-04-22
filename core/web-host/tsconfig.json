@@ -23,6 +23,8 @@
       "@modules/project/*": ["../../modules/project/web/*"],
       "@modules/sales": ["../../modules/sales/web/index.ts"],
       "@modules/sales/*": ["../../modules/sales/web/*"],
+      "@modules/mkt": ["../../modules/mkt/web/index.ts"],
+      "@modules/mkt/*": ["../../modules/mkt/web/*"],
 
       "@sgroup/design-system": ["../../packages/design-system/src/index.css"],
       "@sgroup/types": ["../../packages/types/src/index.ts"],
@@ -41,6 +43,7 @@
     "../../modules/hr/web",
     "../../modules/project/web",
     "../../modules/sales/web",
+    "../../modules/mkt/web",
     "../../packages/types/src",
     "../../packages/api-client/src",
     "../../packages/platform/src",
@@ -51,8 +54,10 @@
     "../../modules/project/web/src",
     "../../modules/hr/web/src",
     "../../modules/sales/web/src",
+    "../../modules/mkt/web/src",
     "../../modules/project/web/node_modules",
     "../../modules/hr/web/node_modules",
-    "../../modules/sales/web/node_modules"
+    "../../modules/sales/web/node_modules",
+    "../../modules/mkt/web/node_modules"
   ]
 }
