@@ -515,7 +515,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                     { s: 1, l: 'Cơ bản', i: User, h: 'Thông tin cơ bản & Liên Hệ' },
                     { s: 2, l: 'Địa chỉ & Giấy tờ', i: MapPin, h: 'Hồ sơ pháp lý' },
                     { s: 3, l: 'Công việc', i: Briefcase, h: 'Hợp đồng & Vị trí' },
-                    { s: 4, l: 'Tài chính & Phép', i: Wallet, h: 'Lương & Ngày phép' }
+                    { s: 4, l: 'Tuyển dụng và nghỉ phép', i: Wallet, h: 'Lương & Ngày phép' }
                   ].map(step => (
                      <button
                         key={step.s}
@@ -610,11 +610,11 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                             <EditField label="Người giới thiệu" value={editForm.referrer} onChange={v => setEditForm(f => ({...f, referrer: v}))} type="text" />
                             <div className="hidden md:block"></div>
                             <EditField label="Số ngày phép" value={editForm.totalLeaveDays} onChange={v => setEditForm(f => ({...f, totalLeaveDays: Number(v) || 0}))} type="number" />
-                            <EditField label="Số phép còn lại" value={editForm.remainingLeaveDays} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Number(v) || 0}))} type="number" />
-                            <div className="md:col-span-2 mt-1 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
-                              <span className="text-sm font-bold text-sg-subtext">Số ngày phép đã nghỉ</span>
-                              <span className="text-base font-black text-amber-500">
-                                {(editForm.totalLeaveDays || 0) - (editForm.remainingLeaveDays || 0)} ngày
+                            <EditField label="Số ngày phép đã nghỉ" value={(editForm.totalLeaveDays || 0) - (editForm.remainingLeaveDays || 0)} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Math.max(0, (f.totalLeaveDays || 0) - (Number(v) || 0))}))} type="number" />
+                            <div className="md:col-span-2 mt-1 px-4 py-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-between">
+                              <span className="text-sm font-bold text-sg-subtext">Số ngày phép còn lại</span>
+                              <span className="text-base font-black text-blue-500">
+                                {(editForm.remainingLeaveDays || 0)} ngày
                               </span>
                             </div>
                           </div>
