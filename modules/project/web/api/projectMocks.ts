@@ -265,3 +265,24 @@ export async function deleteDoc(projectId: string, docId: string): Promise<void>
   const idx = MOCK_DOCS.findIndex(d => d.id === docId);
   if (idx > -1) MOCK_DOCS.splice(idx, 1);
 }
+
+// ==================== Bookings ====================
+
+const MOCK_BOOKINGS: any[] = [
+  { id: 'b-1', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Trần Lê Hải 0', customerPhone: '0969841010', staffName: 'Ngô Việt', amount: 50, status: 'PENDING', createdAt: new Date().toISOString() },
+  { id: 'b-2', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Lâm Chấn Phong 2', customerPhone: '0939225523', staffName: 'Ngô Việt', amount: 50, status: 'PENDING', createdAt: new Date().toISOString() },
+  { id: 'b-3', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Ngô Thị Vàng 1', customerPhone: '0974289192', staffName: 'Trần Minh Khôi', amount: 50, status: 'APPROVED', createdAt: new Date().toISOString() },
+  { id: 'b-4', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Phan Văn Khoa 4', customerPhone: '0926938788', staffName: 'Ngô Việt', amount: 50, status: 'APPROVED', createdAt: new Date().toISOString() },
+  { id: 'b-5', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Đào Thuỳ Trang 3', customerPhone: '0975949856', staffName: 'Trần Minh Khôi', amount: 50, status: 'REJECTED', createdAt: new Date().toISOString() },
+];
+
+export async function listBookings(): Promise<any[]> {
+  await delay(400);
+  return MOCK_BOOKINGS;
+}
+
+export async function updateBookingStatus(id: string, status: string): Promise<void> {
+  await delay(300);
+  const idx = MOCK_BOOKINGS.findIndex(b => b.id === id);
+  if (idx > -1) MOCK_BOOKINGS[idx].status = status;
+}

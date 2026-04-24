@@ -6,6 +6,7 @@ import { ProjectSearchModal } from './components/ProjectSearchModal';
 import { useAuthStore } from '@sgroup/platform';
 
 import { ProjectListScreen } from './screens/ProjectListScreen';
+import { BookingManagementScreen } from './screens/BookingManagementScreen';
 
 // Placeholder for screens under development
 function PlaceholderScreen({ title }: { title: string }) {
@@ -145,7 +146,7 @@ export function ProjectShell() {
           <Routes>
             <Route path="/" element={<Navigate to="list" replace />} />
             <Route path="list" element={<ProjectListScreen />} />
-            <Route path="booking" element={<PlaceholderScreen title="Quản lý giữ chỗ" />} />
+            <Route path="booking" element={<BookingManagementScreen />} />
             <Route path="deposit" element={<PlaceholderScreen title="Quản lý đặt cọc" />} />
             <Route path="*" element={<Navigate to="list" replace />} />
           </Routes>

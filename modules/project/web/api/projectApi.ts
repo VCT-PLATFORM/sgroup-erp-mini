@@ -138,3 +138,14 @@ export const legalDocApi = {
       method: 'DELETE',
     }),
 };
+
+// ─── Bookings ───
+
+export const bookingApi = {
+  list: () => apiFetch<ApiResponse<any[]>>('/bookings'),
+  updateStatus: (id: string, status: string) =>
+    apiFetch<ApiResponse<{ message: string }>>(`/bookings/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status }),
+    }),
+};

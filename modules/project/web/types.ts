@@ -68,6 +68,20 @@ export interface RELegalDoc {
   createdAt?: string;
 }
 
+export type REBookingStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface REBooking {
+  id: string;
+  projectId: string;
+  projectName: string;
+  customerName: string;
+  customerPhone: string;
+  staffName: string;
+  amount: number;
+  status: REBookingStatus;
+  createdAt: string;
+}
+
 // ─── API Response Types ───
 
 export interface ApiResponse<T> {
