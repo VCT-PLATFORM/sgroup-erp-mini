@@ -611,6 +611,12 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                             <div className="hidden md:block"></div>
                             <EditField label="Số ngày phép" value={editForm.totalLeaveDays} onChange={v => setEditForm(f => ({...f, totalLeaveDays: Number(v) || 0}))} type="number" />
                             <EditField label="Số phép còn lại" value={editForm.remainingLeaveDays} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Number(v) || 0}))} type="number" />
+                            <div className="md:col-span-2 mt-1 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
+                              <span className="text-sm font-bold text-sg-subtext">Số ngày phép đã nghỉ</span>
+                              <span className="text-base font-black text-amber-500">
+                                {(editForm.totalLeaveDays || 0) - (editForm.remainingLeaveDays || 0)} ngày
+                              </span>
+                            </div>
                           </div>
                         </EditSection>
                       </>
