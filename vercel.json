@@ -1,11 +1,4 @@
 {
-  "installCommand": "rm -rf package-lock.json node_modules && npm install",
-  "buildCommand": "turbo run build --filter=@sgroup/web-host",
-  "outputDirectory": "core/web-host/dist",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ]
+  "installCommand": "npm install",
+  "framework": "vite"
 }
