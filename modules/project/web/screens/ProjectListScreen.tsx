@@ -144,146 +144,122 @@ export function ProjectListScreen() {
       {filtered.length > 0 && (
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-12">
           <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" : "flex flex-col gap-4"}>
-            {filtered.map((proj, idx) => {
-              const statusCfg = RE_PROJECT_STATUS[proj.status] || RE_PROJECT_STATUS.UPCOMING;
-              const typeCfg = RE_PROPERTY_TYPE[proj.type] || RE_PROPERTY_TYPE.LAND;
-              const soldPercent = proj.totalUnits > 0 ? Math.round((proj.soldUnits / proj.totalUnits) * 100) : 0;
-              
-              if (viewMode === 'list') {
-                  // LIST VIEW
-                  return (
-                      <div key={proj.id} className="sg-stagger bg-white dark:bg-black/30 backdrop-blur-2xl rounded-sg-xl border border-slate-200 dark:border-white/5 p-4 flex flex-col md:flex-row items-center gap-6 shadow-md hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-500 group relative overflow-hidden focus-within:ring-2 focus-within:ring-cyan-500/50" style={{ animationDelay: `${(idx % 10) * 50}ms` }}>
-                         <div className="absolute inset-0 bg-linear-to-r from-transparent via-cyan-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500" />
-                         
-                         {/* Icon */}
-                         <div className={`w-14 h-14 rounded-2xl flex items-center justify-center relative shrink-0 border shadow-inner ${statusCfg.bg.replace('/10', '/20')} ${statusCfg.color} group-hover:scale-110 transition-transform`}>
-                             <Target size={24} strokeWidth={2.5} />
-                             <div className={`absolute -inset-2 rounded-sg-xl border border-${statusCfg.color.replace('text-', '')}/30 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse`} />
-                         </div>
+              {filtered.map((proj, idx) => {
+                const statusCfg = RE_PROJECT_STATUS[proj.status] || RE_PROJECT_STATUS.UPCOMING;
+                const typeCfg = RE_PROPERTY_TYPE[proj.type] || RE_PROPERTY_TYPE.LAND;
+                
+                if (viewMode === 'list') {
+                    // LIST VIEW
+                    return (
+                        <div key={proj.id} className="sg-stagger bg-white dark:bg-black/30 backdrop-blur-2xl rounded-sg-xl border border-slate-200 dark:border-white/5 p-4 flex flex-col md:flex-row items-center gap-6 shadow-md hover:shadow-[0_16px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 transition-all duration-500 group relative overflow-hidden focus-within:ring-2 focus-within:ring-cyan-500/50" style={{ animationDelay: `${(idx % 10) * 50}ms` }}>
+                           <div className="absolute inset-0 bg-linear-to-r from-transparent via-cyan-500/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1500" />
+                           
+                           {/* Icon */}
+                           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center relative shrink-0 border shadow-inner ${statusCfg.bg.replace('/10', '/20')} ${statusCfg.color} group-hover:scale-110 transition-transform`}>
+                               <Target size={24} strokeWidth={2.5} />
+                               <div className={`absolute -inset-2 rounded-sg-xl border border-${statusCfg.color.replace('text-', '')}/30 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse`} />
+                           </div>
 
-                         {/* Info */}
-                         <div className="flex-1 min-w-0 pr-4">
-                             <div className="flex items-center gap-3">
-                                 <Link to={`/ProjectModule/board?id=${proj.id}`} className="text-[18px] font-black text-sg-heading truncate hover:text-cyan-500 transition-colors drop-shadow-sm">{proj.name}</Link>
-                                 <span className="text-[12px] font-black text-sg-muted bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/5">{proj.code}</span>
-                                 <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border shadow-xs ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
-                                    {statusCfg.label}
-                                 </span>
-                             </div>
-                             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-2">
-                                <span className="text-[12px] font-bold text-sg-subtext flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
-                                    <MapPin size={14} className="text-amber-500" /> {proj.location}
-                                </span>
-                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border shadow-xs ${typeCfg.bg} ${typeCfg.color} ${typeCfg.border}`}>
-                                    {typeCfg.label}
-                                </span>
-                             </div>
-                         </div>
+                           {/* Info */}
+                           <div className="flex-1 min-w-0 pr-4">
+                               <div className="flex items-center gap-3">
+                                   <Link to={`/ProjectModule/board?id=${proj.id}`} className="text-[18px] font-black text-sg-heading truncate hover:text-cyan-500 transition-colors drop-shadow-sm">{proj.name}</Link>
+                                   <span className="text-[12px] font-black text-sg-muted bg-slate-100 dark:bg-white/5 px-2 py-0.5 rounded-lg border border-slate-200 dark:border-white/5">{proj.code}</span>
+                                   <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border shadow-xs ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
+                                      {statusCfg.label}
+                                   </span>
+                               </div>
+                               <div className="flex flex-wrap items-center gap-x-6 gap-y-2 mt-2">
+                                  <span className="text-[12px] font-bold text-sg-subtext flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                                      <MapPin size={14} className="text-amber-500" /> {proj.location}
+                                  </span>
+                                  <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider border shadow-xs ${typeCfg.bg} ${typeCfg.color} ${typeCfg.border}`}>
+                                      {typeCfg.label}
+                                  </span>
+                               </div>
+                           </div>
 
-                         {/* Progress */}
-                         <div className="w-full md:w-48 bg-slate-50 dark:bg-black/50 px-4 py-3 rounded-xl border border-slate-200 dark:border-white/5 flex flex-col justify-center">
-                            <div className="flex items-center justify-between text-[11px] font-bold text-sg-subtext mb-1.5">
-                              <span>Hấp Thụ</span>
-                              <span className="text-sg-heading font-black">{proj.soldUnits}/{proj.totalUnits} <span className="text-cyan-500">({soldPercent}%)</span></span>
-                            </div>
-                            <div className="h-1.5 bg-sg-bg rounded-full overflow-hidden shadow-inner">
-                              <div className="h-full bg-linear-to-r from-cyan-500 to-indigo-500 rounded-full transition-all duration-1000 ease-out" style={{ width: `${soldPercent}%` }} />
-                            </div>
-                         </div>
+                           {/* Actions context menu block */}
+                           <div className="md:ml-auto flex items-center gap-3 shrink-0">
+                              {/* Hover actions block (visible on hover) */}
+                              <div className="hidden lg:flex items-center gap-2 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
+                                  <Link to={`/ProjectModule/inventory?project=${proj.id}`} className="bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500 hover:text-white border border-cyan-500/20 px-3 py-1.5 rounded-lg text-[11px] font-black transition-colors">
+                                      Giỏ Hàng
+                                  </Link>
+                                   <button onClick={() => handleEdit(proj)} className="bg-slate-100 dark:bg-white/10 text-sg-heading hover:bg-emerald-500 hover:text-white border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-lg text-[11px] font-black transition-colors">
+                                       Thiết lập
+                                   </button>
+                              </div>
+                              <button onClick={() => handleDelete(proj)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-colors" title="Delete">
+                                   <Trash2 size={16} />
+                              </button>
+                           </div>
+                        </div>
+                    );
+                }
 
-                         {/* Actions context menu block */}
-                         <div className="md:ml-auto flex items-center gap-3 shrink-0">
-                            {/* Hover actions block (visible on hover) */}
-                            <div className="hidden lg:flex items-center gap-2 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-500 pointer-events-none group-hover:pointer-events-auto">
-                                <Link to={`/ProjectModule/inventory?project=${proj.id}`} className="bg-cyan-500/10 text-cyan-500 hover:bg-cyan-500 hover:text-white border border-cyan-500/20 px-3 py-1.5 rounded-lg text-[11px] font-black transition-colors">
-                                    Giỏ Hàng
-                                </Link>
-                                 <button onClick={() => handleEdit(proj)} className="bg-slate-100 dark:bg-white/10 text-sg-heading hover:bg-emerald-500 hover:text-white border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-lg text-[11px] font-black transition-colors">
-                                     Thiết lập
-                                 </button>
-                            </div>
-                            <button onClick={() => handleDelete(proj)} className="w-9 h-9 flex items-center justify-center rounded-xl bg-rose-500/10 text-rose-500 border border-rose-500/20 hover:bg-rose-500 hover:text-white transition-colors" title="Delete">
-                                 <Trash2 size={16} />
+                // GRID VIEW
+                return (
+                  <div key={proj.id} className="relative group perspective-distant sg-stagger" style={{ animationDelay: `${(idx % 10) * 100}ms` }}>
+                    <div className="bg-white dark:bg-black/30 backdrop-blur-3xl rounded-sg-2xl border border-slate-200 dark:border-white/5 p-8 flex flex-col gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-all duration-700 hover:shadow-[0_24px_60px_rgba(0,0,0,0.12)] group-hover:-translate-y-3 relative overflow-hidden">
+                      
+                      {/* Glass Shimmers */}
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                      <div className={`absolute -right-16 -top-16 w-48 h-48 rounded-full ${statusCfg.bg} blur-[60px] opacity-20 group-hover:opacity-60 group-hover:scale-125 transition-all duration-1000`} />
+                      <div className={`absolute -left-16 -bottom-16 w-48 h-48 rounded-full ${typeCfg.bg} blur-[60px] opacity-10 group-hover:opacity-30 transition-all duration-1000`} />
+                      
+                      {/* Status Banner Area */}
+                      <div className="flex items-start justify-between relative z-10 w-full cursor-default">
+                        <div className={`w-16 h-16 rounded-sg-xl flex items-center justify-center border shadow-inner ${statusCfg.bg.replace('/10', '/20')} ${statusCfg.border} ${statusCfg.color} transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-6`}>
+                          <Target size={28} strokeWidth={2.5} />
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <span className={`px-3.5 py-1.5 rounded-sg-md text-[10px] font-black uppercase tracking-widest border shadow-xs ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
+                            {statusCfg.label}
+                          </span>
+                          <div className="relative">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === proj.id ? null : proj.id); }}
+                              className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-black/40 hover:bg-slate-200 dark:hover:bg-black/60 border border-slate-200 dark:border-white/10 text-sg-muted hover:text-sg-heading transition-colors"
+                            >
+                              <MoreHorizontal size={18} />
                             </button>
-                         </div>
-                      </div>
-                  );
-              }
-
-              // GRID VIEW
-              return (
-                <div key={proj.id} className="relative group perspective-distant sg-stagger" style={{ animationDelay: `${(idx % 10) * 100}ms` }}>
-                  <div className="bg-white dark:bg-black/30 backdrop-blur-3xl rounded-sg-2xl border border-slate-200 dark:border-white/5 p-8 flex flex-col gap-6 shadow-[0_8px_32px_rgba(0,0,0,0.04)] transition-all duration-700 hover:shadow-[0_24px_60px_rgba(0,0,0,0.12)] group-hover:-translate-y-3 relative overflow-hidden">
-                    
-                    {/* Glass Shimmers */}
-                    <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                    <div className={`absolute -right-16 -top-16 w-48 h-48 rounded-full ${statusCfg.bg} blur-[60px] opacity-20 group-hover:opacity-60 group-hover:scale-125 transition-all duration-1000`} />
-                    <div className={`absolute -left-16 -bottom-16 w-48 h-48 rounded-full ${typeCfg.bg} blur-[60px] opacity-10 group-hover:opacity-30 transition-all duration-1000`} />
-                    
-                    {/* Status Banner Area */}
-                    <div className="flex items-start justify-between relative z-10 w-full cursor-default">
-                      <div className={`w-16 h-16 rounded-sg-xl flex items-center justify-center border shadow-inner ${statusCfg.bg.replace('/10', '/20')} ${statusCfg.border} ${statusCfg.color} transition-transform duration-700 group-hover:scale-110 group-hover:-rotate-6`}>
-                        <Target size={28} strokeWidth={2.5} />
-                      </div>
-                      <div className="flex gap-2 items-center">
-                        <span className={`px-3.5 py-1.5 rounded-sg-md text-[10px] font-black uppercase tracking-widest border shadow-xs ${statusCfg.bg} ${statusCfg.color} ${statusCfg.border}`}>
-                          {statusCfg.label}
-                        </span>
-                        <div className="relative">
-                          <button
-                            onClick={(e) => { e.stopPropagation(); setMenuOpen(menuOpen === proj.id ? null : proj.id); }}
-                            className="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 dark:bg-black/40 hover:bg-slate-200 dark:hover:bg-black/60 border border-slate-200 dark:border-white/10 text-sg-muted hover:text-sg-heading transition-colors"
-                          >
-                            <MoreHorizontal size={18} />
-                          </button>
-                          {menuOpen === proj.id && (
-                            <div className="absolute right-0 top-11 w-44 bg-white/90 dark:bg-black/80 backdrop-blur-3xl border border-slate-200 dark:border-sg-border rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.2)] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-                               <button onClick={() => handleEdit(proj)}
-                                 className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-black text-sg-heading hover:bg-cyan-500/10 hover:text-cyan-500 transition-colors">
-                                 <Edit2 size={16} /> Cấu hình dự án
-                               </button>
-                               <button onClick={() => handleDelete(proj)}
-                                 className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-black text-rose-500 hover:bg-rose-500/10 transition-colors border-t border-sg-border/50">
-                                 <Trash2 size={16} /> Xoá dữ án
-                               </button>
-                            </div>
-                          )}
+                            {menuOpen === proj.id && (
+                              <div className="absolute right-0 top-11 w-44 bg-white/90 dark:bg-black/80 backdrop-blur-3xl border border-slate-200 dark:border-sg-border rounded-xl shadow-[0_16px_40px_rgba(0,0,0,0.2)] overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
+                                 <button onClick={() => handleEdit(proj)}
+                                   className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-black text-sg-heading hover:bg-cyan-500/10 hover:text-cyan-500 transition-colors">
+                                   <Edit2 size={16} /> Cấu hình dự án
+                                 </button>
+                                 <button onClick={() => handleDelete(proj)}
+                                   className="w-full flex items-center gap-3 px-4 py-3 text-[13px] font-black text-rose-500 hover:bg-rose-500/10 transition-colors border-t border-sg-border/50">
+                                   <Trash2 size={16} /> Xoá dữ án
+                                 </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Content Area */}
-                    <div className="flex flex-col relative z-10 cursor-pointer" onClick={() => window.location.href = `/ProjectModule/board?id=${proj.id}`}>
-                      <h4 className="text-[24px] font-black text-sg-heading tracking-tight hover:text-cyan-500 transition-colors line-clamp-1 drop-shadow-sm mb-1">
-                        {proj.name}
-                      </h4>
-                      <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-xs ${typeCfg.bg} ${typeCfg.color} ${typeCfg.border}`}>
-                           {typeCfg.label}
-                        </span>
-                        <span className="text-[12px] font-black text-sg-muted bg-slate-100 dark:bg-black/40 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">{proj.code}</span>
-                      </div>
-                    </div>
-
-                    {/* Sales Progress */}
-                    <div className="flex flex-col gap-4 relative z-10 mt-2 pointer-events-none">
-                      <div className="flex items-center gap-2 text-[13px] font-bold text-sg-subtext">
-                        <MapPin size={16} className="text-sg-muted" />
-                        <span className="line-clamp-1 opacity-80">{proj.location}</span>
-                      </div>
-                      <div className="bg-slate-50 dark:bg-black/40 px-4 py-4 rounded-sg-xl border border-slate-200 dark:border-white/5 shadow-inner">
-                        <div className="flex items-center justify-between text-[12px] font-bold text-sg-subtext mb-3">
-                           <span className="uppercase tracking-wider text-[10px]">Tiến độ hấp thụ</span>
-                          <span className="text-sg-heading font-black text-[13px]">{proj.soldUnits} / {proj.totalUnits} <span className="text-cyan-500">({soldPercent}%)</span></span>
-                        </div>
-                        <div className="h-2 bg-sg-bg rounded-full overflow-hidden shadow-inner">
-                          <div
-                            className="h-full bg-linear-to-r from-cyan-500 via-blue-500 to-indigo-500 rounded-full transition-all duration-1000 ease-out"
-                            style={{ width: `${soldPercent}%` }}
-                          />
+                      {/* Content Area */}
+                      <div className="flex flex-col relative z-10 cursor-pointer" onClick={() => window.location.href = `/ProjectModule/board?id=${proj.id}`}>
+                        <h4 className="text-[24px] font-black text-sg-heading tracking-tight hover:text-cyan-500 transition-colors line-clamp-1 drop-shadow-sm mb-1">
+                          {proj.name}
+                        </h4>
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border shadow-xs ${typeCfg.bg} ${typeCfg.color} ${typeCfg.border}`}>
+                             {typeCfg.label}
+                          </span>
+                          <span className="text-[12px] font-black text-sg-muted bg-slate-100 dark:bg-black/40 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-white/5">{proj.code}</span>
                         </div>
                       </div>
-                    </div>
+
+                      {/* Meta Info */}
+                      <div className="flex flex-col gap-4 relative z-10 mt-2 pointer-events-none">
+                        <div className="flex items-center gap-2 text-[13px] font-bold text-sg-subtext">
+                          <MapPin size={16} className="text-sg-muted" />
+                          <span className="line-clamp-1 opacity-80">{proj.location}</span>
+                        </div>
+                      </div>
 
                     {/* Footer */}
                     <div className="pt-6 mt-auto border-t border-white/10 dark:border-white/5 flex items-center justify-between relative z-10 pointer-events-none">
