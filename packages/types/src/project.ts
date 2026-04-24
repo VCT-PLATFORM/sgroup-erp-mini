@@ -8,9 +8,9 @@
 
 // ─── Status Enums ───────────────────────────────────────────
 
-export type ProjectStatus = 'UPCOMING' | 'SELLING' | 'HANDOVER' | 'CLOSED';
+export type ProjectStatus = 'BOOKING' | 'DEPOSIT' | 'CONTRACT' | 'HANDOVER' | 'SOLD_OUT';
 
-export type PropertyType = 'LAND' | 'APARTMENT' | 'VILLA' | 'SHOPHOUSE';
+export type PropertyType = 'LAND' | 'APARTMENT' | 'VILLA' | 'SHOPHOUSE' | 'OFFICETEL' | 'LARGE_LAND' | 'CONDOTEL' | 'TOWNHOUSE';
 
 export type ProductStatus =
   | 'AVAILABLE'

@@ -8,7 +8,7 @@ export const MOCK_RE_PROJECTS: REProject[] = [
   {
     id: 'proj-1', name: 'SGroup Riverside', code: 'SGR',
     description: 'Khu đô thị sinh thái ven sông với 500 biệt thự và nhà phố.',
-    status: 'SELLING', type: 'VILLA', location: 'TP Thủ Đức, Hồ Chí Minh',
+    status: 'CONTRACT', type: 'VILLA', location: 'TP Thủ Đức, Hồ Chí Minh',
     developer: 'SGroup Holdings', totalUnits: 500, soldUnits: 175,
     feeRate: 2.5, avgPrice: 15000000000,
     startDate: '2026-01-01', endDate: '2028-12-31',
@@ -18,7 +18,7 @@ export const MOCK_RE_PROJECTS: REProject[] = [
   {
     id: 'proj-2', name: 'SGroup Tower Downtown', code: 'SGT',
     description: 'Chung cư cao cấp hạng A tại trung tâm hành chính.',
-    status: 'UPCOMING', type: 'APARTMENT', location: 'Quận 1, Hồ Chí Minh',
+    status: 'BOOKING', type: 'APARTMENT', location: 'Quận 1, Hồ Chí Minh',
     developer: 'SGroup Invest', totalUnits: 320, soldUnits: 0,
     feeRate: 3.0, avgPrice: 4500000000,
     startDate: '2026-06-01', endDate: '2029-06-01',
