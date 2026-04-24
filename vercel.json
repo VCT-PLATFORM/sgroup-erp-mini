@@ -1,9 +1,5 @@
 {
   "installCommand": "npm install && npm install --no-save @rollup/rollup-linux-x64-gnu lightningcss-linux-x64-gnu @tailwindcss/oxide-linux-x64-gnu",
   "framework": "vite",
-  "outputDirectory": "core/web-host/dist",
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
+  "outputDirectory": "core/web-host/dist"
 }
