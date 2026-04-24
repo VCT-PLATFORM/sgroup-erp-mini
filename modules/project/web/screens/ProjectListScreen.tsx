@@ -261,23 +261,35 @@ export function ProjectListScreen() {
                         </div>
                       </div>
 
-                    {/* Footer */}
-                    <div className="pt-6 mt-auto border-t border-white/10 dark:border-white/5 flex items-center justify-between relative z-10 pointer-events-none">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-sg-md bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[12px] font-black shadow-lg border border-white/20">
-                          <Users size={16} />
-                        </div>
-                        <div className="flex flex-col">
-                           <span className="text-[10px] font-extrabold text-sg-muted uppercase tracking-wider">Người phụ trách</span>
-                          <span className="text-[14px] font-black text-sg-heading leading-tight truncate max-w-[140px]">{proj.managerName || 'Chưa gán'}</span>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center gap-1.5 text-sg-muted bg-slate-50 dark:bg-black/40 px-3 py-1.5 rounded-sg-md border border-slate-200 dark:border-white/5" title="Mở bán dự kiến">
-                        <Calendar size={14} />
-                        <span className="text-[12px] font-black">{proj.startDate ? new Date(proj.startDate).toLocaleDateString('vi-VN') : 'TBD'}</span>
-                      </div>
-                    </div>
+                     {/* Footer */}
+                     <div className="pt-6 mt-auto border-t border-white/10 dark:border-white/5 flex flex-col gap-4 relative z-10 pointer-events-none">
+                       <div className="flex items-center justify-between">
+                         <div className="flex items-center gap-3">
+                           <div className="w-10 h-10 rounded-sg-md bg-linear-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-[12px] font-black shadow-lg border border-white/20">
+                             <Users size={16} />
+                           </div>
+                           <div className="flex flex-col">
+                              <span className="text-[10px] font-extrabold text-sg-muted uppercase tracking-wider">Admin</span>
+                             <span className="text-[14px] font-black text-sg-heading leading-tight truncate max-w-[140px]">Nguyễn Admin</span>
+                           </div>
+                         </div>
+                         
+                         <div className="flex items-center gap-1.5 text-sg-muted bg-slate-50 dark:bg-black/40 px-3 py-1.5 rounded-sg-md border border-slate-200 dark:border-white/5" title="Mở bán dự kiến">
+                           <Calendar size={14} />
+                           <span className="text-[12px] font-black">{proj.startDate ? new Date(proj.startDate).toLocaleDateString('vi-VN') : 'TBD'}</span>
+                         </div>
+                       </div>
+
+                       <div className="flex items-center gap-3 pl-1">
+                          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-500">
+                             <Building2 size={14} />
+                          </div>
+                          <div className="flex flex-col">
+                             <span className="text-[9px] font-extrabold text-sg-muted uppercase tracking-wider">Quản lý dự án</span>
+                             <span className="text-[13px] font-bold text-sg-heading leading-tight truncate">{proj.managerName || 'Chưa gán'}</span>
+                          </div>
+                       </div>
+                     </div>
                   </div>
                 </div>
               );
