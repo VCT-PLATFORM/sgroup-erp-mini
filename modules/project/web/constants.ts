@@ -6,9 +6,13 @@ export const RE_PROJECT_STATUS: Record<string, { label: string; bg: string; colo
 };
 
 export const RE_PROPERTY_TYPE: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  LAND: { label: 'Đất nền', bg: 'bg-amber-500/10', color: 'text-amber-500', border: 'border-amber-500/20' },
-  APARTMENT: { label: 'Căn hộ chung cư', bg: 'bg-cyan-500/10', color: 'text-cyan-500', border: 'border-cyan-500/20' },
-  VILLA: { label: 'Biệt thự', bg: 'bg-indigo-500/10', color: 'text-indigo-500', border: 'border-indigo-500/20' },
+  APARTMENT: { label: 'Căn Hộ', bg: 'bg-cyan-500/10', color: 'text-cyan-500', border: 'border-cyan-500/20' },
+  OFFICETEL: { label: 'Officetel', bg: 'bg-blue-500/10', color: 'text-blue-500', border: 'border-blue-500/20' },
+  LARGE_LAND: { label: 'Đất Lớn', bg: 'bg-emerald-500/10', color: 'text-emerald-500', border: 'border-emerald-500/20' },
+  LAND: { label: 'Đất Nền', bg: 'bg-amber-500/10', color: 'text-amber-500', border: 'border-amber-500/20' },
+  VILLA: { label: 'Biệt Thự', bg: 'bg-indigo-500/10', color: 'text-indigo-500', border: 'border-indigo-500/20' },
+  CONDOTEL: { label: 'Condotel', bg: 'bg-purple-500/10', color: 'text-purple-500', border: 'border-purple-500/20' },
+  TOWNHOUSE: { label: 'Nhà Phố', bg: 'bg-orange-500/10', color: 'text-orange-500', border: 'border-orange-500/20' },
   SHOPHOUSE: { label: 'Shophouse', bg: 'bg-rose-500/10', color: 'text-rose-500', border: 'border-rose-500/20' },
 };
 

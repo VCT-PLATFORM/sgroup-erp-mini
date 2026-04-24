@@ -152,7 +152,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
           {/* Row: Type + Status */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-wider text-sg-subtext">Loại BĐS</label>
+              <label className="text-[11px] font-black uppercase tracking-wider text-sg-subtext">Loại Hình Sản Phẩm</label>
               <select
                 value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value as REPropertyType }))}
                 className="h-12 px-4 bg-sg-bg/80 border border-sg-border rounded-xl text-[14px] font-bold text-sg-heading
@@ -202,7 +202,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
           {/* Row: Manager + Dates */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="flex flex-col gap-2">
-              <label className="text-[11px] font-black uppercase tracking-wider text-sg-subtext">Người phụ trách</label>
+              <label className="text-[11px] font-black uppercase tracking-wider text-sg-subtext">Quản lý dự án</label>
               <input
                 value={form.managerName} onChange={e => setForm(f => ({ ...f, managerName: e.target.value }))}
                 placeholder="Họ tên"
