@@ -5,7 +5,7 @@ import * as M from './salesMocks';
 // SALES API CLIENT — Centralized HTTP layer
 // ═══════════════════════════════════════════════════════════
 
-const API_BASE = (typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_SALES_API_URL : undefined) || 'http://localhost:8083/api/v1';
+const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SALES_API_URL : undefined) || 'http://localhost:8083/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE,
