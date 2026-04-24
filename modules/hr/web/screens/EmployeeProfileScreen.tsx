@@ -512,10 +512,10 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                {/* Sidebar Stepper */}
                <div className="w-56 shrink-0 border-r border-sg-border/60 bg-sg-btn-bg/30 p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
                   {[
-                    { s: 1, l: 'Cơ bản', i: User, h: 'Thông tin cơ bản & Liên Hệ' },
-                    { s: 2, l: 'Địa chỉ & Giấy tờ', i: MapPin, h: 'Hồ sơ pháp lý' },
-                    { s: 3, l: 'Công việc', i: Briefcase, h: 'Hợp đồng & Vị trí' },
-                    { s: 4, l: 'Tuyển dụng và nghỉ phép', i: Wallet, h: 'Lương & Ngày phép' }
+                    { s: 1, l: 'Thông tin cá nhân', i: User, h: 'Cơ bản & Liên hệ' },
+                    { s: 2, l: 'Công việc & Hợp đồng', i: Briefcase, h: 'Vị trí & Hợp đồng' },
+                    { s: 3, l: 'Tài chính & Bảo hiểm', i: Wallet, h: 'Lương & Giấy tờ' },
+                    { s: 4, l: 'Tuyển dụng và Nghỉ phép', i: UserCheck, h: 'Tuyển dụng & Ngày phép' }
                   ].map(step => (
                      <button
                         key={step.s}
@@ -551,29 +551,15 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                             <EditField label="Email" value={editForm.email} onChange={v => setEditForm(f => ({...f, email: v}))} type="email" />
                           </div>
                         </EditSection>
-                      </>
-                    )}
-                    {editStep === 2 && (
-                      <>
                         <EditSection title="Địa chỉ" icon={MapPin} color="emerald-500">
                           <div className="grid grid-cols-1 gap-4">
                             <EditField label="Địa chỉ thường trú" value={editForm.permanentAddress} onChange={v => setEditForm(f => ({...f, permanentAddress: v}))} />
                             <EditField label="Địa chỉ liên hệ" value={editForm.contactAddress} onChange={v => setEditForm(f => ({...f, contactAddress: v}))} />
                           </div>
                         </EditSection>
-                        <EditSection title="Giấy tờ tùy thân" icon={IdCard} color="purple-500">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
-                            <EditField label="CCCD / Passport" value={editForm.idNumber} onChange={v => setEditForm(f => ({...f, idNumber: v}))} />
-                            <EditField label="Ngày cấp" value={editForm.idIssueDate} onChange={v => setEditForm(f => ({...f, idIssueDate: v}))} type="date" />
-                            <EditField label="Nơi cấp" value={editForm.idIssuePlace} onChange={v => setEditForm(f => ({...f, idIssuePlace: v}))} />
-                            <EditField label="VNID" value={editForm.vnId} onChange={v => setEditForm(f => ({...f, vnId: v}))} type="file" />
-                            <EditField label="MST cá nhân" value={editForm.taxCode} onChange={v => setEditForm(f => ({...f, taxCode: v}))} />
-                            <EditField label="Số sổ bảo hiểm" value={editForm.insuranceBook} onChange={v => setEditForm(f => ({...f, insuranceBook: v}))} />
-                          </div>
-                        </EditSection>
                       </>
                     )}
-                    {editStep === 3 && (
+                    {editStep === 2 && (
                       <EditSection title="Công việc & Hợp đồng" icon={Briefcase} color="amber-500">
                         <div className="grid grid-cols-1 gap-x-5 gap-y-4">
                           <div className="grid grid-cols-2 gap-x-5 gap-y-4">
@@ -593,7 +579,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                         </div>
                       </EditSection>
                     )}
-                    {editStep === 4 && (
+                    {editStep === 3 && (
                       <>
                         <EditSection title="Tài chính" icon={Wallet} color="emerald-500">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
@@ -603,8 +589,21 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                             <EditField label="Lương chính thức" value={editForm.officialSalary} onChange={v => setEditForm(f => ({...f, officialSalary: Number(v) || 0}))} type="number" />
                           </div>
                         </EditSection>
-                        <EditSection title="Tuyển dụng và Nghỉ phép" icon={UserCheck} color="pink-500">
+                        <EditSection title="Giấy tờ & Bảo hiểm" icon={ShieldCheck} color="purple-500">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+                            <EditField label="CCCD / Passport" value={editForm.idNumber} onChange={v => setEditForm(f => ({...f, idNumber: v}))} />
+                            <EditField label="Ngày cấp" value={editForm.idIssueDate} onChange={v => setEditForm(f => ({...f, idIssueDate: v}))} type="date" />
+                            <EditField label="Nơi cấp" value={editForm.idIssuePlace} onChange={v => setEditForm(f => ({...f, idIssuePlace: v}))} />
+                            <EditField label="VNID" value={editForm.vnId} onChange={v => setEditForm(f => ({...f, vnId: v}))} type="file" />
+                            <EditField label="MST cá nhân" value={editForm.taxCode} onChange={v => setEditForm(f => ({...f, taxCode: v}))} />
+                            <EditField label="Số sổ bảo hiểm" value={editForm.insuranceBook} onChange={v => setEditForm(f => ({...f, insuranceBook: v}))} />
+                          </div>
+                        </EditSection>
+                      </>
+                    )}
+                    {editStep === 4 && (
+                      <EditSection title="Tuyển dụng và Nghỉ phép" icon={UserCheck} color="pink-500">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
                             <EditField label="Người tuyển dụng" value={editForm.recruiter} onChange={v => setEditForm(f => ({...f, recruiter: v}))} type="select" options={recruiterOptions} />
                             <EditField label="Nguồn ứng viên" value={editForm.candidateSource} onChange={v => setEditForm(f => ({...f, candidateSource: v}))} type="select" options={CANDIDATE_SOURCE_OPTIONS} />
                             <EditField label="Người giới thiệu" value={editForm.referrer} onChange={v => setEditForm(f => ({...f, referrer: v}))} type="text" />
@@ -617,9 +616,8 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                                 {(editForm.remainingLeaveDays || 0)} ngày
                               </span>
                             </div>
-                          </div>
-                        </EditSection>
-                      </>
+                        </div>
+                      </EditSection>
                     )}
                   </div>
                </div>
