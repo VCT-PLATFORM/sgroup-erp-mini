@@ -37,6 +37,7 @@
     "turbo": "^2.9.5"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "^4.60.1"
+    "@rollup/rollup-linux-x64-gnu": "^4.60.1",
+    "lightningcss-linux-x64-gnu": "^1.29.0"
   }
 }
