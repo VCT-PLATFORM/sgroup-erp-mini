@@ -1,8 +1,9 @@
 export const RE_PROJECT_STATUS: Record<string, { label: string; bg: string; color: string; border: string; iconBg: string }> = {
-  UPCOMING: { label: 'Sắp mở bán', bg: 'bg-purple-500/15', color: 'text-purple-500', border: 'border-purple-500/20', iconBg: 'bg-purple-500/20' },
-  SELLING: { label: 'Đang mở bán', bg: 'bg-emerald-500/15', color: 'text-emerald-500', border: 'border-emerald-500/20', iconBg: 'bg-emerald-500/20' },
-  HANDOVER: { label: 'Đang bàn giao', bg: 'bg-blue-500/15', color: 'text-blue-500', border: 'border-blue-500/20', iconBg: 'bg-blue-500/20' },
-  CLOSED: { label: 'Đóng/Hết hàng', bg: 'bg-slate-500/15', color: 'text-slate-400', border: 'border-slate-500/20', iconBg: 'bg-slate-500/20' },
+  BOOKING: { label: 'Đang giữ chỗ', bg: 'bg-purple-500/15', color: 'text-purple-500', border: 'border-purple-500/20', iconBg: 'bg-purple-500/20' },
+  DEPOSIT: { label: 'Đang đặt cọc', bg: 'bg-orange-500/15', color: 'text-orange-500', border: 'border-orange-500/20', iconBg: 'bg-orange-500/20' },
+  CONTRACT: { label: 'Đã ký Hợp đồng mua bán', bg: 'bg-emerald-500/15', color: 'text-emerald-500', border: 'border-emerald-500/20', iconBg: 'bg-emerald-500/20' },
+  HANDOVER: { label: 'Đã bàn giao', bg: 'bg-blue-500/15', color: 'text-blue-500', border: 'border-blue-500/20', iconBg: 'bg-blue-500/20' },
+  SOLD_OUT: { label: 'Đã hết hàng', bg: 'bg-slate-500/15', color: 'text-slate-400', border: 'border-slate-500/20', iconBg: 'bg-slate-500/20' },
 };
 
 export const RE_PROPERTY_TYPE: Record<string, { label: string; bg: string; color: string; border: string }> = {

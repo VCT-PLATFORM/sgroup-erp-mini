@@ -1,6 +1,6 @@
 // ─── Project Types (synced with backend model) ───
 
-export type REProjectStatus = 'UPCOMING' | 'SELLING' | 'HANDOVER' | 'CLOSED';
+export type REProjectStatus = 'BOOKING' | 'DEPOSIT' | 'CONTRACT' | 'HANDOVER' | 'SOLD_OUT';
 export type REPropertyType = 'LAND' | 'APARTMENT' | 'VILLA' | 'SHOPHOUSE' | 'OFFICETEL' | 'LARGE_LAND' | 'CONDOTEL' | 'TOWNHOUSE';
 export type REProductStatus = 'AVAILABLE' | 'LOCKED' | 'RESERVED' | 'PENDING_DEPOSIT' | 'DEPOSIT' | 'SOLD' | 'COMPLETED';
 export type RELegalProcedureStatus = 'PREPARATION' | 'SUBMITTED' | 'ISSUE_FIXING' | 'APPROVED';

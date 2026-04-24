@@ -24,7 +24,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
 
   const [form, setForm] = useState({
     code: '', name: '', description: '', developer: '', location: '',
-    type: 'APARTMENT' as REPropertyType, status: 'UPCOMING' as REProjectStatus,
+    type: 'APARTMENT' as REPropertyType, status: 'BOOKING' as REProjectStatus,
     managerName: '', startDate: '', endDate: '',
   });
 
@@ -37,7 +37,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
         developer: editProject.developer || '',
         location: editProject.location || '',
         type: editProject.type || 'APARTMENT',
-        status: editProject.status || 'UPCOMING',
+        status: editProject.status || 'BOOKING',
         managerName: editProject.managerName || '',
         startDate: editProject.startDate?.slice(0, 10) || '',
         endDate: editProject.endDate?.slice(0, 10) || '',
@@ -45,7 +45,7 @@ export function ProjectFormModal({ isOpen, onClose, onSuccess, editProject }: Pr
     } else {
       setForm({
         code: '', name: '', description: '', developer: '', location: '',
-        type: 'APARTMENT', status: 'UPCOMING', managerName: '', startDate: '', endDate: '',
+        type: 'APARTMENT', status: 'BOOKING', managerName: '', startDate: '', endDate: '',
       });
     }
     setError('');

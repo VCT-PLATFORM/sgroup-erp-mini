@@ -62,7 +62,7 @@ export function ProjectListScreen() {
                 </div>
                  <div className="flex items-center gap-1.5">
                   <span className="text-[11px] font-bold text-emerald-500 uppercase tracking-wider">Mở bán:</span>
-                  <span className="text-[13px] font-extrabold text-emerald-500">{projects.filter(p=>p.status==='SELLING').length}</span>
+                  <span className="text-[13px] font-extrabold text-emerald-500">{projects.filter(p=>p.status==='CONTRACT').length}</span>
                 </div>
              </div>
           </div>
@@ -145,7 +145,7 @@ export function ProjectListScreen() {
         <div className="flex-1 overflow-y-auto custom-scrollbar pb-12">
           <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8" : "flex flex-col gap-4"}>
               {filtered.map((proj, idx) => {
-                const statusCfg = RE_PROJECT_STATUS[proj.status] || RE_PROJECT_STATUS.UPCOMING;
+                const statusCfg = RE_PROJECT_STATUS[proj.status] || RE_PROJECT_STATUS.BOOKING;
                 const typeCfg = RE_PROPERTY_TYPE[proj.type] || RE_PROPERTY_TYPE.LAND;
                 
                 if (viewMode === 'list') {
