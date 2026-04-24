@@ -1,6 +1,6 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Building2, Grid, Wallet } from 'lucide-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { Building2, Grid, Wallet, ArrowLeft } from 'lucide-react';
 
 export const MENU_ITEMS = [
   { path: 'list', label: 'Dự án', icon: Building2 },
@@ -9,6 +9,8 @@ export const MENU_ITEMS = [
 ];
 
 export function ProjectSidebar() {
+  const navigate = useNavigate();
+
   return (
     <div className="w-[280px] h-full flex flex-col pt-6 pb-6 relative z-10">
       {/* Module Title */}
@@ -53,6 +55,17 @@ export function ProjectSidebar() {
             </NavLink>
           );
         })}
+      </div>
+
+      {/* Back to Portal */}
+      <div className="px-4 pt-4 mt-auto border-t border-sg-border/40 mx-4">
+        <button
+          onClick={() => navigate('/')}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sg-subtext hover:text-cyan-600 dark:hover:text-cyan-400 hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/20 transition-all duration-300 group"
+        >
+          <ArrowLeft size={18} className="text-sg-muted group-hover:text-cyan-500 group-hover:-translate-x-0.5 transition-all duration-300" />
+          <span className="text-[13px] font-bold group-hover:font-extrabold transition-all">Quay về Portal</span>
+        </button>
       </div>
     </div>
   );
