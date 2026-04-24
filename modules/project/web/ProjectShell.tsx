@@ -5,15 +5,9 @@ import { Search, Sun, Moon, Briefcase } from 'lucide-react';
 import { ProjectSearchModal } from './components/ProjectSearchModal';
 import { useAuthStore } from '@sgroup/platform';
 
-import { ProjectDashboardScreen } from './screens/ProjectDashboardScreen';
 import { ProjectListScreen } from './screens/ProjectListScreen';
-import { InventoryGrid } from './screens/InventoryGrid';
-import { LegalKanbanScreen } from './screens/LegalKanbanScreen';
-import { SingleProjectHub } from './screens/SingleProjectHub';
-import { ProjectPoliciesScreen } from './screens/ProjectPoliciesScreen';
-import { ProjectVaultLayer } from './screens/ProjectVaultLayer';
 
-// Placeholders for nested screens
+// Placeholder for screens under development
 function PlaceholderScreen({ title }: { title: string }) {
   return (
     <div className="flex-1 h-full flex flex-col bg-transparent relative z-10 overflow-hidden">
@@ -25,14 +19,12 @@ function PlaceholderScreen({ title }: { title: string }) {
             <div className="w-10 h-10 border-4 border-sg-border border-t-cyan-500 rounded-full animate-spin" />
           </div>
           <h2 className="text-2xl font-black text-sg-heading tracking-tight drop-shadow-md">Module "{title}" đang xây dựng</h2>
-          <p className="text-sm font-bold text-sg-muted mt-3 max-w-sm mx-auto leading-relaxed">Giao diện phân phối theo tiêu chuẩn Neo-Glassmorphism v2.2. Vui lòng quay lại sau!</p>
+          <p className="text-sm font-bold text-sg-muted mt-3 max-w-sm mx-auto leading-relaxed">Giao diện đang trong quá trình phát triển. Vui lòng quay lại sau!</p>
         </div>
       </div>
     </div>
   );
 }
-
-import { ReportsScreen } from './screens/ReportsScreen';
 
 export function ProjectShell() {
   const { user } = useAuthStore();
@@ -72,8 +64,6 @@ export function ProjectShell() {
       {/* ── CINEMATIC BACKDROP ── */}
       <div className="absolute inset-0 pointer-events-none -z-10 overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-b from-sg-portal-bg/50 to-sg-portal-bg/95 z-10" />
-        
-        {/* Animated Mesh Auroras (Blue/Cyan/Indigo theme for Projects) */}
         <div className="absolute w-[800px] h-[800px] rounded-full bg-cyan-500 opacity-20 blur-[100px] z-0"
           style={{ animation: 'sg-aurora-1 20s ease-in-out infinite', top: '-10%', left: '-5%' }} />
         <div className="absolute w-[900px] h-[900px] rounded-full bg-indigo-600 opacity-20 blur-[120px] z-0"
@@ -82,15 +72,15 @@ export function ProjectShell() {
           style={{ animation: 'sg-aurora-1 22s ease-in-out infinite', top: '30%', left: '30%', animationDirection: 'reverse' }} />
       </div>
 
-      {/* Trái: Sidebar Module */}
+      {/* Sidebar */}
       <div className="z-20 border-r border-slate-200 dark:border-sg-border/60 bg-white/80 dark:bg-black/60 backdrop-blur-3xl shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-colors duration-300">
         <ProjectSidebar />
       </div>
 
-      {/* Phải: Main Content Area */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 bg-transparent relative z-10">
         
-        {/* Module Header */}
+        {/* Header */}
         <header className="h-[84px] bg-white/80 dark:bg-black/60 backdrop-blur-[32px] saturate-150 border-b border-slate-200 dark:border-sg-border/60 px-8 flex items-center justify-between z-30 transition-colors duration-300 shadow-[0_4px_32px_rgba(0,0,0,0.03)]">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-sg-lg bg-linear-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/30 flex items-center justify-center shadow-inner">
@@ -98,14 +88,14 @@ export function ProjectShell() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-[22px] font-black text-sg-heading tracking-tight drop-shadow-sm leading-tight">
-                Trung Tâm Điều Hành Sàn
+                Quản lý Dự án
               </h1>
-              <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-[1.5px] mt-0.5">SGroup Brokerage</span>
+              <span className="text-[11px] font-bold text-sg-subtext uppercase tracking-[1.5px] mt-0.5">SGroup Project</span>
             </div>
           </div>
 
           <div className="flex items-center gap-5">
-            {/* Context Search Box */}
+            {/* Search Box */}
             <div className="relative group hidden md:block w-72">
                <div className="absolute inset-0 bg-linear-to-r from-cyan-500/0 via-blue-500/10 to-indigo-500/0 rounded-xl opacity-0 group-hover:opacity-100 blur-md transition-opacity duration-500"></div>
                <div 
@@ -113,7 +103,7 @@ export function ProjectShell() {
                   onClick={() => setIsSearchOpen(true)}
                >
                   <Search size={16} className="text-sg-muted group-hover:text-cyan-500 transition-colors" />
-                  <span className="ml-3 text-[13px] font-semibold text-sg-muted group-hover:text-sg-heading transition-colors cursor-text">Tìm dự án, mã căn, giỏ hàng...</span>
+                  <span className="ml-3 text-[13px] font-semibold text-sg-muted group-hover:text-sg-heading transition-colors cursor-text">Tìm dự án...</span>
                   <div className="ml-auto flex items-center gap-1 opacity-50 group-hover:opacity-100 transition-opacity">
                     <kbd className="px-1.5 py-0.5 rounded bg-sg-card border border-sg-border text-[9px] font-extrabold text-sg-heading shadow-sm uppercase">Cmd</kbd>
                     <kbd className="px-1.5 py-0.5 rounded bg-sg-card border border-sg-border text-[9px] font-extrabold text-sg-heading shadow-sm">K</kbd>
@@ -138,7 +128,7 @@ export function ProjectShell() {
             <div className="flex items-center gap-3">
               <div className="flex flex-col items-end">
                 <span className="text-[14px] font-black text-sg-heading drop-shadow-sm tracking-tight">{user?.name || 'Admin'}</span>
-                <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest bg-cyan-500/10 px-2 py-0.5 rounded-md mt-0.5">{(user?.role === 'admin' ? 'System_Admin' : 'Project_Manager').replace('_', ' ')}</span>
+                <span className="text-[10px] font-bold text-cyan-600 dark:text-cyan-400 uppercase tracking-widest bg-cyan-500/10 px-2 py-0.5 rounded-md mt-0.5">{(user?.role === 'admin' ? 'System Admin' : 'Project Manager')}</span>
               </div>
               <div className="w-11 h-11 rounded-[14px] bg-linear-to-br from-cyan-400 to-blue-600 relative group overflow-hidden shadow-[0_8px_16px_rgba(6,182,212,0.2)] hover:shadow-[0_8px_24px_rgba(6,182,212,0.4)] transition-all cursor-pointer">
                 <div className="absolute inset-0 bg-white/20 scale-0 group-hover:scale-100 transition-transform duration-300 rounded-[14px]" />
@@ -150,23 +140,14 @@ export function ProjectShell() {
           </div>
         </header>
 
-        {/* Nội dung Routing của Project Module */}
+        {/* Routes */}
         <main className="flex-1 relative overflow-hidden flex flex-col bg-transparent">
           <Routes>
-            <Route path="/" element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<ProjectDashboardScreen />} />
+            <Route path="/" element={<Navigate to="list" replace />} />
             <Route path="list" element={<ProjectListScreen />} />
-            <Route path="inventory" element={<InventoryGrid />} />
-            <Route path="transactions" element={<PlaceholderScreen title="Quản lý Giao Dịch & Khách Hàng" />} />
-            <Route path="commission" element={<PlaceholderScreen title="Chính sách Hoa Hồng" />} />
-            <Route path="legal" element={<LegalKanbanScreen />} />
-            <Route path="vault" element={<ProjectVaultLayer />} />
-            <Route path="policies" element={<ProjectPoliciesScreen />} />
-            <Route path="board" element={<SingleProjectHub />} />
-            <Route path="hub" element={<SingleProjectHub />} />
-            <Route path="reports" element={<ReportsScreen />} />
-            <Route path="settings" element={<PlaceholderScreen title="Cài đặt hệ thống" />} />
-            <Route path="*" element={<Navigate to="dashboard" replace />} />
+            <Route path="booking" element={<PlaceholderScreen title="Quản lý giữ chỗ" />} />
+            <Route path="deposit" element={<PlaceholderScreen title="Quản lý đặt cọc" />} />
+            <Route path="*" element={<Navigate to="list" replace />} />
           </Routes>
         </main>
       </div>
