@@ -4,15 +4,8 @@ export type AppModuleId =
   | 'exec'
   | 'sales'
   | 'mkt'
-  | 'agency'
-  | 'shomes'
   | 'project'
-  | 'hr'
-  | 'finance'
-  | 'legal'
-  | 'admin'
-  | 'crm'
-  | 'accounting';
+  | 'hr';
 
 export type LegacyModuleId = 'biz';
 export type ModuleAccessId = AppModuleId | LegacyModuleId;
@@ -65,18 +58,6 @@ export const APP_MODULES: readonly AppModuleDefinition[] = [
     requiredRoles: ['admin', 'mkt_manager', 'mkt_director'],
   },
   {
-    id: 'agency',
-    name: 'Đại lý',
-    description: 'Mạng lưới đối tác, chính sách bán và scorecard đại lý.',
-    status: 'planned',
-  },
-  {
-    id: 'shomes',
-    name: 'S-Homes',
-    description: 'Vận hành bất động sản, ticket và resident service.',
-    status: 'planned',
-  },
-  {
     id: 'project',
     name: 'Dự án',
     description: 'Quản lý dự án BĐS, rổ hàng, pháp lý và báo cáo dự án.',
@@ -101,36 +82,6 @@ export const APP_MODULES: readonly AppModuleDefinition[] = [
       'legacy-archive/core-web-host-features/hr',
       'legacy-archive/modules-hr-nextjs',
     ],
-  },
-  {
-    id: 'finance',
-    name: 'Tài chính & Kế toán',
-    description: 'Dòng tiền, công nợ, đối soát và budget control.',
-    status: 'planned',
-  },
-  {
-    id: 'legal',
-    name: 'Pháp lý & Hồ sơ',
-    description: 'Quản trị hợp đồng, compliance và hồ sơ dự án.',
-    status: 'planned',
-  },
-  {
-    id: 'admin',
-    name: 'Quản trị hệ thống',
-    description: 'Tổ chức, phân quyền và vận hành hệ thống.',
-    status: 'planned',
-  },
-  {
-    id: 'crm',
-    name: 'CRM',
-    description: 'Scaffold backend CRM, chưa sẵn sàng để public lên shell.',
-    status: 'scaffold',
-  },
-  {
-    id: 'accounting',
-    name: 'Kế toán',
-    description: 'Scaffold module accounting, đang chờ domain implementation.',
-    status: 'scaffold',
   },
 ] as const;
 

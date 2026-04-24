@@ -146,7 +146,7 @@ export default function WorkspaceScreen() {
         </div>
 
         {/* Module Grid */}
-        <div className="flex flex-wrap justify-center gap-6 max-w-[1240px] mx-auto">
+        <div className="flex flex-wrap justify-center gap-6 max-w-[920px] mx-auto">
           {visibleModules.map((mod, i) => (
             <ModuleCard
               key={mod.id}
