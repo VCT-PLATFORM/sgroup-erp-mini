@@ -481,7 +481,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
       {editOpen && createPortal(
         <div className="fixed inset-0 z-9999 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md" style={{ animation: 'fadeIn .2s ease-out' }}>
           <div className="absolute inset-0" onClick={() => setEditOpen(false)} />
-          <div className="relative w-full max-w-3xl max-h-[92vh] flex flex-col bg-sg-card rounded-[28px] shadow-2xl shadow-black/20 overflow-hidden border border-sg-border/60 ring-1 ring-white/5" style={{ animation: 'slideUp .3s cubic-bezier(.16,1,.3,1)' }}>
+          <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col bg-sg-card rounded-[28px] shadow-2xl shadow-black/20 overflow-hidden border border-sg-border/60 ring-1 ring-white/5" style={{ animation: 'slideUp .3s cubic-bezier(.16,1,.3,1)' }}>
 
             {/* ──── Header with gradient accent ──── */}
             <div className="relative shrink-0 border-b border-sg-border/60 bg-sg-card z-10">
@@ -510,7 +510,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
             {/* ──── Body ──── */}
             <div className="flex-1 flex overflow-hidden">
                {/* Sidebar Stepper */}
-               <div className="w-56 shrink-0 border-r border-sg-border/60 bg-sg-btn-bg/30 p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+               <div className="w-64 shrink-0 border-r border-sg-border/60 bg-sg-btn-bg/30 p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
                   {[
                     { s: 1, l: 'Thông tin cá nhân', i: User, h: 'Cơ bản & Liên hệ' },
                     { s: 2, l: 'Công việc & Hợp đồng', i: Briefcase, h: 'Vị trí & Hợp đồng' },
@@ -520,11 +520,11 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                      <button
                         key={step.s}
                         onClick={() => setEditStep(step.s)}
-                        className={`flex flex-col items-start gap-1 p-3 rounded-xl transition-all ${editStep === step.s ? 'bg-sg-card border border-sg-red/30 shadow-sm' : 'hover:bg-sg-btn-bg border border-transparent'}`}
+                        className={`flex flex-col items-start gap-1 p-3 rounded-xl transition-all text-left ${editStep === step.s ? 'bg-sg-card border border-sg-red/30 shadow-sm' : 'hover:bg-sg-btn-bg border border-transparent'}`}
                      >
                        <div className="flex items-center gap-2">
-                         <step.i size={14} className={editStep === step.s ? 'text-sg-red' : 'text-sg-muted'} />
-                         <span className={`text-[13px] font-extrabold ${editStep === step.s ? 'text-sg-red' : 'text-sg-heading'}`}>{step.l}</span>
+                         <step.i size={14} className={`shrink-0 ${editStep === step.s ? 'text-sg-red' : 'text-sg-muted'}`} />
+                         <span className={`text-[13px] font-extrabold leading-tight ${editStep === step.s ? 'text-sg-red' : 'text-sg-heading'}`}>{step.l}</span>
                        </div>
                        <span className="text-[10px] font-bold text-sg-subtext">{step.h}</span>
                      </button>
