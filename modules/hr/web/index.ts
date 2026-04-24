@@ -16,15 +16,7 @@ export { HRSidebar } from './HRSidebar';
 export { HRDashboard } from './screens/HRDashboard';
 export { StaffDirectoryScreen } from './screens/StaffDirectoryScreen';
 export { EmployeeProfileScreen } from './screens/EmployeeProfileScreen';
-export { LeavesScreen } from './screens/LeavesScreen';
-export { PayrollScreen } from './screens/PayrollScreen';
-export { TimekeepingScreen } from './screens/TimekeepingScreen';
-export { PerformanceScreen } from './screens/PerformanceScreen';
-export { RecruitmentScreen } from './screens/RecruitmentScreen';
 export { OrgConfigScreen } from './screens/OrgConfigScreen';
-export { BenefitsScreen } from './screens/BenefitsScreen';
-export { TrainingScreen } from './screens/TrainingScreen';
-export { PoliciesScreen } from './screens/PoliciesScreen';
 
 // ── Components ──
 export { EmployeeCard } from './components/EmployeeCard';

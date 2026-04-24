@@ -16,7 +16,7 @@ const TABS = [
   { key: 'personal', label: 'Thông tin cá nhân', icon: User },
   { key: 'work', label: 'Công việc & Hợp đồng', icon: Briefcase },
   { key: 'finance', label: 'Tài chính & Bảo hiểm', icon: Wallet },
-  { key: 'recruitment', label: 'Tuyển dụng & Phép', icon: UserCheck },
+  { key: 'recruitment', label: 'Tuyển dụng và Nghỉ phép', icon: UserCheck },
 ];
 
 function formatDate(dateStr?: string) {
@@ -427,7 +427,7 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
             </div>
 
           {/* ════════════════════════════════════════════════ */}
-          {/* TAB 4: Tuyển dụng & Phép */}
+          {/* TAB 4: Tuyển dụng và Nghỉ phép */}
           {/* ════════════════════════════════════════════════ */}
           <div className={`${activeTab === 'recruitment' ? 'grid' : 'hidden'} grid-cols-1 lg:grid-cols-2 gap-6 pb-6 animate-fade-in-up`}>
 
@@ -435,11 +435,13 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
               <SectionCard title="Thông tin tuyển dụng" icon={UserCheck} color="text-pink-400" iconBg="bg-pink-500/20" iconBorder="border-pink-500/30">
                 <InfoRow label="Người tuyển dụng" value={emp?.recruiter} icon={UserCheck} />
                 <InfoRow label="Nguồn ứng viên" value={emp?.candidateSource} icon={Globe} />
+                <InfoRow label="Người giới thiệu" value={emp?.referrer} icon={UserCheck} />
               </SectionCard>
 
               {/* Ngày phép */}
               <SectionCard title="Ngày phép" icon={CalendarDays} color="text-amber-400" iconBg="bg-amber-500/20" iconBorder="border-amber-500/30">
                 <InfoRow label="Số ngày phép" value={emp?.totalLeaveDays != null ? `${emp.totalLeaveDays} ngày` : '—'} icon={CalendarDays} />
+                <InfoRow label="Số ngày phép đã nghỉ" value={(emp?.totalLeaveDays != null && emp?.remainingLeaveDays != null) ? `${emp.totalLeaveDays - emp.remainingLeaveDays} ngày` : '—'} icon={CalendarDays} valueClassName="text-amber-500 font-black" />
                 <InfoRow label="Số ngày phép còn lại" value={emp?.remainingLeaveDays != null ? `${emp.remainingLeaveDays} ngày` : '—'} icon={Clock}
                   valueClassName="text-blue-500 font-black"
                 />
@@ -601,10 +603,12 @@ export function EmployeeProfileScreen({ routeParams }: { routeParams?: URLSearch
                             <EditField label="Lương chính thức" value={editForm.officialSalary} onChange={v => setEditForm(f => ({...f, officialSalary: Number(v) || 0}))} type="number" />
                           </div>
                         </EditSection>
-                        <EditSection title="Tuyển dụng & Phép" icon={UserCheck} color="pink-500">
+                        <EditSection title="Tuyển dụng và Nghỉ phép" icon={UserCheck} color="pink-500">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
                             <EditField label="Người tuyển dụng" value={editForm.recruiter} onChange={v => setEditForm(f => ({...f, recruiter: v}))} type="select" options={recruiterOptions} />
                             <EditField label="Nguồn ứng viên" value={editForm.candidateSource} onChange={v => setEditForm(f => ({...f, candidateSource: v}))} type="select" options={CANDIDATE_SOURCE_OPTIONS} />
+                            <EditField label="Người giới thiệu" value={editForm.referrer} onChange={v => setEditForm(f => ({...f, referrer: v}))} type="text" />
+                            <div className="hidden md:block"></div>
                             <EditField label="Số ngày phép" value={editForm.totalLeaveDays} onChange={v => setEditForm(f => ({...f, totalLeaveDays: Number(v) || 0}))} type="number" />
                             <EditField label="Số phép còn lại" value={editForm.remainingLeaveDays} onChange={v => setEditForm(f => ({...f, remainingLeaveDays: Number(v) || 0}))} type="number" />
                           </div>

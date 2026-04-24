@@ -2,21 +2,21 @@ export const FILTER_TABS = [
   { key: 'all', label: 'Tất cả' },
   { key: 'ACTIVE', label: 'Đang làm' },
   { key: 'PROBATION', label: 'Thử việc' },
-  { key: 'ON_LEAVE', label: 'Đang nghỉ' },
+  { key: 'ON_LEAVE', label: 'Nghỉ chế độ' },
   { key: 'TERMINATED', label: 'Đã nghỉ' },
 ];
 
 export const STATUS_OPTIONS = [
   { value: 'ACTIVE', label: 'Đang làm', color: 'text-emerald-500', bg: 'bg-emerald-500/15', border: 'border-emerald-500/20' },
   { value: 'PROBATION', label: 'Thử việc', color: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/20' },
-  { value: 'ON_LEAVE', label: 'Đang nghỉ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20' },
+  { value: 'ON_LEAVE', label: 'Nghỉ chế độ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20' },
   { value: 'TERMINATED', label: 'Đã nghỉ', color: 'text-red-500', bg: 'bg-red-500/15', border: 'border-red-500/20' },
 ]; 
 
 export const WORK_STATUS_OPTIONS = [
   { v: 'Đang làm việc', l: 'Đang làm việc' },
   { v: 'Thử việc', l: 'Thử việc' },
-  { v: 'Đang nghỉ phép', l: 'Đang nghỉ phép' },
+  { v: 'Nghỉ chế độ', l: 'Nghỉ chế độ' },
   { v: 'Đã nghỉ việc', l: 'Đã nghỉ việc' },
 ];
 
@@ -89,7 +89,7 @@ export const EMPTY_FORM = {
 export const STATUS_ENUM_TO_DISPLAY: Record<string, string> = {
   ACTIVE: 'Đang làm việc',
   PROBATION: 'Thử việc',
-  ON_LEAVE: 'Đang nghỉ phép',
+  ON_LEAVE: 'Nghỉ chế độ',
   TERMINATED: 'Đã nghỉ việc',
 };
 
@@ -97,7 +97,7 @@ export const STATUS_ENUM_TO_DISPLAY: Record<string, string> = {
 export const STATUS_DISPLAY_TO_ENUM: Record<string, string> = {
   'Đang làm việc': 'ACTIVE',
   'Thử việc': 'PROBATION',
-  'Đang nghỉ phép': 'ON_LEAVE',
+  'Nghỉ chế độ': 'ON_LEAVE',
   'Đã nghỉ việc': 'TERMINATED',
 };
 
@@ -113,7 +113,7 @@ export function getStatusConfig(status?: string) {
     case 'PROBATION':
       return { label: 'Thử việc', color: 'text-blue-500', bg: 'bg-blue-500/15', border: 'border-blue-500/20', enum: 'PROBATION' };
     case 'ON_LEAVE':
-      return { label: 'Đang nghỉ phép', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20', enum: 'ON_LEAVE' };
+      return { label: 'Nghỉ chế độ', color: 'text-amber-500', bg: 'bg-amber-500/15', border: 'border-amber-500/20', enum: 'ON_LEAVE' };
     case 'TERMINATED':
       return { label: 'Đã nghỉ việc', color: 'text-red-500', bg: 'bg-red-500/15', border: 'border-red-500/20', enum: 'TERMINATED' };
     default:

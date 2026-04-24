@@ -60,9 +60,9 @@ export function StaffDirectoryScreen({ userRole }: { userRole?: HRRole }) {
 
   const statCards = [
     { label: 'Tổng nhân sự', value: db?.totalEmployees ?? 0, icon: Users, color: 'text-pink-500', bg: 'bg-pink-500/15', gradient: 'from-pink-500 to-rose-600' },
-    { label: 'Phòng ban', value: db?.departmentCount ?? 0, icon: Building, color: 'text-purple-500', bg: 'bg-purple-500/15', gradient: 'from-purple-500 to-indigo-600' },
+    { label: 'Nhân sự chính thức', value: db?.activeEmployees ?? 0, icon: Target, color: 'text-blue-500', bg: 'bg-blue-500/15', gradient: 'from-blue-500 to-cyan-600' },
     { label: 'Thử việc', value: db?.probationEmployees ?? 0, icon: Star, color: 'text-amber-500', bg: 'bg-amber-500/15', gradient: 'from-amber-500 to-orange-600' },
-    { label: 'Nghỉ phép', value: db?.onLeaveCount ?? 0, icon: Target, color: 'text-blue-500', bg: 'bg-blue-500/15', gradient: 'from-blue-500 to-cyan-600' },
+    { label: 'Phòng ban', value: db?.departmentCount ?? 0, icon: Building, color: 'text-purple-500', bg: 'bg-purple-500/15', gradient: 'from-purple-500 to-indigo-600' },
   ];
 
 

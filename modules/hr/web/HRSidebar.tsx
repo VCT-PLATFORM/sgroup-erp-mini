@@ -22,15 +22,7 @@ const SIDEBAR_ITEMS: HRSidebarItem[] = [
   { key: 'HR_DASHBOARD', label: 'Tổng quan HR', icon: LayoutDashboard, section: 'dashboard', minRole: ALL_ROLES },
   { key: 'HR_DIRECTORY', label: 'Danh bạ Nhân sự', icon: Users, section: 'directory', minRole: ALL_ROLES },
   { key: 'HR_PROFILE', label: 'Hồ sơ Chi tiết', icon: UserCog, section: 'directory', minRole: ALL_ROLES },
-  { key: 'HR_TIMEKEEPING', label: 'Chấm công', icon: CalendarCheck, section: 'time_attendance', minRole: ALL_ROLES },
-  { key: 'HR_LEAVES', label: 'Nghỉ phép & Đơn từ', icon: FileText, section: 'time_attendance', minRole: ALL_ROLES },
-  { key: 'HR_PAYROLL', label: 'Bảng lương (Payroll)', icon: Wallet, section: 'payroll', minRole: ['hr_manager', 'hr_director', 'admin', 'ceo'] },
-  { key: 'HR_BENEFITS', label: 'Phúc lợi & BHXH', icon: Briefcase, section: 'payroll', minRole: ['hr_manager', 'hr_director', 'admin', 'ceo'] },
-  { key: 'HR_RECRUITMENT', label: 'Tuyển dụng (ATS)', icon: UserCog, section: 'recruitment', minRole: ALL_ROLES },
-  { key: 'HR_PERFORMANCE', label: 'Đánh giá Năng lực', icon: TrendingUp, section: 'performance_training', minRole: ALL_ROLES },
-  { key: 'HR_TRAINING', label: 'Đào tạo & Phát triển', icon: GraduationCap, section: 'performance_training', minRole: ALL_ROLES },
   { key: 'HR_ORG_CONFIG', label: 'Cơ Cấu Tổ Chức', icon: Users, section: 'admin', minRole: ['admin', 'ceo', 'hr_director'] },
-  { key: 'HR_POLICIES', label: 'Chính sách HR', icon: BookOpen, section: 'admin', minRole: ALL_ROLES },
 ];
 
 interface Props {
@@ -57,10 +49,6 @@ export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, us
   const sections = [
     { key: 'dashboard', label: '' },
     { key: 'directory', label: 'HỒ SƠ NHÂN SỰ' },
-    { key: 'time_attendance', label: 'CHẤM CÔNG & NGHỈ PHÉP' },
-    { key: 'payroll', label: 'LƯƠNG THƯỞNG (C&B)' },
-    { key: 'recruitment', label: 'TUYỂN DỤNG' },
-    { key: 'performance_training', label: 'ĐÁNH GIÁ & ĐÀO TẠO' },
     { key: 'admin', label: 'QUẢN TRỊ & HÀNH CHÍNH' },
   ];
 

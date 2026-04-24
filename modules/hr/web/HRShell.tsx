@@ -13,35 +13,18 @@ import { StaffDirectoryScreen } from './screens/StaffDirectoryScreen';
 import { EmployeeProfileScreen } from './screens/EmployeeProfileScreen';
 import { OrgConfigScreen } from './screens/OrgConfigScreen';
 
-// Import Batch 3 Screens
-import { TimekeepingScreen } from './screens/TimekeepingScreen';
-import { LeavesScreen } from './screens/LeavesScreen';
-import { PayrollScreen } from './screens/PayrollScreen';
-import { TrainingScreen } from './screens/TrainingScreen';
-import { BenefitsScreen } from './screens/BenefitsScreen';
-import { PoliciesScreen } from './screens/PoliciesScreen';
-import { PerformanceScreen } from './screens/PerformanceScreen';
-import { RecruitmentScreen } from './screens/RecruitmentScreen';
+// Import Batch 3 Screens removed as they are unused
 
 const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
   HR_DASHBOARD: HRDashboard,
   HR_DIRECTORY: StaffDirectoryScreen,
   HR_PROFILE: EmployeeProfileScreen,
   HR_ORG_CONFIG: OrgConfigScreen,
-  HR_TIMEKEEPING: TimekeepingScreen,
-  HR_LEAVES: LeavesScreen,
-  HR_PAYROLL: PayrollScreen,
-  HR_BENEFITS: BenefitsScreen,
-  HR_PERFORMANCE: PerformanceScreen,
-  HR_RECRUITMENT: RecruitmentScreen,
-  HR_TRAINING: TrainingScreen,
-  HR_POLICIES: PoliciesScreen,
 };
 
 export function HRShell() {
   const validKeys = useMemo(() => [
-    'HR_DASHBOARD', 'HR_DIRECTORY', 'HR_PROFILE', 'HR_ORG_CONFIG', 'HR_TIMEKEEPING', 'HR_LEAVES',
-    'HR_PAYROLL', 'HR_BENEFITS', 'HR_RECRUITMENT', 'HR_PERFORMANCE', 'HR_TRAINING', 'HR_POLICIES'
+    'HR_DASHBOARD', 'HR_DIRECTORY', 'HR_PROFILE', 'HR_ORG_CONFIG'
   ], []);
   
   const { activeKey, params, navigate } = useHRRoute(validKeys);

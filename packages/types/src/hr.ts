@@ -91,6 +91,7 @@ export interface Employee {
   insuranceBook?: string;
   recruiter?: string;
   candidateSource?: string;
+  referrer?: string;
   directManager?: string;
   dob?: string;
   idNumber?: string;
