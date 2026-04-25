@@ -289,12 +289,12 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
       {/* Stats Quick View */}
       <div className="p-6 lg:p-8 shrink-0 pb-0">
         <div className="grid grid-cols-6 gap-4">
-          <StatCard title="Cuộc Gọi" value={filteredSummaries.reduce((a,b)=>a+b.calls,0)} icon={<PhoneCall size={18} />} color="text-blue-500" />
-          <StatCard title="Khách Quan Tâm" value={filteredSummaries.reduce((a,b)=>a+b.leads,0)} icon={<Target size={18} />} color="text-amber-500" />
-          <StatCard title="Gặp Tư Vấn" value={filteredSummaries.reduce((a,b)=>a+b.meetings,0)} icon={<Briefcase size={18} />} color="text-violet-500" />
-          <StatCard title="Trải Nghiệm" value={filteredSummaries.reduce((a,b)=>a+b.visits,0)} icon={<Building2 size={18} />} color="text-indigo-500" />
-          <StatCard title="Giữ Chỗ" value={filteredSummaries.reduce((a,b)=>a+b.bookings,0)} icon={<Activity size={18} />} color="text-pink-500" />
-          <StatCard title="Đặt Cọc" value={filteredSummaries.reduce((a,b)=>a+b.deposits,0)} icon={<CheckCircle2 size={18} />} color="text-emerald-500" />
+          <StatCard title="Số Cuộc Gọi" value={filteredSummaries.reduce((a,b)=>a+b.calls,0)} icon={<PhoneCall size={18} />} color="text-blue-500" />
+          <StatCard title="Quan Tâm" value={filteredSummaries.reduce((a,b)=>a+b.leads,0)} icon={<Target size={18} />} color="text-amber-500" />
+          <StatCard title="Đã Gặp Tư Vấn" value={filteredSummaries.reduce((a,b)=>a+b.meetings,0)} icon={<Briefcase size={18} />} color="text-violet-500" />
+          <StatCard title="Đã Gặp Trải Nghiệm" value={filteredSummaries.reduce((a,b)=>a+b.visits,0)} icon={<Building2 size={18} />} color="text-indigo-500" />
+          <StatCard title="Đã Giữ Chỗ" value={filteredSummaries.reduce((a,b)=>a+b.bookings,0)} icon={<Activity size={18} />} color="text-pink-500" />
+          <StatCard title="Đã Đặt Cọc" value={filteredSummaries.reduce((a,b)=>a+b.deposits,0)} icon={<CheckCircle2 size={18} />} color="text-emerald-500" />
         </div>
       </div>
 
@@ -317,12 +317,12 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
                          <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap">Ngày</th>
                          <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap">Nhân Sự</th>
                          <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap">Team</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Cuộc Gọi</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Khách Quan Tâm</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Gặp Tư Vấn</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Gặp Trải Nghiệm</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Giữ Chỗ</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đặt Cọc</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Số Cuộc Gọi</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Quan Tâm</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Gặp Tư Vấn</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Gặp Trải Nghiệm</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Giữ Chỗ</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Đặt Cọc</th>
                          <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-right bg-emerald-50/30 dark:bg-transparent">Điểm</th>
                       </tr>
                    </thead>
