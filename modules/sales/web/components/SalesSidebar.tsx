@@ -30,10 +30,6 @@ const STAFF_MENU: SidebarItem[] = [
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
   { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
-  // ── MỤC 3: HỒ SƠ CÁ NHÂN ──
-  { id: 'profile',      label: 'Thông Tin Cá Nhân', icon: UserCheck, path: 'profile',      section: 'HỒ SƠ CÁ NHÂN' },
-  { id: 'timesheet',    label: 'Chấm Công',      icon: Calculator,   path: 'timesheet' },
-  { id: 'payroll',      label: 'Bảng Lương',     icon: DollarSign,   path: 'payroll' },
 ];
 
 const MANAGER_MENU: SidebarItem[] = [
@@ -52,10 +48,6 @@ const MANAGER_MENU: SidebarItem[] = [
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
   { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
-  // ── MỤC 4: HỒ SƠ CÁ NHÂN ──
-  { id: 'profile',      label: 'Thông Tin Cá Nhân', icon: UserCheck, path: 'profile',      section: 'HỒ SƠ CÁ NHÂN' },
-  { id: 'timesheet',    label: 'Chấm Công',      icon: Calculator,   path: 'timesheet' },
-  { id: 'payroll',      label: 'Bảng Lương',     icon: DollarSign,   path: 'payroll' },
 ];
 
 const DIRECTOR_MENU: SidebarItem[] = [
@@ -74,10 +66,6 @@ const DIRECTOR_MENU: SidebarItem[] = [
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
   { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
-  // ── MỤC 4: HỒ SƠ CÁ NHÂN ──
-  { id: 'profile',      label: 'Thông Tin Cá Nhân', icon: UserCheck, path: 'profile',      section: 'HỒ SƠ CÁ NHÂN' },
-  { id: 'timesheet',    label: 'Chấm Công',      icon: Calculator,   path: 'timesheet' },
-  { id: 'payroll',      label: 'Bảng Lương',     icon: DollarSign,   path: 'payroll' },
 ];
 
 export function SalesSidebar() {

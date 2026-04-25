@@ -26,9 +26,6 @@ import { ActivityLogScreen } from '../screens/ActivityLogScreen';
 import { BookingBoardScreen } from '../screens/BookingBoardScreen';
 import { DepositBoardScreen } from '../screens/DepositBoardScreen';
 import { CommissionScreen } from '../screens/CommissionScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
-import { TimesheetScreen } from '../screens/TimesheetScreen';
-import { PayrollScreen } from '../screens/PayrollScreen';
 // Removed duplicate imports
 
 // ═══ Placeholder for modules under construction ═══
@@ -254,9 +251,6 @@ export function SalesShell() {
               <Route path="loan-calculator" element={<LoanCalculatorScreen />} />
               <Route path="inventory" element={<InventoryBoardScreen />} />
               <Route path="commission" element={<CommissionScreen />} />
-              <Route path="profile" element={<ProfileScreen />} />
-              <Route path="timesheet" element={<TimesheetScreen />} />
-              <Route path="payroll" element={<PayrollScreen />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
           </main>
