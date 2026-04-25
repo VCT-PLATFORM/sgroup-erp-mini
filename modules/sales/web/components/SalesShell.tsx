@@ -14,7 +14,6 @@ import { RoleProvider, useSalesRole } from './shared/RoleContext';
 // ═══ Lazy-loaded Screens ═══
 import { DashboardScreen } from '../screens/DashboardScreen';
 import { CustomerScreen } from '../screens/CustomerScreen';
-import { TransactionBoardScreen } from '../screens/TransactionBoardScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { TeamScreen } from '../screens/TeamScreen';
 import { DepartmentScreen } from '../screens/DepartmentScreen';
@@ -237,13 +236,11 @@ export function SalesShell() {
               <Route path="activities" element={<ActivityLogScreen mode="personal" />} />
               <Route path="bookings" element={<BookingBoardScreen mode="personal" />} />
               <Route path="deposits" element={<DepositBoardScreen mode="personal" />} />
-              <Route path="transactions" element={<TransactionBoardScreen mode="personal" />} />
               
               <Route path="team" element={<TeamScreen />} />
               <Route path="team_activities" element={<ActivityLogScreen mode="team" />} />
               <Route path="team_bookings" element={<BookingBoardScreen mode="team" />} />
               <Route path="team_deposits" element={<DepositBoardScreen mode="team" />} />
-              <Route path="team_transactions" element={<TransactionBoardScreen mode="team" />} />
               <Route path="leaderboard" element={<LeaderboardScreen />} />
               <Route path="departments" element={<DepartmentScreen />} />
               <Route path="reports" element={<ReportsScreen />} />

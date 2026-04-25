@@ -28,7 +28,6 @@ const STAFF_MENU: SidebarItem[] = [
   { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
-  { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
 ];
 
 const MANAGER_MENU: SidebarItem[] = [
@@ -39,13 +38,11 @@ const MANAGER_MENU: SidebarItem[] = [
   { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
   { id: 'team_bookings',   label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'team_bookings' },
   { id: 'team_deposits',   label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'team_deposits' },
-  { id: 'team_transactions', label: 'Giao Dịch',      icon: Layers,       path: 'team_transactions' },
   { id: 'team',         label: 'Danh Sách Đội Nhóm', icon: Users,        path: 'team' },
   // ── MỤC 3: NĂNG SUẤT ──
   { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
-  { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
 ];
 
 const DIRECTOR_MENU: SidebarItem[] = [
@@ -56,13 +53,11 @@ const DIRECTOR_MENU: SidebarItem[] = [
   { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
   { id: 'team_bookings',   label: 'Giữ Chỗ',            icon: BookmarkPlus, path: 'team_bookings' },
   { id: 'team_deposits',   label: 'Đặt Cọc',            icon: ShieldCheck,  path: 'team_deposits' },
-  { id: 'team_transactions', label: 'Giao Dịch',          icon: Layers,       path: 'team_transactions' },
   { id: 'team',         label: 'Danh Sách Đội Nhóm',   icon: Users,     path: 'team' },
   // ── MỤC 3: NĂNG SUẤT ──
   { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
-  { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
 ];
 
 const VP_MENU: SidebarItem[] = [
@@ -73,14 +68,12 @@ const VP_MENU: SidebarItem[] = [
   { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
   { id: 'team_bookings',   label: 'Giữ Chỗ',            icon: BookmarkPlus, path: 'team_bookings' },
   { id: 'team_deposits',   label: 'Đặt Cọc',            icon: ShieldCheck,  path: 'team_deposits' },
-  { id: 'team_transactions', label: 'Giao Dịch',          icon: Layers,       path: 'team_transactions' },
   { id: 'team',         label: 'Danh Sách Đội Nhóm',   icon: Users,     path: 'team' },
   { id: 'commission',   label: 'Hoa Hồng',          icon: DollarSign, path: 'commission' },
   // ── MỤC 3: NĂNG SUẤT ──
   { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
   { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
-  { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
 ];
 
 export function SalesSidebar() {
