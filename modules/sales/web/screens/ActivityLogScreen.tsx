@@ -375,14 +375,18 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
 
 function StatCard({ title, value, icon, color }: { title: string, value: number | string, icon: React.ReactNode, color: string }) {
   return (
-    <div className="bg-white dark:bg-black/30 backdrop-blur-3xl rounded-sg-xl border border-slate-200/80 dark:border-sg-border p-5 flex items-center gap-4 shadow-sg-sm">
-      <div className={`w-12 h-12 rounded-2xl bg-sg-card/50 flex shrink-0 flex-center border border-sg-border justify-center items-center ${color}`}>
+    <div className="group bg-white dark:bg-black/30 backdrop-blur-3xl rounded-2xl border border-slate-200/80 dark:border-sg-border p-5 flex flex-col items-center text-center shadow-sg-sm hover:shadow-[0_8px_24px_rgba(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 relative overflow-hidden">
+      {/* Top accent bar */}
+      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full opacity-40 group-hover:opacity-100 group-hover:w-12 transition-all duration-300 ${color.replace('text-', 'bg-')}`} />
+      {/* Icon */}
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${color} bg-current/10`}
+        style={{ backgroundColor: 'color-mix(in srgb, currentColor 8%, transparent)' }}>
         {icon}
       </div>
-      <div>
-        <p className="text-[11px] font-bold text-sg-muted uppercase tracking-wider">{title}</p>
-        <p className={`text-[20px] font-black ${color} truncate`}>{value}</p>
-      </div>
+      {/* Value */}
+      <p className={`text-[28px] font-black leading-none mb-1.5 ${color}`}>{value}</p>
+      {/* Title */}
+      <p className="text-[11px] font-bold text-sg-muted tracking-wide whitespace-nowrap">{title}</p>
     </div>
   );
 }
