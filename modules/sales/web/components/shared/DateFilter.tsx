@@ -123,7 +123,7 @@ export function DateFilter({ onChange }: DateFilterProps) {
     : PRESETS.find(p => p.key === activePreset)?.label || 'Tất cả';
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-nowrap overflow-x-auto custom-scrollbar pb-1">
       {/* Preset Chips */}
       {PRESETS.map(p => (
         <button

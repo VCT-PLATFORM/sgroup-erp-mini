@@ -89,30 +89,34 @@ export function DepositBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="px-6 lg:px-8 py-5 border-b border-slate-100 dark:border-sg-border/40 bg-white/40 dark:bg-black/20 backdrop-blur-xl shrink-0">
-        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+      <div className="relative z-20 px-6 lg:px-8 py-4 border-b border-slate-100 dark:border-sg-border/40 bg-white/40 dark:bg-black/20 backdrop-blur-xl shrink-0">
+        <div className="flex items-center justify-between gap-4">
+          {/* Left: Title */}
+          <div className="flex items-center gap-3 shrink-0">
             <div className="w-10 h-10 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center shrink-0">
               <ShieldCheck size={18} className="text-orange-500" />
             </div>
-            <div>
-              <h2 className="text-[18px] font-black text-sg-heading">
-                {mode === 'team' ? 'Quản Lý Đặt Cọc Team' : 'Quản Lý Đặt Cọc (Deposit)'}
+            <div className="hidden sm:block">
+              <h2 className="text-[17px] font-black text-sg-heading leading-tight tracking-tight">
+                {mode === 'team' ? 'Đặt Cọc Team' : 'Đặt Cọc'}
               </h2>
-              <span className="text-[11px] font-bold text-sg-muted">
-                {mode === 'team' ? 'Dữ liệu toàn đội • ' : 'Dữ liệu cá nhân • '}
-                {(items || []).length} giao dịch cọc đang xử lý
-              </span>
+              <p className="text-[10px] font-bold text-sg-muted uppercase tracking-wider mt-0.5">
+                {mode === 'team' ? 'Đội' : 'Cá nhân'} • {(items || []).length} bản ghi
+              </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 custom-scrollbar">
-            <DateFilter onChange={(range) => setDateRange(range)} />
-            
-            <div className="w-px h-6 bg-sg-border/50 mx-1 shrink-0 hidden sm:block"></div>
+          {/* Center: Filters */}
+          <div className="flex-1 flex justify-center min-w-0">
+            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar max-w-full pb-1">
+              <DateFilter onChange={(range) => setDateRange(range)} />
+            </div>
+          </div>
 
-            <button onClick={fetchItems} className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-white/50 dark:bg-black/20 border border-sg-border rounded-xl text-[12px] font-bold text-sg-muted hover:text-sg-heading transition-colors">
-              <RefreshCw size={14} /> Làm mới
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 shrink-0">
+            <button onClick={fetchItems} className="h-10 w-10 flex items-center justify-center bg-white/60 dark:bg-black/20 border border-sg-border rounded-xl text-sg-muted hover:text-sg-heading hover:bg-white transition-all" title="Làm mới">
+              <RefreshCw size={14} />
             </button>
           </div>
         </div>
