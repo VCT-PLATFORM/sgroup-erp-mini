@@ -87,35 +87,35 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="relative z-20 px-6 lg:px-8 py-4 border-b border-slate-100 dark:border-sg-border/40 bg-white/40 dark:bg-black/20 backdrop-blur-xl shrink-0">
-        <div className="flex items-center justify-between gap-4">
-          {/* Left: Title */}
-          <div className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
-              <BookmarkPlus size={18} className="text-blue-500" />
+      <div className="relative z-20 px-6 lg:px-8 py-5 border-b border-slate-100 dark:border-sg-border/40 bg-white/40 dark:bg-black/20 backdrop-blur-xl shrink-0">
+        <div className="flex flex-col gap-6">
+          {/* Row 1: Title & Actions */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-sm">
+                <BookmarkPlus size={22} className="text-blue-500" />
+              </div>
+              <div className="min-w-0">
+                <h2 className="text-[20px] font-black text-sg-heading leading-none tracking-tight whitespace-nowrap">
+                  {mode === 'team' ? 'Giữ Chỗ Team' : 'Quản Lý Giữ Chỗ'}
+                </h2>
+                <p className="text-[12px] font-bold text-sg-muted uppercase tracking-wider mt-1.5 opacity-80">
+                  {mode === 'team' ? 'Quản lý giỏ hàng toàn đội' : 'Dữ liệu giữ chỗ cá nhân'} • {(items || []).length} bản ghi
+                </p>
+              </div>
             </div>
-            <div className="hidden sm:block">
-              <h2 className="text-[17px] font-black text-sg-heading leading-tight tracking-tight">
-                {mode === 'team' ? 'Giữ Chỗ Team' : 'Giữ Chỗ'}
-              </h2>
-              <p className="text-[10px] font-bold text-sg-muted uppercase tracking-wider mt-0.5">
-                {mode === 'team' ? 'Đội' : 'Cá nhân'} • {(items || []).length} bản ghi
-              </p>
-            </div>
-          </div>
-          
-          {/* Center: Filters */}
-          <div className="flex-1 flex justify-center min-w-0">
-            <div className="flex items-center gap-3 overflow-x-auto no-scrollbar max-w-full pb-1">
-              <DateFilter onChange={(range) => setDateRange(range)} />
+
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={fetchItems} className="h-11 px-4 flex items-center gap-2 bg-white/60 dark:bg-black/20 border border-sg-border rounded-xl text-sg-muted hover:text-sg-heading hover:bg-white transition-all font-bold text-[13px]">
+                <RefreshCw size={16} /> <span className="hidden sm:inline">Làm mới</span>
+              </button>
             </div>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2 shrink-0">
-            <button onClick={fetchItems} className="h-10 w-10 flex items-center justify-center bg-white/60 dark:bg-black/20 border border-sg-border rounded-xl text-sg-muted hover:text-sg-heading hover:bg-white transition-all" title="Làm mới">
-              <RefreshCw size={14} />
-            </button>
+          {/* Row 2: Filters Area */}
+          <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-sg-border/30">
+            <div className="text-[11px] font-black text-sg-muted uppercase tracking-widest mr-2 opacity-60">Lọc thời gian:</div>
+            <DateFilter onChange={(range) => setDateRange(range)} />
           </div>
         </div>
       </div>
