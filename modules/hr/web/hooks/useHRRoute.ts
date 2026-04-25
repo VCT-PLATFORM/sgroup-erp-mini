@@ -2,13 +2,13 @@ import { useState, useEffect, useCallback } from 'react';
 
 export function useHRRoute(validKeys: string[]) {
   const parseHash = () => {
-    if (typeof window === 'undefined') return { key: 'HR_DASHBOARD', params: new URLSearchParams() };
+    if (typeof window === 'undefined') return { key: 'HR_DIRECTORY', params: new URLSearchParams() };
     const fullHash = window.location.hash.replace('#', '');
     const [path, queryString] = fullHash.split('?');
     const key = path.toUpperCase();
     
     return {
-      key: validKeys.includes(key) ? key : 'HR_DASHBOARD',
+      key: validKeys.includes(key) ? key : 'HR_DIRECTORY',
       params: new URLSearchParams(queryString || '')
     };
   };
@@ -27,7 +27,7 @@ export function useHRRoute(validKeys: string[]) {
     const newHash = `${key.toLowerCase()}${queryString ? `?${queryString}` : ''}`;
     
     setRouteState({
-      key: validKeys.includes(key.toUpperCase()) ? key.toUpperCase() : 'HR_DASHBOARD',
+      key: validKeys.includes(key.toUpperCase()) ? key.toUpperCase() : 'HR_DIRECTORY',
       params: searchParams
     });
     window.location.hash = newHash;

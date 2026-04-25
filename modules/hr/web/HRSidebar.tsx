@@ -19,7 +19,6 @@ export interface HRSidebarItem {
 const ALL_ROLES: HRRole[] = ['hr_staff', 'hr_manager', 'hr_director', 'admin', 'ceo'];
 
 const SIDEBAR_ITEMS: HRSidebarItem[] = [
-  { key: 'HR_DASHBOARD', label: 'Tổng quan HR', icon: LayoutDashboard, section: 'dashboard', minRole: ALL_ROLES },
   { key: 'HR_DIRECTORY', label: 'Danh bạ Nhân sự', icon: Users, section: 'directory', minRole: ALL_ROLES },
   { key: 'HR_PROFILE', label: 'Hồ sơ Chi tiết', icon: UserCog, section: 'directory', minRole: ALL_ROLES },
   { key: 'HR_ORG_CONFIG', label: 'Cơ Cấu Tổ Chức', icon: Users, section: 'admin', minRole: ['admin', 'ceo', 'hr_director'] },
@@ -47,7 +46,6 @@ export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, us
 
   const visibleItems = SIDEBAR_ITEMS.filter(item => item.minRole.includes(userRole));
   const sections = [
-    { key: 'dashboard', label: '' },
     { key: 'directory', label: 'HỒ SƠ NHÂN SỰ' },
     { key: 'admin', label: 'QUẢN TRỊ & HÀNH CHÍNH' },
   ];

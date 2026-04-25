@@ -5,8 +5,7 @@ import { HRSidebar, HRSidebarItem, HRRole } from './HRSidebar';
 import { useAuthStore } from '@sgroup/platform';
 import { useHRRoute } from './hooks/useHRRoute';
 
-// Import Batch 1 Screens
-import { HRDashboard } from './screens/HRDashboard';
+// Import Screens
 import { StaffDirectoryScreen } from './screens/StaffDirectoryScreen';
 
 // Import Batch 2 Screens
@@ -16,7 +15,6 @@ import { OrgConfigScreen } from './screens/OrgConfigScreen';
 // Import Batch 3 Screens removed as they are unused
 
 const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
-  HR_DASHBOARD: HRDashboard,
   HR_DIRECTORY: StaffDirectoryScreen,
   HR_PROFILE: EmployeeProfileScreen,
   HR_ORG_CONFIG: OrgConfigScreen,
@@ -24,12 +22,12 @@ const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
 
 export function HRShell() {
   const validKeys = useMemo(() => [
-    'HR_DASHBOARD', 'HR_DIRECTORY', 'HR_PROFILE', 'HR_ORG_CONFIG'
+    'HR_DIRECTORY', 'HR_PROFILE', 'HR_ORG_CONFIG'
   ], []);
   
   const { activeKey, params, navigate } = useHRRoute(validKeys);
-  const [activeLabel, setActiveLabel] = useState('Tổng quan HR');
-  const [activeSection, setActiveSection] = useState('dashboard');
+  const [activeLabel, setActiveLabel] = useState('Danh bạ Nhân sự');
+  const [activeSection, setActiveSection] = useState('directory');
   const [collapsed, setCollapsed] = useState(false);
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   
@@ -80,7 +78,6 @@ export function HRShell() {
   const ContentComponent = KEY_TO_COMPONENT[activeKey];
 
   const sectionLabels: Record<string, string> = {
-    dashboard: 'TỔNG QUAN',
     directory: 'HỒ SƠ NHÂN SỰ',
     time_attendance: 'CHẤM CÔNG & NGHỈ PHÉP',
     payroll: 'LƯƠNG THƯỞNG (C&B)',
