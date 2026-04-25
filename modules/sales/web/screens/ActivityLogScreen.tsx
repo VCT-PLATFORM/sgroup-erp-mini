@@ -31,6 +31,24 @@ interface ActivitySummary {
   originalActivity?: SalesActivity;
 }
 
+const STAFF_ENGLISH_NAMES: Record<string, string> = {
+  'Ngô Việt': 'Anom',
+  'Trần Lê Hải': 'Harry',
+  'Ngô Thị Vàng': 'Goldie',
+  'Lâm Chấn Phong': 'Windy',
+  'Đào Thuỳ Trang': 'Tracy',
+  'Phan Văn Khoa': 'Kevin',
+  'Nguyễn Demo': 'Demo'
+};
+
+const formatStaffName = (fullName: string) => {
+  if (!fullName) return '';
+  const englishName = STAFF_ENGLISH_NAMES[fullName] || 'User';
+  const parts = fullName.trim().split(' ');
+  const lastName = parts[parts.length - 1];
+  return `${englishName} ${lastName}`;
+};
+
 function CustomSelect({ 
   value, 
   onChange, 
@@ -242,21 +260,28 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
   }, [mode, role]);
 
   const handleEdit = (summary: ActivitySummary) => {
-    if (summary.originalActivity) {
+    if (summary.originalActivity && summary.originalActivity.id) {
       setEditingActivity(summary.originalActivity);
       setIsModalOpen(true);
     } else {
-      toast.error('Không tìm thấy dữ liệu gốc để chỉnh sửa.');
+      toast.error(`Dòng dữ liệu ngày ${summary.date} của ${formatStaffName(summary.staffName)} là dữ liệu tổng hợp tự động, không thể chỉnh sửa trực tiếp.`);
     }
   };
 
   const handleDelete = async (summary: ActivitySummary) => {
-    if (!summary.originalActivity?.id) return;
+    const activityId = summary.originalActivity?.id;
     
-    if (window.confirm(`Bạn có chắc chắn muốn xóa bản ghi ngày ${summary.date} của ${summary.staffName}?`)) {
+    if (!activityId) {
+      toast.error(`Bản ghi ngày ${summary.date} của ${formatStaffName(summary.staffName)} được tạo tự động từ hệ thống Giữ chỗ/Đặt cọc, không thể xóa tại đây.`);
+      return;
+    }
+    
+    const confirmMsg = `Bạn có chắc chắn muốn xóa nhật ký kinh doanh ngày ${summary.date} của nhân sự ${formatStaffName(summary.staffName)}? \n\nLưu ý: Hành động này không thể hoàn tác.`;
+    
+    if (window.confirm(confirmMsg)) {
       try {
-        await salesOpsApi.deleteActivity(summary.originalActivity.id);
-        toast.success('Đã xóa bản ghi thành công!');
+        await salesOpsApi.deleteActivity(activityId);
+        toast.success('Đã xóa nhật ký kinh doanh thành công!');
         fetchActivities();
       } catch (err: any) {
         toast.error('Lỗi khi xóa: ' + err.message);
@@ -366,12 +391,12 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
                          <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap">Ngày</th>
                          <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap">Nhân Sự</th>
                          <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap">Team</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Số Cuộc Gọi</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Quan Tâm</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Gặp Tư Vấn</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Gặp Trải Nghiệm</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Giữ Chỗ</th>
-                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Đặt Cọc</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-normal text-center leading-tight">Số<br/>Cuộc Gọi</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-normal text-center leading-tight">Quan<br/>Tâm</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-normal text-center leading-tight">Đã Gặp<br/>Tư Vấn</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-normal text-center leading-tight">Đã Gặp<br/>Trải Nghiệm</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-normal text-center leading-tight">Đã Giữ<br/>Chỗ</th>
+                         <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-normal text-center leading-tight">Đã Đặt<br/>Cọc</th>
                          <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-right bg-emerald-50/30 dark:bg-transparent">Điểm</th>
                          <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Thao tác</th>
                       </tr>
@@ -380,10 +405,10 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
                       {filteredSummaries.map((row, idx) => (
                          <tr key={row.id} className="border-b border-slate-100 dark:border-sg-border/50 hover:bg-slate-50/80 dark:hover:bg-white/5 transition-colors sg-stagger" style={{ animationDelay: `${idx * 40}ms` }}>
                             <td className="px-6 py-4 text-[13px] font-black text-sg-heading whitespace-nowrap">{row.date}</td>
-                            <td className="px-4 py-4">
+                            <td className="px-4 py-4 whitespace-nowrap">
                               <div className="flex items-center gap-2">
                                 <User size={14} className="text-sg-muted" />
-                                <span className="text-[13px] font-bold text-sg-heading">{row.staffName}</span>
+                                <span className="text-[13px] font-bold text-sg-heading">{formatStaffName(row.staffName)}</span>
                               </div>
                             </td>
                             <td className="px-4 py-4 text-[12px] font-bold text-sg-muted whitespace-nowrap">{row.team}</td>
