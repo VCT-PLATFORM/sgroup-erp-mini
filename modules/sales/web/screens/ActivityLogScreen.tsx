@@ -242,7 +242,7 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
             </div>
             <div>
               <h2 className="text-[18px] font-black text-sg-heading">
-                {mode === 'team' ? 'Nhật Ký Năng Suất Team' : 'Nhật Ký Năng Suất'}
+                {mode === 'team' ? 'Nhật Ký Kinh Doanh Team' : 'Nhật Ký Kinh Doanh'}
               </h2>
               <span className="text-[11px] font-bold text-sg-muted">
                 {mode === 'team' ? 'Dữ liệu toàn đội' : 'Dữ liệu cá nhân'} • {filteredSummaries.length} bản ghi

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Target, X, CheckCircle2, FileText, Phone, Users, Calendar, Award, Building2, AlertCircle } from 'lucide-react';
+import { Target, X, CheckCircle2, FileText, Phone, Users, Calendar, Award, Building2, AlertCircle, BookmarkPlus, ShieldCheck } from 'lucide-react';
 import { salesOpsApi } from '../api/salesApi';
 import { useToast } from '@sgroup/web-ui';
 
@@ -13,14 +13,16 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
   const [newLeads, setNewLeads] = useState(0);
   const [meetingsMade, setMeetingsMade] = useState(0);
   const [siteVisits, setSiteVisits] = useState(0);
+  const [bookingsCount, setBookingsCount] = useState(0);
+  const [depositsCount, setDepositsCount] = useState(0);
   
   const [note, setNote] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const toast = useToast();
 
-  // Auto calculate points
-  const totalPoints = newLeads * 1 + meetingsMade * 10 + siteVisits * 20;
+  // Auto calculate points (Cuộc gọi=0, Quan tâm=1, Tư vấn=10, Trải nghiệm=20, Giữ chỗ=30, Đặt cọc=60)
+  const totalPoints = newLeads * 1 + meetingsMade * 10 + siteVisits * 20 + bookingsCount * 30 + depositsCount * 60;
 
   useEffect(() => {
     if (!isOpen) {
@@ -30,6 +32,8 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
         setNewLeads(0);
         setMeetingsMade(0);
         setSiteVisits(0);
+        setBookingsCount(0);
+        setDepositsCount(0);
         setNote('');
       }, 300);
     }
@@ -37,7 +41,7 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (totalPoints === 0) return;
+    if (callsCount + newLeads + meetingsMade + siteVisits + bookingsCount + depositsCount === 0) return;
     setSubmitting(true);
     try {
       await salesOpsApi.createActivity({
@@ -45,6 +49,8 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
         newLeads,
         meetingsMade,
         siteVisits,
+        bookingsCount,
+        depositsCount,
         note
       });
       toast.success(`+${totalPoints} điểm đã được ghi nhận!`);
@@ -88,7 +94,7 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
               <Calendar size={24} />
             </div>
             <div>
-              <h2 className="text-[20px] font-black text-sg-heading tracking-tight">Nhật Ký Tác Nghiệp</h2>
+              <h2 className="text-[20px] font-black text-sg-heading tracking-tight">Nhật Ký Kinh Doanh</h2>
               <div className="flex items-center gap-2 mt-1">
                 <p className="text-[12px] font-bold text-sg-muted">Ghi nhận hoạt động trong ngày</p>
                 <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold flex items-center gap-1">
@@ -108,36 +114,52 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
               
               <div className="grid grid-cols-2 gap-4">
                 <FieldInput 
-                  label="Cuộc Gọi" 
+                  label="Số Cuộc Gọi" 
                   pointsText="0 điểm"
                   value={callsCount} 
                   onChange={setCallsCount} 
-                  icon={<Phone size={18} className={callsCount > 0 ? "text-violet-500" : "text-sg-muted"} />}
-                  theme="violet"
+                  icon={<Phone size={18} className={callsCount > 0 ? "text-blue-500" : "text-sg-muted"} />}
+                  theme="blue"
                 />
                 <FieldInput 
-                  label="Khách Quan Tâm" 
-                  pointsText="+1 điểm/khách"
+                  label="Quan Tâm" 
+                  pointsText="+1 điểm/lần"
                   value={newLeads} 
                   onChange={setNewLeads} 
-                  icon={<Users size={18} className={newLeads > 0 ? "text-emerald-500" : "text-sg-muted"} />}
-                  theme="emerald"
-                />
-                <FieldInput 
-                  label="Hẹn Gặp Tư Vấn" 
-                  pointsText="+10 điểm/lần"
-                  value={meetingsMade} 
-                  onChange={setMeetingsMade} 
-                  icon={<Target size={18} className={meetingsMade > 0 ? "text-amber-500" : "text-sg-muted"} />}
+                  icon={<Users size={18} className={newLeads > 0 ? "text-amber-500" : "text-sg-muted"} />}
                   theme="amber"
                 />
                 <FieldInput 
-                  label="Hẹn Gặp Trải Nghiệm" 
+                  label="Đã Gặp Tư Vấn" 
+                  pointsText="+10 điểm/lần"
+                  value={meetingsMade} 
+                  onChange={setMeetingsMade} 
+                  icon={<Target size={18} className={meetingsMade > 0 ? "text-violet-500" : "text-sg-muted"} />}
+                  theme="violet"
+                />
+                <FieldInput 
+                  label="Đã Gặp Trải Nghiệm" 
                   pointsText="+20 điểm/lần"
                   value={siteVisits} 
                   onChange={setSiteVisits} 
-                  icon={<Building2 size={18} className={siteVisits > 0 ? "text-blue-500" : "text-sg-muted"} />}
-                  theme="blue"
+                  icon={<Building2 size={18} className={siteVisits > 0 ? "text-indigo-500" : "text-sg-muted"} />}
+                  theme="indigo"
+                />
+                <FieldInput 
+                  label="Đã Giữ Chỗ" 
+                  pointsText="+30 điểm/lần"
+                  value={bookingsCount} 
+                  onChange={setBookingsCount} 
+                  icon={<BookmarkPlus size={18} className={bookingsCount > 0 ? "text-pink-500" : "text-sg-muted"} />}
+                  theme="pink"
+                />
+                <FieldInput 
+                  label="Đã Đặt Cọc" 
+                  pointsText="+60 điểm/lần"
+                  value={depositsCount} 
+                  onChange={setDepositsCount} 
+                  icon={<ShieldCheck size={18} className={depositsCount > 0 ? "text-emerald-500" : "text-sg-muted"} />}
+                  theme="emerald"
                 />
               </div>
 
@@ -153,7 +175,7 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
 
               <button 
                 type="submit" 
-                disabled={submitting || totalPoints === 0}
+                disabled={submitting || (callsCount + newLeads + meetingsMade + siteVisits + bookingsCount + depositsCount === 0)}
                 className="w-full h-12 mt-2 rounded-xl bg-linear-to-r from-indigo-500 to-purple-600 text-white font-black text-[15px] hover:shadow-lg hover:shadow-purple-500/40 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:pointer-events-none relative overflow-hidden"
               >
                 {submitting ? 'Đang lưu...' : 'Ghi Nhận Cuối Ngày'}
@@ -197,6 +219,12 @@ const THEMES: Record<string, any> = {
     bgActive: 'bg-blue-500/10',
     bgLight: 'bg-blue-500/20',
     text: 'text-blue-500',
+  },
+  pink: {
+    borderActive: 'border-pink-500/40',
+    bgActive: 'bg-pink-500/10',
+    bgLight: 'bg-pink-500/20',
+    text: 'text-pink-500',
   }
 };
 
