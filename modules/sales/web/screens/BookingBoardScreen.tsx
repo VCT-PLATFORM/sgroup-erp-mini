@@ -88,9 +88,9 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-6 lg:px-8 py-5 border-b border-slate-100 dark:border-sg-border/40 bg-white/40 dark:bg-black/20 backdrop-blur-xl shrink-0">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center shrink-0">
               <BookmarkPlus size={18} className="text-blue-500" />
             </div>
             <div>
@@ -103,9 +103,13 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          
+          <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 custom-scrollbar">
             <DateFilter onChange={(range) => setDateRange(range)} />
-            <button onClick={fetchItems} className="flex items-center gap-2 px-4 py-2.5 bg-sg-btn-bg border border-sg-border rounded-xl text-[12px] font-bold text-sg-muted hover:text-sg-heading transition-colors">
+            
+            <div className="w-px h-6 bg-sg-border/50 mx-1 shrink-0 hidden sm:block"></div>
+
+            <button onClick={fetchItems} className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-white/50 dark:bg-black/20 border border-sg-border rounded-xl text-[12px] font-bold text-sg-muted hover:text-sg-heading transition-colors">
               <RefreshCw size={14} /> Làm mới
             </button>
           </div>

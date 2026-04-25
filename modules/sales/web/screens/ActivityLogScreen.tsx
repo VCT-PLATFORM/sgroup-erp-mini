@@ -244,9 +244,9 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header */}
       <div className="relative z-20 px-6 lg:px-8 py-5 border-b border-slate-100 dark:border-sg-border/40 bg-white/40 dark:bg-black/20 backdrop-blur-xl shrink-0">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center shrink-0">
               <Activity size={18} className="text-violet-500" />
             </div>
             <div>
@@ -258,11 +258,13 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          
+          <div className="flex items-center gap-3 w-full xl:w-auto overflow-x-auto pb-1 custom-scrollbar">
             <DateFilter onChange={(range) => setDateRange(range)} />
             
             {mode === 'team' && (
               <>
+                <div className="w-px h-6 bg-sg-border/50 mx-1 shrink-0 hidden sm:block"></div>
                 <CustomSelect
                   value={filterTeam}
                   onChange={setFilterTeam}
@@ -284,17 +286,21 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
                 />
               </>
             )}
-            <button onClick={fetchActivities} className="flex items-center gap-2 px-4 py-2.5 bg-white/50 dark:bg-black/20 border border-sg-border rounded-xl text-[12px] font-bold text-sg-muted hover:text-sg-heading transition-colors">
-              Refresh
+            
+            <div className="w-px h-6 bg-sg-border/50 mx-1 shrink-0 hidden sm:block"></div>
+
+            <button onClick={fetchActivities} className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-white/50 dark:bg-black/20 border border-sg-border rounded-xl text-[12px] font-bold text-sg-muted hover:text-sg-heading transition-colors">
+              <RefreshCw size={14} /> Refresh
             </button>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-linear-to-r from-emerald-500 to-emerald-600 border border-emerald-500/20 rounded-xl text-[12px] font-black text-white hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5 transition-all"
+              className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-linear-to-r from-emerald-500 to-emerald-600 border border-emerald-500/20 rounded-xl text-[12px] font-black text-white hover:shadow-lg hover:shadow-emerald-500/20 hover:-translate-y-0.5 transition-all"
             >
               <Plus size={16} /> Nhập Hoạt Động
             </button>
           </div>
         </div>
+      </div>
       </div>
 
       {/* Stats Quick View */}
