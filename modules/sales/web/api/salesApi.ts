@@ -48,11 +48,14 @@ export interface SalesActivity {
   staffId?: string;
   staffName?: string;
   teamId?: string;
+  teamName?: string;
   postsCount: number;
   callsCount: number;
   newLeads: number;
   meetingsMade: number;
-  siteVisits?: number;
+  siteVisits: number;
+  bookingsCount?: number;
+  depositsCount?: number;
   points?: number;
   activityDate?: string;
   note?: string;
@@ -126,15 +129,36 @@ export const salesOpsApi = {
   listActivities: (_f?: ListFilter) => mockDelay(MOCK_ACTIVITIES),
   createActivity: (data: Partial<SalesActivity>) => {
     const newAct: SalesActivity = {
-      id: uid(), staffId: 'S1', staffName: 'Nguyễn Demo', teamId: 'T1',
-      postsCount: data.postsCount || 0, callsCount: data.callsCount || 0,
-      newLeads: data.newLeads || 0, meetingsMade: data.meetingsMade || 0,
+      id: uid(), staffId: 'S1', staffName: 'Ngô Việt', teamId: 'T1', teamName: 'BD Zone 1',
+      postsCount: data.postsCount || 0, 
+      callsCount: data.callsCount || 0,
+      newLeads: data.newLeads || 0, 
+      meetingsMade: data.meetingsMade || 0,
       siteVisits: data.siteVisits || 0,
-      points: (data.newLeads||0)*1 + (data.meetingsMade||0)*10 + (data.siteVisits||0)*20,
-      activityDate: new Date().toISOString(), note: data.note || '', createdAt: new Date().toISOString(),
+      bookingsCount: data.bookingsCount || 0,
+      depositsCount: data.depositsCount || 0,
+      points: (data.newLeads||0)*1 + (data.meetingsMade||0)*10 + (data.siteVisits||0)*20 + (data.bookingsCount||0)*30 + (data.depositsCount||0)*60,
+      activityDate: data.activityDate || new Date().toISOString(), 
+      note: data.note || '', 
+      createdAt: new Date().toISOString(),
     };
     MOCK_ACTIVITIES = [newAct, ...MOCK_ACTIVITIES];
     return mockDelay(newAct);
+  },
+  updateActivity: (id: string, data: Partial<SalesActivity>) => {
+    MOCK_ACTIVITIES = MOCK_ACTIVITIES.map(a => {
+      if (a.id === id) {
+        const merged = { ...a, ...data };
+        merged.points = (merged.newLeads||0)*1 + (merged.meetingsMade||0)*10 + (merged.siteVisits||0)*20 + (merged.bookingsCount||0)*30 + (merged.depositsCount||0)*60;
+        return merged;
+      }
+      return a;
+    });
+    return mockDelay(MOCK_ACTIVITIES.find(a => a.id === id));
+  },
+  deleteActivity: (id: string) => {
+    MOCK_ACTIVITIES = MOCK_ACTIVITIES.filter(a => a.id !== id);
+    return mockDelay({ success: true });
   },
   
   // Bookings

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Activity, Calendar, User, Building2, Search, Filter, ChevronDown,
-  PhoneCall, Users, Target, CheckCircle2, TrendingUp, Briefcase, Plus, RefreshCw
+  PhoneCall, Users, Target, CheckCircle2, TrendingUp, Briefcase, Plus, RefreshCw,
+  Edit, Trash2, MoreVertical
 } from 'lucide-react';
 import { useSalesRole } from '../components/shared/RoleContext';
-import { salesOpsApi } from '../api/salesApi';
+import { salesOpsApi, SalesActivity } from '../api/salesApi';
 import { CURRENT_USER, CURRENT_TEAM } from '../api/salesMocks';
 import { SkeletonCard, EmptyState, DateFilter, filterByDateRange } from '../components/shared';
 import { ActivityEntryModal } from '../components/ActivityEntryModal';
+import { useToast } from '@sgroup/web-ui';
 
 // ═══════════════════════════════════════════════════════════
 // ACTIVITY LOG SCREEN — Productivity Tracking
@@ -26,6 +28,7 @@ interface ActivitySummary {
   bookings: number;
   deposits: number;
   points: number;
+  originalActivity?: SalesActivity;
 }
 
 function CustomSelect({ 
@@ -122,9 +125,11 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
   const [summaries, setSummaries] = useState<ActivitySummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingActivity, setEditingActivity] = useState<SalesActivity | null>(null);
   const [filterTeam, setFilterTeam] = useState('all');
   const [filterStaff, setFilterStaff] = useState('all');
   const [dateRange, setDateRange] = useState<{from: Date | null, to: Date | null}>({from: null, to: null});
+  const toast = useToast();
 
   const filteredSummaries = React.useMemo(() => {
     let result = summaries;
@@ -179,16 +184,21 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
       acts.forEach(a => {
         const dateStr = toDateStr(a.activityDate || new Date().toISOString());
         const staffName = a.staffName || (a.staffId === CURRENT_USER.id ? CURRENT_USER.fullName : 'Nhân Sự Khác');
-        const teamName = (a as any).teamName || (a.teamId === CURRENT_TEAM.id ? CURRENT_TEAM.name : 'Khác');
+        const teamName = a.teamName || (a.teamId === CURRENT_TEAM.id ? CURRENT_TEAM.name : 'Khác');
         const key = `${dateStr}_${staffName}`;
         if (!map.has(key)) {
-          map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0 });
+          map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0, originalActivity: a });
         }
         const row = map.get(key)!;
         row.calls += a.callsCount || 0;
         row.leads += a.newLeads || 0;
         row.meetings += a.meetingsMade || 0;
         row.visits += a.siteVisits || 0;
+        row.points += a.points || 0;
+        // Keep the most recent originalActivity for editing
+        if (a.createdAt && (!row.originalActivity?.createdAt || a.createdAt > row.originalActivity.createdAt)) {
+          row.originalActivity = a;
+        }
       });
 
       books.forEach(b => {
@@ -199,7 +209,9 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
         if (!map.has(key)) {
           map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0 });
         }
-        map.get(key)!.bookings += 1;
+        const row = map.get(key)!;
+        row.bookings += 1;
+        row.points += 30;
       });
 
       deps.forEach(d => {
@@ -210,31 +222,47 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
         if (!map.has(key)) {
           map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0 });
         }
-        map.get(key)!.deposits += 1;
+        const row = map.get(key)!;
+        row.deposits += 1;
+        row.points += 60;
       });
 
-      // Compute Points
-      const result = Array.from(map.values()).map(row => {
-        row.points = (row.leads * 1) + (row.meetings * 10) + (row.visits * 20) + (row.bookings * 30) + (row.deposits * 60);
-        return row;
-      });
-
-      // Sort by Date Descending
-      result.sort((a, b) => {
-         const [d1, m1, y1] = a.date.split('/');
-         const [d2, m2, y2] = b.date.split('/');
-         const dateA = new Date(`${y1}-${m1}-${d1}`).getTime();
-         const dateB = new Date(`${y2}-${m2}-${d2}`).getTime();
-         return dateB - dateA;
-      });
-
-      setSummaries(result);
-    } catch (err) {
-      console.error(err);
+      setSummaries(Array.from(map.values()).sort((a, b) => {
+        const [d1, m1, y1] = a.date.split('/');
+        const [d2, m2, y2] = b.date.split('/');
+        const dateA = new Date(`${y1}-${m1}-${d1}`).getTime();
+        const dateB = new Date(`${y2}-${m2}-${d2}`).getTime();
+        return dateB - dateA;
+      }));
+    } catch (err: any) {
+      console.error('Fetch failed', err);
     } finally {
       setLoading(false);
     }
-  }, [role, mode]);
+  }, [mode, role]);
+
+  const handleEdit = (summary: ActivitySummary) => {
+    if (summary.originalActivity) {
+      setEditingActivity(summary.originalActivity);
+      setIsModalOpen(true);
+    } else {
+      toast.error('Không tìm thấy dữ liệu gốc để chỉnh sửa.');
+    }
+  };
+
+  const handleDelete = async (summary: ActivitySummary) => {
+    if (!summary.originalActivity?.id) return;
+    
+    if (window.confirm(`Bạn có chắc chắn muốn xóa bản ghi ngày ${summary.date} của ${summary.staffName}?`)) {
+      try {
+        await salesOpsApi.deleteActivity(summary.originalActivity.id);
+        toast.success('Đã xóa bản ghi thành công!');
+        fetchActivities();
+      } catch (err: any) {
+        toast.error('Lỗi khi xóa: ' + err.message);
+      }
+    }
+  };
 
   useEffect(() => {
     fetchActivities();
@@ -345,6 +373,7 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
                          <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Giữ Chỗ</th>
                          <th className="px-4 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Đã Đặt Cọc</th>
                          <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-right bg-emerald-50/30 dark:bg-transparent">Điểm</th>
+                         <th className="px-6 py-4 text-[10px] font-black text-sg-muted uppercase tracking-widest whitespace-nowrap text-center">Thao tác</th>
                       </tr>
                    </thead>
                    <tbody>
@@ -365,6 +394,24 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
                             <td className="px-4 py-4 text-[15px] font-black text-pink-500 text-center">{row.bookings}</td>
                             <td className="px-4 py-4 text-[15px] font-black text-rose-500 text-center">{row.deposits}</td>
                             <td className="px-6 py-4 text-[18px] font-black text-emerald-600 dark:text-emerald-400 text-right bg-emerald-50/30 dark:bg-transparent">{row.points}</td>
+                            <td className="px-6 py-4 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <button 
+                                  onClick={() => handleEdit(row)}
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 text-blue-500 hover:bg-blue-500 hover:text-white transition-all shadow-sm"
+                                  title="Chỉnh sửa"
+                                >
+                                  <Edit size={14} />
+                                </button>
+                                <button 
+                                  onClick={() => handleDelete(row)}
+                                  className="w-8 h-8 flex items-center justify-center rounded-lg bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                                  title="Xóa"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
                          </tr>
                       ))}
                    </tbody>
@@ -376,9 +423,11 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
 
       <ActivityEntryModal 
         isOpen={isModalOpen} 
+        initialData={editingActivity}
         onClose={() => {
           setIsModalOpen(false);
-          fetchActivities(); // Refresh sau khi thêm mới
+          setEditingActivity(null);
+          fetchActivities(); // Refresh sau khi thêm mới/sửa
         }} 
       />
 

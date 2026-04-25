@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Target, X, CheckCircle2, FileText, Phone, Users, Calendar, Award, Building2, AlertCircle, BookmarkPlus, ShieldCheck } from 'lucide-react';
-import { salesOpsApi } from '../api/salesApi';
+import { salesOpsApi, SalesActivity } from '../api/salesApi';
 import { useToast } from '@sgroup/web-ui';
 
 export interface ActivityEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: SalesActivity | null;
 }
 
-export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps) {
+export function ActivityEntryModal({ isOpen, onClose, initialData }: ActivityEntryModalProps) {
   const [callsCount, setCallsCount] = useState(0);
   const [newLeads, setNewLeads] = useState(0);
   const [meetingsMade, setMeetingsMade] = useState(0);
@@ -21,11 +22,21 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
   const [success, setSuccess] = useState(false);
   const toast = useToast();
 
+  const isEditing = !!initialData;
+
   // Auto calculate points (Cuộc gọi=0, Quan tâm=1, Tư vấn=10, Trải nghiệm=20, Giữ chỗ=30, Đặt cọc=60)
   const totalPoints = newLeads * 1 + meetingsMade * 10 + siteVisits * 20 + bookingsCount * 30 + depositsCount * 60;
 
   useEffect(() => {
-    if (!isOpen) {
+    if (isOpen && initialData) {
+      setCallsCount(initialData.callsCount || 0);
+      setNewLeads(initialData.newLeads || 0);
+      setMeetingsMade(initialData.meetingsMade || 0);
+      setSiteVisits(initialData.siteVisits || 0);
+      setBookingsCount(initialData.bookingsCount || 0);
+      setDepositsCount(initialData.depositsCount || 0);
+      setNote(initialData.note || '');
+    } else if (!isOpen) {
       setTimeout(() => {
         setSuccess(false);
         setCallsCount(0);
@@ -37,14 +48,14 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
         setNote('');
       }, 300);
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (callsCount + newLeads + meetingsMade + siteVisits + bookingsCount + depositsCount === 0) return;
     setSubmitting(true);
     try {
-      await salesOpsApi.createActivity({
+      const payload = {
         callsCount,
         newLeads,
         meetingsMade,
@@ -52,8 +63,16 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
         bookingsCount,
         depositsCount,
         note
-      });
-      toast.success(`+${totalPoints} điểm đã được ghi nhận!`);
+      };
+
+      if (isEditing && initialData?.id) {
+        await salesOpsApi.updateActivity(initialData.id, payload);
+        toast.success(`Đã cập nhật hoạt động!`);
+      } else {
+        await salesOpsApi.createActivity(payload);
+        toast.success(`+${totalPoints} điểm đã được ghi nhận!`);
+      }
+
       setSuccess(true);
       setTimeout(() => {
         onClose();
@@ -94,9 +113,13 @@ export function ActivityEntryModal({ isOpen, onClose }: ActivityEntryModalProps)
               <Calendar size={24} />
             </div>
             <div>
-              <h2 className="text-[20px] font-black text-sg-heading tracking-tight">Nhật Ký Kinh Doanh</h2>
+              <h2 className="text-[20px] font-black text-sg-heading tracking-tight">
+                {isEditing ? 'Chỉnh Sửa Hoạt Động' : 'Nhật Ký Kinh Doanh'}
+              </h2>
               <div className="flex items-center gap-2 mt-1">
-                <p className="text-[12px] font-bold text-sg-muted">Ghi nhận hoạt động trong ngày</p>
+                <p className="text-[12px] font-bold text-sg-muted">
+                  {isEditing ? 'Cập nhật lại các chỉ số đã nhập' : 'Ghi nhận hoạt động trong ngày'}
+                </p>
                 <div className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold flex items-center gap-1">
                   <Award size={10} /> +{totalPoints} Điểm
                 </div>
