@@ -205,7 +205,6 @@ export function SalesShell() {
             <Routes>
               <Route path="/" element={<Navigate to="dashboard" replace />} />
               <Route path="dashboard" element={<DashboardScreen />} />
-              <Route path="customers" element={<CustomerScreen />} />
               <Route path="activities" element={<ActivityLogScreen mode="personal" />} />
               <Route path="bookings" element={<BookingBoardScreen mode="personal" />} />
               <Route path="deposits" element={<DepositBoardScreen mode="personal" />} />
