@@ -58,7 +58,8 @@ function UserRoleSwitcher() {
   const roles = [
     { id: 'sales_staff', label: 'Sales Staff', desc: 'Chuyên viên' },
     { id: 'sales_manager', label: 'Sales Manager', desc: 'Trưởng phòng' },
-    { id: 'sales_director', label: 'Sales Director', desc: 'Giám đốc' }
+    { id: 'sales_director', label: 'Sales Director', desc: 'Giám đốc' },
+    { id: 'sales_vp', label: 'Sales VP', desc: 'Phó TGĐ Kinh Doanh' }
   ] as const;
 
   const currentRole = roles.find(r => r.id === role) || roles[2];

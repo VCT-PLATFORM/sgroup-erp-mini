@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type SalesRole = 'sales_staff' | 'sales_manager' | 'sales_director' | 'admin';
+export type SalesRole = 'sales_staff' | 'sales_manager' | 'sales_director' | 'sales_vp' | 'admin';
 
 interface RoleContextType {
   role: SalesRole;

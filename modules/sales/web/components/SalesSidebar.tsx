@@ -68,6 +68,25 @@ const DIRECTOR_MENU: SidebarItem[] = [
   { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
 ];
 
+const VP_MENU: SidebarItem[] = [
+  // ── MỤC 1: TỔNG QUAN ──
+  { id: 'dashboard',    label: 'Dashboard',         icon: BarChart3, path: 'dashboard',    section: 'TỔNG QUAN' },
+  { id: 'leaderboard',  label: 'Bảng Xếp Hạng',     icon: Trophy,    path: 'leaderboard' },
+  { id: 'inventory',    label: 'Bảng Hàng',         icon: Grid,      path: 'inventory' },
+  // ── MỤC 2: QUẢN LÝ KINH DOANH ──
+  { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
+  { id: 'team_bookings',   label: 'Giữ Chỗ',            icon: BookmarkPlus, path: 'team_bookings' },
+  { id: 'team_deposits',   label: 'Đặt Cọc',            icon: ShieldCheck,  path: 'team_deposits' },
+  { id: 'team_transactions', label: 'Giao Dịch',          icon: Layers,       path: 'team_transactions' },
+  { id: 'team',         label: 'Danh Sách Đội Nhóm',   icon: Users,     path: 'team' },
+  { id: 'commission',   label: 'Hoa Hồng',          icon: DollarSign, path: 'commission' },
+  // ── MỤC 3: NĂNG SUẤT ──
+  { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
+  { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
+  { id: 'deposits',     label: 'Đặt Cọc',        icon: ShieldCheck,  path: 'deposits' },
+  { id: 'transactions', label: 'Giao Dịch',      icon: Layers,       path: 'transactions' },
+];
+
 export function SalesSidebar() {
   const { role: userRole } = useSalesRole();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -78,7 +97,8 @@ export function SalesSidebar() {
 
   let currentMenu = STAFF_MENU;
   if (userRole === 'sales_manager') currentMenu = MANAGER_MENU;
-  if (userRole === 'sales_director' || userRole === 'admin') currentMenu = DIRECTOR_MENU;
+  if (userRole === 'sales_director') currentMenu = DIRECTOR_MENU;
+  if (userRole === 'sales_vp' || userRole === 'admin') currentMenu = VP_MENU;
 
   return (
     <aside className={`h-full flex flex-col bg-white dark:bg-[#0a0a0a] transition-all duration-300 ${isCollapsed ? 'w-[72px]' : 'w-[260px]'}`}>
