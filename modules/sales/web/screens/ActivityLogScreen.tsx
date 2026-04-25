@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Activity, Calendar, User, Building2, Search, Filter, ChevronDown,
-  PhoneCall, Users, Target, CheckCircle2, TrendingUp, Briefcase, Plus
+  PhoneCall, Users, Target, CheckCircle2, TrendingUp, Briefcase, Plus, RefreshCw
 } from 'lucide-react';
 import { useSalesRole } from '../components/shared/RoleContext';
 import { salesOpsApi } from '../api/salesApi';
