@@ -301,7 +301,6 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
           </div>
         </div>
       </div>
-      </div>
 
       {/* Stats Quick View */}
       <div className="p-6 lg:p-8 shrink-0 pb-0">
