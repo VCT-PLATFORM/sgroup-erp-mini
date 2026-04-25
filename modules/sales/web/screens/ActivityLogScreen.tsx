@@ -6,7 +6,7 @@ import {
 import { useSalesRole } from '../components/shared/RoleContext';
 import { salesOpsApi } from '../api/salesApi';
 import { CURRENT_USER, CURRENT_TEAM } from '../api/salesMocks';
-import { SkeletonCard, EmptyState } from '../components/shared';
+import { SkeletonCard, EmptyState, DateFilter, filterByDateRange } from '../components/shared';
 import { ActivityEntryModal } from '../components/ActivityEntryModal';
 
 // ═══════════════════════════════════════════════════════════
@@ -124,14 +124,23 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterTeam, setFilterTeam] = useState('all');
   const [filterStaff, setFilterStaff] = useState('all');
+  const [dateRange, setDateRange] = useState<{from: Date | null, to: Date | null}>({from: null, to: null});
 
   const filteredSummaries = React.useMemo(() => {
-    return summaries.filter(s => {
+    let result = summaries;
+    
+    // Team/Staff Filter
+    result = result.filter(s => {
       if (filterTeam !== 'all' && s.team !== filterTeam) return false;
       if (filterStaff !== 'all' && s.staffName !== filterStaff) return false;
       return true;
     });
-  }, [summaries, filterTeam, filterStaff]);
+
+    // Date Range Filter
+    result = filterByDateRange(result, s => s.date, dateRange);
+
+    return result;
+  }, [summaries, filterTeam, filterStaff, dateRange]);
 
   const fetchActivities = useCallback(async () => {
     setLoading(true);
@@ -250,6 +259,8 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <DateFilter onChange={(range) => setDateRange(range)} />
+            
             {mode === 'team' && (
               <>
                 <CustomSelect

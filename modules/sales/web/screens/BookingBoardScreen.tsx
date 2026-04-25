@@ -8,7 +8,7 @@ import { salesOpsApi } from '../api/salesApi';
 import { CURRENT_USER, CURRENT_TEAM } from '../api/salesMocks';
 import {
   CinematicDrawer, DrawerSection, DrawerHeroCard, DrawerDetailRow,
-  SkeletonCard,
+  SkeletonCard, DateFilter, filterByDateRange
 } from '../components/shared';
 import { BookingEntryModal } from '../components/BookingEntryModal';
 import { formatVND } from '../hooks/useSalesData';
@@ -44,6 +44,7 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
   const [selectedItem, setSelectedItem] = useState<BookingBoardItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<BookingBoardItem | null>(null);
+  const [dateRange, setDateRange] = useState<{from: Date | null, to: Date | null}>({from: null, to: null});
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -74,9 +75,13 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
     fetchItems();
   }, [fetchItems]);
 
+  const filteredItems = React.useMemo(() => {
+    return filterByDateRange(items, i => i.createdAt as string, dateRange);
+  }, [items, dateRange]);
+
   const grouped = COLUMNS.map(col => ({
     ...col,
-    items: items.filter(i => (i.status || 'PENDING') === col.key),
+    items: filteredItems.filter(i => (i.status || 'PENDING') === col.key),
   }));
 
   return (
@@ -99,6 +104,7 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <DateFilter onChange={(range) => setDateRange(range)} />
             <button onClick={fetchItems} className="flex items-center gap-2 px-4 py-2.5 bg-sg-btn-bg border border-sg-border rounded-xl text-[12px] font-bold text-sg-muted hover:text-sg-heading transition-colors">
               <RefreshCw size={14} /> Làm mới
             </button>
