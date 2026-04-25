@@ -5,14 +5,10 @@ import { HRSidebar, HRSidebarItem, HRRole } from './HRSidebar';
 import { useAuthStore } from '@sgroup/platform';
 import { useHRRoute } from './hooks/useHRRoute';
 
-// Import Screens
+// Screens
 import { StaffDirectoryScreen } from './screens/StaffDirectoryScreen';
-
-// Import Batch 2 Screens
 import { EmployeeProfileScreen } from './screens/EmployeeProfileScreen';
 import { OrgConfigScreen } from './screens/OrgConfigScreen';
-
-// Import Batch 3 Screens removed as they are unused
 
 const KEY_TO_COMPONENT: Record<string, React.ComponentType<any>> = {
   HR_DIRECTORY: StaffDirectoryScreen,
@@ -79,10 +75,6 @@ export function HRShell() {
 
   const sectionLabels: Record<string, string> = {
     directory: 'HỒ SƠ NHÂN SỰ',
-    time_attendance: 'CHẤM CÔNG & NGHỈ PHÉP',
-    payroll: 'LƯƠNG THƯỞNG (C&B)',
-    recruitment: 'TUYỂN DỤNG',
-    performance_training: 'ĐÁNH GIÁ & ĐÀO TẠO',
     admin: 'QUẢN TRỊ & HÀNH CHÍNH',
   };
 

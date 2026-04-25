@@ -1,49 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import {
-  Sun, Moon, TrendingUp, Search, Plus
+  Sun, Moon, TrendingUp, Search
 } from 'lucide-react';
 import { SalesSidebar } from './SalesSidebar';
 import { SalesSearchModal } from './SalesSearchModal';
 import { SalesCopilot } from './SalesCopilot';
-import { ActivityEntryModal } from './ActivityEntryModal';
 import { SalesErrorBoundary } from './ErrorBoundary';
 import { ToastProvider } from './shared/Toast';
 import { RoleProvider, useSalesRole } from './shared/RoleContext';
 
 // ═══ Lazy-loaded Screens ═══
 import { DashboardScreen } from '../screens/DashboardScreen';
-import { CustomerScreen } from '../screens/CustomerScreen';
 import { LeaderboardScreen } from '../screens/LeaderboardScreen';
 import { TeamScreen } from '../screens/TeamScreen';
-import { DepartmentScreen } from '../screens/DepartmentScreen';
-import { ReportsScreen } from '../screens/ReportsScreen';
-import { SettingsScreen } from '../screens/SettingsScreen';
-import { LoanCalculatorScreen } from '../screens/LoanCalculatorScreen';
 import { ActivityLogScreen } from '../screens/ActivityLogScreen';
 import { BookingBoardScreen } from '../screens/BookingBoardScreen';
 import { DepositBoardScreen } from '../screens/DepositBoardScreen';
 import { CommissionScreen } from '../screens/CommissionScreen';
-// Removed duplicate imports
-
-// ═══ Placeholder for modules under construction ═══
-function PlaceholderScreen({ title }: { title: string }) {
-  return (
-    <div className="flex-1 h-full flex flex-col bg-transparent relative z-10 overflow-hidden">
-      <div className="flex-1 p-8 flex items-center justify-center relative">
-        <div className="text-center bg-white dark:bg-black/30 backdrop-blur-3xl p-12 rounded-[40px] border border-slate-200 dark:border-sg-border shadow-2xl relative overflow-hidden group">
-          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-emerald-500 via-amber-500 to-emerald-500 opacity-50 group-hover:opacity-100 transition-opacity" />
-          <div className="absolute -inset-10 bg-linear-to-br from-emerald-500/10 to-amber-600/5 blur-3xl rounded-full scale-0 group-hover:scale-100 transition-transform duration-1000 origin-center" />
-          <div className="w-20 h-20 mx-auto rounded-sg-xl bg-sg-btn-bg border border-sg-border flex items-center justify-center mb-6 relative shadow-[0_8px_32px_rgba(0,0,0,0.1)]">
-            <div className="w-10 h-10 border-4 border-sg-border border-t-emerald-500 rounded-full animate-spin" />
-          </div>
-          <h2 className="text-2xl font-black text-sg-heading tracking-tight drop-shadow-md">Module "{title}" đang phát triển</h2>
-          <p className="text-sm font-bold text-sg-muted mt-3 max-w-sm mx-auto leading-relaxed">Giao diện phân phối theo tiêu chuẩn Neo-Glassmorphism v2.2. Vui lòng quay lại sau!</p>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ═══════════════════════════════════════════════════════════
 // ROLE SWITCHER (Demo Component)
@@ -116,7 +90,6 @@ export function SalesShell() {
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCopilotOpen, setIsCopilotOpen] = useState(false);
-  const [isActivityModalOpen, setActivityModalOpen] = useState(false);
 
   // ═══ Keyboard shortcuts ═══
   useEffect(() => {
@@ -242,10 +215,6 @@ export function SalesShell() {
               <Route path="team_bookings" element={<BookingBoardScreen mode="team" />} />
               <Route path="team_deposits" element={<DepositBoardScreen mode="team" />} />
               <Route path="leaderboard" element={<LeaderboardScreen />} />
-              <Route path="departments" element={<DepartmentScreen />} />
-              <Route path="reports" element={<ReportsScreen />} />
-              <Route path="settings" element={<SettingsScreen />} />
-              <Route path="loan-calculator" element={<LoanCalculatorScreen />} />
               <Route path="commission" element={<CommissionScreen />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>

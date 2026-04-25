@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  BarChart3, Users, Layers, Building2, UserCheck,
-  FileText, TrendingUp, Settings, ChevronLeft, ChevronRight,
-  Sparkles, DollarSign, Calculator, Grid, Activity, BookmarkPlus, ShieldCheck, LogOut, Trophy
+  BarChart3, Users, TrendingUp, ChevronLeft, ChevronRight,
+  DollarSign, Activity, BookmarkPlus, ShieldCheck, LogOut, Trophy
 } from 'lucide-react';
 import { useSalesRole } from './shared/RoleContext';
 

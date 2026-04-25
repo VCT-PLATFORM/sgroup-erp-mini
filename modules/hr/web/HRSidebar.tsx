@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
-  LayoutDashboard, Users, UserCog, CalendarCheck, FileText,
-  ChevronLeft, ChevronRight, LogOut, Wallet, BookOpen,
-  GraduationCap, TrendingUp, UserCircle, Plus, Briefcase
+  Users, UserCog, LayoutDashboard,
+  ChevronLeft, ChevronRight, UserCircle
 } from 'lucide-react';
 import { useAuthStore } from '@sgroup/platform';
 
@@ -12,7 +11,7 @@ export interface HRSidebarItem {
   key: string;
   label: string;
   icon: any;
-  section: 'dashboard' | 'directory' | 'time_attendance' | 'payroll' | 'recruitment' | 'performance_training' | 'admin';
+  section: 'directory' | 'admin';
   minRole: HRRole[];
 }
 
@@ -33,7 +32,7 @@ interface Props {
 }
 
 export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, userRole = 'hr_staff' }: Props) {
-  const { logout, user } = useAuthStore();
+  const { user } = useAuthStore();
   const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
   
   useEffect(() => {
@@ -103,8 +102,6 @@ export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, us
           {collapsed ? <ChevronRight size={14} className="text-sg-muted" strokeWidth={2.5} /> : <ChevronLeft size={14} className="text-sg-muted" strokeWidth={2.5} />}
         </button>
       </div>
-
-
 
       {/* Menu */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar py-2">
