@@ -24,7 +24,6 @@ const STAFF_MENU: SidebarItem[] = [
   // ── MỤC 1: TỔNG QUAN ──
   { id: 'dashboard',    label: 'Dashboard',      icon: BarChart3,    path: 'dashboard',    section: 'TỔNG QUAN' },
   { id: 'leaderboard',  label: 'Bảng Xếp Hạng',  icon: Trophy,       path: 'leaderboard' },
-  { id: 'inventory',    label: 'Bảng Hàng',      icon: Grid,         path: 'inventory' },
   // ── MỤC 2: NĂNG SUẤT ──
   { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },
@@ -36,7 +35,6 @@ const MANAGER_MENU: SidebarItem[] = [
   // ── MỤC 1: TỔNG QUAN ──
   { id: 'dashboard',    label: 'Dashboard',      icon: BarChart3,    path: 'dashboard',    section: 'TỔNG QUAN' },
   { id: 'leaderboard',  label: 'Bảng Xếp Hạng',  icon: Trophy,       path: 'leaderboard' },
-  { id: 'inventory',    label: 'Bảng Hàng',      icon: Grid,         path: 'inventory' },
   // ── MỤC 2: QUẢN LÝ KINH DOANH ──
   { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
   { id: 'team_bookings',   label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'team_bookings' },
@@ -54,7 +52,6 @@ const DIRECTOR_MENU: SidebarItem[] = [
   // ── MỤC 1: TỔNG QUAN ──
   { id: 'dashboard',    label: 'Dashboard',         icon: BarChart3, path: 'dashboard',    section: 'TỔNG QUAN' },
   { id: 'leaderboard',  label: 'Bảng Xếp Hạng',     icon: Trophy,    path: 'leaderboard' },
-  { id: 'inventory',    label: 'Bảng Hàng',         icon: Grid,      path: 'inventory' },
   // ── MỤC 2: QUẢN LÝ KINH DOANH ──
   { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
   { id: 'team_bookings',   label: 'Giữ Chỗ',            icon: BookmarkPlus, path: 'team_bookings' },
@@ -72,7 +69,6 @@ const VP_MENU: SidebarItem[] = [
   // ── MỤC 1: TỔNG QUAN ──
   { id: 'dashboard',    label: 'Dashboard',         icon: BarChart3, path: 'dashboard',    section: 'TỔNG QUAN' },
   { id: 'leaderboard',  label: 'Bảng Xếp Hạng',     icon: Trophy,    path: 'leaderboard' },
-  { id: 'inventory',    label: 'Bảng Hàng',         icon: Grid,      path: 'inventory' },
   // ── MỤC 2: QUẢN LÝ KINH DOANH ──
   { id: 'team_activities', label: 'Nhật Ký Kinh Doanh', icon: Activity,     path: 'team_activities', section: 'QUẢN LÝ KINH DOANH' },
   { id: 'team_bookings',   label: 'Giữ Chỗ',            icon: BookmarkPlus, path: 'team_bookings' },

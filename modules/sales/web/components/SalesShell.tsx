@@ -21,7 +21,6 @@ import { DepartmentScreen } from '../screens/DepartmentScreen';
 import { ReportsScreen } from '../screens/ReportsScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
 import { LoanCalculatorScreen } from '../screens/LoanCalculatorScreen';
-import { InventoryBoardScreen } from '../screens/InventoryBoardScreen';
 import { ActivityLogScreen } from '../screens/ActivityLogScreen';
 import { BookingBoardScreen } from '../screens/BookingBoardScreen';
 import { DepositBoardScreen } from '../screens/DepositBoardScreen';
@@ -250,7 +249,6 @@ export function SalesShell() {
               <Route path="reports" element={<ReportsScreen />} />
               <Route path="settings" element={<SettingsScreen />} />
               <Route path="loan-calculator" element={<LoanCalculatorScreen />} />
-              <Route path="inventory" element={<InventoryBoardScreen />} />
               <Route path="commission" element={<CommissionScreen />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
