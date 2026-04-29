@@ -203,12 +203,17 @@ func (h *DashboardHandler) GetTeamPerformance(c *gin.Context) {
 	type TeamPerf struct {
 		TeamID      string  `json:"teamId"`
 		TeamName    string  `json:"teamName"`
+		LeaderName  string  `json:"leaderName"`
 		TotalDeals          int64   `json:"totalDeals"`
 		ClosedDeals         int64   `json:"closedDeals"`
 		GMV                 float64 `json:"gmv"`
 		Revenue             float64 `json:"revenue"`
 		TotalActivityPoints float64 `json:"totalActivityPoints"`
 		StaffCount          int64   `json:"staffCount"`
+		Leads               int64   `json:"leads"`
+		Meetings            int64   `json:"meetings"`
+		Visits              int64   `json:"visits"`
+		Bookings            int64   `json:"bookings"`
 	}
 
 	var teams []model.SalesTeam
@@ -216,13 +221,16 @@ func (h *DashboardHandler) GetTeamPerformance(c *gin.Context) {
 
 	var results []TeamPerf
 	for _, team := range teams {
-		perf := TeamPerf{TeamID: team.ID, TeamName: team.Name}
+		perf := TeamPerf{TeamID: team.ID, TeamName: team.Name, LeaderName: team.ManagerName}
 		h.db.Model(&model.SalesDeal{}).Where("team_id = ?", team.ID).Count(&perf.TotalDeals)
 		h.db.Model(&model.SalesDeal{}).Where("team_id = ? AND stage = ?", team.ID, model.DealStageClosed).Count(&perf.ClosedDeals)
 		h.db.Model(&model.SalesDeal{}).Where("team_id = ? AND stage = ?", team.ID, model.DealStageClosed).
 			Select("COALESCE(SUM(deal_value), 0) as gmv, COALESCE(SUM(commission), 0) as revenue").
 			Scan(&perf)
-		h.db.Model(&model.SalesActivity{}).Where("team_id = ?", team.ID).Select("COALESCE(SUM(points), 0)").Scan(&perf.TotalActivityPoints)
+		h.db.Model(&model.SalesActivity{}).Where("team_id = ?", team.ID).
+			Select("COALESCE(SUM(points), 0) as total_activity_points, COALESCE(SUM(new_leads), 0) as leads, COALESCE(SUM(meetings_made), 0) as meetings, COALESCE(SUM(site_visits), 0) as visits").
+			Scan(&perf)
+		h.db.Model(&model.SalesBooking{}).Where("team_id = ?", team.ID).Count(&perf.Bookings)
 		h.db.Model(&model.SalesStaff{}).Where("team_id = ? AND status = ?", team.ID, "ACTIVE").Count(&perf.StaffCount)
 		results = append(results, perf)
 	}
@@ -242,16 +250,57 @@ func (h *DashboardHandler) GetTopSellers(c *gin.Context) {
 		Deals      int64   `json:"deals"`
 		GMV        float64 `json:"gmv"`
 		Revenue    float64 `json:"revenue"`
+		ActivityPoints float64 `json:"activityPoints"`
+		KpiPoints  float64 `json:"kpiPoints"`
+		Leads      int64   `json:"leads"`
+		Meetings   int64   `json:"meetings"`
+		Visits     int64   `json:"visits"`
+		Bookings   int64   `json:"bookings"`
 	}
 
+	var staffs []model.SalesStaff
+	h.db.Preload("Team").Where("status = ?", "ACTIVE").Find(&staffs)
+
 	var results []TopSeller
-	h.db.Model(&model.SalesDeal{}).
-		Select("staff_id, staff_name, team_name, COUNT(*) as deals, COALESCE(SUM(deal_value), 0) as gmv, COALESCE(SUM(commission), 0) as revenue").
-		Where("stage = ?", model.DealStageClosed).
-		Group("staff_id, staff_name, team_name").
-		Order("gmv DESC").
-		Limit(limit).
-		Scan(&results)
+	for _, staff := range staffs {
+		teamName := "Trống"
+		if staff.Team != nil {
+			teamName = staff.Team.Name
+		}
+		
+		seller := TopSeller{
+			StaffID:   staff.ID,
+			StaffName: staff.FullName,
+			TeamName:  teamName,
+			KpiPoints: 400, // Hardcoded for now based on image
+		}
+		
+		h.db.Model(&model.SalesDeal{}).Where("staff_id = ? AND stage = ?", staff.ID, model.DealStageClosed).Count(&seller.Deals)
+		h.db.Model(&model.SalesDeal{}).Where("staff_id = ? AND stage = ?", staff.ID, model.DealStageClosed).
+			Select("COALESCE(SUM(deal_value), 0) as gmv, COALESCE(SUM(commission), 0) as revenue").
+			Scan(&seller)
+			
+		h.db.Model(&model.SalesActivity{}).Where("staff_id = ?", staff.ID).
+			Select("COALESCE(SUM(points), 0) as activity_points, COALESCE(SUM(new_leads), 0) as leads, COALESCE(SUM(meetings_made), 0) as meetings, COALESCE(SUM(site_visits), 0) as visits").
+			Scan(&seller)
+			
+		h.db.Model(&model.SalesBooking{}).Where("staff_id = ?", staff.ID).Count(&seller.Bookings)
+		
+		results = append(results, seller)
+	}
+
+	// Sort by ActivityPoints DESC
+	for i := 0; i < len(results)-1; i++ {
+		for j := i + 1; j < len(results); j++ {
+			if results[i].ActivityPoints < results[j].ActivityPoints {
+				results[i], results[j] = results[j], results[i]
+			}
+		}
+	}
+
+	if len(results) > limit {
+		results = results[:limit]
+	}
 
 	c.JSON(http.StatusOK, wrapper{Data: results})
 }

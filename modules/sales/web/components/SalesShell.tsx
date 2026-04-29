@@ -17,7 +17,6 @@ import { TeamScreen } from '../screens/TeamScreen';
 import { ActivityLogScreen } from '../screens/ActivityLogScreen';
 import { BookingBoardScreen } from '../screens/BookingBoardScreen';
 import { DepositBoardScreen } from '../screens/DepositBoardScreen';
-import { CommissionScreen } from '../screens/CommissionScreen';
 
 // ═══════════════════════════════════════════════════════════
 // ROLE SWITCHER (Demo Component)
@@ -214,7 +213,6 @@ export function SalesShell() {
               <Route path="team_bookings" element={<BookingBoardScreen mode="team" />} />
               <Route path="team_deposits" element={<DepositBoardScreen mode="team" />} />
               <Route path="leaderboard" element={<LeaderboardScreen />} />
-              <Route path="commission" element={<CommissionScreen />} />
               <Route path="*" element={<Navigate to="dashboard" replace />} />
             </Routes>
           </main>

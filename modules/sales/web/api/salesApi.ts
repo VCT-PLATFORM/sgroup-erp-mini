@@ -1,11 +1,10 @@
 import axios from 'axios';
-import * as M from './salesMocks';
 
 // ═══════════════════════════════════════════════════════════
 // SALES API CLIENT — Centralized HTTP layer
 // ═══════════════════════════════════════════════════════════
 
-const API_BASE = (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_SALES_API_URL : undefined) || 'http://localhost:8083/api/v1';
+const API_BASE = ((import.meta as any).env ? (import.meta as any).env.VITE_SALES_API_URL : undefined) || 'http://localhost:8083/api/v1';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -40,8 +39,8 @@ export interface ListFilter {
   sortBy?: string; sortDir?: string; page?: number; limit?: number;
 }
 
-import { Customer, Transaction, SalesDeal, SalesTeam, SalesStaff, SalesBooking, KPIData, MonthlyRevenue } from '@sgroup/types';
-export type { Customer, Transaction, SalesDeal, SalesTeam, SalesStaff, SalesBooking, KPIData, MonthlyRevenue };
+import { SalesTeam, SalesStaff, SalesBooking, KPIData, MonthlyRevenue } from '@sgroup/types';
+export type { SalesTeam, SalesStaff, SalesBooking, KPIData, MonthlyRevenue };
 
 export interface SalesActivity {
   id?: string;
@@ -72,11 +71,22 @@ export interface TeamPerformance {
   teamId: string; teamName: string; totalDeals: number;
   closedDeals: number; gmv: number; revenue: number; staffCount: number;
   totalActivityPoints: number;
+  leaderName?: string;
+  leads?: number;
+  meetings?: number;
+  visits?: number;
+  bookings?: number;
 }
 
 export interface TopSeller {
   staffId: string; staffName: string; teamName: string;
   deals: number; gmv: number; revenue: number;
+  activityPoints?: number;
+  kpiPoints?: number;
+  leads?: number;
+  meetings?: number;
+  visits?: number;
+  bookings?: number;
 }
 
 // ═══ MOCK WRAPPER ═══
@@ -86,155 +96,52 @@ const mockDelay = <T>(data: T, ms = 400): Promise<ApiResponse<T>> =>
 
 // ═══ Dashboard API ═══
 export const dashboardApi = {
-  getKPIs: () => mockDelay(M.MOCK_KPIS),
-  getMonthlyRevenue: (_year?: number) => mockDelay(M.MOCK_MONTHLY_REVENUE),
-  getRecentTransactions: (limit?: number) => mockDelay(M.MOCK_TRANSACTIONS.slice(0, limit || 5)),
-  getPipelineSummary: () => mockDelay(M.MOCK_PIPELINE),
-  getTeamPerformance: () => mockDelay(M.MOCK_TEAM_PERF),
-  getTopSellers: (limit?: number) => mockDelay(M.MOCK_TOP_SELLERS.slice(0, limit || 10)),
+  getKPIs: () => api.get<any, ApiResponse<KPIData>>('/dashboard/kpi'),
+  getMonthlyRevenue: (year?: number) => 
+    api.get<any, ApiResponse<MonthlyRevenue[]>>('/dashboard/monthly-revenue', { params: { year } }),
+  getPipelineSummary: () => api.get<any, ApiResponse<StageCount[]>>('/dashboard/pipeline-summary'),
+  getTeamPerformance: () => api.get<any, ApiResponse<TeamPerformance[]>>('/dashboard/team-performance'),
+  getTopSellers: (limit?: number) => 
+    api.get<any, ApiResponse<TopSeller[]>>('/dashboard/top-sellers', { params: { limit } }),
 };
 
-// ═══ Customer API ═══
-export const customerApi = {
-  list: (_f?: ListFilter) => mockDelay(M.MOCK_CUSTOMERS),
-  getById: (id: string) => mockDelay(M.MOCK_CUSTOMERS.find(c => c.id === id) || M.MOCK_CUSTOMERS[0]),
-  // Disabling writes
-  create: (_d: Partial<Customer>) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Customer>>,
-  update: (_i: string, _d: Partial<Customer>) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Customer>>,
-  delete: (_i: string) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<void>>,
-};
-
-// ═══ Transaction API ═══
-export const transactionApi = {
-  list: (_f?: ListFilter) => mockDelay(M.MOCK_TRANSACTIONS),
-  listTeam: (_f?: ListFilter) => mockDelay(M.MOCK_TRANSACTIONS),
-  requestLock: (_d: unknown) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Transaction>>,
-  approveLock: (_i: string) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Transaction>>,
-  rejectLock: (_i: string) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Transaction>>,
-  markDeposit: (_i: string) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Transaction>>,
-  markSold: (_i: string) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<Transaction>>,
-};
-
-// ═══ Local Mock State (seeded from salesMocks) ═══
-let MOCK_ACTIVITIES: SalesActivity[] = [...M.MOCK_ACTIVITIES_SEED];
-let MOCK_BOOKINGS_STATE = [...M.MOCK_BOOKINGS];
-let MOCK_DEPOSITS_STATE = [...M.MOCK_DEPOSITS];
-let MOCK_DEALS_STATE: SalesDeal[] = [...M.MOCK_DEALS];
-
-const uid = () => Math.random().toString(36).substring(2, 9);
-
-// ═══ Sales Ops API (Fully Mocked for Frontend-only dev) ═══
+// ═══ Sales Ops API ═══
 export const salesOpsApi = {
   // Activities
-  listActivities: (_f?: ListFilter) => mockDelay(MOCK_ACTIVITIES),
-  createActivity: (data: Partial<SalesActivity>) => {
-    const newAct: SalesActivity = {
-      id: uid(), staffId: 'S1', staffName: 'Ngô Việt', teamId: 'T1', teamName: 'BD Zone 1',
-      postsCount: data.postsCount || 0, 
-      callsCount: data.callsCount || 0,
-      newLeads: data.newLeads || 0, 
-      meetingsMade: data.meetingsMade || 0,
-      siteVisits: data.siteVisits || 0,
-      bookingsCount: data.bookingsCount || 0,
-      depositsCount: data.depositsCount || 0,
-      points: (data.newLeads||0)*1 + (data.meetingsMade||0)*10 + (data.siteVisits||0)*20 + (data.bookingsCount||0)*30 + (data.depositsCount||0)*60,
-      activityDate: data.activityDate || new Date().toISOString(), 
-      note: data.note || '', 
-      createdAt: new Date().toISOString(),
-    };
-    MOCK_ACTIVITIES = [newAct, ...MOCK_ACTIVITIES];
-    return mockDelay(newAct);
-  },
-  updateActivity: (id: string, data: Partial<SalesActivity>) => {
-    MOCK_ACTIVITIES = MOCK_ACTIVITIES.map(a => {
-      if (a.id === id) {
-        const merged = { ...a, ...data };
-        merged.points = (merged.newLeads||0)*1 + (merged.meetingsMade||0)*10 + (merged.siteVisits||0)*20 + (merged.bookingsCount||0)*30 + (merged.depositsCount||0)*60;
-        return merged;
-      }
-      return a;
-    });
-    return mockDelay(MOCK_ACTIVITIES.find(a => a.id === id));
-  },
-  deleteActivity: (id: string) => {
-    MOCK_ACTIVITIES = MOCK_ACTIVITIES.filter(a => a.id !== id);
-    return mockDelay({ success: true });
-  },
+  listActivities: (f?: ListFilter) => api.get<any, ApiResponse<SalesActivity[]>>('/sales-ops/activities', { params: f }),
+  createActivity: (data: Partial<SalesActivity>) => api.post<any, ApiResponse<SalesActivity>>('/sales-ops/activities', data),
+  updateActivity: (id: string, data: Partial<SalesActivity>) => api.patch<any, ApiResponse<SalesActivity>>(`/sales-ops/activities/${id}`, data),
+  deleteActivity: (id: string) => api.delete<any, ApiResponse<void>>(`/sales-ops/activities/${id}`),
   
   // Bookings
-  listBookings: (_f?: ListFilter) => mockDelay(MOCK_BOOKINGS_STATE as unknown as SalesBooking[]),
-  createBooking: (data: Partial<SalesBooking>) => {
-    const b = { ...data, id: `BK-${uid()}`, status: 'PENDING', bookingDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), year: 2026, month: 4,
-      staffId: 'S1', staffName: 'Nguyễn Demo', teamName: 'BD Zone 1' } as any;
-    MOCK_BOOKINGS_STATE = [b, ...MOCK_BOOKINGS_STATE];
-    return mockDelay(b as SalesBooking);
-  },
-  updateBooking: (id: string, data: Partial<SalesBooking>) => {
-    MOCK_BOOKINGS_STATE = MOCK_BOOKINGS_STATE.map(b => 
-      b.id === id ? { ...b, ...data, updatedAt: new Date().toISOString() } : b
-    );
-    const updated = MOCK_BOOKINGS_STATE.find(b => b.id === id);
-    return mockDelay(updated as unknown as SalesBooking);
-  },
-  approveBooking: (id: string) => {
-    MOCK_BOOKINGS_STATE = MOCK_BOOKINGS_STATE.map(b => b.id === id ? { ...b, status: 'APPROVED', reviewedByName: 'Manager', reviewedAt: new Date().toISOString() } : b);
-    return mockDelay({ success: true } as unknown as SalesBooking);
-  },
-  rejectBooking: (id: string) => {
-    MOCK_BOOKINGS_STATE = MOCK_BOOKINGS_STATE.map(b => b.id === id ? { ...b, status: 'REJECTED', reviewedByName: 'Manager', reviewedAt: new Date().toISOString() } : b);
-    return mockDelay({ success: true } as unknown as SalesBooking);
-  },
+  listBookings: (f?: ListFilter) => api.get<any, ApiResponse<SalesBooking[]>>('/sales-ops/bookings', { params: f }),
+  createBooking: (data: Partial<SalesBooking>) => api.post<any, ApiResponse<SalesBooking>>('/sales-ops/bookings', data),
+  updateBooking: (id: string, data: Partial<SalesBooking>) => api.patch<any, ApiResponse<SalesBooking>>(`/sales-ops/bookings/${id}`, data),
+  approveBooking: (id: string) => api.post<any, ApiResponse<SalesBooking>>(`/sales-ops/bookings/${id}/approve`),
+  rejectBooking: (id: string) => api.post<any, ApiResponse<SalesBooking>>(`/sales-ops/bookings/${id}/reject`),
   
   // Deposits
-  listDeposits: (_f?: ListFilter) => mockDelay(MOCK_DEPOSITS_STATE as unknown as SalesBooking[]),
-  createDeposit: (data: Partial<SalesBooking>) => {
-    const d = { ...data, id: `DP-${uid()}`, status: 'PENDING', depositDate: new Date().toISOString(),
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(), year: 2026, month: 4,
-      staffId: 'S1', staffName: 'Nguyễn Demo', teamName: 'BD Zone 1' } as any;
-    MOCK_DEPOSITS_STATE = [d, ...MOCK_DEPOSITS_STATE];
-    return mockDelay(d as SalesBooking);
-  },
-  updateDeposit: (id: string, data: Partial<SalesBooking>) => {
-    MOCK_DEPOSITS_STATE = MOCK_DEPOSITS_STATE.map(d => 
-      d.id === id ? { ...d, ...data, updatedAt: new Date().toISOString() } : d
-    );
-    const updated = MOCK_DEPOSITS_STATE.find(d => d.id === id);
-    return mockDelay(updated as unknown as SalesBooking);
-  },
-  confirmDeposit: (id: string) => {
-    MOCK_DEPOSITS_STATE = MOCK_DEPOSITS_STATE.map(d => d.id === id ? { ...d, status: 'CONFIRMED', confirmedAt: new Date().toISOString() } : d);
-    return mockDelay({ success: true } as unknown as SalesBooking);
-  },
-  cancelDeposit: (id: string) => {
-    MOCK_DEPOSITS_STATE = MOCK_DEPOSITS_STATE.map(d => d.id === id ? { ...d, status: 'CANCELLED' } : d);
-    return mockDelay({ success: true } as unknown as SalesBooking);
-  },
-  
-  // Deals
-  listDeals: (_f?: ListFilter) => mockDelay(MOCK_DEALS_STATE),
-  createDeal: (data: Partial<SalesDeal>) => {
-    const d = { ...data, id: `DL-${uid()}`, dealCode: `DC-${uid()}`, commission: 0, stage: 'NEW',
-      createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() } as any;
-    MOCK_DEALS_STATE = [d, ...MOCK_DEALS_STATE];
-    return mockDelay(d as SalesDeal);
-  },
+  listDeposits: (f?: ListFilter) => api.get<any, ApiResponse<SalesBooking[]>>('/sales-ops/deposits', { params: f }),
+  createDeposit: (data: Partial<SalesBooking>) => api.post<any, ApiResponse<SalesBooking>>('/sales-ops/deposits', data),
+  updateDeposit: (id: string, data: Partial<SalesBooking>) => api.patch<any, ApiResponse<SalesBooking>>(`/sales-ops/deposits/${id}`, data),
+  confirmDeposit: (id: string) => api.post<any, ApiResponse<SalesBooking>>(`/sales-ops/deposits/${id}/confirm`),
+  cancelDeposit: (id: string) => api.post<any, ApiResponse<SalesBooking>>(`/sales-ops/deposits/${id}/cancel`),
 };
 
 // ═══ Team & Staff API ═══
 export const teamApi = {
-  list: (_f?: ListFilter) => mockDelay(M.MOCK_TEAMS),
-  getById: (i: string) => mockDelay(M.MOCK_TEAMS.find(t => t.id === i) || M.MOCK_TEAMS[0]),
-  create: (_d: unknown) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<SalesTeam>>,
-  update: (_i: string, _d: unknown) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<SalesTeam>>,
-  delete: (_i: string) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<void>>,
+  list: (f?: ListFilter) => api.get<any, ApiResponse<SalesTeam[]>>('/teams', { params: f }),
+  getById: (id: string) => api.get<any, ApiResponse<SalesTeam>>(`/teams/${id}`),
+  create: (data: unknown) => api.post<any, ApiResponse<SalesTeam>>('/teams', data),
+  update: (id: string, data: unknown) => api.patch<any, ApiResponse<SalesTeam>>(`/teams/${id}`, data),
+  delete: (id: string) => api.delete<any, ApiResponse<void>>(`/teams/${id}`),
 };
 
 export const staffApi = {
-  list: (_f?: ListFilter) => mockDelay(M.MOCK_STAFF),
-  getById: (i: string) => mockDelay(M.MOCK_STAFF.find(t => t.id === i) || M.MOCK_STAFF[0]),
-  create: (_d: unknown) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<SalesStaff>>,
-  update: (_i: string, _d: unknown) => Promise.reject(new Error("Read Only. Synced from CRM.")) as Promise<ApiResponse<SalesStaff>>,
+  list: (f?: ListFilter) => api.get<any, ApiResponse<SalesStaff[]>>('/staffs', { params: f }),
+  getById: (id: string) => api.get<any, ApiResponse<SalesStaff>>(`/staffs/${id}`),
+  create: (data: unknown) => api.post<any, ApiResponse<SalesStaff>>('/staffs', data),
+  update: (id: string, data: unknown) => api.patch<any, ApiResponse<SalesStaff>>(`/staffs/${id}`, data),
 };
 
 export default api;

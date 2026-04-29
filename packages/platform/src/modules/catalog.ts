@@ -23,7 +23,7 @@ export interface AppModuleDefinition {
   legacySources?: readonly string[];
 }
 
-export const ACTIVE_APP_MODULE_IDS = ['hr', 'project', 'sales', 'mkt'] as const;
+export const ACTIVE_APP_MODULE_IDS = ['exec', 'hr', 'project', 'sales', 'mkt'] as const;
 export type ActiveAppModuleId = typeof ACTIVE_APP_MODULE_IDS[number];
 
 export const MODULE_LEGACY_ALIASES: Record<LegacyModuleId, AppModuleId> = {
@@ -35,7 +35,10 @@ export const APP_MODULES: readonly AppModuleDefinition[] = [
     id: 'exec',
     name: 'Ban điều hành',
     description: 'KPI chiến lược, báo cáo tổng thể và ra quyết định.',
-    status: 'planned',
+    routeName: 'ExecModule',
+    basePath: '/ExecModule',
+    status: 'active',
+    requiredRoles: ['admin', 'sales_director', 'mkt_director'],
   },
   {
     id: 'sales',

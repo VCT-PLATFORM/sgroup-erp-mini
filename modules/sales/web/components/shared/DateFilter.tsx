@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Calendar, ChevronDown, X } from 'lucide-react';
+import { Calendar, ChevronDown, X, Clock } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════
-// SMART DATE FILTER — Reusable Preset + Custom Range Picker
+// SMART DATE FILTER — Compact Dropdown Design
 // ═══════════════════════════════════════════════════════════
 
-export type DatePreset = 'all' | 'today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'custom';
+export type DatePreset = 'all' | 'today' | 'yesterday' | 'this_week' | 'last_week' | 'this_month' | 'last_month' | 'this_quarter' | 'custom';
 
 interface DateRange {
   from: Date | null;
@@ -24,6 +24,7 @@ const PRESETS: { key: DatePreset; label: string }[] = [
   { key: 'last_week',  label: 'Tuần trước' },
   { key: 'this_month', label: 'Tháng này' },
   { key: 'last_month', label: 'Tháng trước' },
+  { key: 'this_quarter', label: 'Quý này' },
 ];
 
 function getPresetRange(preset: DatePreset): DateRange {
@@ -60,6 +61,12 @@ function getPresetRange(preset: DatePreset): DateRange {
       const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
       return { from: firstDay, to: lastDay };
     }
+    case 'this_quarter': {
+      const currentMonth = today.getMonth();
+      const currentQuarter = Math.floor(currentMonth / 3);
+      const firstDay = new Date(today.getFullYear(), currentQuarter * 3, 1);
+      return { from: firstDay, to: new Date(today.getTime() + 86400000 - 1) };
+    }
     default:
       return { from: null, to: null };
   }
@@ -70,14 +77,9 @@ function formatShortDate(d: Date | null): string {
   return `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
 }
 
-function toInputDate(d: Date | null): string {
-  if (!d) return '';
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
 export function DateFilter({ onChange }: DateFilterProps) {
   const [activePreset, setActivePreset] = useState<DatePreset>('all');
-  const [showCustom, setShowCustom] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -85,7 +87,7 @@ export function DateFilter({ onChange }: DateFilterProps) {
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
-        setShowCustom(false);
+        setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
@@ -93,12 +95,8 @@ export function DateFilter({ onChange }: DateFilterProps) {
   }, []);
 
   const handlePreset = (preset: DatePreset) => {
-    if (preset === 'custom') {
-      setShowCustom(true);
-      return;
-    }
     setActivePreset(preset);
-    setShowCustom(false);
+    setIsOpen(false);
     onChange(getPresetRange(preset), preset);
   };
 
@@ -107,7 +105,7 @@ export function DateFilter({ onChange }: DateFilterProps) {
     const from = new Date(customFrom + 'T00:00:00');
     const to = new Date(customTo + 'T23:59:59');
     setActivePreset('custom');
-    setShowCustom(false);
+    setIsOpen(false);
     onChange({ from, to }, 'custom');
   };
 
@@ -115,62 +113,79 @@ export function DateFilter({ onChange }: DateFilterProps) {
     setActivePreset('all');
     setCustomFrom('');
     setCustomTo('');
+    setIsOpen(false);
     onChange({ from: null, to: null }, 'all');
   };
 
   const activeLabel = activePreset === 'custom'
     ? `${formatShortDate(new Date(customFrom))} → ${formatShortDate(new Date(customTo))}`
-    : PRESETS.find(p => p.key === activePreset)?.label || 'Tất cả';
+    : PRESETS.find(p => p.key === activePreset)?.label || 'Toàn thời gian';
 
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {/* Preset Chips */}
-      {PRESETS.map(p => (
-        <button
-          key={p.key}
-          onClick={() => handlePreset(p.key)}
-          className={`px-3.5 py-2 rounded-xl text-[12px] font-bold transition-all duration-200 border whitespace-nowrap ${
-            activePreset === p.key
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-[0_2px_8px_rgba(16,185,129,0.12)]'
-              : 'bg-white/60 dark:bg-black/20 border-slate-200/80 dark:border-sg-border text-sg-muted hover:text-sg-heading hover:border-slate-300 dark:hover:border-sg-border/80'
-          }`}
-        >
-          {p.label}
-        </button>
-      ))}
+    <div className="relative inline-block" ref={popoverRef}>
+      {/* Trigger Button */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-[13px] font-bold transition-all duration-300 border ${
+          activePreset !== 'all'
+            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 shadow-[0_4px_12px_rgba(16,185,129,0.15)]'
+            : 'bg-white/60 dark:bg-black/20 border-slate-200 dark:border-white/10 text-sg-heading hover:bg-white dark:hover:bg-white/5 hover:border-slate-300 dark:hover:border-white/20 hover:shadow-sm'
+        }`}
+      >
+        {activePreset !== 'all' ? <Calendar size={16} /> : <Clock size={16} className="text-sg-muted" />}
+        <span>{activeLabel}</span>
+        <ChevronDown size={14} className={`text-sg-muted transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
 
-      {/* Custom Range Trigger */}
-      <div className="relative" ref={popoverRef}>
-        <button
-          onClick={() => setShowCustom(!showCustom)}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[12px] font-bold transition-all duration-200 border whitespace-nowrap ${
-            activePreset === 'custom'
-              ? 'bg-violet-500/10 border-violet-500/30 text-violet-600 dark:text-violet-400 shadow-[0_2px_8px_rgba(139,92,246,0.12)]'
-              : 'bg-white/60 dark:bg-black/20 border-slate-200/80 dark:border-sg-border text-sg-muted hover:text-sg-heading hover:border-slate-300'
-          }`}
-        >
-          <Calendar size={13} />
-          {activePreset === 'custom' ? activeLabel : 'Chọn ngày'}
-          <ChevronDown size={12} className={`transition-transform ${showCustom ? 'rotate-180' : ''}`} />
-        </button>
-
-        {/* Custom Range Popover */}
-        {showCustom && (
-          <div className="absolute right-0 top-full mt-2 w-[320px] bg-white dark:bg-black/90 backdrop-blur-3xl border border-slate-200 dark:border-sg-border rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.12)] p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[11px] font-black uppercase tracking-widest text-sg-muted">Khoảng thời gian</span>
-              <button onClick={() => setShowCustom(false)} className="text-sg-muted hover:text-sg-heading">
-                <X size={14} />
+      {/* Popover Content */}
+      {isOpen && (
+        <div className="absolute left-0 top-full mt-2 w-[340px] bg-white dark:bg-[#1a1a1c] backdrop-blur-3xl border border-slate-200 dark:border-white/10 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.15)] p-5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-[11px] font-black uppercase tracking-widest text-sg-muted">Chọn thời gian</span>
+            {activePreset !== 'all' && (
+              <button 
+                onClick={handleClear}
+                className="text-[11px] font-bold text-rose-500 hover:text-rose-600 transition-colors flex items-center gap-1 bg-rose-500/10 px-2 py-1 rounded-md"
+              >
+                <X size={12} /> Xóa lọc
               </button>
-            </div>
-            <div className="space-y-3">
+            )}
+          </div>
+          
+          {/* Preset Grid */}
+          <div className="grid grid-cols-2 gap-2 mb-5">
+            {PRESETS.map(p => (
+              <button
+                key={p.key}
+                onClick={() => handlePreset(p.key)}
+                className={`px-3 py-2.5 rounded-xl text-[12px] font-bold text-left transition-all ${
+                  activePreset === p.key
+                    ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
+                    : 'bg-slate-50 dark:bg-white/5 text-sg-heading hover:bg-slate-100 dark:hover:bg-white/10 border border-transparent dark:border-white/5'
+                }`}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Range Separator */}
+          <div className="relative py-2 mb-3 flex items-center">
+            <div className="grow border-t border-slate-200 dark:border-white/10"></div>
+            <span className="shrink-0 px-3 text-[10px] font-black uppercase tracking-widest text-sg-muted">Hoặc tùy chỉnh</span>
+            <div className="grow border-t border-slate-200 dark:border-white/10"></div>
+          </div>
+
+          {/* Custom Range Form */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-[10px] font-bold text-sg-muted uppercase tracking-wider mb-1 block">Từ ngày</label>
                 <input
                   type="date"
                   value={customFrom}
                   onChange={e => setCustomFrom(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-sg-card/50 border border-sg-border text-[13px] font-bold text-sg-heading focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                  className="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[12px] font-bold text-sg-heading focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
               </div>
               <div>
@@ -179,29 +194,19 @@ export function DateFilter({ onChange }: DateFilterProps) {
                   type="date"
                   value={customTo}
                   onChange={e => setCustomTo(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-sg-card/50 border border-sg-border text-[13px] font-bold text-sg-heading focus:outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                  className="w-full h-10 px-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[12px] font-bold text-sg-heading focus:outline-none focus:border-emerald-500/50 focus:ring-2 focus:ring-emerald-500/20 transition-all"
                 />
               </div>
-              <button
-                onClick={handleCustomApply}
-                disabled={!customFrom || !customTo}
-                className="w-full h-10 rounded-xl bg-linear-to-r from-violet-500 to-purple-600 text-white text-[13px] font-black hover:shadow-lg hover:shadow-violet-500/30 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:pointer-events-none"
-              >
-                Áp dụng
-              </button>
             </div>
+            <button
+              onClick={handleCustomApply}
+              disabled={!customFrom || !customTo}
+              className="w-full h-10 mt-1 rounded-xl bg-linear-to-r from-emerald-500 to-teal-500 text-white text-[13px] font-black hover:shadow-lg hover:shadow-emerald-500/30 hover:-translate-y-0.5 transition-all disabled:opacity-40 disabled:pointer-events-none"
+            >
+              Áp dụng bộ lọc
+            </button>
           </div>
-        )}
-      </div>
-
-      {/* Clear filter */}
-      {activePreset !== 'all' && (
-        <button
-          onClick={handleClear}
-          className="flex items-center gap-1 px-2.5 py-2 rounded-xl text-[11px] font-bold text-rose-500 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 transition-all"
-        >
-          <X size={12} /> Xóa lọc
-        </button>
+        </div>
       )}
     </div>
   );
@@ -226,8 +231,7 @@ export function filterByDateRange<T>(
     if (raw instanceof Date) {
       d = raw;
     } else if (typeof raw === 'string') {
-      // Try dd/MM/yyyy format
-      const parts = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      const parts = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
       if (parts) {
         d = new Date(parseInt(parts[3]), parseInt(parts[2]) - 1, parseInt(parts[1]));
       } else {

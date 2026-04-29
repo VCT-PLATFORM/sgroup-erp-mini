@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  dashboardApi, customerApi, transactionApi, salesOpsApi, teamApi, staffApi,
-  type KPIData, type MonthlyRevenue, type Customer, type Transaction,
-  type SalesDeal, type SalesTeam, type SalesStaff, type SalesBooking,
+  dashboardApi, salesOpsApi, teamApi, staffApi,
+  type KPIData, type MonthlyRevenue,
+  type SalesTeam, type SalesStaff, type SalesBooking,
   type StageCount, type TeamPerformance, type TopSeller, type ListFilter,
 } from '../api/salesApi';
 import { useSalesRole } from '../components/shared/RoleContext';
@@ -91,10 +91,6 @@ export function useMonthlyRevenue(year?: number) {
   }, [year, role]);
 }
 
-export function useRecentTransactions(limit = 10) {
-  return useAsync<Transaction[]>(() => dashboardApi.getRecentTransactions(limit), [limit]);
-}
-
 export function usePipelineSummary() {
   const { role } = useSalesRole();
   return useAsync<StageCount[]>(async () => {
@@ -114,121 +110,6 @@ export function useTeamPerformance() {
 
 export function useTopSellers(limit = 10) {
   return useAsync<TopSeller[]>(() => dashboardApi.getTopSellers(limit), [limit]);
-}
-
-// ═══════════════════════════════════════════════════════════
-// CUSTOMER HOOKS
-// ═══════════════════════════════════════════════════════════
-
-export function useCustomers(filter?: ListFilter) {
-  const [filterState, setFilter] = useState<ListFilter>(filter || { page: 1, limit: 20 });
-
-  const result = useAsync<Customer[]>(
-    () => customerApi.list(filterState),
-    [JSON.stringify(filterState)]
-  );
-
-  return { ...result, filter: filterState, setFilter };
-}
-
-export function useCustomerActions() {
-  const [submitting, setSubmitting] = useState(false);
-
-  const createCustomer = useCallback(async (data: Partial<Customer>) => {
-    setSubmitting(true);
-    try {
-      const res = await customerApi.create(data);
-      return res.data;
-    } finally { setSubmitting(false); }
-  }, []);
-
-  const updateCustomer = useCallback(async (id: string, data: Partial<Customer>) => {
-    setSubmitting(true);
-    try {
-      const res = await customerApi.update(id, data);
-      return res.data;
-    } finally { setSubmitting(false); }
-  }, []);
-
-  const deleteCustomer = useCallback(async (id: string) => {
-    setSubmitting(true);
-    try {
-      await customerApi.delete(id);
-    } finally { setSubmitting(false); }
-  }, []);
-
-  return { createCustomer, updateCustomer, deleteCustomer, submitting };
-}
-
-// ═══════════════════════════════════════════════════════════
-// TRANSACTION HOOKS
-// ═══════════════════════════════════════════════════════════
-
-export function useTransactions(filter?: ListFilter) {
-  const { role } = useSalesRole();
-  const [filterState, setFilter] = useState<ListFilter>(filter || { page: 1, limit: 50 });
-  const result = useAsync<Transaction[]>(
-    async () => {
-      const res = await transactionApi.list(filterState);
-      if (role === 'sales_staff') {
-        res.data = res.data.slice(0, 3); // Nhân viên chỉ xem 3 deal của mình
-      } else if (role === 'sales_manager') {
-        res.data = res.data.slice(0, 8); // Trưởng phòng xem 8 deal của team
-      }
-      return res;
-    },
-    [JSON.stringify(filterState), role]
-  );
-  return { ...result, filter: filterState, setFilter };
-}
-
-export function useTransactionActions() {
-  const [submitting, setSubmitting] = useState(false);
-
-  const requestLock = useCallback(async (data: Partial<Transaction>) => {
-    setSubmitting(true);
-    try { return (await transactionApi.requestLock(data)).data; }
-    finally { setSubmitting(false); }
-  }, []);
-
-  const approveLock = useCallback(async (id: string) => {
-    setSubmitting(true);
-    try { await transactionApi.approveLock(id); }
-    finally { setSubmitting(false); }
-  }, []);
-
-  const rejectLock = useCallback(async (id: string) => {
-    setSubmitting(true);
-    try { await transactionApi.rejectLock(id); }
-    finally { setSubmitting(false); }
-  }, []);
-
-  const markDeposit = useCallback(async (id: string) => {
-    setSubmitting(true);
-    try { await transactionApi.markDeposit(id); }
-    finally { setSubmitting(false); }
-  }, []);
-
-  const markSold = useCallback(async (id: string) => {
-    setSubmitting(true);
-    try { await transactionApi.markSold(id); }
-    finally { setSubmitting(false); }
-  }, []);
-
-  return { requestLock, approveLock, rejectLock, markDeposit, markSold, submitting };
-}
-
-// ═══════════════════════════════════════════════════════════
-// DEAL HOOKS
-// ═══════════════════════════════════════════════════════════
-
-export function useDeals(filter?: ListFilter) {
-  const [filterState, setFilter] = useState<ListFilter>(filter || { page: 1, limit: 20 });
-  const result = useAsync<SalesDeal[]>(
-    () => salesOpsApi.listDeals(filterState),
-    [JSON.stringify(filterState)]
-  );
-  return { ...result, filter: filterState, setFilter };
 }
 
 // ═══════════════════════════════════════════════════════════

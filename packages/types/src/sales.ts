@@ -27,80 +27,15 @@ export interface MonthlyRevenue {
   deals: number;
 }
 
-export interface Customer {
-  id: string;
-  fullName: string;
-  phone: string;
-  email: string;
-  idCardNo?: string;
-  address?: string;
-  company?: string;
-  source: string;
-  assignedTo: string;
-  assignedToName: string;
-  teamId?: string;
-  status: string;
-  notes?: string;
-  lastInteraction?: string;
-  lastContactAt?: string;
-  bizflyCrmId?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// ── Customer ──
+// NOTE: Bảng `customers` đã bị xóa khỏi DB.
+// Thông tin KH lưu inline trong bookings/deposits (customer_name, customer_phone, customer_email, id_card_no).
+// Nếu cần quản lý KH riêng, sử dụng CRM bên ngoài (Bizfly CRM).
 
-export interface Transaction {
-  id: string;
-  productId: string;
-  productCode?: string;
-  unitCode: string;
-  price: number;
-  commission: number;
-  projectId?: string;
-  projectName?: string;
-  customerId: string;
-  customerName?: string;
-  customerPhone?: string;
-  salesStaffId: string;
-  salesTeamId?: string;
-  status: string;
-  priceAtLock: number;
-  notes?: string;
-  approvedBy?: string;
-  approvedAt?: string;
-  customer?: Customer;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface SalesDeal {
-  id: string;
-  dealCode: string;
-  projectId?: string;
-  projectName: string;
-  staffId?: string;
-  staffName: string;
-  teamId?: string;
-  teamName: string;
-  customerId?: string;
-  customerName: string;
-  customerPhone: string;
-  productCode: string;
-  productType: string;
-  dealValue: number;
-  feeRate: number;
-  commission: number;
-  source: string;
-  year: number;
-  month: number;
-  stage: string;
-  priority: string;
-  expectedClose?: string;
-  closedAt?: string;
-  lostReason?: string;
-  note?: string;
-  createdAt: string;
-  updatedAt: string;
-}
+// ── Transaction & SalesDeal ──
+// NOTE: Bảng `transactions` và `deals` đã bị xóa khỏi DB.
+// Flow bán hàng đơn giản hóa: bookings (giữ chỗ) → deposits (đặt cọc).
+// Không còn bước "lock" hay bảng deal riêng.
 
 export interface SalesTeam {
   id: string;

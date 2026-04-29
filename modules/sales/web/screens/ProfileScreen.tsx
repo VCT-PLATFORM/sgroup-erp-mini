@@ -4,7 +4,7 @@ import {
   Edit3, Camera, Shield, Star, TrendingUp, Target, Briefcase,
   CheckCircle2, Clock, FileText, Activity, ChevronRight, Save, X
 } from 'lucide-react';
-import * as M from '../api/salesMocks';
+
 import { useToastActions } from '../components/shared/Toast';
 import { useSalesRole } from '../components/shared/RoleContext';
 
@@ -19,15 +19,15 @@ const formatVND = (n: number) => {
   return n.toLocaleString('vi-VN');
 };
 
-import { CURRENT_USER as MOCK_USER, CURRENT_TEAM as MOCK_TEAM } from '../api/salesMocks';
+
 
 // ═══ Personal Profile Mock Data ═══
 const CURRENT_USER = {
-  id: MOCK_USER.id,
-  employeeCode: MOCK_USER.employeeCode || 'SG-2025-001',
-  fullName: MOCK_USER.fullName,
-  email: MOCK_USER.email || 'user@sgroup.vn',
-  phone: MOCK_USER.phone || '0901 234 567',
+  id: 'S1',
+  employeeCode: 'SG-2025-001',
+  fullName: 'User Name',
+  email: 'user@sgroup.vn',
+  phone: '0901 234 567',
   address: '123 Nguyễn Huệ, Q.1, TP.HCM',
   dateOfBirth: '1995-06-15',
   gender: 'male' as const,
@@ -37,7 +37,7 @@ const CURRENT_USER = {
   taxCode: '0123456789',
   joinDate: '2025-01-15',
   department: 'Phòng Kinh Doanh',
-  team: MOCK_TEAM.name,
+  team: 'BD Zone 1',
   position: 'Chuyên Viên Kinh Doanh',
   contractType: 'Toàn thời gian',
   contractExpiry: '2027-01-15',
@@ -206,7 +206,7 @@ export function ProfileScreen() {
               <div className="space-y-3">
                 <QuickStatRow label="Booking tháng này" value={MY_KPI.bookings} color="text-blue-500" />
                 <QuickStatRow label="Đặt cọc tháng này" value={MY_KPI.deposits} color="text-pink-500" />
-                <QuickStatRow label="Khách hàng phụ trách" value={M.MOCK_CUSTOMERS.length} color="text-violet-500" />
+                <QuickStatRow label="Khách hàng phụ trách" value={17} color="text-violet-500" />
                 <QuickStatRow label="Ngày công tháng này" value={22} color="text-emerald-500" />
               </div>
             </div>

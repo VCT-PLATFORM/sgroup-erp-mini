@@ -7,7 +7,7 @@
 // ═══════════════════════════════════════════════════════════
 
 import { lazy } from 'react';
-import { Users, Briefcase, TrendingUp, Megaphone } from 'lucide-react';
+import { Users, Briefcase, TrendingUp, Megaphone, Target } from 'lucide-react';
 import {
   ACTIVE_APP_MODULE_IDS,
   getAppModuleById,
@@ -19,6 +19,7 @@ import type { ModuleConfig } from './types';
  * Icon mapping per module.
  */
 const moduleIcons: Record<ActiveAppModuleId, ModuleConfig['icon']> = {
+  exec: Target,
   hr: Users,
   project: Briefcase,
   sales: TrendingUp,
@@ -29,6 +30,7 @@ const moduleIcons: Record<ActiveAppModuleId, ModuleConfig['icon']> = {
  * Gradient accent per module — used in workspace tiles and headers.
  */
 const moduleAccents: Record<ActiveAppModuleId, string> = {
+  exec: 'from-indigo-500 to-purple-600',
   hr: 'from-sg-red to-sg-red-dark',
   project: 'from-cyan-500 to-blue-600',
   sales: 'from-emerald-500 to-teal-600',
@@ -42,6 +44,9 @@ const moduleAccents: Record<ActiveAppModuleId, string> = {
  * This is the ONLY import path from web-shell into a module.
  */
 const moduleShells: Record<ActiveAppModuleId, ModuleConfig['Shell']> = {
+  exec: lazy(() =>
+    import('@modules/exec').then((m) => ({ default: m.ExecShell })),
+  ),
   hr: lazy(() =>
     import('@modules/hr').then((m) => ({ default: m.HRShell })),
   ),

@@ -11,6 +11,7 @@
 
 /* Content scanning paths for Tailwind v4 */
 @source "../../../modules/hr/web/**/*.tsx";
+@source "../../../modules/exec/web/**/*.tsx";
 @source "../../../modules/project/web/**/*.tsx";
 @source "../../../modules/sales/web/**/*.tsx";
 @source "../../../packages/web-ui/src/**/*.tsx";

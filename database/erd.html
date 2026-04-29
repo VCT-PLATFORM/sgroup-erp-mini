@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SGroup ERP — Database ERD</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/panzoom@9.4.3/dist/panzoom.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border-bottom: 1px solid rgba(139,92,246,0.2);
+            padding: 24px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #a78bfa, #818cf8, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header .subtitle {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 24px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 900;
+            color: #a78bfa;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 16px;
+            padding: 16px 40px;
+            background: rgba(15,23,42,0.6);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .erd-wrapper {
+            position: relative;
+            background: rgba(10,10,15,0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .erd-container {
+            width: 100%;
+            height: 70vh;
+            overflow: hidden;
+            cursor: grab;
+            position: relative;
+        }
+
+        .erd-container:active {
+            cursor: grabbing;
+        }
+
+        .erd-inner {
+            display: inline-block;
+            padding: 40px;
+            transform-origin: 0 0;
+        }
+
+        .mermaid svg {
+            max-width: none !important;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 6px;
+            z-index: 50;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 1px solid rgba(139,92,246,0.25);
+            background: rgba(15,23,42,0.9);
+            backdrop-filter: blur(12px);
+            color: #a78bfa;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(139,92,246,0.2);
+            border-color: rgba(139,92,246,0.5);
+            color: #c4b5fd;
+            transform: scale(1.05);
+        }
+
+        .zoom-btn:active {
+            transform: scale(0.95);
+        }
+
+        .zoom-info {
+            height: 40px;
+            padding: 0 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(139,92,246,0.15);
+            background: rgba(15,23,42,0.9);
+            backdrop-filter: blur(12px);
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            font-family: monospace;
+        }
+
+        .zoom-hint {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 8px 20px;
+            border-radius: 20px;
+            background: rgba(15,23,42,0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139,92,246,0.15);
+            color: #64748b;
+            font-size: 11px;
+            z-index: 50;
+            white-space: nowrap;
+        }
+
+        .zoom-hint kbd {
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: rgba(139,92,246,0.15);
+            color: #a78bfa;
+            font-family: monospace;
+            font-size: 10px;
+            margin: 0 2px;
+        }
+
+        .tables-section {
+            padding: 32px 40px;
+        }
+
+        .tables-section h2 {
+            font-size: 18px;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: #e2e8f0;
+        }
+
+        .domain-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px;
+        }
+
+        .domain-card {
+            background: linear-gradient(135deg, rgba(30,27,75,0.4), rgba(15,23,42,0.6));
+            border: 1px solid rgba(139,92,246,0.15);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .domain-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(139,92,246,0.4);
+        }
+
+        .domain-card-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .domain-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .domain-card-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .domain-card-header .count {
+            margin-left: auto;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: rgba(139,92,246,0.15);
+            color: #a78bfa;
+        }
+
+        .table-list {
+            padding: 12px 20px 16px;
+        }
+
+        .table-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            cursor: pointer;
+            transition: background 0.15s;
+            border-radius: 6px;
+            padding: 8px;
+            margin: 0 -8px;
+        }
+
+        .table-item:hover {
+            background: rgba(139,92,246,0.08);
+        }
+
+        .table-item:last-child {
+            border-bottom: none;
+        }
+
+        .table-name {
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: #c4b5fd;
+            min-width: 160px;
+        }
+
+        .table-desc {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .table-details {
+            display: none;
+            margin-top: 8px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(139,92,246,0.1);
+        }
+
+        .table-details.open {
+            display: block;
+        }
+
+        .col-row {
+            display: grid;
+            grid-template-columns: 160px 120px 1fr;
+            gap: 8px;
+            padding: 4px 0;
+            font-size: 11px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .col-row:last-child { border-bottom: none; }
+
+        .col-name {
+            font-family: monospace;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
+        .col-type {
+            color: #6366f1;
+            font-family: monospace;
+        }
+
+        .col-note {
+            color: #64748b;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 4px;
+            margin-left: 4px;
+        }
+
+        .badge-pk { background: #eab308; color: #000; }
+        .badge-fk { background: #3b82f6; color: #fff; }
+        .badge-uk { background: #10b981; color: #fff; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div>
+        <h1>🏗️ SGroup ERP — Database ERD</h1>
+        <div class="subtitle">PostgreSQL 15 · Docker self-hosted · UUID v7 · Cập nhật: 28/04/2026</div>
+    </div>
+    <div class="stats-bar">
+        <div class="stat"><div class="stat-value">41</div><div class="stat-label">Bảng</div></div>
+        <div class="stat"><div class="stat-value">8</div><div class="stat-label">Domain</div></div>
+        <div class="stat"><div class="stat-value">v15</div><div class="stat-label">PostgreSQL</div></div>
+    </div>
+</div>
+
+<div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Auth & RBAC</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#06b6d4"></div>HR</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Project</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Sales</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#10b981"></div>Marketing</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>CRM</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>Accounting</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Executive</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#64748b"></div>System</div>
+</div>
+
+<div class="erd-wrapper">
+    <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomIn" title="Phóng to (+)">+</button>
+        <button class="zoom-btn" id="zoomOut" title="Thu nhỏ (-)">−</button>
+        <div class="zoom-info" id="zoomLevel">100%</div>
+        <button class="zoom-btn" id="zoomReset" title="Reset (0)" style="font-size:14px">↺</button>
+        <button class="zoom-btn" id="zoomFit" title="Vừa màn hình (F)" style="font-size:13px">⊞</button>
+    </div>
+    <div class="zoom-hint">🖱️ Cuộn để zoom · Kéo để di chuyển · <kbd>+</kbd> <kbd>-</kbd> <kbd>0</kbd> reset · <kbd>F</kbd> fit</div>
+<div class="erd-container" id="erdContainer">
+    <div class="erd-inner" id="erdInner">
+    <pre class="mermaid">
+erDiagram
+
+    users {
+        uuid id PK
+        varchar email UK
+        varchar password_hash
+        varchar name
+        varchar english_name
+        varchar status
+        timestamp created_at
+    }
+
+    roles {
+        uuid id PK
+        varchar code UK
+        varchar name
+        jsonb permissions
+    }
+
+    user_roles {
+        uuid id PK
+        uuid user_id FK
+        uuid role_id FK
+    }
+
+    users ||--o{ user_roles : "has"
+    roles ||--o{ user_roles : "assigned"
+
+    departments {
+        uuid id PK
+        varchar name
+        varchar code UK
+        uuid manager_id FK
+    }
+
+    positions {
+        uuid id PK
+        varchar name
+        varchar code UK
+        varchar level
+    }
+
+    teams {
+        uuid id PK
+        varchar name
+        varchar code UK
+        uuid department_id FK
+    }
+
+    employees {
+        uuid id PK
+        uuid user_id FK
+        varchar employee_code UK
+        varchar full_name
+        varchar email
+        varchar phone
+        uuid department_id FK
+        uuid position_id FK
+        uuid team_id FK
+        uuid manager_id FK
+        varchar status
+    }
+
+    departments ||--o{ teams : "has"
+    departments ||--o{ employees : "belongs"
+    positions ||--o{ employees : "holds"
+    teams ||--o{ employees : "member"
+    employees ||--o{ employees : "manages"
+
+    projects {
+        uuid id PK
+        varchar code UK
+        varchar name
+        varchar developer
+        varchar property_type
+        numeric fee_rate
+        numeric avg_price
+        int total_units
+        int sold_units
+        varchar status
+        uuid manager_id FK
+    }
+
+    products {
+        uuid id PK
+        uuid project_id FK
+        varchar code
+        varchar block
+        int floor
+        numeric area
+        numeric price
+        varchar status
+        uuid salesperson_id FK
+    }
+
+    legal_docs {
+        uuid id PK
+        uuid project_id FK
+        varchar title
+        varchar doc_type
+        varchar status
+        varchar file_url
+        uuid uploaded_by FK
+    }
+
+    projects ||--o{ products : "has units"
+    projects ||--o{ legal_docs : "has docs"
+
+    employees }o--o{ projects : "manages"
+
+    bookings {
+        uuid id PK
+        uuid project_id FK
+        varchar unit_code
+        varchar customer_name
+        varchar customer_phone
+        numeric booking_amount
+        uuid staff_id FK
+        uuid team_id FK
+        varchar status
+        uuid created_by FK
+        uuid reviewed_by FK
+    }
+
+    deposits {
+        uuid id PK
+        uuid project_id FK
+        varchar unit_code
+        varchar customer_name
+        numeric deposit_amount
+        numeric price
+        varchar source
+        uuid booking_id FK
+        uuid staff_id FK
+        varchar status
+        varchar customer_confirm_url
+        varchar ceo_confirm_url
+    }
+
+    sales_plans {
+        uuid id PK
+        varchar name
+        int year
+        int month
+        varchar plan_type
+        uuid team_id FK
+        uuid staff_id FK
+        int target_bookings
+        int target_deposits
+        int target_points
+        varchar status
+    }
+
+    sales_activities {
+        uuid id PK
+        uuid staff_id FK
+        int posts_count
+        int calls_count
+        int points
+        date activity_date
+    }
+
+    projects ||--o{ bookings : "has"
+    projects ||--o{ deposits : "has"
+    bookings ||--o| deposits : "converts"
+    employees ||--o{ bookings : "handles"
+    employees ||--o{ deposits : "handles"
+    employees ||--o{ sales_activities : "logs"
+    teams ||--o{ sales_plans : "plans"
+    employees ||--o{ sales_plans : "assigned"
+
+    campaigns {
+        uuid id PK
+        varchar name
+        varchar status
+        varchar channel
+        numeric budget
+        numeric spent
+        uuid owner_id FK
+    }
+
+    mkt_leads {
+        uuid id PK
+        varchar name
+        varchar status
+        uuid campaign_id FK
+        uuid assigned_to FK
+    }
+
+    content_posts {
+        uuid id PK
+        varchar title
+        varchar platform
+        varchar status
+        uuid campaign_id FK
+        uuid author_id FK
+    }
+
+    kol_partners {
+        uuid id PK
+        varchar name
+        varchar platform
+        int followers
+        numeric rating
+    }
+
+    campaigns ||--o{ mkt_leads : "generates"
+    campaigns ||--o{ content_posts : "includes"
+
+    attachments {
+        uuid id PK
+        varchar entity_type
+        uuid entity_id
+        varchar filename
+        varchar url
+    }
+
+    audit_logs {
+        uuid id PK
+        uuid user_id FK
+        varchar action
+        varchar entity_type
+        jsonb old_value
+        jsonb new_value
+    }
+
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        varchar title
+        varchar type
+        boolean is_read
+    }
+
+    users ||--o{ audit_logs : "performs"
+    users ||--o{ notifications : "receives"
+
+    crm_contacts {
+        uuid id PK
+        varchar full_name
+        varchar phone
+        varchar source
+        varchar status
+        uuid assigned_to FK
+        uuid team_id FK
+        uuid interest_project FK
+    }
+
+    crm_interactions {
+        uuid id PK
+        uuid contact_id FK
+        uuid staff_id FK
+        varchar interaction_type
+        varchar outcome
+        text notes
+    }
+
+    crm_contacts ||--o{ crm_interactions : "has"
+    employees ||--o{ crm_contacts : "manages"
+    employees ||--o{ crm_interactions : "performs"
+    projects ||--o{ crm_contacts : "interested in"
+
+    acc_transactions {
+        uuid id PK
+        varchar txn_code UK
+        varchar txn_type
+        numeric amount
+        varchar direction
+        varchar status
+        uuid project_id FK
+        uuid employee_id FK
+    }
+
+    acc_invoices {
+        uuid id PK
+        varchar invoice_no UK
+        varchar invoice_type
+        numeric total_amount
+        varchar status
+        date due_date
+    }
+
+    projects ||--o{ acc_transactions : "related"
+    employees ||--o{ acc_transactions : "involved"
+
+    exec_kpi_targets {
+        uuid id PK
+        varchar name
+        int year
+        varchar scope
+        uuid department_id FK
+        uuid team_id FK
+        numeric target_revenue
+        int target_bookings
+        varchar status
+    }
+
+    exec_reports {
+        uuid id PK
+        varchar title
+        varchar report_type
+        varchar scope
+        date period_start
+        date period_end
+        jsonb summary_data
+        varchar status
+    }
+
+    departments ||--o{ exec_kpi_targets : "receives KPI"
+    teams ||--o{ exec_kpi_targets : "receives KPI"
+    </pre>
+    </div>
+</div>
+</div>
+
+<div class="tables-section">
+    <h2>📋 Chi tiết các bảng</h2>
+    <div class="domain-grid">
+
+        <!-- Auth -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(139,92,246,0.15);color:#a78bfa">🔐</div>
+                <h3>Auth & RBAC</h3>
+                <span class="count">3 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">users</span><span class="table-desc">Tài khoản đăng nhập</span></div>
+                <div class="table-item"><span class="table-name">roles</span><span class="table-desc">Vai trò: admin, sales_staff...</span></div>
+                <div class="table-item"><span class="table-name">user_roles</span><span class="table-desc">M:N user ↔ role</span></div>
+            </div>
+        </div>
+
+        <!-- HR -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(6,182,212,0.15);color:#06b6d4">👥</div>
+                <h3>HR Module</h3>
+                <span class="count">4 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">departments</span><span class="table-desc">Phòng ban</span></div>
+                <div class="table-item"><span class="table-name">positions</span><span class="table-desc">Chức vụ</span></div>
+                <div class="table-item"><span class="table-name">teams</span><span class="table-desc">Nhóm/đội</span></div>
+                <div class="table-item"><span class="table-name">employees</span><span class="table-desc">Nhân viên → liên kết users</span></div>
+            </div>
+        </div>
+
+        <!-- Project -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(245,158,11,0.15);color:#f59e0b">🏢</div>
+                <h3>Project Module</h3>
+                <span class="count">3 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">projects</span><span class="table-desc">Dự án BĐS</span></div>
+                <div class="table-item"><span class="table-name">products</span><span class="table-desc">Sản phẩm / Căn hộ / Lô đất</span></div>
+                <div class="table-item"><span class="table-name">legal_docs</span><span class="table-desc">Hồ sơ pháp lý dự án</span></div>
+            </div>
+        </div>
+
+        <!-- Sales -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(239,68,68,0.15);color:#ef4444">💰</div>
+                <h3>Sales Module ⭐</h3>
+                <span class="count">4 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">bookings</span><span class="table-desc">Giữ chỗ (PENDING → APPROVED/REJECTED)</span></div>
+                <div class="table-item"><span class="table-name">deposits</span><span class="table-desc">Đặt cọc + xác nhận KH/TGĐ</span></div>
+                <div class="table-item"><span class="table-name">sales_activities</span><span class="table-desc">Nhật ký hoạt động (điểm KPI)</span></div>
+                <div class="table-item"><span class="table-name">sales_plans</span><span class="table-desc">Kế hoạch KD (target vs actual)</span></div>
+            </div>
+        </div>
+
+        <!-- Marketing -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(16,185,129,0.15);color:#10b981">📣</div>
+                <h3>Marketing Module</h3>
+                <span class="count">4 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">campaigns</span><span class="table-desc">Chiến dịch marketing</span></div>
+                <div class="table-item"><span class="table-name">mkt_leads</span><span class="table-desc">Leads từ chiến dịch</span></div>
+                <div class="table-item"><span class="table-name">content_posts</span><span class="table-desc">Bài đăng MXH</span></div>
+                <div class="table-item"><span class="table-name">kol_partners</span><span class="table-desc">KOL/Influencer</span></div>
+            </div>
+        </div>
+
+        <!-- CRM -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(249,115,22,0.15);color:#f97316">🤝</div>
+                <h3>CRM Module</h3>
+                <span class="count">2 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">crm_contacts</span><span class="table-desc">Khách hàng — lifecycle tracking</span></div>
+                <div class="table-item"><span class="table-name">crm_interactions</span><span class="table-desc">Lịch sử tương tác</span></div>
+            </div>
+        </div>
+
+        <!-- Accounting -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(14,165,233,0.15);color:#0ea5e9">💳</div>
+                <h3>Accounting Module</h3>
+                <span class="count">2 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">acc_transactions</span><span class="table-desc">Phát sinh tài chính</span></div>
+                <div class="table-item"><span class="table-name">acc_invoices</span><span class="table-desc">Hóa đơn phải thu/phải trả</span></div>
+            </div>
+        </div>
+
+        <!-- Executive -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(236,72,153,0.15);color:#ec4899">👔</div>
+                <h3>Executive Module</h3>
+                <span class="count">2 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">exec_kpi_targets</span><span class="table-desc">Chỉ tiêu KPI từ ban điều hành</span></div>
+                <div class="table-item"><span class="table-name">exec_reports</span><span class="table-desc">Báo cáo định kỳ</span></div>
+            </div>
+        </div>
+
+        <!-- System -->
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon" style="background:rgba(100,116,139,0.15);color:#94a3b8">⚙️</div>
+                <h3>System Support</h3>
+                <span class="count">3 bảng</span>
+            </div>
+            <div class="table-list">
+                <div class="table-item"><span class="table-name">attachments</span><span class="table-desc">File đính kèm (polymorphic)</span></div>
+                <div class="table-item"><span class="table-name">audit_logs</span><span class="table-desc">Lịch sử thao tác</span></div>
+                <div class="table-item"><span class="table-name">notifications</span><span class="table-desc">Thông báo push</span></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    mermaid.initialize({
+        startOnLoad: true,
+        theme: 'dark',
+        er: {
+            diagramPadding: 30,
+            layoutDirection: 'TB',
+            minEntityWidth: 180,
+            minEntityHeight: 60,
+            entityPadding: 15,
+            useMaxWidth: false
+        },
+        themeVariables: {
+            primaryColor: '#1e1b4b',
+            primaryBorderColor: '#6366f1',
+            primaryTextColor: '#e2e8f0',
+            lineColor: '#6366f1',
+            background: '#0a0a0f'
+        }
+    });
+
+    // Pan & Zoom
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            const el = document.getElementById('erdInner');
+            const container = document.getElementById('erdContainer');
+            const zoomLevelEl = document.getElementById('zoomLevel');
+
+            const pz = panzoom(el, {
+                maxZoom: 5,
+                minZoom: 0.15,
+                smoothScroll: false,
+                zoomDoubleClickSpeed: 1,
+                bounds: true,
+                boundsPadding: 0.3
+            });
+
+            function updateZoomLabel() {
+                const t = pz.getTransform();
+                zoomLevelEl.textContent = Math.round(t.scale * 100) + '%';
+            }
+
+            pz.on('zoom', updateZoomLabel);
+            pz.on('pan', updateZoomLabel);
+
+            document.getElementById('zoomIn').addEventListener('click', () => {
+                const t = pz.getTransform();
+                pz.smoothZoom(container.clientWidth / 2, container.clientHeight / 2, 1.3);
+            });
+
+            document.getElementById('zoomOut').addEventListener('click', () => {
+                const t = pz.getTransform();
+                pz.smoothZoom(container.clientWidth / 2, container.clientHeight / 2, 0.7);
+            });
+
+            document.getElementById('zoomReset').addEventListener('click', () => {
+                pz.moveTo(0, 0);
+                pz.zoomAbs(0, 0, 1);
+                updateZoomLabel();
+            });
+
+            document.getElementById('zoomFit').addEventListener('click', () => {
+                const svg = el.querySelector('svg');
+                if (!svg) return;
+                const svgRect = svg.getBoundingClientRect();
+                const cw = container.clientWidth;
+                const ch = container.clientHeight;
+                const scale = Math.min(cw / svgRect.width, ch / svgRect.height) * 0.9;
+                pz.moveTo(0, 0);
+                pz.zoomAbs(0, 0, scale);
+                const newSvgW = svgRect.width * scale;
+                const newSvgH = svgRect.height * scale;
+                pz.moveTo((cw - newSvgW) / 2, (ch - newSvgH) / 2);
+                updateZoomLabel();
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (e.key === '+' || e.key === '=') {
+                    e.preventDefault();
+                    pz.smoothZoom(container.clientWidth / 2, container.clientHeight / 2, 1.3);
+                } else if (e.key === '-') {
+                    e.preventDefault();
+                    pz.smoothZoom(container.clientWidth / 2, container.clientHeight / 2, 0.7);
+                } else if (e.key === '0') {
+                    pz.moveTo(0, 0);
+                    pz.zoomAbs(0, 0, 1);
+                    updateZoomLabel();
+                } else if (e.key === 'f' || e.key === 'F') {
+                    document.getElementById('zoomFit').click();
+                }
+            });
+
+            // Auto-fit on load
+            document.getElementById('zoomFit').click();
+        }, 500);
+    });
+</script>
+
+</body>
+</html>

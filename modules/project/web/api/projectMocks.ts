@@ -269,11 +269,13 @@ export async function deleteDoc(projectId: string, docId: string): Promise<void>
 // ==================== Bookings ====================
 
 const MOCK_BOOKINGS: any[] = [
-  { id: 'b-1', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Trần Lê Hải 0', customerPhone: '0969841010', staffName: 'Ngô Việt', amount: 50, status: 'PENDING', createdAt: new Date().toISOString() },
-  { id: 'b-2', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Lâm Chấn Phong 2', customerPhone: '0939225523', staffName: 'Ngô Việt', amount: 50, status: 'PENDING', createdAt: new Date().toISOString() },
-  { id: 'b-3', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Ngô Thị Vàng 1', customerPhone: '0974289192', staffName: 'Trần Minh Khôi', amount: 50, status: 'APPROVED', createdAt: new Date().toISOString() },
-  { id: 'b-4', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Phan Văn Khoa 4', customerPhone: '0926938788', staffName: 'Ngô Việt', amount: 50, status: 'APPROVED', createdAt: new Date().toISOString() },
-  { id: 'b-5', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Đào Thuỳ Trang 3', customerPhone: '0975949856', staffName: 'Trần Minh Khôi', amount: 50, status: 'REJECTED', createdAt: new Date().toISOString() },
+  { id: 'b-1', type: 'BOOKING', unitCode: 'SH-01', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Trần Lê Hải 0', customerPhone: '0969841010', staffName: 'Ngô Việt', amount: 50000000, status: 'PENDING', createdAt: new Date().toISOString() },
+  { id: 'b-2', type: 'BOOKING', unitCode: 'V1-2', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Lâm Chấn Phong 2', customerPhone: '0939225523', staffName: 'Ngô Việt', amount: 50000000, status: 'PENDING', createdAt: new Date().toISOString() },
+  { id: 'd-1', type: 'DEPOSIT', source: 'BOOKING', unitCode: 'V1-1', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Trần Lê Hải 0', customerPhone: '0969841010', staffName: 'Ngô Việt', amount: 200000000, status: 'PENDING', createdAt: new Date().toISOString() },
+  { id: 'd-2', type: 'DEPOSIT', source: 'DIRECT', unitCode: 'V1-3', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Lâm Chấn Phong 2', customerPhone: '0939225523', staffName: 'Ngô Việt', amount: 300000000, status: 'PENDING', createdAt: new Date().toISOString() },
+  { id: 'b-3', type: 'BOOKING', unitCode: 'SH-03', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Ngô Thị Vàng 1', customerPhone: '0974289192', staffName: 'Trần Minh Khôi', amount: 50000000, status: 'APPROVED', createdAt: new Date().toISOString() },
+  { id: 'b-4', type: 'BOOKING', unitCode: 'V1-4', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Phan Văn Khoa 4', customerPhone: '0926938788', staffName: 'Ngô Việt', amount: 50000000, status: 'APPROVED', createdAt: new Date().toISOString() },
+  { id: 'b-5', type: 'BOOKING', unitCode: 'SH-05', projectId: 'proj-1', projectName: 'SGroup Riverside', customerName: 'Đào Thuỳ Trang 3', customerPhone: '0975949856', staffName: 'Trần Minh Khôi', amount: 50000000, status: 'REJECTED', createdAt: new Date().toISOString() },
 ];
 
 export async function listBookings(): Promise<any[]> {

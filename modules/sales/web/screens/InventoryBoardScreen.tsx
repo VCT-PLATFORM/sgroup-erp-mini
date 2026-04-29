@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { CinematicDrawer, DrawerSection, DrawerDetailRow } from '../components/shared';
 import { useToastActions } from '../components/shared/Toast';
-import { CURRENT_USER } from '../api/salesMocks';
+
 
 // ═══════════════════════════════════════════════════════════
 // INVENTORY BOARD SCREEN — Real-time Lock System
@@ -128,7 +128,7 @@ export function InventoryBoardScreen() {
     }
     const now = Date.now();
     setUnits(prev => prev.map(u => u.id === unit.id ? {
-      ...u, status: 'BOOKED' as UnitStatus, lockedBy: CURRENT_USER.fullName, lockedAt: now, lockExpiry: now + LOCK_DURATION_MS,
+      ...u, status: 'BOOKED' as UnitStatus, lockedBy: 'User Name', lockedAt: now, lockExpiry: now + LOCK_DURATION_MS,
     } : u));
     setSelectedUnit(null);
     toast.success(`Đã Booking căn ${unit.code} thành công! Giữ chỗ 15 phút.`);
@@ -142,7 +142,7 @@ export function InventoryBoardScreen() {
     }
     const now = Date.now();
     setUnits(prev => prev.map(u => u.id === unit.id ? {
-      ...u, status: 'LOCKED' as UnitStatus, lockedBy: CURRENT_USER.fullName, lockedAt: now, lockExpiry: now + LOCK_DURATION_MS,
+      ...u, status: 'LOCKED' as UnitStatus, lockedBy: 'User Name', lockedAt: now, lockExpiry: now + LOCK_DURATION_MS,
     } : u));
     setSelectedUnit(null);
     toast.success(`Đã Khoá căn ${unit.code} thành công!`);
@@ -161,7 +161,7 @@ export function InventoryBoardScreen() {
         // Expire locks
         const now = Date.now();
         copy.forEach((u, idx) => {
-          if ((u.status === 'BOOKED' || u.status === 'LOCKED') && u.lockExpiry && u.lockExpiry < now && u.lockedBy !== CURRENT_USER.fullName) {
+          if ((u.status === 'BOOKED' || u.status === 'LOCKED') && u.lockExpiry && u.lockExpiry < now && u.lockedBy !== 'User Name') {
             copy[idx] = { ...u, status: 'AVAILABLE', lockedBy: undefined, lockedAt: undefined, lockExpiry: undefined, processingBy: undefined };
           }
         });

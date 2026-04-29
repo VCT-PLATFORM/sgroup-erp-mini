@@ -4,6 +4,8 @@ import { ProjectSidebar } from './components/ProjectSidebar';
 import { Search, Sun, Moon, Briefcase } from 'lucide-react';
 import { ProjectSearchModal } from './components/ProjectSearchModal';
 import { useAuthStore } from '@sgroup/platform';
+import { RoleProvider } from '@modules/sales/components/shared/RoleContext';
+import { ToastProvider } from '@modules/sales/components/shared/Toast';
 
 import { ProjectListScreen } from './screens/ProjectListScreen';
 import { BookingManagementScreen } from './screens/BookingManagementScreen';
@@ -60,6 +62,8 @@ export function ProjectShell() {
   };
 
   return (
+    <RoleProvider>
+    <ToastProvider>
     <div className="flex w-screen h-screen bg-sg-portal-bg overflow-hidden transition-colors duration-500">
       
       {/* ── CINEMATIC BACKDROP ── */}
@@ -146,8 +150,8 @@ export function ProjectShell() {
           <Routes>
             <Route path="/" element={<Navigate to="list" replace />} />
             <Route path="list" element={<ProjectListScreen />} />
-            <Route path="booking" element={<BookingManagementScreen />} />
-            <Route path="deposit" element={<PlaceholderScreen title="Quản lý đặt cọc" />} />
+            <Route path="booking" element={<BookingManagementScreen filterType="BOOKING" />} />
+            <Route path="deposit" element={<BookingManagementScreen filterType="DEPOSIT" />} />
             <Route path="*" element={<Navigate to="list" replace />} />
           </Routes>
         </main>
@@ -155,5 +159,7 @@ export function ProjectShell() {
 
       <ProjectSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </div>
+    </ToastProvider>
+    </RoleProvider>
   );
 }

@@ -4,19 +4,26 @@ import { RE_PROPERTY_TYPE } from '../constants';
 import { 
   Clock, CheckCircle, XCircle, Search, 
   Phone, User, CreditCard, Building2,
-  Plus, MoreHorizontal, Filter
+  Plus, MoreHorizontal, Filter, CheckCircle2
 } from 'lucide-react';
 import type { REBooking, REBookingStatus } from '../types';
+import { DepositEntryModal } from '@modules/sales/components/DepositEntryModal';
 
-const COLUMNS: { id: REBookingStatus; label: string; color: string; bg: string; border: string; icon: any }[] = [
-  { id: 'PENDING', label: 'Chờ Duyệt', color: 'text-amber-500', bg: 'bg-amber-500/5', border: 'border-amber-500/20', icon: Clock },
-  { id: 'APPROVED', label: 'Đã Duyệt', color: 'text-emerald-500', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', icon: CheckCircle },
-  { id: 'REJECTED', label: 'Từ Chối', color: 'text-rose-500', bg: 'bg-rose-500/5', border: 'border-rose-500/20', icon: XCircle },
-];
-
-export function BookingManagementScreen() {
+export function BookingManagementScreen({ filterType }: { filterType?: 'BOOKING' | 'DEPOSIT' }) {
   const { data: bookings, moveBooking, loading } = useBookings();
   const [draggedId, setDraggedId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  const COLUMNS: { id: REBookingStatus; label: string; color: string; bg: string; border: string; icon: any }[] = filterType === 'DEPOSIT' ? [
+    { id: 'PENDING', label: 'Chờ Xác Nhận', color: 'text-amber-500', bg: 'bg-amber-500/5', border: 'border-amber-500/20', icon: Clock },
+    { id: 'CONFIRMED', label: 'Đã Nhận Cọc', color: 'text-blue-500', bg: 'bg-blue-500/5', border: 'border-blue-500/20', icon: CheckCircle2 },
+    { id: 'COMPLETED', label: 'Đã Hoàn Tất Hồ Sơ', color: 'text-emerald-500', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', icon: CheckCircle },
+  ] : [
+    { id: 'PENDING', label: 'Chờ Duyệt', color: 'text-amber-500', bg: 'bg-amber-500/5', border: 'border-amber-500/20', icon: Clock },
+    { id: 'APPROVED', label: 'Đã Duyệt', color: 'text-emerald-500', bg: 'bg-emerald-500/5', border: 'border-emerald-500/20', icon: CheckCircle },
+    { id: 'REJECTED', label: 'Từ Chối', color: 'text-rose-500', bg: 'bg-rose-500/5', border: 'border-rose-500/20', icon: XCircle },
+  ];
 
   const handleDragStart = (e: React.DragEvent, id: string) => {
     e.dataTransfer.setData('bookingId', id);
@@ -37,6 +44,29 @@ export function BookingManagementScreen() {
     setDraggedId(null);
   };
 
+  // Map booking item to the format DepositEntryModal expects as editData
+  const mapToEditData = (item: REBooking) => ({
+    id: item.id,
+    customerName: item.customerName,
+    customerPhone: item.customerPhone || '',
+    idNumber: '',
+    projectName: item.projectName || 'SGroup Royal City',
+    unitCode: item.unitCode || '',
+    depositAmount: item.amount || 0,
+    price: (item as any).price || 0,
+    note: (item as any).note || '',
+    status: item.status,
+    source: item.source,
+    type: item.type,
+    isAgreementSigned: (item as any).isAgreementSigned || false,
+    isContractSigned: (item as any).isContractSigned || false,
+  });
+
+  const handleCardClick = (item: REBooking) => {
+    setSelectedItem(mapToEditData(item));
+    setIsModalOpen(true);
+  };
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden p-4 sm:p-8 lg:px-12">
       {/* Cinematic Ambient Glow */}
@@ -45,9 +75,13 @@ export function BookingManagementScreen() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-[32px] font-black text-sg-heading tracking-tighter leading-none">Quản lý Giữ Chỗ</h2>
+          <h2 className="text-[32px] font-black text-sg-heading tracking-tighter leading-none">
+            {filterType === 'DEPOSIT' ? 'Quản lý Đặt Cọc' : filterType === 'BOOKING' ? 'Quản lý Giữ Chỗ' : 'Quản lý Giao Dịch'}
+          </h2>
           <div className="flex items-center gap-4">
-            <span className="text-[13px] font-bold text-sg-subtext">Theo dõi và phê duyệt lệnh giữ chỗ từ hệ thống</span>
+            <span className="text-[13px] font-bold text-sg-subtext">
+              {filterType === 'DEPOSIT' ? 'Theo dõi và phê duyệt Đặt Cọc từ bộ phận Kinh Doanh' : filterType === 'BOOKING' ? 'Theo dõi và phê duyệt Giữ Chỗ từ bộ phận Kinh Doanh' : 'Theo dõi và phê duyệt Giữ Chỗ / Đặt Cọc từ bộ phận Kinh Doanh'}
+            </span>
           </div>
         </div>
 
@@ -64,83 +98,95 @@ export function BookingManagementScreen() {
             <Filter size={16} />
             <span className="text-[13px] font-bold">Lọc</span>
           </button>
-          <button className="h-11 w-11 flex items-center justify-center bg-linear-to-r from-cyan-500 to-blue-600 rounded-xl text-white shadow-lg hover:shadow-cyan-500/30 transition-all">
-            <Plus size={20} />
-          </button>
         </div>
       </div>
 
       {/* Kanban Board */}
-      <div className="flex-1 flex gap-6 overflow-x-auto pb-6 custom-scrollbar">
-        {COLUMNS.map(col => {
-          const colItems = bookings.filter(b => b.status === col.id);
-          return (
-            <div 
-              key={col.id}
-              onDragOver={handleDragOver}
-              onDrop={(e) => handleDrop(e, col.id)}
-              className="w-[380px] flex-shrink-0 flex flex-col h-full rounded-[24px] bg-slate-50/50 dark:bg-black/20 border border-sg-border/50"
-            >
-              {/* Column Header */}
-              <div className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3 bg-white dark:bg-sg-card border border-sg-border shadow-sm px-4 py-2.5 rounded-2xl w-full">
-                  <col.icon size={18} className={col.color} />
-                  <span className="text-[14px] font-black text-sg-heading tracking-tight">{col.label}</span>
-                  <span className={`ml-auto text-[13px] font-black ${col.color}`}>{colItems.length}</span>
+      <div className="flex-1 overflow-x-auto p-4 lg:p-6 custom-scrollbar">
+        <div className="grid grid-cols-3 gap-6 h-full min-w-[1000px]">
+          {COLUMNS.map((col, colIdx) => {
+            const colItems = bookings.filter(b => b.status === col.id && (!filterType || b.type === filterType));
+            return (
+              <div 
+                key={col.id}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, col.id)}
+                className="flex flex-col sg-stagger"
+                style={{ animationDelay: `${colIdx * 60}ms` }}
+              >
+                {/* Column header */}
+                <div className={`flex items-center justify-between px-4 py-3 rounded-xl border mb-3 ${col.border} bg-white/60 dark:bg-black/30 backdrop-blur-xl`}>
+                  <div className="flex items-center gap-2">
+                    <col.icon size={16} className={col.color} />
+                    <span className="text-[13px] font-black text-sg-heading">{col.label}</span>
+                  </div>
+                  <span className={`px-2 py-0.5 rounded-md text-[11px] font-black ${col.color} bg-sg-card/50`}>
+                    {colItems.length}
+                  </span>
                 </div>
-              </div>
 
-              {/* Column Items */}
-              <div className="flex-1 overflow-y-auto px-4 pb-4 flex flex-col gap-4 custom-scrollbar">
-                {colItems.map(item => (
-                  <div 
-                    key={item.id}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, item.id)}
-                    onDragEnd={() => setDraggedId(null)}
-                    className={`bg-white dark:bg-black/40 border border-sg-border/60 rounded-[20px] p-5 shadow-sm hover:shadow-md transition-all group relative overflow-hidden cursor-grab active:cursor-grabbing ${draggedId === item.id ? 'opacity-40 grayscale' : ''}`}
-                  >
-                    {/* Status indicator line */}
-                    <div className={`absolute top-0 left-0 right-0 h-1 ${col.bg.replace('/5', '/40')}`} />
+                {/* Column Items */}
+                <div className="flex-1 space-y-3 overflow-y-auto pb-4 custom-scrollbar">
+                  {colItems.map((item, idx) => (
+                    <div 
+                      key={item.id}
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, item.id)}
+                      onDragEnd={() => setDraggedId(null)}
+                      onClick={() => handleCardClick(item)}
+                      className={`bg-white dark:bg-black/30 backdrop-blur-3xl rounded-[20px] border border-slate-200/80 dark:border-sg-border p-4 shadow-sg-sm hover:shadow-sg-md hover:-translate-y-1 transition-all cursor-pointer active:cursor-grabbing group relative overflow-hidden sg-stagger ${draggedId === item.id ? 'opacity-40 grayscale' : ''}`}
+                      style={{ animationDelay: `${colIdx * 60 + idx * 40}ms` }}
+                    >
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className={`absolute -right-8 -top-8 w-24 h-24 rounded-full ${col.bg.replace('/5', '/10')} blur-2xl opacity-0 group-hover:opacity-60 transition-opacity`} />
                     
-                    {/* Project & Tag */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex flex-col">
-                        <h4 className="text-[16px] font-black text-sg-heading leading-tight group-hover:text-cyan-500 transition-colors">{item.projectName}</h4>
+                    <div className="flex items-center justify-between mb-4 relative z-10">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <span className="text-[18px] font-black text-sg-heading group-hover:text-cyan-500 transition-colors leading-none tracking-tight">{item.unitCode || 'N/A'}</span>
+                        {item.type === 'BOOKING' ? (
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold text-blue-600 bg-blue-50 dark:text-blue-400 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 shadow-sm">Giữ chỗ</span>
+                        ) : item.source === 'BOOKING' ? (
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 shadow-sm">Giữ chỗ ➝ Đặt cọc</span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 shadow-sm">Khách hàng cọc mới</span>
+                        )}
                       </div>
-                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider border ${col.bg.replace('/5', '/15')} ${col.color} ${col.border}`}>
-                        {col.label}
-                      </span>
+                      <span className={`px-2 py-1 rounded-lg text-[10px] font-black ${col.color} ${col.bg} border ${col.border} shadow-sm shrink-0`}>{col.label}</span>
                     </div>
 
-                    {/* Customer Info */}
-                    <div className="flex flex-col gap-2 mb-5">
-                      <div className="flex items-center gap-2 text-sg-subtext">
-                        <User size={14} className="text-sg-muted" />
-                        <span className="text-[13px] font-bold">{item.customerName}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sg-subtext">
-                        <Phone size={14} className="text-sg-muted" />
-                        <span className="text-[12px] font-semibold">{item.customerPhone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="px-2 py-1 bg-cyan-500/10 rounded-lg flex items-center gap-1.5 border border-cyan-500/20">
-                           <User size={10} className="text-cyan-500" />
-                           <span className="text-[10px] font-black text-cyan-600 dark:text-cyan-400">{item.staffName}</span>
+                    <div className="flex flex-col gap-2 text-[13px] font-medium text-sg-heading mb-4 relative z-10 bg-slate-50/50 dark:bg-white/5 p-3 rounded-xl border border-slate-100 dark:border-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0 shadow-sm">
+                          <User size={12} className="text-slate-500" />
                         </div>
+                        <span className="truncate">{item.customerName || 'Chưa có KH'}</span>
+                      </div>
+                      {item.customerPhone && (
+                        <div className="flex items-center gap-3">
+                          <div className="w-6 h-6 rounded-full bg-white dark:bg-black/50 border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0 shadow-sm">
+                            <Phone size={10} className="text-slate-500" />
+                          </div>
+                          <span className="font-mono text-[12px]">{item.customerPhone}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-3">
+                        <div className="w-6 h-6 rounded-full bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-200 dark:border-cyan-500/20 flex items-center justify-center shrink-0 shadow-sm">
+                          <User size={10} className="text-cyan-500" />
+                        </div>
+                        <span className="text-[12px] font-bold text-cyan-600 dark:text-cyan-400 truncate tracking-wide">{item.staffName || 'N/A'}</span>
                       </div>
                     </div>
 
-                    {/* Footer Info */}
-                    <div className="pt-4 border-t border-sg-border/60 flex items-center justify-between">
-                       <div className="flex flex-col">
-                          <span className="text-[9px] font-black text-sg-muted uppercase tracking-widest">Số Tiền</span>
-                          <span className="text-[16px] font-black text-blue-600 dark:text-blue-400 leading-none mt-1">{item.amount}M</span>
-                       </div>
-                       <div className="flex flex-col items-end">
-                          <span className="text-[9px] font-black text-sg-muted uppercase tracking-widest">Nhân Sự</span>
-                          <span className="text-[13px] font-black text-sg-heading leading-none mt-1">{item.staffName}</span>
-                       </div>
+                    <div className="relative z-10 pt-3 border-t border-slate-200/50 dark:border-sg-border border-dashed">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${item.type === 'BOOKING' ? 'bg-blue-500/10' : 'bg-orange-500/10'}`}>
+                            <CreditCard size={14} className={item.type === 'BOOKING' ? 'text-blue-500' : 'text-orange-500'} />
+                          </div>
+                          <span className="text-[11px] font-bold text-sg-muted uppercase tracking-wider">{item.type === 'BOOKING' ? 'Tiền Giữ Chỗ' : 'Tiền Cọc'}</span>
+                        </div>
+                        <p className={`text-[16px] font-black tracking-tight drop-shadow-sm ${item.type === 'BOOKING' ? 'text-blue-500' : 'text-orange-500'}`}>{item.amount >= 1000000 ? `${item.amount / 1000000}M` : `${item.amount}M`}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -155,6 +201,15 @@ export function BookingManagementScreen() {
           );
         })}
       </div>
+      </div>
+
+      {/* Deposit Entry Modal — Admin mode */}
+      <DepositEntryModal
+        isOpen={isModalOpen}
+        onClose={() => { setIsModalOpen(false); setSelectedItem(null); }}
+        editData={selectedItem}
+        isAdmin={true}
+      />
     </div>
   );
 }

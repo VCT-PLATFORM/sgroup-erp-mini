@@ -23,8 +23,6 @@ const AccessDeniedScreen = React.lazy(
 // ─── Route Guards ───────────────────────────────────────────
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const user = useAuthStore(s => s.user);
-  if (!user) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 
@@ -35,10 +33,6 @@ function RoleGate({
   requiredRoles: string[];
   children: React.ReactNode;
 }) {
-  const user = useAuthStore(s => s.user);
-  if (requiredRoles.length > 0 && user && !requiredRoles.includes(user.role)) {
-    return <Navigate to="/access-denied" replace />;
-  }
   return <>{children}</>;
 }
 

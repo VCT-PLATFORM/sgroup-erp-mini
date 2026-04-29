@@ -112,6 +112,9 @@ func main() {
 		"http://localhost:3002",
 		"http://localhost:3003",
 		"http://localhost:3004",
+		"http://localhost:5173",
+		"http://localhost:5174",
+		"http://localhost:5175",
 	}
 	if extraOrigins := os.Getenv("CORS_ORIGINS"); extraOrigins != "" {
 		allowedOrigins = append(allowedOrigins, extraOrigins)

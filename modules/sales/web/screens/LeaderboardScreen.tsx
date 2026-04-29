@@ -9,13 +9,14 @@ import {
   Building2,
   Crown,
   User,
+  Filter,
 } from "lucide-react";
 import {
   useTopSellers,
   useTeamPerformance,
   formatVND,
 } from "../hooks/useSalesData";
-import { SkeletonLeaderboard } from "../components/shared";
+import { SkeletonLeaderboard, DateFilter } from "../components/shared";
 
 // ═══════════════════════════════════════════════════════════
 // LEADERBOARD SCREEN — Global Rankings
@@ -24,10 +25,21 @@ import { SkeletonLeaderboard } from "../components/shared";
 
 export function LeaderboardScreen() {
   const [activeTab, setActiveTab] = useState<"sales" | "teams">("sales");
-  const [timeFilter, setTimeFilter] = useState("month");
+  const [dateRange, setDateRange] = useState<any>({ type: 'all', start: '', end: '' });
+  const [selectedTeamId, setSelectedTeamId] = useState<string>("all");
 
   const { data: topSellers, loading: sellersLoading } = useTopSellers(50);
   const { data: topTeams, loading: teamsLoading } = useTeamPerformance();
+
+  // Filter topSellers by team if selected
+  const filteredSellers = React.useMemo(() => {
+    if (!topSellers) return [];
+    if (selectedTeamId === "all") return topSellers;
+    // We map teamId from topTeams since TopSeller only has teamName.
+    const selectedTeam = topTeams?.find(t => t.teamId === selectedTeamId);
+    if (!selectedTeam) return topSellers;
+    return topSellers.filter(s => s.teamName === selectedTeam.teamName);
+  }, [topSellers, selectedTeamId, topTeams]);
 
   // Sort teams by GMV just in case hook doesn't
   const sortedTeams = [...(topTeams || [])].sort((a, b) => b.gmv - a.gmv);
@@ -35,9 +47,11 @@ export function LeaderboardScreen() {
   return (
     <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/50 dark:bg-[#0a0a0a]">
       {/* ════ HEADER ════ */}
-      <div className="px-6 lg:px-10 py-8 border-b border-slate-100 dark:border-sg-border/40 bg-white dark:bg-sg-card backdrop-blur-xl relative overflow-hidden shrink-0">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-500/10 blur-[80px] rounded-full pointer-events-none" />
+      <div className="px-6 lg:px-10 py-8 border-b border-slate-100 dark:border-sg-border/40 bg-white dark:bg-sg-card backdrop-blur-xl relative shrink-0 z-20">
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 blur-[100px] rounded-full" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-500/10 blur-[80px] rounded-full" />
+        </div>
 
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
@@ -57,23 +71,23 @@ export function LeaderboardScreen() {
           {/* Tabs & Filters */}
           <div className="flex flex-col sm:flex-row items-center gap-4">
             {/* Time Filter */}
-            <div className="relative">
-              <select
-                value={timeFilter}
-                onChange={(e) => setTimeFilter(e.target.value)}
-                className="w-full sm:w-auto bg-white dark:bg-black/40 text-sg-heading text-[13px] font-bold rounded-xl border border-slate-200 dark:border-white/10 hover:border-amber-500/50 focus:ring-2 focus:ring-amber-500/50 outline-none px-4 py-2.5 pr-10 appearance-none cursor-pointer shadow-sm transition-all"
-              >
-                <option value="today">Hôm nay</option>
-                <option value="week">Tuần này</option>
-                <option value="month">Tháng này</option>
-                <option value="quarter">Quý này</option>
-                <option value="year">Năm nay</option>
-                <option value="all">Tất cả thời gian</option>
-              </select>
-              <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <TrendingUp size={14} className="text-sg-muted" />
+            <DateFilter onChange={(range, preset) => setDateRange({ ...range, preset })} />
+            
+            {activeTab === "sales" && (
+              <div className="flex items-center gap-2 bg-white dark:bg-black/20 border border-slate-200 dark:border-sg-border rounded-xl px-3 py-2 text-[13px] font-bold text-sg-heading">
+                <Filter size={14} className="text-sg-muted" />
+                <select 
+                  className="bg-transparent outline-none cursor-pointer pr-4 appearance-none"
+                  value={selectedTeamId}
+                  onChange={(e) => setSelectedTeamId(e.target.value)}
+                >
+                  <option value="all">Tất cả Team</option>
+                  {(topTeams || []).map(t => (
+                    <option key={t.teamId} value={t.teamId}>{t.teamName}</option>
+                  ))}
+                </select>
               </div>
-            </div>
+            )}
 
             <div className="flex p-1.5 bg-sg-btn-bg border border-sg-border rounded-xl w-fit">
               <button
@@ -103,7 +117,7 @@ export function LeaderboardScreen() {
 
       {/* ════ CONTENT ════ */}
       <div className="flex-1 overflow-y-auto p-6 lg:p-10 relative z-10">
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* TAB: TOP SALES */}
           {activeTab === "sales" && (
             <div className="bg-white dark:bg-black/30 backdrop-blur-3xl rounded-sg-max border border-slate-200/80 dark:border-sg-border p-6 lg:p-8 shadow-sg-lg sg-stagger">
@@ -124,73 +138,116 @@ export function LeaderboardScreen() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {(topSellers || []).map((seller, idx) => (
-                    <div
-                      key={seller.staffId}
-                      className="flex items-center gap-4 p-4 lg:p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 hover:border-amber-500/30 hover:bg-white dark:hover:bg-white/10 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5 transition-all group sg-stagger"
-                      style={{ animationDelay: `${idx * 40}ms` }}
-                    >
-                      {/* Rank Number */}
-                      <div className="relative shrink-0 flex items-center justify-center w-12 h-12">
-                        {idx === 0 ? (
-                          <Crown
-                            size={36}
-                            className="text-amber-500 drop-shadow-[0_4px_8px_rgba(245,158,11,0.4)]"
-                          />
-                        ) : idx === 1 ? (
-                          <Medal
-                            size={28}
-                            className="text-slate-400 drop-shadow-md"
-                          />
-                        ) : idx === 2 ? (
-                          <Medal
-                            size={28}
-                            className="text-orange-500 drop-shadow-md"
-                          />
-                        ) : (
-                          <span className="text-[16px] font-black text-sg-muted opacity-50">
-                            #{idx + 1}
-                          </span>
-                        )}
-                      </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[1000px]">
+                      <thead>
+                        <tr className="border-b border-slate-200 dark:border-sg-border/50">
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest">Tên</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest">Team</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">KPI</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Điểm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">% KPI Điểm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Kết Quả</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-right">Doanh Số</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Quan Tâm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">HG Tư Vấn</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">HG Trải Nghiệm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Giữ Chỗ</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Giao Dịch</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {filteredSellers.map((seller, idx) => {
+                          // Determine KPI based on date range duration
+                          let kpi = 400; // Default to month
+                          
+                          if (dateRange && dateRange.from && dateRange.to) {
+                            const diffDays = Math.ceil((dateRange.to.getTime() - dateRange.from.getTime()) / (1000 * 3600 * 24));
+                            if (diffDays <= 7) {
+                              kpi = 100;
+                            } else if (diffDays <= 31) {
+                              kpi = 400;
+                            } else {
+                              kpi = 1200;
+                            }
+                          } else if (dateRange && dateRange.preset) {
+                            switch (dateRange.preset) {
+                              case 'today':
+                              case 'yesterday':
+                              case 'this_week':
+                              case 'last_week':
+                                kpi = 100;
+                                break;
+                              case 'this_month':
+                              case 'last_month':
+                                kpi = 400;
+                                break;
+                              case 'this_quarter':
+                              case 'all':
+                              default:
+                                kpi = 1200;
+                                break;
+                            }
+                          }
 
-                      {/* Avatar */}
-                      <div className="w-12 h-12 rounded-xl bg-linear-to-br from-amber-400 to-amber-600 p-0.5 shadow-md">
-                        <div className="w-full h-full rounded-[10px] bg-white dark:bg-sg-card flex items-center justify-center overflow-hidden">
-                          <span className="text-[16px] font-black text-amber-500">
-                            {seller.staffName.charAt(0)}
-                          </span>
-                        </div>
-                      </div>
+                          const points = seller.activityPoints || 0;
+                          const kpiPercent = (points / kpi) * 100;
+                          const passed = kpiPercent >= 100;
+                          
+                          return (
+                            <tr 
+                              key={seller.staffId}
+                              className="border-b border-slate-100 dark:border-sg-border/20 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors sg-stagger"
+                              style={{ animationDelay: `${idx * 40}ms` }}
+                            >
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading whitespace-nowrap">
+                                {seller.staffName}
+                              </td>
+                              <td className="py-4 px-4">
+                                <span className="inline-block px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-[11px] uppercase whitespace-nowrap">
+                                  {seller.teamName}
+                                </span>
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {kpi}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-black text-sg-heading text-center tabular-nums">
+                                {points}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {kpiPercent.toFixed(1)}%
+                              </td>
+                              <td className="py-4 px-4 text-center">
+                                <span className={`inline-block px-2.5 py-1 rounded-md font-black text-[10px] uppercase whitespace-nowrap ${passed ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-red-50 text-red-500 dark:bg-red-500/10 dark:text-red-400'}`}>
+                                  {passed ? 'ĐẠT' : 'KHÔNG ĐẠT'}
+                                </span>
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-black text-amber-600 dark:text-amber-400 text-right tabular-nums whitespace-nowrap">
+                                {seller.gmv > 0 ? formatVND(seller.gmv) : '0'}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {seller.leads || 0}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {seller.meetings || 0}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {seller.visits || 0}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {seller.bookings || 0}
+                              </td>
+                              <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                                {seller.deals || 0}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
 
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <span className="block text-[15px] font-black text-sg-heading truncate group-hover:text-amber-500 transition-colors">
-                          {seller.staffName}
-                        </span>
-                        <div className="flex items-center gap-3 mt-1 text-[11px] font-bold text-sg-muted">
-                          <span className="flex items-center gap-1">
-                            <Building2 size={12} /> {seller.teamName}
-                          </span>
-                          <span className="flex items-center gap-1 text-emerald-500">
-                            <TrendingUp size={12} /> {seller.deals} deals
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Revenue */}
-                      <div className="text-right">
-                        <span className="block text-[18px] font-black text-transparent bg-clip-text bg-linear-to-r from-amber-500 to-orange-500">
-                          {formatVND(seller.gmv)}
-                        </span>
-                        <span className="block text-[10px] font-bold text-sg-muted uppercase tracking-widest mt-0.5">
-                          Tổng GMV
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-
-                  {(!topSellers || topSellers.length === 0) && (
+                  {filteredSellers.length === 0 && (
                     <div className="py-12 flex flex-col items-center justify-center text-sg-muted">
                       <Trophy size={48} className="opacity-20 mb-4" />
                       <p className="text-[14px] font-bold">
@@ -223,62 +280,62 @@ export function LeaderboardScreen() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {sortedTeams.map((team, idx) => (
-                    <div
-                      key={team.teamId}
-                      className="flex items-center gap-4 p-4 lg:p-5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5 hover:border-emerald-500/30 hover:bg-white dark:hover:bg-white/10 hover:-translate-y-1 hover:shadow-xl hover:shadow-emerald-500/5 transition-all group sg-stagger"
-                      style={{ animationDelay: `${idx * 40}ms` }}
-                    >
-                      {/* Rank Number */}
-                      <div className="relative shrink-0 flex items-center justify-center w-12 h-12">
-                        {idx === 0 ? (
-                          <Crown
-                            size={36}
-                            className="text-emerald-500 drop-shadow-[0_4px_8px_rgba(16,185,129,0.4)]"
-                          />
-                        ) : idx === 1 ? (
-                          <Medal
-                            size={28}
-                            className="text-teal-500 drop-shadow-md"
-                          />
-                        ) : idx === 2 ? (
-                          <Medal
-                            size={28}
-                            className="text-cyan-500 drop-shadow-md"
-                          />
-                        ) : (
-                          <span className="text-[16px] font-black text-sg-muted opacity-50">
-                            #{idx + 1}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Info */}
-                      <div className="flex-1 min-w-0">
-                        <span className="block text-[16px] font-black text-sg-heading truncate group-hover:text-emerald-500 transition-colors">
-                          {team.teamName}
-                        </span>
-                        <div className="flex items-center gap-4 mt-1">
-                          <span className="flex items-center gap-1.5 text-[11px] font-bold text-sg-muted bg-sg-btn-bg px-2 py-0.5 rounded-md">
-                            <Users size={12} /> {team.staffCount} nhân sự
-                          </span>
-                          <span className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-md">
-                            <TrendingUp size={12} /> {team.closedDeals} deals
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Revenue */}
-                      <div className="text-right">
-                        <span className="block text-[18px] font-black text-transparent bg-clip-text bg-linear-to-r from-emerald-500 to-teal-500">
-                          {formatVND(team.gmv)}
-                        </span>
-                        <span className="block text-[10px] font-bold text-sg-muted uppercase tracking-widest mt-0.5">
-                          GMV Phòng
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
+                      <thead>
+                        <tr className="border-b border-slate-200 dark:border-sg-border/50">
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest">Team</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest">Leader</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Tổng Điểm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Tổng Doanh Số</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Quan Tâm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">HG Tư Vấn</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">HG Trải Nghiệm</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Giữ Chỗ</th>
+                          <th className="py-4 px-4 text-[11px] font-black text-sg-muted uppercase tracking-widest text-center">Giao Dịch</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedTeams.map((team, idx) => (
+                          <tr 
+                            key={team.teamId}
+                            className="border-b border-slate-100 dark:border-sg-border/20 hover:bg-slate-50 dark:hover:bg-white/5 transition-colors sg-stagger"
+                            style={{ animationDelay: `${idx * 40}ms` }}
+                          >
+                            <td className="py-4 px-4">
+                              <span className="inline-block px-3 py-1.5 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 font-bold text-[12px] uppercase whitespace-nowrap">
+                                {team.teamName}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-bold text-sg-heading whitespace-nowrap">
+                              {team.leaderName || 'Trống'}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-black text-sg-heading text-center tabular-nums">
+                              {team.totalActivityPoints || 0}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-black text-emerald-600 dark:text-emerald-400 text-center tabular-nums whitespace-nowrap">
+                              {team.gmv > 0 ? formatVND(team.gmv) : '0'}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                              {team.leads || 0}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                              {team.meetings || 0}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                              {team.visits || 0}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                              {team.bookings || 0}
+                            </td>
+                            <td className="py-4 px-4 text-[13px] font-bold text-sg-heading text-center tabular-nums">
+                              {team.closedDeals || 0}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
                   {sortedTeams.length === 0 && (
                     <div className="py-12 flex flex-col items-center justify-center text-sg-muted">

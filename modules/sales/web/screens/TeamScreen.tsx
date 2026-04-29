@@ -9,6 +9,7 @@ import {
   CinematicDrawer, DrawerSection, DrawerHeroCard, DrawerDetailRow,
   EmptyState, SkeletonCard,
 } from '../components/shared';
+import { useSalesRole } from '../components/shared/RoleContext';
 
 // ═══════════════════════════════════════════════════════════
 // TEAM SCREEN — Staff Management with 3D cards + Drawer
@@ -23,6 +24,7 @@ const ROLE_CONFIG: Record<string, { label: string; color: string; gradient: stri
 };
 
 export function TeamScreen() {
+  const { role } = useSalesRole();
   const { data: staff, loading: staffLoading } = useStaff();
   const { data: teams, loading: teamsLoading } = useTeams();
   const { data: topSellers } = useTopSellers(100);
@@ -30,6 +32,12 @@ export function TeamScreen() {
   const [selectedTeam, setSelectedTeam] = useState('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [selectedStaff, setSelectedStaff] = useState<any | null>(null);
+
+  React.useEffect(() => {
+    if (role === 'sales_manager' && !selectedTeam && teams && teams.length > 0) {
+      setSelectedTeam(teams[0].id);
+    }
+  }, [role, selectedTeam, teams]);
 
   const staffWithMetrics = (staff || []).map(s => {
     const metrics = (topSellers || []).find(ts => ts.staffId === s.id) || { deals: 0, gmv: 0, revenue: 0 };
@@ -74,7 +82,7 @@ export function TeamScreen() {
               className="w-full h-10 pl-10 pr-4 bg-sg-btn-bg border border-sg-border rounded-xl text-[13px] font-semibold text-sg-heading placeholder:text-sg-muted outline-none focus:border-emerald-500/40 transition-colors" />
           </div>
           <select value={selectedTeam} onChange={e => setSelectedTeam(e.target.value)} className="h-10 px-4 bg-sg-btn-bg border border-sg-border rounded-xl text-[12px] font-bold text-sg-heading outline-none">
-            <option value="">Tất cả Teams</option>
+            {role !== 'sales_manager' && <option value="">Tất cả Teams</option>}
             {(teams || []).map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
           <div className="flex items-center p-1 bg-sg-btn-bg border border-sg-border rounded-xl">

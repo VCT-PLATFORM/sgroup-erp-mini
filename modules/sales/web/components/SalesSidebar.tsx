@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   BarChart3, Users, TrendingUp, ChevronLeft, ChevronRight,
-  DollarSign, Activity, BookmarkPlus, ShieldCheck, LogOut, Trophy
+  Activity, BookmarkPlus, ShieldCheck, LogOut, Trophy
 } from 'lucide-react';
 import { useSalesRole } from './shared/RoleContext';
 
@@ -68,7 +68,7 @@ const VP_MENU: SidebarItem[] = [
   { id: 'team_bookings',   label: 'Giữ Chỗ',            icon: BookmarkPlus, path: 'team_bookings' },
   { id: 'team_deposits',   label: 'Đặt Cọc',            icon: ShieldCheck,  path: 'team_deposits' },
   { id: 'team',         label: 'Danh Sách Đội Nhóm',   icon: Users,     path: 'team' },
-  { id: 'commission',   label: 'Hoa Hồng',          icon: DollarSign, path: 'commission' },
+
   // ── MỤC 3: NĂNG SUẤT ──
   { id: 'activities',   label: 'Nhật Ký Kinh Doanh', icon: Activity,  path: 'activities',   section: 'NĂNG SUẤT' },
   { id: 'bookings',     label: 'Giữ Chỗ',        icon: BookmarkPlus, path: 'bookings' },

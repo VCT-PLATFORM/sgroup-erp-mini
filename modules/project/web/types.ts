@@ -68,12 +68,15 @@ export interface RELegalDoc {
   createdAt?: string;
 }
 
-export type REBookingStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+export type REBookingStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CONFIRMED' | 'COMPLETED';
 
 export interface REBooking {
   id: string;
   projectId: string;
   projectName: string;
+  unitCode?: string;
+  type?: 'BOOKING' | 'DEPOSIT';
+  source?: 'BOOKING' | 'DIRECT';
   customerName: string;
   customerPhone: string;
   staffName: string;

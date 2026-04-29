@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Search, Users, BarChart3, Layers, Settings, FileText,
-  ArrowRight, Hash, TrendingUp, Building2,
+  Search, Users, BarChart3, Layers,
+  ArrowRight, Hash, TrendingUp, FileText,
 } from 'lucide-react';
 
 // ═══════════════════════════════════════════════════════════
@@ -41,15 +41,14 @@ export function SalesSearchModal({ isOpen, onClose }: Props) {
 
   const allResults: SearchResult[] = [
     { id: 'nav-dashboard', label: 'Dashboard', sublabel: 'Tổng quan KPI & doanh số', icon: <BarChart3 size={16} />, action: () => navigateTo('dashboard'), category: 'Navigation' },
-    { id: 'nav-customers', label: 'Khách Hàng', sublabel: 'Quản lý CRM & leads', icon: <Users size={16} />, action: () => navigateTo('customers'), category: 'Navigation' },
-    { id: 'nav-transactions', label: 'Giao Dịch', sublabel: 'Kanban lock-deposit-sold', icon: <Layers size={16} />, action: () => navigateTo('transactions'), category: 'Navigation' },
+    { id: 'nav-bookings', label: 'Giữ Chỗ', sublabel: 'Quản lý booking BĐS', icon: <Layers size={16} />, action: () => navigateTo('bookings'), category: 'Navigation' },
+    { id: 'nav-deposits', label: 'Đặt Cọc', sublabel: 'Quản lý deposit BĐS', icon: <TrendingUp size={16} />, action: () => navigateTo('deposits'), category: 'Navigation' },
     { id: 'nav-team', label: 'Đội Ngũ', sublabel: 'Quản lý Sales Teams', icon: <Users size={16} />, action: () => navigateTo('team'), category: 'Navigation' },
-    { id: 'nav-departments', label: 'Phòng Ban', sublabel: 'Khối kinh doanh & KPI phòng', icon: <Building2 size={16} />, action: () => navigateTo('departments'), category: 'Navigation' },
-    { id: 'nav-reports', label: 'Báo Cáo', sublabel: 'Plan vs Actual, Team, Project', icon: <FileText size={16} />, action: () => navigateTo('reports'), category: 'Navigation' },
-    { id: 'nav-commission', label: 'Hoa Hồng', sublabel: 'Bảng tính commission', icon: <TrendingUp size={16} />, action: () => navigateTo('commission'), category: 'Navigation' },
-    { id: 'nav-settings', label: 'Cài Đặt', sublabel: 'Cấu hình module KD', icon: <Settings size={16} />, action: () => navigateTo('settings'), category: 'Navigation' },
-    { id: 'act-new-customer', label: 'Thêm khách hàng mới', sublabel: 'Tạo lead mới vào hệ thống', icon: <Hash size={16} />, action: () => navigateTo('customers'), category: 'Actions' },
-    { id: 'act-new-deal', label: 'Tạo Deal mới', sublabel: 'Mở giao dịch mới cho khách', icon: <Hash size={16} />, action: () => navigateTo('transactions'), category: 'Actions' },
+    { id: 'nav-activities', label: 'Nhật Ký', sublabel: 'Hoạt động kinh doanh', icon: <FileText size={16} />, action: () => navigateTo('activities'), category: 'Navigation' },
+    { id: 'nav-leaderboard', label: 'Bảng Xếp Hạng', sublabel: 'Top sellers & KPI', icon: <BarChart3 size={16} />, action: () => navigateTo('leaderboard'), category: 'Navigation' },
+
+    { id: 'act-new-booking', label: 'Tạo Giữ Chỗ mới', sublabel: 'Tạo booking mới cho khách', icon: <Hash size={16} />, action: () => navigateTo('bookings'), category: 'Actions' },
+    { id: 'act-new-deposit', label: 'Tạo Đặt Cọc mới', sublabel: 'Tạo deposit mới cho khách', icon: <Hash size={16} />, action: () => navigateTo('deposits'), category: 'Actions' },
   ];
 
   const filtered = query

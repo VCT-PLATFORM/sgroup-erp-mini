@@ -28,6 +28,7 @@ export default defineConfig({
 
       // ── Feature Modules (Vertical Slices) ──
       // Each alias points to the module's barrel index.ts
+      '@modules/exec': path.resolve(rootDir, 'modules/exec/web'),
       '@modules/hr': path.resolve(rootDir, 'modules/hr/web'),
       '@modules/project': path.resolve(rootDir, 'modules/project/web'),
       '@modules/sales': path.resolve(rootDir, 'modules/sales/web'),

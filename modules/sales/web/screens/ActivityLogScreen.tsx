@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { useSalesRole } from '../components/shared/RoleContext';
 import { salesOpsApi, SalesActivity } from '../api/salesApi';
-import { CURRENT_USER, CURRENT_TEAM } from '../api/salesMocks';
+
 import { SkeletonCard, EmptyState, DateFilter, filterByDateRange } from '../components/shared';
 import { ActivityEntryModal } from '../components/ActivityEntryModal';
 import { useToast } from '@sgroup/web-ui';
@@ -168,90 +168,74 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
   const fetchActivities = useCallback(async () => {
     setLoading(true);
     try {
-      const [resActs, resBooks, resDeps] = await Promise.all([
-        salesOpsApi.listActivities(),
-        salesOpsApi.listBookings(),
-        salesOpsApi.listDeposits()
-      ]);
-      
-      let acts = resActs.data;
-      let books = resBooks.data;
-      let deps = resDeps.data;
+      const resActs = await salesOpsApi.listActivities();
+      let activities = resActs.data;
 
-      // Personal mode: only show current user's items
-      if (mode === 'personal' || role === 'sales_staff') {
-        acts = acts.filter(act => act.staffId === CURRENT_USER.id);
-        books = books.filter(b => (b as any).staffId === CURRENT_USER.id);
-        deps = deps.filter(d => (d as any).createdByUserId === CURRENT_USER.id || (d as any).staffId === CURRENT_USER.id);
-      }
-      // Team mode: Manager sees team items
-      else if (mode === 'team' && role === 'sales_manager') {
-        acts = acts.filter(act => act.teamId === CURRENT_TEAM.id || act.staffId === CURRENT_USER.id);
-        books = books.filter(b => b.teamName === CURRENT_TEAM.name || (b as any).staffId === CURRENT_USER.id);
-        deps = deps.filter(d => (d as any).teamName === CURRENT_TEAM.name || (d as any).staffId === CURRENT_USER.id);
+      if (role === 'sales_staff') {
+        activities = activities.filter(a => a.staffId === 'S1');
+      } else if (role === 'sales_manager') {
+        if (filterTeam !== 'all') {
+          activities = activities.filter(a => a.teamId === filterTeam);
+        } else {
+          activities = activities.filter(a => a.teamId === 'T1' || a.staffId === 'S1');
+        }
       }
 
       const map = new Map<string, ActivitySummary>();
       
-      // We will parse the local format carefully
       const toDateStr = (dateString: string) => {
         const d = new Date(dateString);
-        return d.toLocaleDateString('vi-VN'); // eg: 10/4/2026
+        return d.toLocaleDateString('vi-VN'); 
       };
 
-      acts.forEach(a => {
+      activities.forEach(a => {
         const dateStr = toDateStr(a.activityDate || new Date().toISOString());
-        const staffName = a.staffName || (a.staffId === CURRENT_USER.id ? CURRENT_USER.fullName : 'Nhân Sự Khác');
-        const teamName = a.teamName || (a.teamId === CURRENT_TEAM.id ? CURRENT_TEAM.name : 'Khác');
+        const staffName = a.staffName || 'Nhân Sự Khác';
+        const teamName = a.teamName || 'BD Zone 1';
+        
         const key = `${dateStr}_${staffName}`;
         if (!map.has(key)) {
-          map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0, originalActivity: a });
+          map.set(key, { 
+            id: a.id || key, 
+            date: dateStr, 
+            staffName, 
+            team: teamName, 
+            calls: 0, 
+            leads: 0, 
+            meetings: 0, 
+            visits: 0, 
+            bookings: 0, 
+            deposits: 0, 
+            points: 0, 
+            originalActivity: a 
+          });
         }
+        
         const row = map.get(key)!;
         row.calls += a.callsCount || 0;
         row.leads += a.newLeads || 0;
         row.meetings += a.meetingsMade || 0;
         row.visits += a.siteVisits || 0;
+        row.bookings += a.bookingsCount || 0;
+        row.deposits += a.depositsCount || 0;
         row.points += a.points || 0;
-        // Keep the most recent originalActivity for editing
-        if (a.createdAt && (!row.originalActivity?.createdAt || a.createdAt > row.originalActivity.createdAt)) {
+        
+        // Keep the record for editing (usually there's only one per day per staff anyway)
+        if (a.id && a.createdAt && (!row.originalActivity?.createdAt || a.createdAt > row.originalActivity.createdAt)) {
           row.originalActivity = a;
         }
       });
 
-      books.forEach(b => {
-        const dateStr = toDateStr(b.bookingDate || b.createdAt);
-        const staffName = b.staffName || CURRENT_USER.fullName;
-        const teamName = b.teamName || CURRENT_TEAM.name;
-        const key = `${dateStr}_${staffName}`;
-        if (!map.has(key)) {
-          map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0 });
-        }
-        const row = map.get(key)!;
-        row.bookings += 1;
-        row.points += 30;
-      });
-
-      deps.forEach(d => {
-        const dateStr = toDateStr((d as any).depositDate || d.createdAt);
-        const staffName = (d as any).staffName || CURRENT_USER.fullName;
-        const teamName = (d as any).teamName || CURRENT_TEAM.name;
-        const key = `${dateStr}_${staffName}`;
-        if (!map.has(key)) {
-          map.set(key, { id: key, date: dateStr, staffName, team: teamName, calls: 0, leads: 0, meetings: 0, visits: 0, bookings: 0, deposits: 0, points: 0 });
-        }
-        const row = map.get(key)!;
-        row.deposits += 1;
-        row.points += 60;
-      });
-
-      setSummaries(Array.from(map.values()).sort((a, b) => {
+      const sortedSummaries = Array.from(map.values()).sort((a, b) => {
         const [d1, m1, y1] = a.date.split('/');
         const [d2, m2, y2] = b.date.split('/');
         const dateA = new Date(`${y1}-${m1}-${d1}`).getTime();
         const dateB = new Date(`${y2}-${m2}-${d2}`).getTime();
         return dateB - dateA;
-      }));
+      });
+      setSummaries(sortedSummaries);
+
+
     } catch (err: any) {
       console.error('Fetch failed', err);
     } finally {
@@ -260,25 +244,17 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
   }, [mode, role]);
 
   const handleEdit = (summary: ActivitySummary) => {
-    if (summary.originalActivity && summary.originalActivity.id) {
+    if (summary.originalActivity) {
       setEditingActivity(summary.originalActivity);
       setIsModalOpen(true);
-    } else {
-      toast.error(`Dòng dữ liệu ngày ${summary.date} của ${formatStaffName(summary.staffName)} là dữ liệu tổng hợp tự động, không thể chỉnh sửa trực tiếp.`);
     }
   };
 
   const handleDelete = async (summary: ActivitySummary) => {
     const activityId = summary.originalActivity?.id;
+    if (!activityId) return;
     
-    if (!activityId) {
-      toast.error(`Bản ghi ngày ${summary.date} của ${formatStaffName(summary.staffName)} được tạo tự động từ hệ thống Giữ chỗ/Đặt cọc, không thể xóa tại đây.`);
-      return;
-    }
-    
-    const confirmMsg = `Bạn có chắc chắn muốn xóa nhật ký kinh doanh ngày ${summary.date} của nhân sự ${formatStaffName(summary.staffName)}? \n\nLưu ý: Hành động này không thể hoàn tác.`;
-    
-    if (window.confirm(confirmMsg)) {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa nhật ký kinh doanh ngày ${summary.date} của nhân sự ${formatStaffName(summary.staffName)}?`)) {
       try {
         await salesOpsApi.deleteActivity(activityId);
         toast.success('Đã xóa nhật ký kinh doanh thành công!');
@@ -335,15 +311,17 @@ export function ActivityLogScreen({ mode = 'personal' }: { mode?: 'personal' | '
             {mode === 'team' && (
               <>
                 <div className="w-px h-6 bg-sg-border/50 mx-1 shrink-0 hidden md:block"></div>
-                <CustomSelect
-                  value={filterTeam}
-                  onChange={setFilterTeam}
-                  icon={<Users size={14} />}
-                  options={[
-                    { label: 'Tất cả Team', value: 'all' },
-                    ...[...new Set(summaries.map(s => s.team))].map(t => ({ label: t, value: t }))
-                  ]}
-                />
+                {role !== 'sales_manager' && (
+                  <CustomSelect
+                    value={filterTeam}
+                    onChange={setFilterTeam}
+                    icon={<Users size={14} />}
+                    options={[
+                      { label: 'Tất cả Team', value: 'all' },
+                      ...[...new Set(summaries.map(s => s.team))].map(t => ({ label: t, value: t }))
+                    ]}
+                  />
+                )}
                 
                 <CustomSelect
                   value={filterStaff}

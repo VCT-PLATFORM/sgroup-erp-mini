@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   BookmarkPlus, Clock, Lock, CheckCircle2,
-  XCircle, RefreshCw, User, DollarSign, Building2, Plus, Phone, Edit3
+  XCircle, RefreshCw, User, Users, DollarSign, Building2, Plus, Phone, Edit3,
+  CreditCard, Home, Hash, Image as ImageIcon, FileText, Upload, MessageSquare,
+  ChevronDown, Search
 } from 'lucide-react';
 import { useSalesRole } from '../components/shared/RoleContext';
 import { salesOpsApi } from '../api/salesApi';
-import { CURRENT_USER, CURRENT_TEAM } from '../api/salesMocks';
+
 import {
   CinematicDrawer, DrawerSection, DrawerHeroCard, DrawerDetailRow,
   SkeletonCard, DateFilter, filterByDateRange
@@ -22,13 +24,21 @@ export interface BookingBoardItem {
   id: string;
   projectName?: string;
   unitCode?: string;
+  idNumber?: string;
+  bookingCount?: number;
+  bookingSTT?: string;
+  idFront?: string;
+  idBack?: string;
+  paymentProof?: string;
+  note?: string;
   customerName?: string;
   customerPhone?: string;
   status?: string;
   staffName?: string;
   teamName?: string;
   bookingAmount: number;
-  [key: string]: unknown;
+  createdAt?: string;
+  [key: string]: any;
 }
 
 const COLUMNS = [
@@ -36,6 +46,39 @@ const COLUMNS = [
   { key: 'APPROVED', label: 'Đã Duyệt',      icon: <CheckCircle2 size={16} />, color: 'text-emerald-500', borderColor: 'border-emerald-500/20', glowColor: 'bg-emerald-500' },
   { key: 'REJECTED', label: 'Từ Chối',       icon: <XCircle size={16} />,      color: 'text-rose-500',    borderColor: 'border-rose-500/20',  glowColor: 'bg-rose-500' },
 ];
+
+function StaffSelect({ value, onChange, options }: { value: string; onChange: (v: string) => void; options: { label: string; value: string }[] }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handler = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+  const selected = options.find(o => o.value === value)?.label || 'Tất cả nhân sự';
+  return (
+    <div className="relative" ref={ref}>
+      <button onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 bg-white/50 dark:bg-black/40 border border-sg-border rounded-xl px-3 py-2.5 outline-none hover:bg-white/80 dark:hover:bg-black/60 transition-colors shrink-0 focus:ring-2 focus:ring-blue-500/20">
+        <User size={14} className="text-sg-muted" />
+        <span className="text-[12px] font-bold text-sg-heading min-w-[100px] text-left truncate">{selected}</span>
+        <ChevronDown size={14} className={`text-sg-muted transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute top-full right-0 mt-2 min-w-[220px] bg-white/90 dark:bg-black/90 backdrop-blur-3xl border border-sg-border rounded-xl shadow-[0_8px_32px_-8px_rgba(0,0,0,0.1)] z-[100] overflow-hidden">
+          <div className="max-h-[250px] overflow-y-auto custom-scrollbar p-1">
+            {options.map(opt => (
+              <button key={opt.value} onClick={() => { onChange(opt.value); setOpen(false); }}
+                className={`w-full text-left flex items-center px-3 py-2.5 rounded-lg text-[13px] font-bold transition-colors ${value === opt.value ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' : 'text-sg-heading hover:bg-slate-100 dark:hover:bg-white/5'}`}>
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 'team' }) {
   const { role } = useSalesRole();
@@ -45,6 +88,8 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editItem, setEditItem] = useState<BookingBoardItem | null>(null);
   const [dateRange, setDateRange] = useState<{from: Date | null, to: Date | null}>({from: null, to: null});
+  const [filterStaff, setFilterStaff] = useState('all');
+  const [filterTeam, setFilterTeam] = useState('all');
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -52,17 +97,16 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
       const res = await salesOpsApi.listBookings();
       let data = res.data as unknown as BookingBoardItem[];
       
-      // Personal mode: only show current user's items
-      if (mode === 'personal' || role === 'sales_staff') {
-        data = data.filter((item) => item.staffName === CURRENT_USER.fullName);
-      } 
-      // Team mode: show team items (Manager) or all items (Director)
-      else if (mode === 'team') {
-        if (role === 'sales_manager') {
-          data = data.filter((item) => item.teamName === CURRENT_TEAM.name || item.staffName === CURRENT_USER.fullName);
+      if (role === 'sales_staff') {
+        data = data.filter(b => b.staffId === 'S1');
+      } else if (role === 'sales_manager') {
+        if (filterTeam !== 'all') {
+          data = data.filter(b => b.teamId === filterTeam);
+        } else {
+          data = data.filter(b => b.teamId === 'T1' || b.staffId === 'S1');
         }
-        // Director sees everything, no filter needed
-      }
+      } 
+      
       setItems(data);
     } catch (err) {
       console.error(err);
@@ -75,9 +119,30 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
     fetchItems();
   }, [fetchItems]);
 
+  const teamOptions = React.useMemo(() => {
+    const teams = [...new Set(items.map(i => i.teamName).filter(Boolean))];
+    return [{ label: 'Tất cả Team', value: 'all' }, ...teams.map(t => ({ label: t!, value: t! }))];
+  }, [items]);
+
+  const staffOptions = React.useMemo(() => {
+    let source = items;
+    if (filterTeam !== 'all') {
+      source = source.filter(i => i.teamName === filterTeam);
+    }
+    const names = [...new Set(source.map(i => i.staffName).filter(Boolean))];
+    return [{ label: 'Tất cả nhân sự', value: 'all' }, ...names.map(n => ({ label: n!, value: n! }))];
+  }, [items, filterTeam]);
+
   const filteredItems = React.useMemo(() => {
-    return filterByDateRange(items, i => i.createdAt as string, dateRange);
-  }, [items, dateRange]);
+    let result = items;
+    if (filterTeam !== 'all') {
+      result = result.filter(i => i.teamName === filterTeam);
+    }
+    if (filterStaff !== 'all') {
+      result = result.filter(i => i.staffName === filterStaff);
+    }
+    return filterByDateRange(result, i => i.createdAt as string, dateRange);
+  }, [items, filterTeam, filterStaff, dateRange]);
 
   const grouped = COLUMNS.map(col => ({
     ...col,
@@ -114,8 +179,17 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
 
           {/* Row 2: Filters Area */}
           <div className="flex flex-wrap items-center gap-3 pt-4 border-t border-sg-border/30">
-            <div className="text-[11px] font-black text-sg-muted uppercase tracking-widest mr-2 opacity-60">Lọc thời gian:</div>
+            <div className="text-[11px] font-black text-sg-muted uppercase tracking-widest mr-2 opacity-60">Bộ lọc thông minh:</div>
             <DateFilter onChange={(range) => setDateRange(range)} />
+            {mode === 'team' && (
+              <>
+                <div className="w-px h-6 bg-sg-border/50 mx-1 shrink-0 hidden md:block" />
+                {role !== 'sales_manager' && (
+                  <StaffSelect value={filterTeam} onChange={(v) => { setFilterTeam(v); setFilterStaff('all'); }} options={teamOptions} />
+                )}
+                <StaffSelect value={filterStaff} onChange={setFilterStaff} options={staffOptions} />
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -151,7 +225,10 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
                   {col.items.map((item, idx) => (
                     <div
                       key={item.id}
-                      onClick={() => setSelectedItem(item)}
+                      onClick={() => {
+                        setEditItem(item);
+                        setIsModalOpen(true);
+                      }}
                       className="bg-white dark:bg-black/30 backdrop-blur-3xl rounded-[20px] border border-slate-200/80 dark:border-sg-border p-4 shadow-sg-sm hover:shadow-sg-md hover:-translate-y-1 transition-all cursor-pointer group relative overflow-hidden sg-stagger"
                       style={{ animationDelay: `${colIdx * 60 + idx * 40}ms` }}
                     >
@@ -208,60 +285,6 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
         )}
       </div>
 
-      {/* Detail Drawer */}
-      <CinematicDrawer
-        isOpen={!!selectedItem}
-        onClose={() => setSelectedItem(null)}
-        title={selectedItem?.projectName || 'Chi tiết Booking'}
-        subtitle={selectedItem ? COLUMNS.find(c => c.key === selectedItem.status)?.label : ''}
-        icon={selectedItem ? <BookmarkPlus size={24} className="text-blue-500" /> : undefined}
-      >
-        {selectedItem && (
-          <>
-            <DrawerHeroCard>
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign size={18} className="text-blue-500" />
-                <span className="text-[11px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Tiền Giữ Chỗ (Booking)</span>
-              </div>
-              <div className="text-[32px] font-black text-transparent bg-clip-text bg-linear-to-r from-blue-400 to-cyan-400 leading-tight">
-                {formatVND(selectedItem.bookingAmount)}
-              </div>
-              <div className="mt-4 pt-4 border-t border-blue-500/10">
-                <span className={`px-2 py-1 rounded text-[11px] font-black ${COLUMNS.find(c => c.key === selectedItem.status)?.color} bg-sg-card border ${COLUMNS.find(c => c.key === selectedItem.status)?.borderColor}`}>
-                  Trạng thái: {COLUMNS.find(c => c.key === selectedItem.status)?.label}
-                </span>
-              </div>
-            </DrawerHeroCard>
-
-            <DrawerSection title="Chi Tiết Booking" icon={<Building2 size={14} className="text-blue-500" />}>
-              <div className="grid grid-cols-1 gap-4">
-                <DrawerDetailRow icon={<User size={16} className="text-indigo-500" />} label="Khách hàng" value={selectedItem.customerName} />
-                {selectedItem.customerPhone && (
-                  <DrawerDetailRow icon={<Phone size={16} className="text-emerald-500" />} label="Số thiết bị (SĐT)" value={selectedItem.customerPhone} />
-                )}
-                <DrawerDetailRow icon={<Building2 size={16} className="text-blue-500" />} label="Dự án" value={selectedItem.projectName} />
-                <DrawerDetailRow icon={<User size={16} className="text-amber-500" />} label="Nhân viên QL" value={selectedItem.staffName} />
-              </div>
-            </DrawerSection>
-
-            {selectedItem.status === 'PENDING' && selectedItem.staffName === CURRENT_USER.fullName && (
-              <div className="mt-8 px-4">
-                <button
-                  onClick={() => {
-                    setEditItem(selectedItem);
-                    setIsModalOpen(true);
-                    setSelectedItem(null); // Close drawer to open modal cleanly
-                  }}
-                  className="w-full h-12 flex items-center justify-center gap-2 rounded-xl bg-sg-card/60 hover:bg-blue-500 focus:bg-blue-600 text-sg-heading hover:text-white border border-sg-border/50 hover:border-blue-500/50 shadow-sm transition-all font-bold text-[14px]"
-                >
-                  <Edit3 size={16} /> Chỉnh sửa phiếu này
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </CinematicDrawer>
-
       {/* FAB */}
       <button
         onClick={() => { setEditItem(null); setIsModalOpen(true); }}
@@ -271,6 +294,7 @@ export function BookingBoardScreen({ mode = 'personal' }: { mode?: 'personal' | 
         <Plus size={24} className="group-hover:rotate-90 transition-transform duration-300" />
       </button>
 
+      {/* Modal handles both Create and Edit */}
       <BookingEntryModal 
         isOpen={isModalOpen} 
         onClose={() => { setIsModalOpen(false); setEditItem(null); }} 
