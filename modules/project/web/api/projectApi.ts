@@ -3,7 +3,7 @@ import type {
   ApiResponse, CreateProjectPayload, CreateProductPayload
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8081/api/v1';
+const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8081/api/v1';
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem('auth_token') || '';

@@ -126,7 +126,7 @@ export function HRSidebar({ activeKey, onSelect, collapsed, onToggleCollapse, us
       <div className="p-3 border-t border-sg-border flex flex-col gap-2">
         <div className={`flex items-center ${collapsed ? 'justify-center mx-auto' : 'justify-between'}`}>
            <button 
-              onClick={() => onSelect({ key: 'HR_PROFILE', label: 'Hồ sơ Của Tôi', icon: UserCircle, section: 'dashboard', minRole: ALL_ROLES })}
+              onClick={() => onSelect({ key: 'HR_PROFILE', label: 'Hồ sơ Của Tôi', icon: UserCircle, section: 'directory', minRole: ALL_ROLES })}
               className={`flex items-center flex-1 rounded-xl transition-all border border-transparent overflow-hidden ${collapsed ? 'p-0 w-9 h-9 justify-center' : 'p-2 mr-2'}
                 ${activeKey === 'HR_PROFILE' ? (isDark ? 'bg-sg-red/15 border-sg-red/20' : 'bg-red-50 border-red-100') : 'hover:bg-sg-btn-bg'}
               `}

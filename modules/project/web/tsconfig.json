@@ -33,7 +33,15 @@
       "@sgroup/types": ["../../../packages/types/src/index.ts"],
       "@sgroup/types/*": ["../../../packages/types/src/*"],
       "@sgroup/web-ui": ["../../../packages/web-ui/src/index.ts"],
-      "@sgroup/web-ui/*": ["../../../packages/web-ui/src/*"]
+      "@sgroup/web-ui/*": ["../../../packages/web-ui/src/*"],
+      "@modules/sales": ["../../sales/web"],
+      "@modules/sales/*": ["../../sales/web/*"],
+      "@modules/hr": ["../../hr/web"],
+      "@modules/hr/*": ["../../hr/web/*"],
+      "@modules/exec": ["../../exec/web"],
+      "@modules/exec/*": ["../../exec/web/*"],
+      "@modules/project": ["../../project/web"],
+      "@modules/project/*": ["../../project/web/*"]
     }
   },
   "include": [
