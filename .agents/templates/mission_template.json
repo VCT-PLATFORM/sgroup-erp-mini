@@ -1,0 +1,43 @@
+{
+  "mission_id": "M-YYYYMMDD-XXXX",
+  "version": "5.5",
+  "objective": "High-level goal description",
+  "status": "PLANNING | IN_PROGRESS | PAUSED | COMPLETED | BLOCKED",
+  "priority": "P0 | P1 | P2",
+  "chairman_id": "CHAIRMAN_NAME",
+  "orchestrator": "JEN_V5.5",
+  "success_criteria": [
+    {
+      "id": 1,
+      "condition": "Verifiable condition 1",
+      "satisfied": false,
+      "verifier_agent": "qa_agent"
+    }
+  ],
+  "task_tree": [
+    {
+      "task_id": "T-001",
+      "description": "Sub-task 1",
+      "assigned_to": "specialized_agent",
+      "status": "TODO | IN_PROGRESS | DONE | FAILED",
+      "output_reference": "path/to/artifact",
+      "dependencies": []
+    }
+  ],
+  "timeline": {
+    "started_at": "ISO-TIMESTAMP",
+    "last_updated": "ISO-TIMESTAMP",
+    "completed_at": null
+  },
+  "evaluation_log": [
+    {
+      "timestamp": "ISO-TIMESTAMP",
+      "agent": "financial_auditor",
+      "score": 0,
+      "comment": "Initial state"
+    }
+  ],
+  "context_snapshots": [
+    "path/to/memory/snapshot.json"
+  ]
+}
