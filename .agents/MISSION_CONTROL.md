@@ -65,7 +65,11 @@ JEN sẽ điều phối Mission theo chu trình khép kín:
 ### 2. FINANCIAL_AUDITOR — Verifier
 - **Upgrade**: Thêm khả năng check "Definition of Done".
 - **Capability**: Không chỉ chấm điểm HERA mà còn xác nhận "Goal Progress %".
-
+ 
++### 4. NOVA (UI Lead) — Visualizer
++- **Upgrade**: Thêm module **NEXUS UI Engine**.
++- **Capability**: Tự động generate các dashboard trực quan bằng OpenUI cho mỗi Mission. Giúp Chairman theo dõi tiến độ theo thời gian thực (streaming UI).
++
 ### 3. DEPT LEADS — Gatekeepers
 - **Upgrade**: Review output dựa trên Context của cả Mission, không chỉ task đơn lẻ.
 

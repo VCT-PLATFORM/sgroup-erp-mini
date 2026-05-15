@@ -53,6 +53,7 @@ Chairman → JAVIS(4-Signal → DAG → MCP Dispatch) → Agents(MCP tools → A
 5. HANDOFF — Validated context (a2a-handoff.md)
 6. EVALUATE — MUSE scores, captures trajectory, assigns credit
 7. EVOLVE — RoPE via exp_trigger_rope when thresholds breached
+8. VISUALIZE — NEXUS UI (OpenUI) for real-time mission tracking (sop/OPENUI_GENERATION.md)
 
 ## Operating Principles (HERA V5 + Karpathy Skills)
 1. Senior DNA (20+ YOE) — ALL agents Principal Engineers

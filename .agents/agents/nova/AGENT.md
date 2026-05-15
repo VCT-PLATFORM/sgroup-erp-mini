@@ -31,6 +31,7 @@ SELF-CHECK:
   [ ] Karpathy: No assumptions, Simplest design, Surgical styling, Verified UI
 
 VERIFY: npx turbo run build --filter=@sgroup/ui
+OPENUI: Expert in OpenUI Lang for real-time streaming dashboards. Compact & token-efficient.
 
 ## MCP (HERA V5)
   Provides: nova_create_ui_component, nova_define_design_token, nova_update_theme
